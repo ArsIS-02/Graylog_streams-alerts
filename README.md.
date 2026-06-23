@@ -1,5 +1,76 @@
-# Graylog Streams & Alerts
+<p align="center">
+  <img src="https://img.shields.io/badge/Graylog-7.1.3-FF6B00?style=for-the-badge&logo=graylog&logoColor=white" alt="Graylog version"/>
+  <img src="https://img.shields.io/badge/MongoDB-7.0.37-47A248?style=for-the-badge&logo=mongodb&logoColor=white" alt="MongoDB version"/>
+  <img src="https://img.shields.io/badge/OpenSearch-2.19.5-005EB8?style=for-the-badge&logo=opensearch&logoColor=white" alt="OpenSearch version"/>
+  <img src="https://img.shields.io/badge/License-MIT-blue?style=for-the-badge" alt="License"/>
+</p>
 
-Лабораторный проект по настройке активного мониторинга безопасности на базе Graylog 7.1.3.
+# 🛡️ Graylog Streams & Alerts
 
-Подробности в [PDF-статье](Graylog-streams&alerts.pdf).
+> **Активный мониторинг безопасности для домашней лаборатории**  
+> Потоки, декодер auditd, алерты по email — без плагинов, только хардкор.
+
+---
+
+## 📌 О проекте
+
+Этот репозиторий содержит полную конфигурацию и скрипты для превращения **Graylog 7.1.3** из пассивного хранилища логов в **интеллектуальную систему оповещения**. Всё настроено на реальном оборудовании в изолированной сети.
+
+**Что вы получите:**
+- ✅ Автоматическое разделение логов на потоки (Windows, Linux, Security, Errors)
+- ✅ Декодирование auditd в человекочитаемый вид (собственный Python-демон)
+- ✅ Email-алерты на подозрительные события (неудачные SSH-входы, брутфорс на Windows)
+- ✅ Полная статья с объяснениями (PDF) и примерами скриншотов
+
+---
+
+## ✨ Возможности
+
+| Функция | Описание |
+|---------|----------|
+| 📂 **Потоки (Streams)** | Логи Windows, Linux, Security и Errors — всё разложено по полочкам |
+| 🐍 **Декодер auditd** | Python-скрипт принимает сырые логи по UDP, декодирует hex-поля и отправляет в Graylog в формате GELF |
+| 📧 **Алерты по email** | Настроена отправка через SMTP (Mail.ru). При срабатывании — письмо с прямой ссылкой на событие |
+| ⚡ **Быстрая реакция** | Проверка условий каждую минуту, уведомление в течение 1–2 минут |
+| 🔍 **Готовые шаблоны** | Примеры поисков для SSH-атак и событий 4625 (Windows) |
+
+---
+
+## 📦 Структура репозитория
+
+```bash
+.
+├── ПО/                          # Бинарные пакеты (выложены в Releases)
+│   ├── graylog-server_7.1.3-1_amd64.deb
+│   ├── graylog-server-7.1.3-1.x86_64.rpm
+│   ├── mongodb-org-server_7.0.37_amd64.deb
+│   ├── mongodb-org-server-7.0.37-1.el9.x86_64.rpm
+│   ├── opensearch-2.19.5-linux-x64.deb
+│   └── opensearch-2.19.5-linux-x64.rpm
+├── media/                       # Скриншоты и иллюстрации из статьи
+├── auditd_decoder.py            # Декодер auditd (Python)
+├── audit-decoder.service        # systemd-юнит для автозапуска
+└──  server.conf.example          # Пример конфигурации Graylog с SMTP
+
+## 🚀 Быстрый старт
+
+### 1. Установка Graylog
+Скачайте подходящие пакеты из [Releases](https://github.com/ArsIS-02/Graylog_streams-alerts/releases) и установите согласно официальной документации.
+
+### 2. Настройка входов (Inputs)
+- Для Windows: создайте **GELF TCP** input, укажите порт (например, 12201).
+- Для Linux: создайте **Syslog UDP** input на порту 1514.
+
+### 3. Настройка SMTP (для алертов)
+Скопируйте `server.conf.example` в `/etc/graylog/server/server.conf` и отредактируйте параметры:
+```ini
+transport_email_enabled = true
+transport_email_hostname = smtp.mail.ru
+transport_email_port = 465
+transport_email_use_ssl = true
+transport_email_auth_username = your-email@mail.ru
+transport_email_auth_password = your_app_password
+transport_email_from_email = your-email@mail.ru
+transport_email_web_interface_url = http://your-graylog-ip:9000
+
+
