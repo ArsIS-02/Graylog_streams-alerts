@@ -1,0 +1,4 @@
+preexec() {
+    echo "$(date "+%Y-%m-%d %H:%M:%S") | $(whoami) | $(pwd) | $1" >> ~/.local/log/commands.log
+}
+
