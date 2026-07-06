@@ -1,0 +1,100 @@
+# =========================== Inputs ===========================
+filebeat.inputs:
+
+  # ============================================================
+  # 1. ТОЛЬКО КРИТИЧЕСКИЕ СОБЫТИЯ из unified logging
+  # ============================================================
+  - type: filestream
+    id: unified-json
+    enabled: true
+    paths:
+      - /var/log/unified.json.log
+    fields:
+      log_type: macos_unified
+    fields_under_root: true
+    # Фильтр по ключевым словам (можно расширять)
+    include_lines:
+      - 'AirDrop'
+      - 'sharingd'
+      - 'USB'
+      - 'enumerated'
+      - 'sudo'
+      - 'incorrect'
+      - 'password'
+      - 'TCC'
+      - 'Sandbox'
+      - 'kernel panic'
+      - 'diskarbitrationd'
+      - 'AMPDeviceDiscovery'
+    processors:
+      - decode_json_fields:
+          fields: ["message"]
+          target: ""
+          overwrite_keys: true
+
+  # ============================================================
+  # 2. USB-события из wifi.log (подключение/отключение)
+  # ============================================================
+  - type: filestream
+    id: macos-wifi-usb
+    enabled: true
+    paths:
+      - /var/log/wifi.log
+    fields:
+      log_type: macos_wifi_usb
+    fields_under_root: true
+    include_lines:
+      - 'Usb Host Notification'
+      - 'USBDeviceInserted'
+      - 'USBDeviceRemoved'
+
+  # ============================================================
+  # 3. Результаты osquery (обязательно)
+  # ============================================================
+  - type: filestream
+    id: osquery-results
+    enabled: true
+    paths:
+      - /var/log/osquery/osqueryd.results.log
+    fields:
+      log_type: macos_osquery
+    fields_under_root: true
+    processors:
+      - decode_json_fields:
+          fields: ["message"]
+          target: ""
+          overwrite_keys: true
+
+  # ============================================================
+  # ОТКЛЮЧЕНЫ (закомментированы или удалены):
+  # - macos-firewall (включить, если нужны логи брандмауэра)
+  # - macos-crash (только для отладки)
+  # - macos-commands (только если нужно логировать команды)
+  # - macos-system (system.log – устарел)
+  # - macos-install (install.log – редко нужен)
+  # - macos-apps (очень шумно)
+
+# =========================== Processors ===========================
+processors:
+  - add_host_metadata: ~
+
+# =========================== Output ===========================
+output.logstash:
+  hosts: ["YOUR GRAYLOG-SERVER IP:PORT"]  
+  timeout: 30s
+  ttl: 5s
+  pipelining: 1
+  compression_level: 3
+  bulk_max_size: 256             
+
+# =========================== Metadata ===========================
+tags: ["macos", "prod", "essential"]
+
+# =========================== Logging ===========================
+logging.level: info
+logging.to_files: true
+logging.files:
+  path: /usr/local/filebeat/logs
+  name: filebeat.log
+  keepfiles: 7
+  permissions: 0644
