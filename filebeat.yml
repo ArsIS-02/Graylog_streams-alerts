@@ -4,6 +4,12 @@ filebeat.inputs:
   # ============================================================
   # 1. ТОЛЬКО КРИТИЧЕСКИЕ СОБЫТИЯ из unified logging
   # ============================================================
+  # ВАЖНО: include_lines — это грубый фильтр по подстроке.
+  # Он не умеет исключать. Если добавишь паттерн, который
+  # часто встречается у шумных процессов (Kaspersky, Sandbox),
+  # поток резко вырастет. Проверяй через:
+  #   grep -c "паттерн" /var/log/unified.json.log*
+  # ============================================================
   - type: filestream
     id: unified-json
     enabled: true
@@ -12,20 +18,21 @@ filebeat.inputs:
     fields:
       log_type: macos_unified
     fields_under_root: true
-    # Фильтр по ключевым словам (можно расширять)
     include_lines:
+      # События передачи файлов
       - 'AirDrop'
-      - 'sharingd'
-      - 'USB'
-      - 'enumerated'
-      - 'sudo'
-      - 'incorrect'
-      - 'password'
+      # Доступ к камере/микрофону/сенсорам (TCC = Transparency Consent Control)
       - 'TCC'
-      - 'Sandbox'
+      # USB-устройства (точный паттерн, в отличие от широкого "USB")
+      - 'hostNotificationUSB'
+      # Паники ядра и сбои оборудования
       - 'kernel panic'
-      - 'diskarbitrationd'
+      # USB-устройства Apple (в unified logs)
       - 'AMPDeviceDiscovery'
+      # Защита системы
+      - 'SIP'
+      - 'FileVault'
+      - 'Gatekeeper'
     processors:
       - decode_json_fields:
           fields: ["message"]
@@ -35,6 +42,9 @@ filebeat.inputs:
   # ============================================================
   # 2. USB-события из wifi.log (подключение/отключение)
   # ============================================================
+  # Здесь источник — /var/log/wifi.log, куда macOS пишет
+  # уведомления о USB через "Usb Host Notification".
+  # Эти строки дают точную информацию о том, что подключено.
   - type: filestream
     id: macos-wifi-usb
     enabled: true
@@ -49,7 +59,7 @@ filebeat.inputs:
       - 'USBDeviceRemoved'
 
   # ============================================================
-  # 3. Результаты osquery (обязательно)
+  # 3. Результаты osquery (структурированные снимки состояния)
   # ============================================================
   - type: filestream
     id: osquery-results
@@ -73,19 +83,21 @@ filebeat.inputs:
   # - macos-system (system.log – устарел)
   # - macos-install (install.log – редко нужен)
   # - macos-apps (очень шумно)
+  # ============================================================
 
 # =========================== Processors ===========================
 processors:
   - add_host_metadata: ~
 
 # =========================== Output ===========================
+# ЗАМЕНИТЬ на IP:PORT своего Graylog Beats Input!
 output.logstash:
-  hosts: ["YOUR GRAYLOG-SERVER IP:PORT"]  
+  hosts: ["YOUR GRAYLOG-SERVER IP:PORT"]
   timeout: 30s
   ttl: 5s
   pipelining: 1
   compression_level: 3
-  bulk_max_size: 256             
+  bulk_max_size: 256
 
 # =========================== Metadata ===========================
 tags: ["macos", "prod", "essential"]
