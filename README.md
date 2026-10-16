@@ -1,142 +1,91 @@
-# Graylog + macOS мониторинг: конфигурационные файлы
+<p align="center">
+  <img src="https://img.shields.io/badge/Graylog-7.1.3-FF6B00?style=for-the-badge&logo=graylog&logoColor=white" alt="Graylog version"/>
+  <img src="https://img.shields.io/badge/MongoDB-7.0.37-47A248?style=for-the-badge&logo=mongodb&logoColor=white" alt="MongoDB version"/>
+  <img src="https://img.shields.io/badge/OpenSearch-2.19.5-005EB8?style=for-the-badge&logo=opensearch&logoColor=white" alt="OpenSearch version"/>
+  <img src="https://img.shields.io/badge/License-MIT-blue?style=for-the-badge" alt="License"/>
+</p>
 
-Готовые конфигурации для централизованного сбора логов с macOS-хостов
-в Graylog с помощью **Filebeat**, **osquery** и **unified logging**.
+# 🛡️ Graylog: домашняя лаборатория со сбором логов, потоками и алертами
 
-Репозиторий — практическое дополнение к статье
+> **Единая история** — от первого опыта до активного мониторинга безопасности.
+> Разворачиваем Graylog, собираем логи с Windows, Linux и macOS, раскладываем их по
+> потокам, декодируем auditd и настраиваем email-алерты на подозрительную активность.
 
-## Что собираем
+---
 
-| Источник | Что даёт | Инструмент |
-|----------|----------|------------|
-| Unified logging | Системные события, ошибки ядра, TCC, AirDrop, USB | `log stream` + Filebeat |
-| `wifi.log` | Подключение/отключение USB-устройств | Filebeat |
-| osquery | Снимки состояния системы (процессы, порты, FIM) | osqueryd + Filebeat |
-| `commands.log` | История команд терминала (кастомно) | zsh hook + Filebeat |
+## 📖 О чём этот репозиторий
 
-## Структура репозитория
+Централизованный сбор логов становится по-настоящему полезным, когда система сама
+сортирует события и предупреждает о проблемах. В этом репозитории — полный путь:
+
+1. **База** — разворачиваем Graylog (Java + MongoDB + OpenSearch) и настраиваем приём логов.
+2. **Потоки** — раскладываем логи по смыслу: Windows, Linux, Security, Errors.
+3. **Декодер auditd** — переводим шестнадцатеричные поля в читаемый вид (собственный Python-демон).
+4. **Алерты** — email-уведомления о неудачных входах на Linux и Windows.
+
+Материал объединяет две статьи автора о Graylog и дополнен конфигурацией для macOS.
+
+## 🗂 Структура
 
 ```
 .
-├── README.md
-├── filebeat.yml                        # Конфиг Filebeat
-├── co.elastic.filebeat.plist           # LaunchDaemon для Filebeat
-├── osquery.conf                        # Конфиг osquery
-├── com.user.logstream.plist            # LaunchDaemon для log stream (через wrapper)
-├── zshrc.local                         # Хук логирования команд
-├── logstream/
-│   ├── logstream-wrapper.sh            # Обёртка: перезапуск log stream при ротации
-│   └── unified.json.conf               # Конфиг newsyslog для ротации
-└── docs/
-    └── troubleshooting.md              # Грабли и их решения
+├── README.md                         ← этот обзор
+├── docs/                             ← единая история по главам
+│   ├── 01-home-lab.md                ← часть 1: установка Graylog, MongoDB, OpenSearch
+│   ├── 02-streams-alerts.md          ← часть 2: потоки, алерты, декодер auditd
+│   ├── 03-windows.md                 ← Windows: Sysmon, Winlogbeat, алерт 4625
+│   ├── 04-linux.md                   ← Linux: auditd, rsyslog, алерт SSH
+│   ├── 05-macos.md                   ← macOS: unified log, Filebeat, osquery
+│   └── troubleshooting.md            ← грабли и их решения
+├── decoder/                          ← декодер auditd
+│   ├── auditd_decoder.py             ← Python-демон: UDP → GELF
+│   └── audit-decoder.service         ← systemd-юнит
+├── config/                           ← примеры конфигов
+│   ├── server.conf.smtp.example      ← SMTP для email-алертов (Mail.ru)
+│   ├── opensearch.yml.example        ← OpenSearch для Graylog
+│   ├── rsyslog.conf.example          ← пересылка syslog в Graylog
+│   └── winlogbeat.yml.example        ← доставка событий Windows
+├── filebeat.yml                      ← Filebeat для macOS
+├── osquery.conf                      ← osquery для macOS
+├── co.elastic.filebeat.plist         ← LaunchDaemon Filebeat
+├── com.user.logstream.plist          ← LaunchDaemon log stream
+├── zshrc.local                       ← хук логирования команд
+└── logstream/                        ← ротация unified.json.log
 ```
 
-## Установка
+## 🚀 Быстрый старт
 
-### 1. Filebeat
+1. **Установите стек** по [части 1](docs/01-home-lab.md): Java 17, MongoDB,
+   OpenSearch, Graylog server.
+2. **Настройте агенты** по своей ОС: [Windows](docs/03-windows.md),
+   [Linux](docs/04-linux.md), [macOS](docs/05-macos.md).
+3. **Создайте потоки и алерты** по [части 2](docs/02-streams-alerts.md).
+4. **Подключите декодер auditd** из [`decoder/`](decoder/auditd_decoder.py) — и
+   события auditd станут читаемыми.
 
-```bash
-# Скопировать конфиг
-sudo cp filebeat.yml /usr/local/filebeat/filebeat.yml
+## ✨ Что вы получите
 
-# Заменить YOUR GRAYLOG-SERVER IP:PORT на свой адрес
-sudo nano /usr/local/filebeat/filebeat.yml
+| Функция | Описание |
+|---|---|
+| 📂 **Потоки** | Windows Logs, Linux Logs, Security Events, Errors — всё разложено |
+| 🐍 **Декодер auditd** | Python-демон принимает сырые логи по UDP, декодирует hex-поля, отправляет GELF |
+| 📧 **Алерты по email** | SMTP через Mail.ru, письмо с прямой ссылкой на событие |
+| ⚡ **Быстрая реакция** | Проверка условий каждые 5 минут, уведомление в течение 1–2 минут |
+| 🖥 **Три платформы** | Windows, Linux (РЕД ОС), macOS |
 
-# Установить LaunchDaemon
-sudo cp co.elastic.filebeat.plist /Library/LaunchDaemons/
-sudo chown root:wheel /Library/LaunchDaemons/co.elastic.filebeat.plist
-sudo chmod 644 /Library/LaunchDaemons/co.elastic.filebeat.plist
+## 📚 Читать по главам
 
-# Запустить
-sudo launchctl load /Library/LaunchDaemons/co.elastic.filebeat.plist
-```
+- [Часть 1. Домашняя лаборатория: разворачиваем Graylog](docs/01-home-lab.md)
+- [Часть 2. Потоки, алерты и декодер auditd](docs/02-streams-alerts.md)
+- [Windows: Sysmon, Winlogbeat и алерт 4625](docs/03-windows.md)
+- [Linux: auditd, rsyslog и алерт SSH](docs/04-linux.md)
+- [macOS: unified log, Filebeat и osquery](docs/05-macos.md)
+- [Troubleshooting](docs/troubleshooting.md)
 
-### 2. osquery
-
-```bash
-# Скопировать конфиг
-sudo cp osquery.conf /private/var/osquery/osquery.conf
-
-# Запустить
-sudo launchctl load /Library/LaunchDaemons/io.osquery.agent.plist
-```
-
-### 3. Ротация unified.json.log
-
-```bash
-# Wrapper
-sudo cp logstream/logstream-wrapper.sh /usr/local/bin/
-sudo chmod 755 /usr/local/bin/logstream-wrapper.sh
-
-# Конфиг newsyslog
-sudo cp logstream/unified.json.conf /etc/newsyslog.d/
-
-# LaunchDaemon
-sudo cp com.user.logstream.plist /Library/LaunchDaemons/
-sudo chown root:wheel /Library/LaunchDaemons/com.user.logstream.plist
-sudo chmod 644 /Library/LaunchDaemons/com.user.logstream.plist
-
-# Запустить
-sudo launchctl load /Library/LaunchDaemons/com.user.logstream.plist
-```
-
-### 4. Логирование команд (опционально)
-
-```bash
-# Создать каталог
-mkdir -p ~/.local/log
-
-# Подключить хук в ~/.zshrc
-echo 'source ~/.zshrc.local' >> ~/.zshrc
-
-# Скопировать конфиг
-cp zshrc.local ~/.zshrc.local
-```
-
-## Проверка
-
-```bash
-# Filebeat работает?
-sudo launchctl list | grep filebeat
-
-# log stream пишет?
-sudo ls -lah /var/log/unified.json.log
-
-# Данные идут в Graylog?
-sudo log show --predicate 'process == "filebeat"' --last 5m --info | \
-  grep -iE "events.sent|connection"
-```
-
-## Важные замечания
-
-- **`include_lines` в Filebeat — подстрочный поиск**, не regex.
-  Не добавляй паттерны, которые матчатся у шумных процессов
-  (например, `Sandbox` или `incorrect` — их генерирует Kaspersky).
-  Подробнее — в [docs/troubleshooting.md](docs/troubleshooting.md).
-
-- **`log stream` держит файл открытым**, поэтому нужен wrapper
-  для ротации `unified.json.log`. Без него файл растёт до десятков ГБ.
-
-- **Не дублируй `preexec`** в `.zshrc` — используй `add-zsh-hook`.
-  Иначе команды пишутся в `commands.log` дважды.
-
-## Troubleshooting
-
-Все найденные грабли и их решения собраны в
-[docs/troubleshooting.md](docs/troubleshooting.md):
-
-1. Рост `unified.json.log` до 14 ГБ
-2. Дубли команд в `commands.log`
-3. Kaspersky засоряет unified logs
-4. `include_lines` vs regex
-5. APFS snapshots и освобождение места
-6. `nc -w 1` (BiZone)
-7. Filebeat и права на `audit.log`
-8. Beats input: порт не слушается
-9. Диагностика «идут ли данные»
-
-## Ссылки
+## 🔗 Ссылки
 
 - [Graylog Documentation](https://docs.graylog.org/)
 - [Filebeat Documentation](https://www.elastic.co/guide/en/beats/filebeat/current/index.html)
+- [Winlogbeat Documentation](https://www.elastic.co/guide/en/beats/winlogbeat/current/index.html)
 - [osquery Documentation](https://osquery.readthedocs.io/)
+- [Sysmon (Sysinternals)](https://learn.microsoft.com/sysinternals/downloads/sysmon)

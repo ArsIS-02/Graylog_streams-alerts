@@ -1,0 +1,17 @@
+# Winlogbeat: отправка событий журналов Windows в Graylog (вход Beats, порт 5044/TCP).
+# Файл: C:\Program Files\winlogbeat\winlogbeat.yml
+#
+# Проверка и установка службы:
+#   cd "C:\Program Files\winlogbeat"
+#   ./winlogbeat test config
+#   ./winlogbeat test output
+#   .\install-service-winlogbeat.ps1
+#   Start-Service winlogbeat
+
+winlogbeat.event_logs:
+  - name: Application
+  - name: Security
+  - name: System
+
+output.logstash:
+  hosts: ["192.168.1.210:5044"]
