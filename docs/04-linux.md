@@ -69,19 +69,19 @@ systemctl status rsyslog.service
 journalctl -fu rsyslog
 ```
 
-На сервере Graylog создайте вход **Syslog UDP** на порту 1514:
+На сервере Graylog создай вход **Syslog UDP** на порту 1514:
 `System/Overview → Inputs → Syslog UDP → Launch new input`.
 
 ## Декодер auditd
 
-Чтобы поля auditd (в hex) стали читаемыми, используйте декодер из
+Чтобы поля auditd (в hex) стали читаемыми, используй декодер из
 [`decoder/auditd_decoder.py`](../decoder/auditd_decoder.py) — он принимает события,
 декодирует hex-поля и отправляет результат в Graylog в формате GELF. Подробности —
 в [02-streams-alerts.md](02-streams-alerts.md).
 
 ## Поток Linux Logs
 
-Создайте поток **Linux Logs**, в который попадают сообщения с Linux-хостов,
+Создай поток **Linux Logs**, в который попадают сообщения с Linux-хостов,
 полученные по Syslog через UDP.
 
 ## Алерт на неудачный SSH-вход
@@ -113,7 +113,7 @@ program:sshd AND message:"Authentication failure"
    проверка каждые 5 минут, условие «больше нуля сообщений», группировка по
    `count` и `source`.
 4. **Fields** — стандартные поля из логов Linux.
-5. **Notifications** — выберите email-уведомление, нажмите **Add notification**.
+5. **Notifications** — выбери email-уведомление, нажми **Add notification**.
 
 ![Создание алерта для Linux](images/linux-alert-form.png)
 

@@ -31,7 +31,7 @@
 
 ```bash
 sudo cp filebeat.yml /usr/local/filebeat/filebeat.yml
-# замените "YOUR GRAYLOG-SERVER IP:PORT" на адрес своего Graylog
+# замени "YOUR GRAYLOG-SERVER IP:PORT" на адрес своего Graylog
 sudo nano /usr/local/filebeat/filebeat.yml
 
 sudo cp co.elastic.filebeat.plist /Library/LaunchDaemons/
@@ -78,12 +78,12 @@ sudo log show --predicate 'process == "filebeat"' --last 5m --info | \
 
 ## Важные замечания
 
-- **`include_lines` в Filebeat — подстрочный поиск, не regex.** Не добавляйте паттерны,
+- **`include_lines` в Filebeat — подстрочный поиск, не regex.** Не добавляй паттерны,
   которые матчатся у шумных процессов (например, `Sandbox` или `incorrect` — их
   генерирует Kaspersky).
 - **`log stream` держит файл открытым**, поэтому нужен wrapper для ротации
   `unified.json.log`. Без него файл растёт до десятков ГБ.
-- **Не дублируйте `preexec`** в `.zshrc` — используйте `add-zsh-hook`, иначе команды
+- **Не дублируй `preexec`** в `.zshrc` — используй `add-zsh-hook`, иначе команды
   пишутся в `commands.log` дважды.
 
 Подробнее — в [`docs/troubleshooting.md`](troubleshooting.md).
@@ -91,9 +91,9 @@ sudo log show --predicate 'process == "filebeat"' --last 5m --info | \
 ## Алерты для macOS
 
 Алерты для macOS строятся так же, как для Windows и Linux (см.
-[02-streams-alerts.md](02-streams-alerts.md)): выберите поток с macOS-логами,
-задайте условие по структурированным полям (`log_type: macos_unified`,
-`host`, `process`) и привяжите email-уведомление. Примеры полезных условий:
+[02-streams-alerts.md](02-streams-alerts.md)): выбери поток с macOS-логами,
+задай условие по структурированным полям (`log_type: macos_unified`,
+`host`, `process`) и привяжи email-уведомление. Примеры полезных условий:
 
 - `log_type: macos_unified AND message: "kernel panic"` — паника ядра;
 - `log_type: macos_wifi_usb AND message: "USBDeviceInserted"` — новое USB-устройство;
