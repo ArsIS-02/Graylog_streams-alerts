@@ -144,7 +144,7 @@ transport_email_auth_username = your-email@mail.ru
 transport_email_auth_password = <пароль_приложения>
 transport_email_from_email = your-email@mail.ru
 transport_email_subject_prefix = [Graylog Alert]
-transport_email_web_interface_url = http://192.168.1.210:9000
+transport_email_web_interface_url = http://<адрес твоего сервера>:9000
 ```
 
 Готовый пример — [`config/server.conf.smtp.example`](../config/server.conf.smtp.example).
