@@ -36,6 +36,7 @@
 │   ├── 03-windows.md                 ← Windows: Sysmon, Winlogbeat, алерт 4625
 │   ├── 04-linux.md                   ← Linux: auditd, rsyslog, алерт SSH
 │   ├── 05-macos.md                   ← macOS: unified log, Filebeat, osquery
+│   ├── 06-macos-bztriage.md          ← macOS: телеметрия через BI.ZONE Triage
 │   └── troubleshooting.md            ← грабли и их решения
 ├── decoder/                          ← декодер auditd (на сервере)
 │   ├── auditd_decoder.py             ← Python-демон: UDP → GELF
@@ -53,7 +54,8 @@
     ├── co.elastic.filebeat.plist     ← LaunchDaemon Filebeat
     ├── com.user.logstream.plist      ← LaunchDaemon log stream
     ├── zshrc.local                   ← хук логирования команд
-    └── logstream/                    ← ротация unified.json.log
+    ├── logstream/                    ← ротация unified.json.log
+    └── bztriage/                     ← BI.ZONE Triage: скрипты, plist-ы, документация
 ```
 
 ## 🚀 Быстрый старт
@@ -83,6 +85,7 @@
 - [Windows: Sysmon, Winlogbeat и алерт 4625](docs/03-windows.md)
 - [Linux: auditd, rsyslog и алерт SSH](docs/04-linux.md)
 - [macOS: unified log, Filebeat и osquery](docs/05-macos.md)
+- [macOS: телеметрия через BI.ZONE Triage](docs/06-macos-bztriage.md)
 - [Troubleshooting](docs/troubleshooting.md)
 
 ## 🔗 Ссылки
