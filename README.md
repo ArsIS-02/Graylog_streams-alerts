@@ -37,20 +37,23 @@
 │   ├── 04-linux.md                   ← Linux: auditd, rsyslog, алерт SSH
 │   ├── 05-macos.md                   ← macOS: unified log, Filebeat, osquery
 │   └── troubleshooting.md            ← грабли и их решения
-├── decoder/                          ← декодер auditd
+├── decoder/                          ← декодер auditd (на сервере)
 │   ├── auditd_decoder.py             ← Python-демон: UDP → GELF
 │   └── audit-decoder.service         ← systemd-юнит
-├── config/                           ← примеры конфигов
+├── config/                           ← конфиги сервера Graylog/OpenSearch
 │   ├── server.conf.smtp.example      ← SMTP для email-алертов (Mail.ru)
-│   ├── opensearch.yml.example        ← OpenSearch для Graylog
-│   ├── rsyslog.conf.example          ← пересылка syslog в Graylog
+│   └── opensearch.yml.example        ← OpenSearch для Graylog
+├── linux/                            ← агенты для Linux-хостов
+│   └── rsyslog.conf.example          ← пересылка syslog в Graylog
+├── windows/                          ← агенты для Windows-хостов
 │   └── winlogbeat.yml.example        ← доставка событий Windows
-├── filebeat.yml                      ← Filebeat для macOS
-├── osquery.conf                      ← osquery для macOS
-├── co.elastic.filebeat.plist         ← LaunchDaemon Filebeat
-├── com.user.logstream.plist          ← LaunchDaemon log stream
-├── zshrc.local                       ← хук логирования команд
-└── logstream/                        ← ротация unified.json.log
+└── macos/                            ← агенты для macOS-хостов
+    ├── filebeat.yml                  ← Filebeat (unified log, wifi.log, osquery)
+    ├── osquery.conf                  ← osquery
+    ├── co.elastic.filebeat.plist     ← LaunchDaemon Filebeat
+    ├── com.user.logstream.plist      ← LaunchDaemon log stream
+    ├── zshrc.local                   ← хук логирования команд
+    └── logstream/                    ← ротация unified.json.log
 ```
 
 ## 🚀 Быстрый старт
