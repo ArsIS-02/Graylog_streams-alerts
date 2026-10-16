@@ -52,7 +52,7 @@ winlogbeat.event_logs:
   - name: System
 
 output.logstash:
-  hosts: ["192.168.1.210:5044"]
+  hosts: ["<ip сервера Graylog>:5044"]
 ```
 
 Готовый пример — [`config/winlogbeat.yml.example`](../config/winlogbeat.yml.example).
