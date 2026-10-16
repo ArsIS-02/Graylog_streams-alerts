@@ -28,6 +28,10 @@
 .\Sysmon64.exe -i .\sysmonconfig-export.xml -accepteula
 ```
 
+![Установка Sysmon](images/sysmon-install.png)
+
+![Sysmon: подготовка конфига](images/sysmon.png)
+
 Проверка логов: `eventvwr.msc` → «Журналы приложений и служб → Microsoft → Windows →
 Sysmon → Operational».
 
@@ -70,6 +74,8 @@ Start-Service winlogbeat
 На сервере Graylog создайте вход **Beats** на порту 5044/TCP:
 `System/Overview → Inputs → Beats → Launch new input`.
 
+![Настройка входа Beats для Winlogbeat](images/beats-input.png)
+
 ## Поток Windows Logs
 
 Создайте поток **Windows Logs** (см. [02-streams-alerts.md](02-streams-alerts.md)),
@@ -103,6 +109,10 @@ winlogbeat_winlog_task: Logon
 winlogbeat_event_code:4625 AND winlogbeat_event_outcome:failure
 ```
 
+![Поиск события 4625](images/windows-4625-search.png)
+
+![Детали события 4625](images/windows-event-detail.png)
+
 ### Создание алерта
 
 1. **Alerts → Event Definitions → Create event definition**.
@@ -112,8 +122,16 @@ winlogbeat_event_code:4625 AND winlogbeat_event_outcome:failure
 4. **Fields** — добавьте поля, которые должны попадать в алерт.
 5. **Notifications** — выберите созданное email-уведомление, нажмите **Add notification**.
 
+![Создание алерта для Windows](images/windows-alert-form.png)
+
+![Поля для поиска в событиях Windows](images/windows-alert-fields.png)
+
 Проверка: попытка входа с неверным паролем → в течение пары минут письмо со ссылкой
 на событие.
+
+![Сработавший алерт для Windows](images/windows-alert-result.png)
+
+![Письмо с алертом](images/windows-alert-email.png)
 
 > Не ищите события по русскому тексту в `message` — используйте точные
 > `event_code` и `outcome`. Это быстрее и без ложных срабатываний.

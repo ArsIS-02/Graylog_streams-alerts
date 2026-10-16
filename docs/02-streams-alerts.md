@@ -19,6 +19,10 @@
 
 По умолчанию в системе есть три потока (активен только `Default stream`).
 
+![Поступающие логи до создания потоков](images/logs-before-streams.png)
+
+![Потоки по умолчанию](images/default-streams.png)
+
 ### Зачем нужны потоки
 
 | Причина | Что даёт |
@@ -48,13 +52,30 @@
 | **Security Events** | события аутентификации и доступа: event_id 4624, 4625, 4648 и др. (Windows + РЕД ОС) |
 | **Errors** | сообщения со словами `error` или `critical` со всех хостов |
 
+![Проверка корректности правила для стрима](images/stream-rule-check.png)
+
+![Потоки для Windows и Linux](images/streams-win-linux.png)
+
+![Правило потока для Linux](images/linux-stream.png)
+
+![Созданные потоки на сервере](images/created-streams.png)
+
 ### Создание потока
 
 1. Верхнее меню → **Streams**.
+
+![Страница управления потоками](images/streams-page.png)
+
 2. **Create stream** (правый верхний угол).
 3. Заполнить поля: `Title` (например, `Windows Logs`), `Description`.
 4. Поставить флажок **Remove matches from Default Stream** — чтобы события не дублировались.
 5. Кнопка **More** → **Quick add rule** — задать правило маршрутизации.
+
+![Форма создания потока](images/create-stream-form.png)
+
+![Выбор поля для фильтра стрима](images/stream-field-filter.png)
+
+![Первый стрим для логов Windows готов](images/windows-stream-done.png)
 
 ## Декодер auditd
 
@@ -113,6 +134,16 @@ systemctl status audit-decoder.service
 Декодер слушает UDP 1514, отправляет GELF на `127.0.0.1:12201`. Создайте в Graylog
 вход **GELF UDP** на порту 12201.
 
+![Декодер логов активен](images/decoder-unit.png)
+
+![Поля после декодирования](images/decoded-fields.png)
+
+Примеры поисковых пресетов после декодирования:
+
+![Пресет с событиями EXECVE](images/preset-execve.png)
+
+![Пресет с событиями SYSCALL](images/preset-syscall.png)
+
 ## Алерты
 
 Алерт — автоматическое уведомление при выполнении заданного условия в выбранном потоке.
@@ -149,6 +180,8 @@ transport_email_web_interface_url = http://<адрес твоего сервер
 
 Готовый пример — [`config/server.conf.smtp.example`](../config/server.conf.smtp.example).
 
+![Настройка SMTP в server.conf](images/smtp-config.png)
+
 Перезапуск и проверка:
 
 ```bash
@@ -173,6 +206,10 @@ journalctl -u graylog-server | grep -i smtp
 4. `Email recipients` — адрес получателя.
 5. `Subject` (опционально): `[Graylog] ${event_definition_title}`.
 6. **Execute test notification** — проверка отправки.
+
+![Создание email-уведомления](images/notification.png)
+
+![Шаблон письма](images/email-template.png)
 
 ### Условия алерта
 

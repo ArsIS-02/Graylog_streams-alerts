@@ -21,6 +21,8 @@ auditctl -l                    # убедиться, что правила до�
 tail /var/log/audit/audit.log  # проверить, что демон пишет события
 ```
 
+![Правила auditd загружены](images/auditd.png)
+
 ## rsyslog
 
 Для пересылки системных логов на Graylog используем rsyslog.
@@ -51,6 +53,10 @@ UDP.
 ```
 *.* @@192.168.1.210:1514
 ```
+
+![Настройка rsyslog](images/rsyslog.png)
+
+![rsyslog: приём по UDP на 1514](images/rsyslog-udp.png)
 
 Готовый пример — [`config/rsyslog.conf.example`](../config/rsyslog.conf.example).
 
@@ -92,6 +98,10 @@ sshd-session[71592]: pam_unix(sshd:auth): authentication failure; logname= uid=0
 program:sshd AND message:"Authentication failure"
 ```
 
+![Поиск события SSH](images/ssh-search.png)
+
+![Успешный поиск по паттерну](images/ssh-search-result.png)
+
 Этот запрос отлавливает все неудачные подключения по SSH: несуществующие имена
 пользователей, неверные пароли, превышение числа попыток.
 
@@ -105,5 +115,15 @@ program:sshd AND message:"Authentication failure"
 4. **Fields** — стандартные поля из логов Linux.
 5. **Notifications** — выберите email-уведомление, нажмите **Add notification**.
 
+![Создание алерта для Linux](images/linux-alert-form.png)
+
+![Условия алерта Linux](images/linux-alert-filter.png)
+
+![Поля алерта Linux](images/linux-alert-fields.png)
+
+![Уведомление алерта Linux](images/linux-alert-notification.png)
+
 Совет: следующий алерт проще клонировать из предыдущего (**Update**), чем создавать
 с нуля.
+
+![Письмо с алертом для Linux](images/linux-alert-email.png)
