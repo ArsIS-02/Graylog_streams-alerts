@@ -59,7 +59,7 @@ output.logstash:
   hosts: ["<ip сервера Graylog>:5044"]
 ```
 
-Готовый пример — [`config/winlogbeat.yml.example`](../config/winlogbeat.yml.example).
+Готовый пример — [`config/winlogbeat.yml.example`](../windows/winlogbeat.yml.example).
 
 Проверка и установка службы:
 

@@ -17,15 +17,21 @@
 
 | Файл | Назначение |
 |---|---|
-| [`filebeat.yml`](../filebeat.yml) | Конфиг Filebeat (unified log, wifi.log, osquery) |
-| [`co.elastic.filebeat.plist`](../co.elastic.filebeat.plist) | LaunchDaemon для Filebeat |
-| [`osquery.conf`](../osquery.conf) | Конфиг osquery |
-| [`com.user.logstream.plist`](../com.user.logstream.plist) | LaunchDaemon для `log stream` (через wrapper) |
-| [`zshrc.local`](../zshrc.local) | Хук логирования команд |
-| [`logstream/logstream-wrapper.sh`](../logstream/logstream-wrapper.sh) | Обёртка: перезапуск `log stream` при ротации |
-| [`logstream/unified.json.conf`](../logstream/unified.json.conf) | Конфиг newsyslog для ротации |
+| [`filebeat.yml`](../macos/filebeat.yml) | Конфиг Filebeat (unified log, wifi.log, osquery) |
+| [`co.elastic.filebeat.plist`](../macos/co.elastic.filebeat.plist) | LaunchDaemon для Filebeat |
+| [`osquery.conf`](../macos/osquery.conf) | Конфиг osquery |
+| [`com.user.logstream.plist`](../macos/com.user.logstream.plist) | LaunchDaemon для `log stream` (через wrapper) |
+| [`zshrc.local`](../macos/zshrc.local) | Хук логирования команд |
+| [`logstream/logstream-wrapper.sh`](../macos/logstream/logstream-wrapper.sh) | Обёртка: перезапуск `log stream` при ротации |
+| [`logstream/unified.json.conf`](../macos/logstream/unified.json.conf) | Конфиг newsyslog для ротации |
 
 ## Установка
+
+Все файлы лежат в каталоге [`macos/`](../macos/) репозитория. Перейди в него:
+
+```bash
+cd macos
+```
 
 ### Filebeat
 

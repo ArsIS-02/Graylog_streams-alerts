@@ -20,7 +20,7 @@ LaunchDaemon `com.user.logstream`. Штатный `newsyslog` про этот ф
    когда файл превышает порог
 3. `/Library/LaunchDaemons/com.user.logstream.plist` — запускает wrapper
 
-Файлы лежат в каталоге `logstream/` этого репозитория.
+Файлы лежат в каталоге `macos/logstream/` этого репозитория.
 
 **Почему wrapper:** `log stream` держит файл открытым (file descriptor).
 Даже если `newsyslog` переименует файл, процесс продолжит писать

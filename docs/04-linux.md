@@ -58,7 +58,7 @@ UDP.
 
 ![rsyslog: приём по UDP на 1514](images/rsyslog-udp.png)
 
-Готовый пример — [`config/rsyslog.conf.example`](../config/rsyslog.conf.example).
+Готовый пример — [`config/rsyslog.conf.example`](../linux/rsyslog.conf.example).
 
 Перезапуск:
 
