@@ -49,6 +49,8 @@ Graylog состоит из нескольких компонентов:
                      (MongoDB + OpenSearch)
 ```
 
+![Схема лаборатории](images/architecture.png)
+
 В тестовой лаборатории автора: пять устройств на x86-64, остальные — Raspberry Pi 4/5,
 операционные системы РЕД ОС 8.0 (Linux) и Windows. Graylog успешно работает на ARM.
 
@@ -69,6 +71,8 @@ Graylog состоит из нескольких компонентов:
 dnf install java-17-openjdk
 ```
 
+![Установка Java 17](images/java-install.png)
+
 Если установлено несколько версий Java, выбираем версию 17.
 
 ### MongoDB
@@ -79,6 +83,8 @@ systemctl daemon-reload
 systemctl enable mongod --now
 systemctl status mongod      # должно быть active (running)
 ```
+
+![Статус службы mongod](images/mongodb-status.png)
 
 ### OpenSearch
 
@@ -100,6 +106,10 @@ action.auto_create_index: false
 plugins.security.disabled: true
 ```
 
+![Настройка opensearch.yml](images/opensearch-config.png)
+
+![Настройка opensearch.yml (продолжение)](images/opensearch-config-2.png)
+
 Готовый пример — [`config/opensearch.yml.example`](../config/opensearch.yml.example).
 
 > `plugins.security.disabled: true` уместно только в изолированной домашней лаборатории.
@@ -111,6 +121,8 @@ plugins.security.disabled: true
 sysctl -w vm.max_map_count=262144
 echo 'vm.max_map_count=262144' >> /etc/sysctl.conf
 ```
+
+![Настройка виртуальной памяти](images/vm-max-map-count.png)
 
 Запуск и проверка OpenSearch:
 
@@ -127,6 +139,8 @@ rpm -Uvh https://packages.graylog2.org/repo/packages/graylog5.2-repository_lates
 dnf install graylog-server
 ```
 
+![Установка graylog-server](images/graylog-install.png)
+
 Создаём секретный ключ и хеш пароля администратора:
 
 ```bash
@@ -137,6 +151,8 @@ echo -n "Enter Password: " && head -1 </dev/stdin | tr -d '\n' | sha256sum | cut
 < /dev/urandom tr -dc A-Z-a-z-0-9 | head -c ${1:-96}; echo;
 ```
 
+![Создание паролей Graylog](images/graylog-password.png)
+
 Правки в `/etc/graylog/server/server.conf`:
 
 ```ini
@@ -144,6 +160,10 @@ root_password_sha2 = <хеш_пароля>
 password_secret = <секретный_ключ>
 elasticsearch_hosts = http://localhost:9200
 ```
+
+![Настройка server.conf](images/server-conf.png)
+
+![Настройка server.conf (продолжение)](images/server-conf-2.png)
 
 Запуск:
 
@@ -153,12 +173,16 @@ systemctl enable graylog-server --now
 systemctl --type=service --state=active | grep graylog
 ```
 
+![Перезапуск graylog-server](images/graylog-restart.png)
+
 Веб-интерфейс доступен на `http://localhost:9000`, вход — `admin` с заданным паролем.
 
 ### Таймзона
 
 По умолчанию Graylog использует UTC+00:00. Чтобы не путаться при анализе событий,
 расскомментируйте в `server.conf` параметр таймзоны (у автора — `+05:00`, Екатеринбург).
+
+![Настройка таймзоны](images/timezone.png)
 
 ## Совместимость версий
 
@@ -169,6 +193,10 @@ Graylog 7.1 требует определённых версий компоне�
 | Graylog | 7.1.3 |
 | MongoDB | 7.0.37 |
 | OpenSearch | 2.19.5 |
+
+![Таблица совместимости версий компонентов](images/version-compat.png)
+
+![Версия установленного MongoDB](images/mongodb-version.png)
 
 ## Настройка входов (Inputs) на сервере
 
