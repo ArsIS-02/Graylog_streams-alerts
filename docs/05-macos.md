@@ -94,6 +94,12 @@ sudo log show --predicate 'process == "filebeat"' --last 5m --info | \
 
 Подробнее — в [`docs/troubleshooting.md`](troubleshooting.md).
 
+## Другой подход — BI.ZONE Triage
+
+Кроме Filebeat/osquery, для macOS есть второй способ сбора телеметрии — через
+BI.ZONE Triage (процессы, сеть, autoruns, baseline). О нём — отдельная глава:
+[06-macos-bztriage.md](06-macos-bztriage.md).
+
 ## Алерты для macOS
 
 Алерты для macOS строятся так же, как для Windows и Linux (см.
