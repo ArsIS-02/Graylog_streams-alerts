@@ -1,0 +1,26 @@
+# Пример SMTP-настроек Graylog для отправки email-алертов через Mail.ru.
+# Скопируйте нужные строки в /etc/graylog/server/server.conf,
+# отредактируйте и перезапустите: sudo systemctl restart graylog-server
+
+# Включаем отправку email
+transport_email_enabled = true
+
+# SMTP-сервер Mail.ru
+transport_email_hostname = smtp.mail.ru
+transport_email_port = 465
+
+# Аутентификация: порт 465 + SSL (TLS при этом отключаем)
+transport_email_use_auth = true
+transport_email_use_ssl = true
+transport_email_use_tls = false
+
+# Учётные данные: полный email и пароль приложения (не пароль от ящика!)
+transport_email_auth_username = your-email@mail.ru
+transport_email_auth_password = your_app_password
+
+# Отправитель и тема писем
+transport_email_from_email = your-email@mail.ru
+transport_email_subject_prefix = [Graylog Alert]
+
+# URL веб-интерфейса — подставляется в ссылки в письмах
+transport_email_web_interface_url = http://192.168.1.210:9000

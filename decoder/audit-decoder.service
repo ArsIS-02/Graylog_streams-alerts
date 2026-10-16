@@ -1,0 +1,20 @@
+[Unit]
+Description=Auditd decoder for Graylog
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/auditd_decoder.py
+Restart=always
+RestartSec=5
+# По умолчанию декодер слушает UDP 1514 и отправляет GELF на 127.0.0.1:12201.
+# При необходимости задайте другие адреса через окружение:
+#Environment=GRAYLOG_HOST=127.0.0.1
+#Environment=GRAYLOG_PORT=12201
+#Environment=LISTEN_HOST=0.0.0.0
+#Environment=LISTEN_PORT=1514
+#User=root   # или любой непривилегированный пользователь
+#Group=root
+
+[Install]
+WantedBy=multi-user.target
