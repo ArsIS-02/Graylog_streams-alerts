@@ -20,9 +20,9 @@
 
 ### Установка
 
-1. Скачайте Sysmon с официального сайта Microsoft Sysinternals.
-2. Подготовьте конфиг (свой или скачанный).
-3. Распакуйте архив, откройте PowerShell от имени администратора:
+1. Скачай Sysmon с официального сайта Microsoft Sysinternals.
+2. Подготовь конфиг (свой или скачанный).
+3. Распакуй архив, открой PowerShell от имени администратора:
 
 ```powershell
 .\Sysmon64.exe -i .\sysmonconfig-export.xml -accepteula
@@ -46,7 +46,7 @@ Sysmon → Operational».
 
 ### Настройка
 
-Установите Winlogbeat на каждый Windows-хост. Отредактируйте `winlogbeat.yml`
+Установи Winlogbeat на каждый Windows-хост. Отредактируй `winlogbeat.yml`
 (обычно `C:\Program Files\winlogbeat\winlogbeat.yml`), указав адрес сервера Graylog:
 
 ```yaml
@@ -71,14 +71,14 @@ cd "C:\Program Files\winlogbeat"
 Start-Service winlogbeat
 ```
 
-На сервере Graylog создайте вход **Beats** на порту 5044/TCP:
+На сервере Graylog создай вход **Beats** на порту 5044/TCP:
 `System/Overview → Inputs → Beats → Launch new input`.
 
 ![Настройка входа Beats для Winlogbeat](images/beats-input.png)
 
 ## Поток Windows Logs
 
-Создайте поток **Windows Logs** (см. [02-streams-alerts.md](02-streams-alerts.md)),
+Создай поток **Windows Logs** (см. [02-streams-alerts.md](02-streams-alerts.md)),
 в который попадают сообщения от Winlogbeat и Sysmon с Windows-хостов.
 
 ## Алерт на неудачный вход (4625)
@@ -119,8 +119,8 @@ winlogbeat_event_code:4625 AND winlogbeat_event_outcome:failure
 2. **Event Details** — тема, приоритет, сводка.
 3. **Filter & Aggregation** — ищем в потоке **Windows Logs** по паттерну выше,
    проверка каждые 5 минут, условие «больше нуля сообщений».
-4. **Fields** — добавьте поля, которые должны попадать в алерт.
-5. **Notifications** — выберите созданное email-уведомление, нажмите **Add notification**.
+4. **Fields** — добавь поля, которые должны попадать в алерт.
+5. **Notifications** — выбери созданное email-уведомление, нажми **Add notification**.
 
 ![Создание алерта для Windows](images/windows-alert-form.png)
 
@@ -133,5 +133,5 @@ winlogbeat_event_code:4625 AND winlogbeat_event_outcome:failure
 
 ![Письмо с алертом](images/windows-alert-email.png)
 
-> Не ищите события по русскому тексту в `message` — используйте точные
+> Не ищи события по русскому тексту в `message` — используй точные
 > `event_code` и `outcome`. Это быстрее и без ложных срабатываний.

@@ -55,15 +55,15 @@
 
 ## 🚀 Быстрый старт
 
-1. **Установите стек** по [части 1](docs/01-home-lab.md): Java 17, MongoDB,
+1. **Установи стек** по [части 1](docs/01-home-lab.md): Java 17, MongoDB,
    OpenSearch, Graylog server.
-2. **Настройте агенты** по своей ОС: [Windows](docs/03-windows.md),
+2. **Настрой агенты** по своей ОС: [Windows](docs/03-windows.md),
    [Linux](docs/04-linux.md), [macOS](docs/05-macos.md).
-3. **Создайте потоки и алерты** по [части 2](docs/02-streams-alerts.md).
-4. **Подключите декодер auditd** из [`decoder/`](decoder/auditd_decoder.py) — и
+3. **Создай потоки и алерты** по [части 2](docs/02-streams-alerts.md).
+4. **Подключи декодер auditd** из [`decoder/`](decoder/auditd_decoder.py) — и
    события auditd станут читаемыми.
 
-## ✨ Что вы получите
+## ✨ Что вы получи
 
 | Функция | Описание |
 |---|---|
