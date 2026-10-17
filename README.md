@@ -37,6 +37,7 @@
 │   ├── 04-linux.md                   ← Linux: auditd, rsyslog, алерт SSH
 │   ├── 05-macos.md                   ← macOS: unified log, Filebeat, osquery
 │   ├── 06-macos-bztriage.md          ← macOS: телеметрия через BI.ZONE Triage
+│   ├── 07-dashboards.md              ← дашборды для доклада
 │   └── troubleshooting.md            ← грабли и их решения
 ├── decoder/                          ← декодер auditd (на сервере)
 │   ├── auditd_decoder.py             ← Python-демон: UDP → GELF
@@ -89,6 +90,7 @@
 - [Linux: auditd, rsyslog и алерт SSH](docs/04-linux.md)
 - [macOS: unified log, Filebeat и osquery](docs/05-macos.md)
 - [macOS: телеметрия через BI.ZONE Triage](docs/06-macos-bztriage.md)
+- [Дашборды для доклада](docs/07-dashboards.md)
 - [Troubleshooting](docs/troubleshooting.md)
 
 ## 🔗 Ссылки
