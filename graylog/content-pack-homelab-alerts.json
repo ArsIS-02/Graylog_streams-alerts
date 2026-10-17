@@ -1,0 +1,2887 @@
+{
+  "id": "f631a87c-b6c9-4b9d-88e7-fc717d2a32af",
+  "rev": 2,
+  "v": "1",
+  "name": "HomeLab Alerts (LNX/macOS/Windows)",
+  "summary": "19 алертов и 3 email-уведомления для redos-server",
+  "description": "Алерты auditd/RED OS, macOS (osquery/unified log/wifi.log) и Windows (winlogbeat/Sysmon) + HTML-шаблоны писем. Перенесено с homelab.monitoring.test 2026-10-17. Rev 2: отправитель «Graylog Server».",
+  "vendor": "ArsIS-02",
+  "url": "",
+  "created_at": "2026-10-17T05:04:45.341Z",
+  "server_version": "7.2.0-rc.1+f147f30",
+  "parameters": [],
+  "entities": [
+    {
+      "id": "cccc2bed-3362-4549-b0e5-d9eca1927725",
+      "type": {
+        "name": "event_definition",
+        "version": "1"
+      },
+      "v": "1",
+      "data": {
+        "_scope": {
+          "@type": "string",
+          "@value": "DEFAULT"
+        },
+        "title": {
+          "@type": "string",
+          "@value": "macOS - Подключено мобильное устройство (не Apple)"
+        },
+        "description": {
+          "@type": "string",
+          "@value": "По USB подключено мобильное устройство не Apple (isApple N). Возможна попытка первоначального доступа."
+        },
+        "remediation_steps": null,
+        "updated_at": "2026-10-17T04:14:13.202Z",
+        "matched_at": null,
+        "priority": {
+          "@type": "integer",
+          "@value": 3
+        },
+        "alert": {
+          "@type": "boolean",
+          "@value": true
+        },
+        "config": {
+          "type": "aggregation-v1",
+          "query": {
+            "@type": "string",
+            "@value": "log_type:macos_wifi_usb AND message:(hostNotificationUSBDeviceInserted AND \"isApple N\")"
+          },
+          "query_parameters": [],
+          "filters": [],
+          "streams": [
+            "812b224e-0563-4483-9e66-7ee015acbce9"
+          ],
+          "stream_categories": [],
+          "group_by": [],
+          "series": [],
+          "conditions": {
+            "expression": null
+          },
+          "search_within_ms": 300000,
+          "execute_every_ms": 300000,
+          "use_cron_scheduling": false,
+          "cron_expression": null,
+          "cron_timezone": null,
+          "event_limit": 100
+        },
+        "field_spec": {
+          "host": {
+            "data_type": "string",
+            "providers": [
+              {
+                "type": "template-v1",
+                "template": "${source.source}",
+                "require_values": false,
+                "exclude_empty_fields": true
+              }
+            ]
+          }
+        },
+        "key_spec": [
+          "host"
+        ],
+        "notification_settings": {
+          "grace_period_ms": 300000,
+          "backlog_size": 5
+        },
+        "notifications": [
+          {
+            "notification_id": {
+              "@type": "string",
+              "@value": "8b5d6631-b241-47fd-8e50-40971e2d830d"
+            },
+            "notification_parameters": null
+          }
+        ],
+        "storage": [
+          {
+            "type": "persist-to-streams-v1",
+            "streams": [
+              "000000000000000000000002"
+            ]
+          }
+        ],
+        "tags": [],
+        "is_scheduled": {
+          "@type": "boolean",
+          "@value": true
+        },
+        "event_procedure": null,
+        "event_summary_template": null,
+        "tactics_techniques": []
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.2.0-rc.1+f147f30"
+        }
+      ]
+    },
+    {
+      "id": "5b71603b-a05c-4a10-9975-0cdf11ff4814",
+      "type": {
+        "name": "event_definition",
+        "version": "1"
+      },
+      "v": "1",
+      "data": {
+        "_scope": {
+          "@type": "string",
+          "@value": "DEFAULT"
+        },
+        "title": {
+          "@type": "string",
+          "@value": "LNX - Остановка службы (systemctl stop)"
+        },
+        "description": {
+          "@type": "string",
+          "@value": "Остановка системной службы через systemctl stop. Имя службы: аргумент a2 в исходных сообщениях."
+        },
+        "remediation_steps": null,
+        "updated_at": "2026-10-17T04:14:12.453Z",
+        "matched_at": null,
+        "priority": {
+          "@type": "integer",
+          "@value": 2
+        },
+        "alert": {
+          "@type": "boolean",
+          "@value": true
+        },
+        "config": {
+          "type": "aggregation-v1",
+          "query": {
+            "@type": "string",
+            "@value": "audit_type:EXECVE AND a0:\"systemctl\" AND a1:\"stop\""
+          },
+          "query_parameters": [],
+          "filters": [],
+          "streams": [
+            "eb9ed9b8-b5bc-4d19-ac6a-7e6dad39debb"
+          ],
+          "stream_categories": [],
+          "group_by": [
+            "source"
+          ],
+          "series": [
+            {
+              "type": "count",
+              "id": "count-",
+              "field": null
+            }
+          ],
+          "conditions": {
+            "expression": {
+              "expr": ">",
+              "left": {
+                "expr": "number-ref",
+                "ref": "count-"
+              },
+              "right": {
+                "expr": "number",
+                "value": 0
+              }
+            }
+          },
+          "search_within_ms": 300000,
+          "execute_every_ms": 300000,
+          "use_cron_scheduling": false,
+          "cron_expression": null,
+          "cron_timezone": null,
+          "event_limit": 100
+        },
+        "field_spec": {
+          "host": {
+            "data_type": "string",
+            "providers": [
+              {
+                "type": "template-v1",
+                "template": "${source.source}",
+                "require_values": false,
+                "exclude_empty_fields": true
+              }
+            ]
+          }
+        },
+        "key_spec": [
+          "host"
+        ],
+        "notification_settings": {
+          "grace_period_ms": 300000,
+          "backlog_size": 5
+        },
+        "notifications": [
+          {
+            "notification_id": {
+              "@type": "string",
+              "@value": "8a2e5e72-6d02-428d-b698-4ef8a5dfc9dd"
+            },
+            "notification_parameters": null
+          }
+        ],
+        "storage": [
+          {
+            "type": "persist-to-streams-v1",
+            "streams": [
+              "000000000000000000000002"
+            ]
+          }
+        ],
+        "tags": [],
+        "is_scheduled": {
+          "@type": "boolean",
+          "@value": true
+        },
+        "event_procedure": null,
+        "event_summary_template": null,
+        "tactics_techniques": []
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.2.0-rc.1+f147f30"
+        }
+      ]
+    },
+    {
+      "id": "a264a425-f14b-4f25-ac13-5795cda5e673",
+      "type": {
+        "name": "event_definition",
+        "version": "1"
+      },
+      "v": "1",
+      "data": {
+        "_scope": {
+          "@type": "string",
+          "@value": "DEFAULT"
+        },
+        "title": {
+          "@type": "string",
+          "@value": "Windows - Создание/удаление локального пользователя (net user)"
+        },
+        "description": {
+          "@type": "string",
+          "@value": "Создан или удалён локальный пользователь командой net user /add или /delete (Sysmon Event 1)."
+        },
+        "remediation_steps": null,
+        "updated_at": "2026-10-17T04:14:13.489Z",
+        "matched_at": null,
+        "priority": {
+          "@type": "integer",
+          "@value": 3
+        },
+        "alert": {
+          "@type": "boolean",
+          "@value": true
+        },
+        "config": {
+          "type": "aggregation-v1",
+          "query": {
+            "@type": "string",
+            "@value": "winlogbeat_winlog_event_id:1 AND message:\"net user\" AND (message:\"/add\" OR message:\"/delete\")"
+          },
+          "query_parameters": [],
+          "filters": [],
+          "streams": [
+            "a782c512-3d33-4b5f-a02e-9db95d1c9371"
+          ],
+          "stream_categories": [],
+          "group_by": [],
+          "series": [],
+          "conditions": {
+            "expression": null
+          },
+          "search_within_ms": 300000,
+          "execute_every_ms": 300000,
+          "use_cron_scheduling": false,
+          "cron_expression": null,
+          "cron_timezone": null,
+          "event_limit": 100
+        },
+        "field_spec": {
+          "command_line": {
+            "data_type": "string",
+            "providers": [
+              {
+                "type": "template-v1",
+                "template": "${source.winlogbeat_winlog_event_data_CommandLine}",
+                "require_values": false,
+                "exclude_empty_fields": true
+              }
+            ]
+          },
+          "host": {
+            "data_type": "string",
+            "providers": [
+              {
+                "type": "template-v1",
+                "template": "${source.source}",
+                "require_values": false,
+                "exclude_empty_fields": true
+              }
+            ]
+          },
+          "parent_process": {
+            "data_type": "string",
+            "providers": [
+              {
+                "type": "template-v1",
+                "template": "${source.winlogbeat_winlog_event_data_ParentImage}",
+                "require_values": false,
+                "exclude_empty_fields": true
+              }
+            ]
+          },
+          "user": {
+            "data_type": "string",
+            "providers": [
+              {
+                "type": "template-v1",
+                "template": "${source.winlogbeat_winlog_event_data_User}",
+                "require_values": false,
+                "exclude_empty_fields": true
+              }
+            ]
+          }
+        },
+        "key_spec": [
+          "host"
+        ],
+        "notification_settings": {
+          "grace_period_ms": 300000,
+          "backlog_size": 5
+        },
+        "notifications": [
+          {
+            "notification_id": {
+              "@type": "string",
+              "@value": "e711646d-945a-4753-83e0-01184bbdcb1e"
+            },
+            "notification_parameters": null
+          }
+        ],
+        "storage": [
+          {
+            "type": "persist-to-streams-v1",
+            "streams": [
+              "000000000000000000000002"
+            ]
+          }
+        ],
+        "tags": [],
+        "is_scheduled": {
+          "@type": "boolean",
+          "@value": true
+        },
+        "event_procedure": null,
+        "event_summary_template": null,
+        "tactics_techniques": []
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.2.0-rc.1+f147f30"
+        }
+      ]
+    },
+    {
+      "id": "d0e94858-3f28-4350-b3fa-945baf01c668",
+      "type": {
+        "name": "event_definition",
+        "version": "1"
+      },
+      "v": "1",
+      "data": {
+        "_scope": {
+          "@type": "string",
+          "@value": "DEFAULT"
+        },
+        "title": {
+          "@type": "string",
+          "@value": "LNX - Неудачная попытка sudo"
+        },
+        "description": {
+          "@type": "string",
+          "@value": "Неудачная аутентификация sudo: неверный пароль или отказ PAM/SSSD. Возможен подбор пароля или ошибка пользователя."
+        },
+        "remediation_steps": null,
+        "updated_at": "2026-10-17T04:14:12.237Z",
+        "matched_at": null,
+        "priority": {
+          "@type": "integer",
+          "@value": 2
+        },
+        "alert": {
+          "@type": "boolean",
+          "@value": true
+        },
+        "config": {
+          "type": "aggregation-v1",
+          "query": {
+            "@type": "string",
+            "@value": "message:\"sudo\" AND (message:\"authentication failure\" OR message:\"incorrect password\" OR (message:\"pam_sss\" AND message:\"failure\"))"
+          },
+          "query_parameters": [],
+          "filters": [],
+          "streams": [
+            "eb9ed9b8-b5bc-4d19-ac6a-7e6dad39debb"
+          ],
+          "stream_categories": [],
+          "group_by": [
+            "source"
+          ],
+          "series": [
+            {
+              "type": "count",
+              "id": "count-",
+              "field": null
+            }
+          ],
+          "conditions": {
+            "expression": {
+              "expr": ">",
+              "left": {
+                "expr": "number-ref",
+                "ref": "count-"
+              },
+              "right": {
+                "expr": "number",
+                "value": 0
+              }
+            }
+          },
+          "search_within_ms": 300000,
+          "execute_every_ms": 300000,
+          "use_cron_scheduling": false,
+          "cron_expression": null,
+          "cron_timezone": null,
+          "event_limit": 100
+        },
+        "field_spec": {
+          "host": {
+            "data_type": "string",
+            "providers": [
+              {
+                "type": "template-v1",
+                "template": "${source.source}",
+                "require_values": false,
+                "exclude_empty_fields": true
+              }
+            ]
+          }
+        },
+        "key_spec": [
+          "host"
+        ],
+        "notification_settings": {
+          "grace_period_ms": 300000,
+          "backlog_size": 5
+        },
+        "notifications": [
+          {
+            "notification_id": {
+              "@type": "string",
+              "@value": "8a2e5e72-6d02-428d-b698-4ef8a5dfc9dd"
+            },
+            "notification_parameters": null
+          }
+        ],
+        "storage": [
+          {
+            "type": "persist-to-streams-v1",
+            "streams": [
+              "000000000000000000000002"
+            ]
+          }
+        ],
+        "tags": [],
+        "is_scheduled": {
+          "@type": "boolean",
+          "@value": true
+        },
+        "event_procedure": null,
+        "event_summary_template": null,
+        "tactics_techniques": []
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.2.0-rc.1+f147f30"
+        }
+      ]
+    },
+    {
+      "id": "a6a72ab6-0058-4419-894c-49e4ad9e9275",
+      "type": {
+        "name": "event_definition",
+        "version": "1"
+      },
+      "v": "1",
+      "data": {
+        "_scope": {
+          "@type": "string",
+          "@value": "DEFAULT"
+        },
+        "title": {
+          "@type": "string",
+          "@value": "macOS - Изменение /etc/sudoers"
+        },
+        "description": {
+          "@type": "string",
+          "@value": "Изменён файл /etc/sudoers, задающий права суперпользователя. Возможна эскалация привилегий."
+        },
+        "remediation_steps": null,
+        "updated_at": "2026-10-17T04:14:12.528Z",
+        "matched_at": null,
+        "priority": {
+          "@type": "integer",
+          "@value": 3
+        },
+        "alert": {
+          "@type": "boolean",
+          "@value": true
+        },
+        "config": {
+          "type": "aggregation-v1",
+          "query": {
+            "@type": "string",
+            "@value": "name:file_events AND columns_category:sudoers AND (action:added OR columns_action:(MOVED_TO OR ROOT_CHANGED OR ATTRIBUTES_MODIFIED OR UPDATED))"
+          },
+          "query_parameters": [],
+          "filters": [],
+          "streams": [
+            "812b224e-0563-4483-9e66-7ee015acbce9"
+          ],
+          "stream_categories": [],
+          "group_by": [
+            "source"
+          ],
+          "series": [
+            {
+              "type": "count",
+              "id": "count-",
+              "field": null
+            }
+          ],
+          "conditions": {
+            "expression": {
+              "expr": ">",
+              "left": {
+                "expr": "number-ref",
+                "ref": "count-"
+              },
+              "right": {
+                "expr": "number",
+                "value": 0
+              }
+            }
+          },
+          "search_within_ms": 300000,
+          "execute_every_ms": 300000,
+          "use_cron_scheduling": false,
+          "cron_expression": null,
+          "cron_timezone": null,
+          "event_limit": 100
+        },
+        "field_spec": {
+          "host": {
+            "data_type": "string",
+            "providers": [
+              {
+                "type": "template-v1",
+                "template": "${source.source}",
+                "require_values": false,
+                "exclude_empty_fields": true
+              }
+            ]
+          }
+        },
+        "key_spec": [
+          "host"
+        ],
+        "notification_settings": {
+          "grace_period_ms": 300000,
+          "backlog_size": 5
+        },
+        "notifications": [
+          {
+            "notification_id": {
+              "@type": "string",
+              "@value": "8b5d6631-b241-47fd-8e50-40971e2d830d"
+            },
+            "notification_parameters": null
+          }
+        ],
+        "storage": [
+          {
+            "type": "persist-to-streams-v1",
+            "streams": [
+              "000000000000000000000002"
+            ]
+          }
+        ],
+        "tags": [],
+        "is_scheduled": {
+          "@type": "boolean",
+          "@value": true
+        },
+        "event_procedure": null,
+        "event_summary_template": null,
+        "tactics_techniques": []
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.2.0-rc.1+f147f30"
+        }
+      ]
+    },
+    {
+      "id": "15895340-8f20-4c59-94e6-8e42cc416e0a",
+      "type": {
+        "name": "event_definition",
+        "version": "1"
+      },
+      "v": "1",
+      "data": {
+        "_scope": {
+          "@type": "string",
+          "@value": "DEFAULT"
+        },
+        "title": {
+          "@type": "string",
+          "@value": "macOS - Выполнение команды через sudo"
+        },
+        "description": {
+          "@type": "string",
+          "@value": "Выполнение команды с повышенными привилегиями через sudo (не от root)."
+        },
+        "remediation_steps": null,
+        "updated_at": "2026-10-17T04:14:12.729Z",
+        "matched_at": null,
+        "priority": {
+          "@type": "integer",
+          "@value": 1
+        },
+        "alert": {
+          "@type": "boolean",
+          "@value": true
+        },
+        "config": {
+          "type": "aggregation-v1",
+          "query": {
+            "@type": "string",
+            "@value": "name:sudo_commands AND -columns_uid:0"
+          },
+          "query_parameters": [],
+          "filters": [],
+          "streams": [
+            "812b224e-0563-4483-9e66-7ee015acbce9"
+          ],
+          "stream_categories": [],
+          "group_by": [
+            "source"
+          ],
+          "series": [
+            {
+              "type": "count",
+              "id": "count-",
+              "field": null
+            }
+          ],
+          "conditions": {
+            "expression": {
+              "expr": ">",
+              "left": {
+                "expr": "number-ref",
+                "ref": "count-"
+              },
+              "right": {
+                "expr": "number",
+                "value": 0
+              }
+            }
+          },
+          "search_within_ms": 300000,
+          "execute_every_ms": 300000,
+          "use_cron_scheduling": false,
+          "cron_expression": null,
+          "cron_timezone": null,
+          "event_limit": 100
+        },
+        "field_spec": {
+          "host": {
+            "data_type": "string",
+            "providers": [
+              {
+                "type": "template-v1",
+                "template": "${source.source}",
+                "require_values": false,
+                "exclude_empty_fields": true
+              }
+            ]
+          }
+        },
+        "key_spec": [
+          "host"
+        ],
+        "notification_settings": {
+          "grace_period_ms": 300000,
+          "backlog_size": 5
+        },
+        "notifications": [
+          {
+            "notification_id": {
+              "@type": "string",
+              "@value": "8b5d6631-b241-47fd-8e50-40971e2d830d"
+            },
+            "notification_parameters": null
+          }
+        ],
+        "storage": [
+          {
+            "type": "persist-to-streams-v1",
+            "streams": [
+              "000000000000000000000002"
+            ]
+          }
+        ],
+        "tags": [],
+        "is_scheduled": {
+          "@type": "boolean",
+          "@value": true
+        },
+        "event_procedure": null,
+        "event_summary_template": null,
+        "tactics_techniques": []
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.2.0-rc.1+f147f30"
+        }
+      ]
+    },
+    {
+      "id": "75d257c2-b169-46db-9daf-092b22c334b0",
+      "type": {
+        "name": "event_definition",
+        "version": "1"
+      },
+      "v": "1",
+      "data": {
+        "_scope": {
+          "@type": "string",
+          "@value": "DEFAULT"
+        },
+        "title": {
+          "@type": "string",
+          "@value": "LNX - Брутфорс SSH (5+ неудачных входов за 5 мин)"
+        },
+        "description": {
+          "@type": "string",
+          "@value": "5 и более неудачных SSH-аутентификаций на одном хосте за 5 минут. Возможен подбор пароля."
+        },
+        "remediation_steps": null,
+        "updated_at": "2026-10-17T04:14:12.152Z",
+        "matched_at": null,
+        "priority": {
+          "@type": "integer",
+          "@value": 3
+        },
+        "alert": {
+          "@type": "boolean",
+          "@value": true
+        },
+        "config": {
+          "type": "aggregation-v1",
+          "query": {
+            "@type": "string",
+            "@value": "(message:\"sshd-session\" AND message:\"Authentication failure\") OR (message:\"sshd\" AND message:\"Failed password\")"
+          },
+          "query_parameters": [],
+          "filters": [],
+          "streams": [
+            "eb9ed9b8-b5bc-4d19-ac6a-7e6dad39debb"
+          ],
+          "stream_categories": [],
+          "group_by": [
+            "source"
+          ],
+          "series": [
+            {
+              "type": "count",
+              "id": "count-",
+              "field": null
+            }
+          ],
+          "conditions": {
+            "expression": {
+              "expr": ">=",
+              "left": {
+                "expr": "number-ref",
+                "ref": "count-"
+              },
+              "right": {
+                "expr": "number",
+                "value": 5
+              }
+            }
+          },
+          "search_within_ms": 300000,
+          "execute_every_ms": 300000,
+          "use_cron_scheduling": false,
+          "cron_expression": null,
+          "cron_timezone": null,
+          "event_limit": 100
+        },
+        "field_spec": {
+          "host": {
+            "data_type": "string",
+            "providers": [
+              {
+                "type": "template-v1",
+                "template": "${source.source}",
+                "require_values": false,
+                "exclude_empty_fields": true
+              }
+            ]
+          }
+        },
+        "key_spec": [
+          "host"
+        ],
+        "notification_settings": {
+          "grace_period_ms": 300000,
+          "backlog_size": 5
+        },
+        "notifications": [
+          {
+            "notification_id": {
+              "@type": "string",
+              "@value": "8a2e5e72-6d02-428d-b698-4ef8a5dfc9dd"
+            },
+            "notification_parameters": null
+          }
+        ],
+        "storage": [
+          {
+            "type": "persist-to-streams-v1",
+            "streams": [
+              "000000000000000000000002"
+            ]
+          }
+        ],
+        "tags": [],
+        "is_scheduled": {
+          "@type": "boolean",
+          "@value": true
+        },
+        "event_procedure": null,
+        "event_summary_template": null,
+        "tactics_techniques": []
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.2.0-rc.1+f147f30"
+        }
+      ]
+    },
+    {
+      "id": "f7aeadde-4a39-4604-8465-e48f08d9a503",
+      "type": {
+        "name": "event_definition",
+        "version": "1"
+      },
+      "v": "1",
+      "data": {
+        "_scope": {
+          "@type": "string",
+          "@value": "DEFAULT"
+        },
+        "title": {
+          "@type": "string",
+          "@value": "LNX - Добавление/удаление пользователя"
+        },
+        "description": {
+          "@type": "string",
+          "@value": "На хосте успешно добавлен или удалён локальный пользователь. В исходных сообщениях: учётка и инициатор (auid)."
+        },
+        "remediation_steps": null,
+        "updated_at": "2026-10-17T04:14:11.992Z",
+        "matched_at": null,
+        "priority": {
+          "@type": "integer",
+          "@value": 3
+        },
+        "alert": {
+          "@type": "boolean",
+          "@value": true
+        },
+        "config": {
+          "type": "aggregation-v1",
+          "query": {
+            "@type": "string",
+            "@value": "(audit_type:ADD_USER OR audit_type:DEL_USER) AND res:success*"
+          },
+          "query_parameters": [],
+          "filters": [],
+          "streams": [
+            "eb9ed9b8-b5bc-4d19-ac6a-7e6dad39debb"
+          ],
+          "stream_categories": [],
+          "group_by": [
+            "source"
+          ],
+          "series": [
+            {
+              "type": "count",
+              "id": "count-",
+              "field": null
+            }
+          ],
+          "conditions": {
+            "expression": {
+              "expr": ">",
+              "left": {
+                "expr": "number-ref",
+                "ref": "count-"
+              },
+              "right": {
+                "expr": "number",
+                "value": 0
+              }
+            }
+          },
+          "search_within_ms": 300000,
+          "execute_every_ms": 300000,
+          "use_cron_scheduling": false,
+          "cron_expression": null,
+          "cron_timezone": null,
+          "event_limit": 100
+        },
+        "field_spec": {
+          "host": {
+            "data_type": "string",
+            "providers": [
+              {
+                "type": "template-v1",
+                "template": "${source.source}",
+                "require_values": false,
+                "exclude_empty_fields": true
+              }
+            ]
+          }
+        },
+        "key_spec": [
+          "host"
+        ],
+        "notification_settings": {
+          "grace_period_ms": 300000,
+          "backlog_size": 5
+        },
+        "notifications": [
+          {
+            "notification_id": {
+              "@type": "string",
+              "@value": "8a2e5e72-6d02-428d-b698-4ef8a5dfc9dd"
+            },
+            "notification_parameters": null
+          }
+        ],
+        "storage": [
+          {
+            "type": "persist-to-streams-v1",
+            "streams": [
+              "000000000000000000000002"
+            ]
+          }
+        ],
+        "tags": [],
+        "is_scheduled": {
+          "@type": "boolean",
+          "@value": true
+        },
+        "event_procedure": null,
+        "event_summary_template": null,
+        "tactics_techniques": []
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.2.0-rc.1+f147f30"
+        }
+      ]
+    },
+    {
+      "id": "f3732dd2-664d-431c-bd57-011668a5b444",
+      "type": {
+        "name": "event_definition",
+        "version": "1"
+      },
+      "v": "1",
+      "data": {
+        "_scope": {
+          "@type": "string",
+          "@value": "DEFAULT"
+        },
+        "title": {
+          "@type": "string",
+          "@value": "macOS - Подключён USB-накопитель"
+        },
+        "description": {
+          "@type": "string",
+          "@value": "Ядро распознало USB-накопитель (IOUSBMassStorageDriver): флешку или внешний диск."
+        },
+        "remediation_steps": null,
+        "updated_at": "2026-10-17T04:14:13.150Z",
+        "matched_at": null,
+        "priority": {
+          "@type": "integer",
+          "@value": 2
+        },
+        "alert": {
+          "@type": "boolean",
+          "@value": true
+        },
+        "config": {
+          "type": "aggregation-v1",
+          "query": {
+            "@type": "string",
+            "@value": "log_type:macos_unified AND processImagePath:\\/kernel AND senderImagePath:\"\\/System\\/Library\\/Extensions\\/IOUSBMassStorageDriver.kext\\/Contents\\/MacOS\\/IOUSBMassStorageDriver\""
+          },
+          "query_parameters": [],
+          "filters": [],
+          "streams": [
+            "812b224e-0563-4483-9e66-7ee015acbce9"
+          ],
+          "stream_categories": [],
+          "group_by": [
+            "source"
+          ],
+          "series": [
+            {
+              "type": "count",
+              "id": "count-",
+              "field": null
+            }
+          ],
+          "conditions": {
+            "expression": {
+              "expr": ">",
+              "left": {
+                "expr": "number-ref",
+                "ref": "count-"
+              },
+              "right": {
+                "expr": "number",
+                "value": 0
+              }
+            }
+          },
+          "search_within_ms": 300000,
+          "execute_every_ms": 300000,
+          "use_cron_scheduling": false,
+          "cron_expression": null,
+          "cron_timezone": null,
+          "event_limit": 100
+        },
+        "field_spec": {
+          "host": {
+            "data_type": "string",
+            "providers": [
+              {
+                "type": "template-v1",
+                "template": "${source.source}",
+                "require_values": false,
+                "exclude_empty_fields": true
+              }
+            ]
+          }
+        },
+        "key_spec": [
+          "host"
+        ],
+        "notification_settings": {
+          "grace_period_ms": 300000,
+          "backlog_size": 5
+        },
+        "notifications": [
+          {
+            "notification_id": {
+              "@type": "string",
+              "@value": "8b5d6631-b241-47fd-8e50-40971e2d830d"
+            },
+            "notification_parameters": null
+          }
+        ],
+        "storage": [
+          {
+            "type": "persist-to-streams-v1",
+            "streams": [
+              "000000000000000000000002"
+            ]
+          }
+        ],
+        "tags": [],
+        "is_scheduled": {
+          "@type": "boolean",
+          "@value": true
+        },
+        "event_procedure": null,
+        "event_summary_template": null,
+        "tactics_techniques": []
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.2.0-rc.1+f147f30"
+        }
+      ]
+    },
+    {
+      "id": "b0afd391-7630-4f0d-b21b-f17b2157a046",
+      "type": {
+        "name": "event_definition",
+        "version": "1"
+      },
+      "v": "1",
+      "data": {
+        "_scope": {
+          "@type": "string",
+          "@value": "DEFAULT"
+        },
+        "title": {
+          "@type": "string",
+          "@value": "macOS - Подозрительный процесс открыл TCP-порт"
+        },
+        "description": {
+          "@type": "string",
+          "@value": "nc/ncat/python/bash/sh начал слушать нестандартный порт. Возможен бэкдор или reverse shell."
+        },
+        "remediation_steps": null,
+        "updated_at": "2026-10-17T04:14:12.619Z",
+        "matched_at": null,
+        "priority": {
+          "@type": "integer",
+          "@value": 3
+        },
+        "alert": {
+          "@type": "boolean",
+          "@value": true
+        },
+        "config": {
+          "type": "aggregation-v1",
+          "query": {
+            "@type": "string",
+            "@value": "name:listening_ports AND (columns_name:(nc OR ncat OR netcat OR python OR python3 OR bash OR sh) AND NOT columns_port:(22 OR 80 OR 443 OR 4000)) AND action:added"
+          },
+          "query_parameters": [],
+          "filters": [],
+          "streams": [
+            "812b224e-0563-4483-9e66-7ee015acbce9"
+          ],
+          "stream_categories": [],
+          "group_by": [],
+          "series": [],
+          "conditions": {
+            "expression": null
+          },
+          "search_within_ms": 300000,
+          "execute_every_ms": 300000,
+          "use_cron_scheduling": false,
+          "cron_expression": null,
+          "cron_timezone": null,
+          "event_limit": 100
+        },
+        "field_spec": {
+          "address": {
+            "data_type": "string",
+            "providers": [
+              {
+                "type": "template-v1",
+                "template": "${source.columns_address}",
+                "require_values": false,
+                "exclude_empty_fields": true
+              }
+            ]
+          },
+          "host": {
+            "data_type": "string",
+            "providers": [
+              {
+                "type": "template-v1",
+                "template": "${source.source}",
+                "require_values": false,
+                "exclude_empty_fields": true
+              }
+            ]
+          },
+          "pid": {
+            "data_type": "string",
+            "providers": [
+              {
+                "type": "template-v1",
+                "template": "${source.columns_pid}",
+                "require_values": false,
+                "exclude_empty_fields": true
+              }
+            ]
+          },
+          "port": {
+            "data_type": "string",
+            "providers": [
+              {
+                "type": "template-v1",
+                "template": "${source.columns_port}",
+                "require_values": false,
+                "exclude_empty_fields": true
+              }
+            ]
+          },
+          "process": {
+            "data_type": "string",
+            "providers": [
+              {
+                "type": "template-v1",
+                "template": "${source.columns_name}",
+                "require_values": false,
+                "exclude_empty_fields": true
+              }
+            ]
+          },
+          "protocol": {
+            "data_type": "string",
+            "providers": [
+              {
+                "type": "template-v1",
+                "template": "${source.columns_protocol}",
+                "require_values": false,
+                "exclude_empty_fields": true
+              }
+            ]
+          }
+        },
+        "key_spec": [
+          "host"
+        ],
+        "notification_settings": {
+          "grace_period_ms": 300000,
+          "backlog_size": 5
+        },
+        "notifications": [
+          {
+            "notification_id": {
+              "@type": "string",
+              "@value": "8b5d6631-b241-47fd-8e50-40971e2d830d"
+            },
+            "notification_parameters": null
+          }
+        ],
+        "storage": [
+          {
+            "type": "persist-to-streams-v1",
+            "streams": [
+              "000000000000000000000002"
+            ]
+          }
+        ],
+        "tags": [],
+        "is_scheduled": {
+          "@type": "boolean",
+          "@value": true
+        },
+        "event_procedure": null,
+        "event_summary_template": null,
+        "tactics_techniques": []
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.2.0-rc.1+f147f30"
+        }
+      ]
+    },
+    {
+      "id": "5b8ff9d1-5baa-4d0c-9296-02fd2f30c9ee",
+      "type": {
+        "name": "event_definition",
+        "version": "1"
+      },
+      "v": "1",
+      "data": {
+        "_scope": {
+          "@type": "string",
+          "@value": "DEFAULT"
+        },
+        "title": {
+          "@type": "string",
+          "@value": "Windows - Подбор пароля (5+ ошибок входа 4625 за 5 мин)"
+        },
+        "description": {
+          "@type": "string",
+          "@value": "5 и более неудачных входов (Event ID 4625) на одном хосте за 5 минут. Возможен брутфорс, в том числе учётной записи администратора."
+        },
+        "remediation_steps": null,
+        "updated_at": "2026-10-17T04:14:13.318Z",
+        "matched_at": null,
+        "priority": {
+          "@type": "integer",
+          "@value": 3
+        },
+        "alert": {
+          "@type": "boolean",
+          "@value": true
+        },
+        "config": {
+          "type": "aggregation-v1",
+          "query": {
+            "@type": "string",
+            "@value": "winlogbeat_event_code:4625 AND winlogbeat_event_outcome:failure"
+          },
+          "query_parameters": [],
+          "filters": [],
+          "streams": [
+            "a782c512-3d33-4b5f-a02e-9db95d1c9371"
+          ],
+          "stream_categories": [],
+          "group_by": [
+            "source"
+          ],
+          "series": [
+            {
+              "type": "count",
+              "id": "count-",
+              "field": null
+            }
+          ],
+          "conditions": {
+            "expression": {
+              "expr": ">=",
+              "left": {
+                "expr": "number-ref",
+                "ref": "count-"
+              },
+              "right": {
+                "expr": "number",
+                "value": 5
+              }
+            }
+          },
+          "search_within_ms": 300000,
+          "execute_every_ms": 300000,
+          "use_cron_scheduling": false,
+          "cron_expression": null,
+          "cron_timezone": null,
+          "event_limit": 100
+        },
+        "field_spec": {
+          "host": {
+            "data_type": "string",
+            "providers": [
+              {
+                "type": "template-v1",
+                "template": "${source.source}",
+                "require_values": false,
+                "exclude_empty_fields": true
+              }
+            ]
+          }
+        },
+        "key_spec": [
+          "host"
+        ],
+        "notification_settings": {
+          "grace_period_ms": 300000,
+          "backlog_size": 5
+        },
+        "notifications": [
+          {
+            "notification_id": {
+              "@type": "string",
+              "@value": "e711646d-945a-4753-83e0-01184bbdcb1e"
+            },
+            "notification_parameters": null
+          }
+        ],
+        "storage": [
+          {
+            "type": "persist-to-streams-v1",
+            "streams": [
+              "000000000000000000000002"
+            ]
+          }
+        ],
+        "tags": [],
+        "is_scheduled": {
+          "@type": "boolean",
+          "@value": true
+        },
+        "event_procedure": null,
+        "event_summary_template": null,
+        "tactics_techniques": []
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.2.0-rc.1+f147f30"
+        }
+      ]
+    },
+    {
+      "id": "e9e62bf5-04ad-4b59-8476-9efce11e0571",
+      "type": {
+        "name": "event_definition",
+        "version": "1"
+      },
+      "v": "1",
+      "data": {
+        "_scope": {
+          "@type": "string",
+          "@value": "DEFAULT"
+        },
+        "title": {
+          "@type": "string",
+          "@value": "LNX - Изменение прав доступа (chmod)"
+        },
+        "description": {
+          "@type": "string",
+          "@value": "Изменение прав доступа через chmod (кроме uid 1001). В исходных сообщениях: режим, файл и пользователь."
+        },
+        "remediation_steps": null,
+        "updated_at": "2026-10-17T04:14:12.075Z",
+        "matched_at": null,
+        "priority": {
+          "@type": "integer",
+          "@value": 2
+        },
+        "alert": {
+          "@type": "boolean",
+          "@value": true
+        },
+        "config": {
+          "type": "aggregation-v1",
+          "query": {
+            "@type": "string",
+            "@value": "audit_type:SYSCALL AND comm:chmod AND success:yes AND -uid:\"1001\""
+          },
+          "query_parameters": [],
+          "filters": [],
+          "streams": [
+            "eb9ed9b8-b5bc-4d19-ac6a-7e6dad39debb"
+          ],
+          "stream_categories": [],
+          "group_by": [
+            "source"
+          ],
+          "series": [
+            {
+              "type": "count",
+              "id": "count-",
+              "field": null
+            }
+          ],
+          "conditions": {
+            "expression": {
+              "expr": ">",
+              "left": {
+                "expr": "number-ref",
+                "ref": "count-"
+              },
+              "right": {
+                "expr": "number",
+                "value": 0
+              }
+            }
+          },
+          "search_within_ms": 300000,
+          "execute_every_ms": 300000,
+          "use_cron_scheduling": false,
+          "cron_expression": null,
+          "cron_timezone": null,
+          "event_limit": 100
+        },
+        "field_spec": {
+          "host": {
+            "data_type": "string",
+            "providers": [
+              {
+                "type": "template-v1",
+                "template": "${source.source}",
+                "require_values": false,
+                "exclude_empty_fields": true
+              }
+            ]
+          }
+        },
+        "key_spec": [
+          "host"
+        ],
+        "notification_settings": {
+          "grace_period_ms": 300000,
+          "backlog_size": 5
+        },
+        "notifications": [
+          {
+            "notification_id": {
+              "@type": "string",
+              "@value": "8a2e5e72-6d02-428d-b698-4ef8a5dfc9dd"
+            },
+            "notification_parameters": null
+          }
+        ],
+        "storage": [
+          {
+            "type": "persist-to-streams-v1",
+            "streams": [
+              "000000000000000000000002"
+            ]
+          }
+        ],
+        "tags": [],
+        "is_scheduled": {
+          "@type": "boolean",
+          "@value": true
+        },
+        "event_procedure": null,
+        "event_summary_template": null,
+        "tactics_techniques": []
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.2.0-rc.1+f147f30"
+        }
+      ]
+    },
+    {
+      "id": "e9e25706-d5d7-40fd-997a-32b9bdc67971",
+      "type": {
+        "name": "event_definition",
+        "version": "1"
+      },
+      "v": "1",
+      "data": {
+        "_scope": {
+          "@type": "string",
+          "@value": "DEFAULT"
+        },
+        "title": {
+          "@type": "string",
+          "@value": "Windows - Изменение группы «Администраторы домена»"
+        },
+        "description": {
+          "@type": "string",
+          "@value": "Добавление или удаление учётной записи в группе «Администраторы домена» (net group). Критично: высшие привилегии в домене."
+        },
+        "remediation_steps": null,
+        "updated_at": "2026-10-17T04:14:13.259Z",
+        "matched_at": null,
+        "priority": {
+          "@type": "integer",
+          "@value": 3
+        },
+        "alert": {
+          "@type": "boolean",
+          "@value": true
+        },
+        "config": {
+          "type": "aggregation-v1",
+          "query": {
+            "@type": "string",
+            "@value": "message:\"net group\" AND message:(\"/add\" OR \"/delete\") AND message:\"Администраторы домена\""
+          },
+          "query_parameters": [],
+          "filters": [],
+          "streams": [
+            "a782c512-3d33-4b5f-a02e-9db95d1c9371"
+          ],
+          "stream_categories": [],
+          "group_by": [],
+          "series": [],
+          "conditions": {
+            "expression": null
+          },
+          "search_within_ms": 300000,
+          "execute_every_ms": 300000,
+          "use_cron_scheduling": false,
+          "cron_expression": null,
+          "cron_timezone": null,
+          "event_limit": 100
+        },
+        "field_spec": {
+          "command_line": {
+            "data_type": "string",
+            "providers": [
+              {
+                "type": "template-v1",
+                "template": "${source.winlogbeat_winlog_event_data_CommandLine}",
+                "require_values": false,
+                "exclude_empty_fields": true
+              }
+            ]
+          },
+          "host": {
+            "data_type": "string",
+            "providers": [
+              {
+                "type": "template-v1",
+                "template": "${source.source}",
+                "require_values": false,
+                "exclude_empty_fields": true
+              }
+            ]
+          },
+          "parent_process": {
+            "data_type": "string",
+            "providers": [
+              {
+                "type": "template-v1",
+                "template": "${source.winlogbeat_winlog_event_data_ParentImage}",
+                "require_values": false,
+                "exclude_empty_fields": true
+              }
+            ]
+          },
+          "user": {
+            "data_type": "string",
+            "providers": [
+              {
+                "type": "template-v1",
+                "template": "${source.winlogbeat_winlog_event_data_User}",
+                "require_values": false,
+                "exclude_empty_fields": true
+              }
+            ]
+          }
+        },
+        "key_spec": [
+          "host"
+        ],
+        "notification_settings": {
+          "grace_period_ms": 300000,
+          "backlog_size": 5
+        },
+        "notifications": [
+          {
+            "notification_id": {
+              "@type": "string",
+              "@value": "e711646d-945a-4753-83e0-01184bbdcb1e"
+            },
+            "notification_parameters": null
+          }
+        ],
+        "storage": [
+          {
+            "type": "persist-to-streams-v1",
+            "streams": [
+              "000000000000000000000002"
+            ]
+          }
+        ],
+        "tags": [],
+        "is_scheduled": {
+          "@type": "boolean",
+          "@value": true
+        },
+        "event_procedure": null,
+        "event_summary_template": null,
+        "tactics_techniques": []
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.2.0-rc.1+f147f30"
+        }
+      ]
+    },
+    {
+      "id": "e711646d-945a-4753-83e0-01184bbdcb1e",
+      "type": {
+        "name": "notification",
+        "version": "1"
+      },
+      "v": "1",
+      "data": {
+        "title": {
+          "@type": "string",
+          "@value": "Mail.ru Alert Windows"
+        },
+        "description": {
+          "@type": "string",
+          "@value": "Email-уведомление для алертов Windows"
+        },
+        "config": {
+          "type": "email-notification-v1",
+          "sender": {
+            "@type": "string",
+            "@value": "Graylog Server <<your>@mail.ru>"
+          },
+          "replyTo": {
+            "@type": "string",
+            "@value": ""
+          },
+          "subject": {
+            "@type": "string",
+            "@value": "🪟 [${if event.priority='3'}HIGH${else}${if event.priority='2'}MEDIUM${else}LOW${end}${end}] ${event_definition_title} — ${if event.group_by_fields.source}${event.group_by_fields.source}${else}${if event.fields.host}${event.fields.host}${else}хост не определён${end}${end}"
+          },
+          "body_template": {
+            "@type": "string",
+            "@value": "🪟 [${if event.priority='3'}HIGH${else}${if event.priority='2'}MEDIUM${else}LOW${end}${end}] ${event_definition_title}\nХост: ${if event.group_by_fields.source}${event.group_by_fields.source}${else}${if event.fields.host}${event.fields.host}${else}хост не определён${end}${end}\nВремя: ${event.timestamp}\nОкно проверки: ${event.timerange_start} — ${event.timerange_end}\nСработало: ${event.message}\n\n${event_definition_description}\n${if event.fields}\n--- Поля события ---\n${foreach event.fields f}  ${f.key}: ${f.value}\n${end}${end}${if backlog}\n--- Исходные сообщения ---\n${foreach backlog m}[${m.timestamp}] ${m.source}:${if m.fields.winlogbeat_winlog_event_data_User} user=${m.fields.winlogbeat_winlog_event_data_User}${end}${if m.fields.winlogbeat_winlog_event_data_TargetUserName} target=${m.fields.winlogbeat_winlog_event_data_TargetUserName}${end}${if m.fields.winlogbeat_winlog_event_data_IpAddress} ip=${m.fields.winlogbeat_winlog_event_data_IpAddress}${end}${if m.fields.winlogbeat_winlog_event_data_CommandLine} cmd=${m.fields.winlogbeat_winlog_event_data_CommandLine}${end}\n  ${m.message}\n${end}${end}\nОткрыть в Graylog: http://<Graylog server>:9000/alerts/${event.id}/replay-search"
+          },
+          "html_body_template": {
+            "@type": "string",
+            "@value": "<div style=\"font-family:Arial,Helvetica,sans-serif;background:#1e1e2e;color:#cdd6f4;max-width:760px;border-radius:8px;overflow:hidden;\">\n<div style=\"background:${if event.priority='3'}#f38ba8${else}${if event.priority='2'}#fab387${else}#89b4fa${end}${end};color:#11111b;padding:10px 20px;font-weight:bold;font-size:13px;letter-spacing:1px;\">🪟 WINDOWS · ${if event.priority='3'}🔴${else}${if event.priority='2'}🟠${else}🔵${end}${end} ${if event.priority='3'}HIGH${else}${if event.priority='2'}MEDIUM${else}LOW${end}${end} · GRAYLOG ALERT</div>\n<div style=\"padding:20px;border-left:5px solid ${if event.priority='3'}#f38ba8${else}${if event.priority='2'}#fab387${else}#89b4fa${end}${end};\">\n<h2 style=\"margin:0 0 6px;color:#cdd6f4;font-size:20px;\">${event_definition_title}</h2>\n<p style=\"margin:0 0 16px;color:#a6adc8;font-size:14px;line-height:1.4;\">${event_definition_description}</p>\n<table cellpadding=\"0\" cellspacing=\"0\" style=\"border-collapse:collapse;font-size:14px;width:100%;\">\n<tr><td style=\"padding:6px 10px;border-bottom:1px solid #313244;color:#a6adc8;width:170px;\">🖥️ Хост</td><td style=\"padding:6px 10px;border-bottom:1px solid #313244;color:#f9e2af;font-weight:bold;font-size:17px;\">${if event.group_by_fields.source}${event.group_by_fields.source}${else}${if event.fields.host}${event.fields.host}${else}хост не определён${end}${end}</td></tr>\n<tr><td style=\"padding:6px 10px;border-bottom:1px solid #313244;color:#a6adc8;\">🕒 Время события</td><td style=\"padding:6px 10px;border-bottom:1px solid #313244;\">${event.timestamp}</td></tr>\n<tr><td style=\"padding:6px 10px;border-bottom:1px solid #313244;color:#a6adc8;\">🔎 Окно проверки</td><td style=\"padding:6px 10px;border-bottom:1px solid #313244;\">${event.timerange_start} — ${event.timerange_end}</td></tr>\n<tr><td style=\"padding:6px 10px;border-bottom:1px solid #313244;color:#a6adc8;\">⚡ Сработало</td><td style=\"padding:6px 10px;border-bottom:1px solid #313244;\">${event.message}</td></tr>\n<tr><td style=\"padding:6px 10px;border-bottom:1px solid #313244;color:#a6adc8;\">🎯 Приоритет</td><td style=\"padding:6px 10px;border-bottom:1px solid #313244;color:${if event.priority='3'}#f38ba8${else}${if event.priority='2'}#fab387${else}#89b4fa${end}${end};font-weight:bold;\">${if event.priority='3'}HIGH${else}${if event.priority='2'}MEDIUM${else}LOW${end}${end}</td></tr>\n</table>\n${if event.fields}<h3 style=\"color:#89b4fa;font-size:15px;margin:20px 0 6px;\">Поля события</h3>\n<table cellpadding=\"0\" cellspacing=\"0\" style=\"border-collapse:collapse;font-size:13px;width:100%;\">${foreach event.fields f}<tr><td style=\"padding:6px 10px;border-bottom:1px solid #313244;color:#a6adc8;width:170px;\">${f.key}</td><td style=\"padding:6px 10px;border-bottom:1px solid #313244;font-family:Menlo,Consolas,monospace;\">${f.value}</td></tr>${end}</table>${end}\n${if backlog}<h3 style=\"color:#89b4fa;font-size:15px;margin:20px 0 6px;\">Исходные сообщения</h3>\n${foreach backlog m}<div style=\"background:#313244;border-radius:6px;padding:10px 12px;margin:8px 0;font-size:13px;\">\n<div style=\"color:#a6adc8;font-size:12px;margin-bottom:6px;\">${m.timestamp} · <b style=\"color:#f9e2af;\">${m.source}</b></div>\n<div style=\"margin-bottom:6px;\">${if m.fields.winlogbeat_winlog_event_data_User}👤 пользователь: <b>${m.fields.winlogbeat_winlog_event_data_User}</b>&nbsp;&nbsp;${end}${if m.fields.winlogbeat_winlog_event_data_TargetUserName}учётка-цель: <b>${m.fields.winlogbeat_winlog_event_data_TargetUserName}</b>&nbsp;&nbsp;${end}${if m.fields.winlogbeat_winlog_event_data_IpAddress}IP: <b>${m.fields.winlogbeat_winlog_event_data_IpAddress}</b>&nbsp;&nbsp;${end}${if m.fields.winlogbeat_event_code}EventID: ${m.fields.winlogbeat_event_code}${end}${if m.fields.winlogbeat_winlog_event_data_CommandLine}<div style=\"margin-top:4px;\">⌨️ <code style=\"color:#a6e3a1;\">${m.fields.winlogbeat_winlog_event_data_CommandLine}</code></div>${end}${if m.fields.winlogbeat_winlog_event_data_ParentImage}<div style=\"font-size:12px;color:#a6adc8;\">родитель: ${m.fields.winlogbeat_winlog_event_data_ParentImage}</div>${end}</div>\n<pre style=\"background:#181825;padding:8px;border-radius:4px;color:#f9e2af;white-space:pre-wrap;word-break:break-all;margin:0;font-size:12px;\">${m.message}</pre>\n</div>${end}${end}\n<p style=\"margin-top:22px;\">\n<a href=\"http://<Graylog server>:9000/alerts/${event.id}/replay-search\" style=\"background:#89b4fa;color:#11111b;padding:9px 16px;border-radius:6px;text-decoration:none;font-weight:bold;font-size:14px;\">Открыть в Graylog</a>\n&nbsp;<a href=\"http://<Graylog server>:9000/alerts/definitions/${event_definition_id}\" style=\"color:#89b4fa;font-size:13px;\">Настройки алерта</a>\n</p>\n<hr style=\"border:0;border-top:1px solid #45475a;margin:20px 0 10px;\">\n<p style=\"color:#6c7086;font-size:11px;margin:0;\">Graylog · <Graylog server> · event id ${event.id}</p>\n</div></div>"
+          },
+          "email_recipients": [
+            "<your>@mail.ru"
+          ],
+          "user_recipients": [
+            "graylog-sidecar"
+          ],
+          "time_zone": {
+            "@type": "string",
+            "@value": "Asia/Yekaterinburg"
+          },
+          "lookup_recipient_emails": {
+            "@type": "boolean",
+            "@value": false
+          },
+          "recipients_lut_name": {
+            "@type": "string",
+            "@value": ""
+          },
+          "recipients_lut_key": {
+            "@type": "string",
+            "@value": ""
+          },
+          "lookup_sender_email": {
+            "@type": "boolean",
+            "@value": false
+          },
+          "sender_lut_name": {
+            "@type": "string",
+            "@value": ""
+          },
+          "sender_lut_key": {
+            "@type": "string",
+            "@value": ""
+          },
+          "lookup_reply_to_email": {
+            "@type": "boolean",
+            "@value": false
+          },
+          "reply_to_lut_name": {
+            "@type": "string",
+            "@value": ""
+          },
+          "reply_to_lut_key": {
+            "@type": "string",
+            "@value": ""
+          },
+          "single_email": {
+            "@type": "boolean",
+            "@value": false
+          },
+          "cc_users": [],
+          "cc_emails": [],
+          "lookup_cc_emails": {
+            "@type": "boolean",
+            "@value": false
+          },
+          "cc_emails_lut_name": {
+            "@type": "string",
+            "@value": ""
+          },
+          "cc_emails_lut_key": {
+            "@type": "string",
+            "@value": ""
+          },
+          "bcc_users": [],
+          "bcc_emails": [],
+          "lookup_bcc_emails": {
+            "@type": "boolean",
+            "@value": false
+          },
+          "bcc_emails_lut_name": {
+            "@type": "string",
+            "@value": ""
+          },
+          "bcc_emails_lut_key": {
+            "@type": "string",
+            "@value": ""
+          },
+          "include_event_procedures": {
+            "@type": "boolean",
+            "@value": false
+          }
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.2.0-rc.1+f147f30"
+        }
+      ]
+    },
+    {
+      "id": "8a2b17fe-24eb-4428-8410-3923abcb4ac6",
+      "type": {
+        "name": "event_definition",
+        "version": "1"
+      },
+      "v": "1",
+      "data": {
+        "_scope": {
+          "@type": "string",
+          "@value": "DEFAULT"
+        },
+        "title": {
+          "@type": "string",
+          "@value": "LNX - Использование sudo"
+        },
+        "description": {
+          "@type": "string",
+          "@value": "Выполнение команды через sudo (кроме uid 1001). Команда собирается из аргументов a0 a1 a2 a3 в исходных сообщениях."
+        },
+        "remediation_steps": null,
+        "updated_at": "2026-10-17T04:14:12.379Z",
+        "matched_at": "2026-10-16T15:17:44.894Z",
+        "priority": {
+          "@type": "integer",
+          "@value": 1
+        },
+        "alert": {
+          "@type": "boolean",
+          "@value": true
+        },
+        "config": {
+          "type": "aggregation-v1",
+          "query": {
+            "@type": "string",
+            "@value": "audit_type:EXECVE AND a0:\"sudo\" AND NOT uid:\"1001\""
+          },
+          "query_parameters": [],
+          "filters": [],
+          "streams": [
+            "eb9ed9b8-b5bc-4d19-ac6a-7e6dad39debb"
+          ],
+          "stream_categories": [],
+          "group_by": [
+            "source"
+          ],
+          "series": [
+            {
+              "type": "count",
+              "id": "count-",
+              "field": null
+            }
+          ],
+          "conditions": {
+            "expression": {
+              "expr": ">",
+              "left": {
+                "expr": "number-ref",
+                "ref": "count-"
+              },
+              "right": {
+                "expr": "number",
+                "value": 0
+              }
+            }
+          },
+          "search_within_ms": 300000,
+          "execute_every_ms": 300000,
+          "use_cron_scheduling": false,
+          "cron_expression": null,
+          "cron_timezone": null,
+          "event_limit": 100
+        },
+        "field_spec": {
+          "host": {
+            "data_type": "string",
+            "providers": [
+              {
+                "type": "template-v1",
+                "template": "${source.source}",
+                "require_values": false,
+                "exclude_empty_fields": true
+              }
+            ]
+          }
+        },
+        "key_spec": [
+          "host"
+        ],
+        "notification_settings": {
+          "grace_period_ms": 300000,
+          "backlog_size": 5
+        },
+        "notifications": [
+          {
+            "notification_id": {
+              "@type": "string",
+              "@value": "8a2e5e72-6d02-428d-b698-4ef8a5dfc9dd"
+            },
+            "notification_parameters": null
+          }
+        ],
+        "storage": [
+          {
+            "type": "persist-to-streams-v1",
+            "streams": [
+              "000000000000000000000002"
+            ]
+          }
+        ],
+        "tags": [],
+        "is_scheduled": {
+          "@type": "boolean",
+          "@value": true
+        },
+        "event_procedure": null,
+        "event_summary_template": null,
+        "tactics_techniques": []
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.2.0-rc.1+f147f30"
+        }
+      ]
+    },
+    {
+      "id": "8b5d6631-b241-47fd-8e50-40971e2d830d",
+      "type": {
+        "name": "notification",
+        "version": "1"
+      },
+      "v": "1",
+      "data": {
+        "title": {
+          "@type": "string",
+          "@value": "Mail.ru Alert MacOS"
+        },
+        "description": {
+          "@type": "string",
+          "@value": "Email-уведомление для алертов macOS"
+        },
+        "config": {
+          "type": "email-notification-v1",
+          "sender": {
+            "@type": "string",
+            "@value": "Graylog Server <<your>@mail.ru>"
+          },
+          "replyTo": {
+            "@type": "string",
+            "@value": ""
+          },
+          "subject": {
+            "@type": "string",
+            "@value": "🍎 [${if event.priority='3'}HIGH${else}${if event.priority='2'}MEDIUM${else}LOW${end}${end}] ${event_definition_title} — ${if event.group_by_fields.source}${event.group_by_fields.source}${else}${if event.fields.host}${event.fields.host}${else}хост не определён${end}${end}"
+          },
+          "body_template": {
+            "@type": "string",
+            "@value": "🍎 [${if event.priority='3'}HIGH${else}${if event.priority='2'}MEDIUM${else}LOW${end}${end}] ${event_definition_title}\nХост: ${if event.group_by_fields.source}${event.group_by_fields.source}${else}${if event.fields.host}${event.fields.host}${else}хост не определён${end}${end}\nВремя: ${event.timestamp}\nОкно проверки: ${event.timerange_start} — ${event.timerange_end}\nСработало: ${event.message}\n\n${event_definition_description}\n${if event.fields}\n--- Поля события ---\n${foreach event.fields f}  ${f.key}: ${f.value}\n${end}${end}${if backlog}\n--- Исходные сообщения ---\n${foreach backlog m}[${m.timestamp}] ${m.source}:${if m.fields.columns_username} user=${m.fields.columns_username}${end}${if m.fields.columns_name} proc=${m.fields.columns_name}${end}${if m.fields.columns_port} port=${m.fields.columns_port}${end}${if m.fields.columns_target_path} path=${m.fields.columns_target_path}${end}\n  ${m.message}\n${end}${end}\nОткрыть в Graylog: http://<Graylog server>:9000/alerts/${event.id}/replay-search"
+          },
+          "html_body_template": {
+            "@type": "string",
+            "@value": "<div style=\"font-family:Arial,Helvetica,sans-serif;background:#1e1e2e;color:#cdd6f4;max-width:760px;border-radius:8px;overflow:hidden;\">\n<div style=\"background:${if event.priority='3'}#f38ba8${else}${if event.priority='2'}#fab387${else}#89b4fa${end}${end};color:#11111b;padding:10px 20px;font-weight:bold;font-size:13px;letter-spacing:1px;\">🍎 MACOS · ${if event.priority='3'}🔴${else}${if event.priority='2'}🟠${else}🔵${end}${end} ${if event.priority='3'}HIGH${else}${if event.priority='2'}MEDIUM${else}LOW${end}${end} · GRAYLOG ALERT</div>\n<div style=\"padding:20px;border-left:5px solid ${if event.priority='3'}#f38ba8${else}${if event.priority='2'}#fab387${else}#89b4fa${end}${end};\">\n<h2 style=\"margin:0 0 6px;color:#cdd6f4;font-size:20px;\">${event_definition_title}</h2>\n<p style=\"margin:0 0 16px;color:#a6adc8;font-size:14px;line-height:1.4;\">${event_definition_description}</p>\n<table cellpadding=\"0\" cellspacing=\"0\" style=\"border-collapse:collapse;font-size:14px;width:100%;\">\n<tr><td style=\"padding:6px 10px;border-bottom:1px solid #313244;color:#a6adc8;width:170px;\">🖥️ Хост</td><td style=\"padding:6px 10px;border-bottom:1px solid #313244;color:#f9e2af;font-weight:bold;font-size:17px;\">${if event.group_by_fields.source}${event.group_by_fields.source}${else}${if event.fields.host}${event.fields.host}${else}хост не определён${end}${end}</td></tr>\n<tr><td style=\"padding:6px 10px;border-bottom:1px solid #313244;color:#a6adc8;\">🕒 Время события</td><td style=\"padding:6px 10px;border-bottom:1px solid #313244;\">${event.timestamp}</td></tr>\n<tr><td style=\"padding:6px 10px;border-bottom:1px solid #313244;color:#a6adc8;\">🔎 Окно проверки</td><td style=\"padding:6px 10px;border-bottom:1px solid #313244;\">${event.timerange_start} — ${event.timerange_end}</td></tr>\n<tr><td style=\"padding:6px 10px;border-bottom:1px solid #313244;color:#a6adc8;\">⚡ Сработало</td><td style=\"padding:6px 10px;border-bottom:1px solid #313244;\">${event.message}</td></tr>\n<tr><td style=\"padding:6px 10px;border-bottom:1px solid #313244;color:#a6adc8;\">🎯 Приоритет</td><td style=\"padding:6px 10px;border-bottom:1px solid #313244;color:${if event.priority='3'}#f38ba8${else}${if event.priority='2'}#fab387${else}#89b4fa${end}${end};font-weight:bold;\">${if event.priority='3'}HIGH${else}${if event.priority='2'}MEDIUM${else}LOW${end}${end}</td></tr>\n</table>\n${if event.fields}<h3 style=\"color:#89b4fa;font-size:15px;margin:20px 0 6px;\">Поля события</h3>\n<table cellpadding=\"0\" cellspacing=\"0\" style=\"border-collapse:collapse;font-size:13px;width:100%;\">${foreach event.fields f}<tr><td style=\"padding:6px 10px;border-bottom:1px solid #313244;color:#a6adc8;width:170px;\">${f.key}</td><td style=\"padding:6px 10px;border-bottom:1px solid #313244;font-family:Menlo,Consolas,monospace;\">${f.value}</td></tr>${end}</table>${end}\n${if backlog}<h3 style=\"color:#89b4fa;font-size:15px;margin:20px 0 6px;\">Исходные сообщения</h3>\n${foreach backlog m}<div style=\"background:#313244;border-radius:6px;padding:10px 12px;margin:8px 0;font-size:13px;\">\n<div style=\"color:#a6adc8;font-size:12px;margin-bottom:6px;\">${m.timestamp} · <b style=\"color:#f9e2af;\">${m.source}</b></div>\n<div style=\"margin-bottom:6px;\">${if m.fields.columns_username}👤 пользователь: <b>${m.fields.columns_username}</b>&nbsp;&nbsp;${end}${if m.fields.columns_name}процесс: <b>${m.fields.columns_name}</b>&nbsp;&nbsp;${end}${if m.fields.columns_port}порт: <b>${m.fields.columns_port}</b>&nbsp;&nbsp;${end}${if m.fields.columns_pid}pid: ${m.fields.columns_pid}&nbsp;&nbsp;${end}${if m.fields.columns_action}действие: <b>${m.fields.columns_action}</b>&nbsp;&nbsp;${end}${if m.fields.processImagePath}процесс: ${m.fields.processImagePath}${end}${if m.fields.columns_target_path}<div style=\"margin-top:4px;\">📄 <code style=\"color:#a6e3a1;\">${m.fields.columns_target_path}</code></div>${end}${if m.fields.columns_command}<div style=\"margin-top:4px;\">⌨️ <code style=\"color:#a6e3a1;\">${m.fields.columns_command}</code></div>${end}</div>\n<pre style=\"background:#181825;padding:8px;border-radius:4px;color:#f9e2af;white-space:pre-wrap;word-break:break-all;margin:0;font-size:12px;\">${m.message}</pre>\n</div>${end}${end}\n<p style=\"margin-top:22px;\">\n<a href=\"http://<Graylog server>:9000/alerts/${event.id}/replay-search\" style=\"background:#89b4fa;color:#11111b;padding:9px 16px;border-radius:6px;text-decoration:none;font-weight:bold;font-size:14px;\">Открыть в Graylog</a>\n&nbsp;<a href=\"http://<Graylog server>:9000/alerts/definitions/${event_definition_id}\" style=\"color:#89b4fa;font-size:13px;\">Настройки алерта</a>\n</p>\n<hr style=\"border:0;border-top:1px solid #45475a;margin:20px 0 10px;\">\n<p style=\"color:#6c7086;font-size:11px;margin:0;\">Graylog · <Graylog server> · event id ${event.id}</p>\n</div></div>"
+          },
+          "email_recipients": [
+            "<your>@mail.ru"
+          ],
+          "user_recipients": [
+            "graylog-sidecar"
+          ],
+          "time_zone": {
+            "@type": "string",
+            "@value": "Asia/Yekaterinburg"
+          },
+          "lookup_recipient_emails": {
+            "@type": "boolean",
+            "@value": false
+          },
+          "recipients_lut_name": {
+            "@type": "string",
+            "@value": ""
+          },
+          "recipients_lut_key": {
+            "@type": "string",
+            "@value": ""
+          },
+          "lookup_sender_email": {
+            "@type": "boolean",
+            "@value": false
+          },
+          "sender_lut_name": {
+            "@type": "string",
+            "@value": ""
+          },
+          "sender_lut_key": {
+            "@type": "string",
+            "@value": ""
+          },
+          "lookup_reply_to_email": {
+            "@type": "boolean",
+            "@value": false
+          },
+          "reply_to_lut_name": {
+            "@type": "string",
+            "@value": ""
+          },
+          "reply_to_lut_key": {
+            "@type": "string",
+            "@value": ""
+          },
+          "single_email": {
+            "@type": "boolean",
+            "@value": false
+          },
+          "cc_users": [],
+          "cc_emails": [],
+          "lookup_cc_emails": {
+            "@type": "boolean",
+            "@value": false
+          },
+          "cc_emails_lut_name": {
+            "@type": "string",
+            "@value": ""
+          },
+          "cc_emails_lut_key": {
+            "@type": "string",
+            "@value": ""
+          },
+          "bcc_users": [],
+          "bcc_emails": [],
+          "lookup_bcc_emails": {
+            "@type": "boolean",
+            "@value": false
+          },
+          "bcc_emails_lut_name": {
+            "@type": "string",
+            "@value": ""
+          },
+          "bcc_emails_lut_key": {
+            "@type": "string",
+            "@value": ""
+          },
+          "include_event_procedures": {
+            "@type": "boolean",
+            "@value": false
+          }
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.2.0-rc.1+f147f30"
+        }
+      ]
+    },
+    {
+      "id": "39eba1ef-f01f-4ed9-92b1-7c0bb192811f",
+      "type": {
+        "name": "event_definition",
+        "version": "1"
+      },
+      "v": "1",
+      "data": {
+        "_scope": {
+          "@type": "string",
+          "@value": "DEFAULT"
+        },
+        "title": {
+          "@type": "string",
+          "@value": "macOS - Активность AirDrop"
+        },
+        "description": {
+          "@type": "string",
+          "@value": "Передача или приём через AirDrop (sharingd). Возможна утечка данных."
+        },
+        "remediation_steps": null,
+        "updated_at": "2026-10-17T04:14:13.023Z",
+        "matched_at": null,
+        "priority": {
+          "@type": "integer",
+          "@value": 2
+        },
+        "alert": {
+          "@type": "boolean",
+          "@value": true
+        },
+        "config": {
+          "type": "aggregation-v1",
+          "query": {
+            "@type": "string",
+            "@value": "log_type:macos_unified AND processImagePath:\"/usr/libexec/sharingd\" AND (eventMessage:\"Creating new AirDrop connection\" OR eventMessage:\"SDAirDropReceiveService.transfers ADD\" OR eventMessage:\"Received ASK request\")"
+          },
+          "query_parameters": [],
+          "filters": [],
+          "streams": [
+            "812b224e-0563-4483-9e66-7ee015acbce9"
+          ],
+          "stream_categories": [],
+          "group_by": [
+            "source"
+          ],
+          "series": [
+            {
+              "type": "count",
+              "id": "count-",
+              "field": null
+            }
+          ],
+          "conditions": {
+            "expression": {
+              "expr": ">=",
+              "left": {
+                "expr": "number-ref",
+                "ref": "count-"
+              },
+              "right": {
+                "expr": "number",
+                "value": 1
+              }
+            }
+          },
+          "search_within_ms": 300000,
+          "execute_every_ms": 300000,
+          "use_cron_scheduling": false,
+          "cron_expression": null,
+          "cron_timezone": null,
+          "event_limit": 100
+        },
+        "field_spec": {
+          "host": {
+            "data_type": "string",
+            "providers": [
+              {
+                "type": "template-v1",
+                "template": "${source.source}",
+                "require_values": false,
+                "exclude_empty_fields": true
+              }
+            ]
+          }
+        },
+        "key_spec": [
+          "host"
+        ],
+        "notification_settings": {
+          "grace_period_ms": 300000,
+          "backlog_size": 5
+        },
+        "notifications": [
+          {
+            "notification_id": {
+              "@type": "string",
+              "@value": "8b5d6631-b241-47fd-8e50-40971e2d830d"
+            },
+            "notification_parameters": null
+          }
+        ],
+        "storage": [
+          {
+            "type": "persist-to-streams-v1",
+            "streams": [
+              "000000000000000000000002"
+            ]
+          }
+        ],
+        "tags": [],
+        "is_scheduled": {
+          "@type": "boolean",
+          "@value": true
+        },
+        "event_procedure": null,
+        "event_summary_template": null,
+        "tactics_techniques": []
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.2.0-rc.1+f147f30"
+        }
+      ]
+    },
+    {
+      "id": "8a2e5e72-6d02-428d-b698-4ef8a5dfc9dd",
+      "type": {
+        "name": "notification",
+        "version": "1"
+      },
+      "v": "1",
+      "data": {
+        "title": {
+          "@type": "string",
+          "@value": "Mail.ru Alert Linux"
+        },
+        "description": {
+          "@type": "string",
+          "@value": "Email-уведомление для алертов Linux"
+        },
+        "config": {
+          "type": "email-notification-v1",
+          "sender": {
+            "@type": "string",
+            "@value": "Graylog Server <<your>@mail.ru>"
+          },
+          "replyTo": {
+            "@type": "string",
+            "@value": "<your>@mail.ru"
+          },
+          "subject": {
+            "@type": "string",
+            "@value": "🐧 [${if event.priority='3'}HIGH${else}${if event.priority='2'}MEDIUM${else}LOW${end}${end}] ${event_definition_title} — ${if event.group_by_fields.source}${event.group_by_fields.source}${else}${if event.fields.host}${event.fields.host}${else}хост не определён${end}${end}"
+          },
+          "body_template": {
+            "@type": "string",
+            "@value": "🐧 [${if event.priority='3'}HIGH${else}${if event.priority='2'}MEDIUM${else}LOW${end}${end}] ${event_definition_title}\nХост: ${if event.group_by_fields.source}${event.group_by_fields.source}${else}${if event.fields.host}${event.fields.host}${else}хост не определён${end}${end}\nВремя: ${event.timestamp}\nОкно проверки: ${event.timerange_start} — ${event.timerange_end}\nСработало: ${event.message}\n\n${event_definition_description}\n${if event.fields}\n--- Поля события ---\n${foreach event.fields f}  ${f.key}: ${f.value}\n${end}${end}${if backlog}\n--- Исходные сообщения ---\n${foreach backlog m}[${m.timestamp}] ${m.source}:${if m.fields.auid_decoded} инициатор=${m.fields.auid_decoded}${end}${if m.fields.uid_decoded} uid=${m.fields.uid_decoded}${end}${if m.fields.acct_decoded} учётка=${m.fields.acct_decoded}${end}${if m.fields.a0} cmd=\"${m.fields.a0} ${m.fields.a1} ${m.fields.a2} ${m.fields.a3}\"${end}\n  ${m.message}\n${end}${end}\nОткрыть в Graylog: http://<Graylog server>:9000/alerts/${event.id}/replay-search"
+          },
+          "html_body_template": {
+            "@type": "string",
+            "@value": "<div style=\"font-family:Arial,Helvetica,sans-serif;background:#1e1e2e;color:#cdd6f4;max-width:760px;border-radius:8px;overflow:hidden;\">\n<div style=\"background:${if event.priority='3'}#f38ba8${else}${if event.priority='2'}#fab387${else}#89b4fa${end}${end};color:#11111b;padding:10px 20px;font-weight:bold;font-size:13px;letter-spacing:1px;\">🐧 LINUX · ${if event.priority='3'}🔴${else}${if event.priority='2'}🟠${else}🔵${end}${end} ${if event.priority='3'}HIGH${else}${if event.priority='2'}MEDIUM${else}LOW${end}${end} · GRAYLOG ALERT</div>\n<div style=\"padding:20px;border-left:5px solid ${if event.priority='3'}#f38ba8${else}${if event.priority='2'}#fab387${else}#89b4fa${end}${end};\">\n<h2 style=\"margin:0 0 6px;color:#cdd6f4;font-size:20px;\">${event_definition_title}</h2>\n<p style=\"margin:0 0 16px;color:#a6adc8;font-size:14px;line-height:1.4;\">${event_definition_description}</p>\n<table cellpadding=\"0\" cellspacing=\"0\" style=\"border-collapse:collapse;font-size:14px;width:100%;\">\n<tr><td style=\"padding:6px 10px;border-bottom:1px solid #313244;color:#a6adc8;width:170px;\">🖥️ Хост</td><td style=\"padding:6px 10px;border-bottom:1px solid #313244;color:#f9e2af;font-weight:bold;font-size:17px;\">${if event.group_by_fields.source}${event.group_by_fields.source}${else}${if event.fields.host}${event.fields.host}${else}хост не определён${end}${end}</td></tr>\n<tr><td style=\"padding:6px 10px;border-bottom:1px solid #313244;color:#a6adc8;\">🕒 Время события</td><td style=\"padding:6px 10px;border-bottom:1px solid #313244;\">${event.timestamp}</td></tr>\n<tr><td style=\"padding:6px 10px;border-bottom:1px solid #313244;color:#a6adc8;\">🔎 Окно проверки</td><td style=\"padding:6px 10px;border-bottom:1px solid #313244;\">${event.timerange_start} — ${event.timerange_end}</td></tr>\n<tr><td style=\"padding:6px 10px;border-bottom:1px solid #313244;color:#a6adc8;\">⚡ Сработало</td><td style=\"padding:6px 10px;border-bottom:1px solid #313244;\">${event.message}</td></tr>\n<tr><td style=\"padding:6px 10px;border-bottom:1px solid #313244;color:#a6adc8;\">🎯 Приоритет</td><td style=\"padding:6px 10px;border-bottom:1px solid #313244;color:${if event.priority='3'}#f38ba8${else}${if event.priority='2'}#fab387${else}#89b4fa${end}${end};font-weight:bold;\">${if event.priority='3'}HIGH${else}${if event.priority='2'}MEDIUM${else}LOW${end}${end}</td></tr>\n</table>\n${if event.fields}<h3 style=\"color:#89b4fa;font-size:15px;margin:20px 0 6px;\">Поля события</h3>\n<table cellpadding=\"0\" cellspacing=\"0\" style=\"border-collapse:collapse;font-size:13px;width:100%;\">${foreach event.fields f}<tr><td style=\"padding:6px 10px;border-bottom:1px solid #313244;color:#a6adc8;width:170px;\">${f.key}</td><td style=\"padding:6px 10px;border-bottom:1px solid #313244;font-family:Menlo,Consolas,monospace;\">${f.value}</td></tr>${end}</table>${end}\n${if backlog}<h3 style=\"color:#89b4fa;font-size:15px;margin:20px 0 6px;\">Исходные сообщения</h3>\n${foreach backlog m}<div style=\"background:#313244;border-radius:6px;padding:10px 12px;margin:8px 0;font-size:13px;\">\n<div style=\"color:#a6adc8;font-size:12px;margin-bottom:6px;\">${m.timestamp} · <b style=\"color:#f9e2af;\">${m.source}</b></div>\n<div style=\"margin-bottom:6px;\">${if m.fields.auid_decoded}👤 инициатор: <b>${m.fields.auid_decoded}</b>&nbsp;&nbsp;${end}${if m.fields.uid_decoded}uid: <b>${m.fields.uid_decoded}</b>&nbsp;&nbsp;${end}${if m.fields.acct_decoded}учётка: <b>${m.fields.acct_decoded}</b>&nbsp;&nbsp;${end}${if m.fields.exe}exe: ${m.fields.exe}&nbsp;&nbsp;${end}${if m.fields.terminal}tty: ${m.fields.terminal}&nbsp;&nbsp;${end}${if m.fields.name}файл: <b>${m.fields.name}</b>${end}${if m.fields.a0}<div style=\"margin-top:4px;\">⌨️ <code style=\"color:#a6e3a1;\">${m.fields.a0} ${m.fields.a1} ${m.fields.a2} ${m.fields.a3}</code></div>${end}</div>\n<pre style=\"background:#181825;padding:8px;border-radius:4px;color:#f9e2af;white-space:pre-wrap;word-break:break-all;margin:0;font-size:12px;\">${m.message}</pre>\n</div>${end}${end}\n<p style=\"margin-top:22px;\">\n<a href=\"http://<Graylog server>:9000/alerts/${event.id}/replay-search\" style=\"background:#89b4fa;color:#11111b;padding:9px 16px;border-radius:6px;text-decoration:none;font-weight:bold;font-size:14px;\">Открыть в Graylog</a>\n&nbsp;<a href=\"http://<Graylog server>:9000/alerts/definitions/${event_definition_id}\" style=\"color:#89b4fa;font-size:13px;\">Настройки алерта</a>\n</p>\n<hr style=\"border:0;border-top:1px solid #45475a;margin:20px 0 10px;\">\n<p style=\"color:#6c7086;font-size:11px;margin:0;\">Graylog · <Graylog server> · event id ${event.id}</p>\n</div></div>"
+          },
+          "email_recipients": [
+            "<your>@mail.ru"
+          ],
+          "user_recipients": [
+            "graylog-sidecar"
+          ],
+          "time_zone": {
+            "@type": "string",
+            "@value": "Asia/Yekaterinburg"
+          },
+          "lookup_recipient_emails": {
+            "@type": "boolean",
+            "@value": false
+          },
+          "recipients_lut_name": {
+            "@type": "string",
+            "@value": ""
+          },
+          "recipients_lut_key": {
+            "@type": "string",
+            "@value": ""
+          },
+          "lookup_sender_email": {
+            "@type": "boolean",
+            "@value": false
+          },
+          "sender_lut_name": {
+            "@type": "string",
+            "@value": ""
+          },
+          "sender_lut_key": {
+            "@type": "string",
+            "@value": ""
+          },
+          "lookup_reply_to_email": {
+            "@type": "boolean",
+            "@value": false
+          },
+          "reply_to_lut_name": {
+            "@type": "string",
+            "@value": ""
+          },
+          "reply_to_lut_key": {
+            "@type": "string",
+            "@value": ""
+          },
+          "single_email": {
+            "@type": "boolean",
+            "@value": true
+          },
+          "cc_users": [],
+          "cc_emails": [],
+          "lookup_cc_emails": {
+            "@type": "boolean",
+            "@value": false
+          },
+          "cc_emails_lut_name": {
+            "@type": "string",
+            "@value": ""
+          },
+          "cc_emails_lut_key": {
+            "@type": "string",
+            "@value": ""
+          },
+          "bcc_users": [],
+          "bcc_emails": [],
+          "lookup_bcc_emails": {
+            "@type": "boolean",
+            "@value": false
+          },
+          "bcc_emails_lut_name": {
+            "@type": "string",
+            "@value": ""
+          },
+          "bcc_emails_lut_key": {
+            "@type": "string",
+            "@value": ""
+          },
+          "include_event_procedures": {
+            "@type": "boolean",
+            "@value": false
+          }
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.2.0-rc.1+f147f30"
+        }
+      ]
+    },
+    {
+      "id": "9f0791c7-8d35-456f-866a-a8f2bbf4f6cf",
+      "type": {
+        "name": "event_definition",
+        "version": "1"
+      },
+      "v": "1",
+      "data": {
+        "_scope": {
+          "@type": "string",
+          "@value": "DEFAULT"
+        },
+        "title": {
+          "@type": "string",
+          "@value": "macOS - Неудачная попытка sudo (неверный пароль)"
+        },
+        "description": {
+          "@type": "string",
+          "@value": "При выполнении sudo введён неверный пароль. Возможен подбор пароля."
+        },
+        "remediation_steps": null,
+        "updated_at": "2026-10-17T04:14:12.790Z",
+        "matched_at": null,
+        "priority": {
+          "@type": "integer",
+          "@value": 2
+        },
+        "alert": {
+          "@type": "boolean",
+          "@value": true
+        },
+        "config": {
+          "type": "aggregation-v1",
+          "query": {
+            "@type": "string",
+            "@value": "log_type:macos_unified AND processImagePath:\"/usr/bin/sudo\" AND message:\"incorrect password\""
+          },
+          "query_parameters": [],
+          "filters": [],
+          "streams": [
+            "812b224e-0563-4483-9e66-7ee015acbce9"
+          ],
+          "stream_categories": [],
+          "group_by": [
+            "source"
+          ],
+          "series": [
+            {
+              "type": "count",
+              "id": "count-",
+              "field": null
+            }
+          ],
+          "conditions": {
+            "expression": {
+              "expr": ">",
+              "left": {
+                "expr": "number-ref",
+                "ref": "count-"
+              },
+              "right": {
+                "expr": "number",
+                "value": 0
+              }
+            }
+          },
+          "search_within_ms": 300000,
+          "execute_every_ms": 300000,
+          "use_cron_scheduling": false,
+          "cron_expression": null,
+          "cron_timezone": null,
+          "event_limit": 100
+        },
+        "field_spec": {
+          "host": {
+            "data_type": "string",
+            "providers": [
+              {
+                "type": "template-v1",
+                "template": "${source.source}",
+                "require_values": false,
+                "exclude_empty_fields": true
+              }
+            ]
+          }
+        },
+        "key_spec": [
+          "host"
+        ],
+        "notification_settings": {
+          "grace_period_ms": 300000,
+          "backlog_size": 5
+        },
+        "notifications": [
+          {
+            "notification_id": {
+              "@type": "string",
+              "@value": "8b5d6631-b241-47fd-8e50-40971e2d830d"
+            },
+            "notification_parameters": null
+          }
+        ],
+        "storage": [
+          {
+            "type": "persist-to-streams-v1",
+            "streams": [
+              "000000000000000000000002"
+            ]
+          }
+        ],
+        "tags": [],
+        "is_scheduled": {
+          "@type": "boolean",
+          "@value": true
+        },
+        "event_procedure": null,
+        "event_summary_template": null,
+        "tactics_techniques": []
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.2.0-rc.1+f147f30"
+        }
+      ]
+    },
+    {
+      "id": "d24201d1-d505-491f-9286-82d6f1745b35",
+      "type": {
+        "name": "event_definition",
+        "version": "1"
+      },
+      "v": "1",
+      "data": {
+        "_scope": {
+          "@type": "string",
+          "@value": "DEFAULT"
+        },
+        "title": {
+          "@type": "string",
+          "@value": "LNX - Добавление SSH-ключа в authorized_keys"
+        },
+        "description": {
+          "@type": "string",
+          "@value": "Запись в файл authorized_keys. Возможно добавление SSH-ключа для постоянного доступа. Проверьте, кто изменил файл и легитимен ли ключ."
+        },
+        "remediation_steps": null,
+        "updated_at": "2026-10-17T04:21:32.036Z",
+        "matched_at": null,
+        "priority": {
+          "@type": "integer",
+          "@value": 3
+        },
+        "alert": {
+          "@type": "boolean",
+          "@value": true
+        },
+        "config": {
+          "type": "aggregation-v1",
+          "query": {
+            "@type": "string",
+            "@value": "message:\"authorized_keys\" AND (message:\"CREATE\" OR message:\"write\")"
+          },
+          "query_parameters": [],
+          "filters": [],
+          "streams": [
+            "eb9ed9b8-b5bc-4d19-ac6a-7e6dad39debb"
+          ],
+          "stream_categories": [],
+          "group_by": [
+            "source"
+          ],
+          "series": [
+            {
+              "type": "count",
+              "id": "count-",
+              "field": null
+            }
+          ],
+          "conditions": {
+            "expression": {
+              "expr": ">",
+              "left": {
+                "expr": "number-ref",
+                "ref": "count-"
+              },
+              "right": {
+                "expr": "number",
+                "value": 0
+              }
+            }
+          },
+          "search_within_ms": 300000,
+          "execute_every_ms": 300000,
+          "use_cron_scheduling": false,
+          "cron_expression": null,
+          "cron_timezone": null,
+          "event_limit": 100
+        },
+        "field_spec": {
+          "host": {
+            "data_type": "string",
+            "providers": [
+              {
+                "type": "template-v1",
+                "template": "${source.source}",
+                "require_values": false,
+                "exclude_empty_fields": true
+              }
+            ]
+          }
+        },
+        "key_spec": [
+          "host"
+        ],
+        "notification_settings": {
+          "grace_period_ms": 300000,
+          "backlog_size": 5
+        },
+        "notifications": [
+          {
+            "notification_id": {
+              "@type": "string",
+              "@value": "8a2e5e72-6d02-428d-b698-4ef8a5dfc9dd"
+            },
+            "notification_parameters": null
+          }
+        ],
+        "storage": [
+          {
+            "type": "persist-to-streams-v1",
+            "streams": [
+              "000000000000000000000002"
+            ]
+          }
+        ],
+        "tags": [],
+        "is_scheduled": {
+          "@type": "boolean",
+          "@value": true
+        },
+        "event_procedure": null,
+        "event_summary_template": null,
+        "tactics_techniques": []
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.2.0-rc.1+f147f30"
+        }
+      ]
+    },
+    {
+      "id": "40edd323-398f-4b39-b9d2-429f9cf50ee0",
+      "type": {
+        "name": "event_definition",
+        "version": "1"
+      },
+      "v": "1",
+      "data": {
+        "_scope": {
+          "@type": "string",
+          "@value": "DEFAULT"
+        },
+        "title": {
+          "@type": "string",
+          "@value": "macOS - Подключено Apple-устройство (iPhone/iPad/iPod)"
+        },
+        "description": {
+          "@type": "string",
+          "@value": "По USB подключено и распознано Apple-устройство (wifi.log, hostNotificationUSBDeviceInserted)."
+        },
+        "remediation_steps": null,
+        "updated_at": "2026-10-17T04:14:13.093Z",
+        "matched_at": null,
+        "priority": {
+          "@type": "integer",
+          "@value": 2
+        },
+        "alert": {
+          "@type": "boolean",
+          "@value": true
+        },
+        "config": {
+          "type": "aggregation-v1",
+          "query": {
+            "@type": "string",
+            "@value": "log_type:macos_wifi_usb AND message:(hostNotificationUSBDeviceInserted AND (iPad OR iPhone OR iPod))"
+          },
+          "query_parameters": [],
+          "filters": [],
+          "streams": [
+            "812b224e-0563-4483-9e66-7ee015acbce9"
+          ],
+          "stream_categories": [],
+          "group_by": [],
+          "series": [],
+          "conditions": {
+            "expression": null
+          },
+          "search_within_ms": 300000,
+          "execute_every_ms": 300000,
+          "use_cron_scheduling": false,
+          "cron_expression": null,
+          "cron_timezone": null,
+          "event_limit": 100
+        },
+        "field_spec": {
+          "host": {
+            "data_type": "string",
+            "providers": [
+              {
+                "type": "template-v1",
+                "template": "${source.source}",
+                "require_values": false,
+                "exclude_empty_fields": true
+              }
+            ]
+          }
+        },
+        "key_spec": [
+          "host"
+        ],
+        "notification_settings": {
+          "grace_period_ms": 300000,
+          "backlog_size": 5
+        },
+        "notifications": [
+          {
+            "notification_id": {
+              "@type": "string",
+              "@value": "8b5d6631-b241-47fd-8e50-40971e2d830d"
+            },
+            "notification_parameters": null
+          }
+        ],
+        "storage": [
+          {
+            "type": "persist-to-streams-v1",
+            "streams": [
+              "000000000000000000000002"
+            ]
+          }
+        ],
+        "tags": [],
+        "is_scheduled": {
+          "@type": "boolean",
+          "@value": true
+        },
+        "event_procedure": null,
+        "event_summary_template": null,
+        "tactics_techniques": []
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.2.0-rc.1+f147f30"
+        }
+      ]
+    },
+    {
+      "id": "f622d3aa-05ff-4182-9b52-147f4ffeae85",
+      "type": {
+        "name": "event_definition",
+        "version": "1"
+      },
+      "v": "1",
+      "data": {
+        "_scope": {
+          "@type": "string",
+          "@value": "DEFAULT"
+        },
+        "title": {
+          "@type": "string",
+          "@value": "macOS - Новый/изменённый plist в автозагрузке"
+        },
+        "description": {
+          "@type": "string",
+          "@value": "Создан, изменён или удалён plist в LaunchDaemons/LaunchAgents (кроме com.apple.*). Типичный способ закрепления (persistence)."
+        },
+        "remediation_steps": null,
+        "updated_at": "2026-10-17T04:14:12.968Z",
+        "matched_at": null,
+        "priority": {
+          "@type": "integer",
+          "@value": 3
+        },
+        "alert": {
+          "@type": "boolean",
+          "@value": true
+        },
+        "config": {
+          "type": "aggregation-v1",
+          "query": {
+            "@type": "string",
+            "@value": "name:file_events AND (columns_action:CREATED OR columns_action:UPDATED OR columns_action:DELETED) AND (columns_category:launch_agents OR columns_category:launch_daemons) AND -columns_target_path:\"com.apple*\""
+          },
+          "query_parameters": [],
+          "filters": [],
+          "streams": [
+            "812b224e-0563-4483-9e66-7ee015acbce9"
+          ],
+          "stream_categories": [],
+          "group_by": [
+            "source"
+          ],
+          "series": [
+            {
+              "type": "count",
+              "id": "count-",
+              "field": null
+            }
+          ],
+          "conditions": {
+            "expression": {
+              "expr": ">",
+              "left": {
+                "expr": "number-ref",
+                "ref": "count-"
+              },
+              "right": {
+                "expr": "number",
+                "value": 0
+              }
+            }
+          },
+          "search_within_ms": 300000,
+          "execute_every_ms": 300000,
+          "use_cron_scheduling": false,
+          "cron_expression": null,
+          "cron_timezone": null,
+          "event_limit": 100
+        },
+        "field_spec": {
+          "host": {
+            "data_type": "string",
+            "providers": [
+              {
+                "type": "template-v1",
+                "template": "${source.source}",
+                "require_values": false,
+                "exclude_empty_fields": true
+              }
+            ]
+          }
+        },
+        "key_spec": [
+          "host"
+        ],
+        "notification_settings": {
+          "grace_period_ms": 300000,
+          "backlog_size": 5
+        },
+        "notifications": [
+          {
+            "notification_id": {
+              "@type": "string",
+              "@value": "8b5d6631-b241-47fd-8e50-40971e2d830d"
+            },
+            "notification_parameters": null
+          }
+        ],
+        "storage": [
+          {
+            "type": "persist-to-streams-v1",
+            "streams": [
+              "000000000000000000000002"
+            ]
+          }
+        ],
+        "tags": [],
+        "is_scheduled": {
+          "@type": "boolean",
+          "@value": true
+        },
+        "event_procedure": null,
+        "event_summary_template": null,
+        "tactics_techniques": []
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.2.0-rc.1+f147f30"
+        }
+      ]
+    },
+    {
+      "id": "812b224e-0563-4483-9e66-7ee015acbce9",
+      "type": {
+        "name": "stream_title",
+        "version": "1"
+      },
+      "v": "1",
+      "data": {
+        "title": {
+          "@type": "string",
+          "@value": "MacOS Logs"
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.2.0-rc.1+f147f30"
+        }
+      ]
+    },
+    {
+      "id": "eb9ed9b8-b5bc-4d19-ac6a-7e6dad39debb",
+      "type": {
+        "name": "stream_title",
+        "version": "1"
+      },
+      "v": "1",
+      "data": {
+        "title": {
+          "@type": "string",
+          "@value": "RedOS auditd Logs"
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.2.0-rc.1+f147f30"
+        }
+      ]
+    },
+    {
+      "id": "a782c512-3d33-4b5f-a02e-9db95d1c9371",
+      "type": {
+        "name": "stream_title",
+        "version": "1"
+      },
+      "v": "1",
+      "data": {
+        "title": {
+          "@type": "string",
+          "@value": "WindowsLogs"
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.2.0-rc.1+f147f30"
+        }
+      ]
+    }
+  ]
+}

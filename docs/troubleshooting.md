@@ -205,3 +205,79 @@ curl -s "http://<graylog>:9200/graylog_0/_count?pretty" -H 'Content-Type: applic
 # 3. Лог Filebeat
 sudo tail -20 /usr/local/filebeat/logs/filebeat.log
 ```
+
+---
+
+## 10. Алерты не создаются, список Event Definitions падает с `IOException encountered while parsing`
+
+**Симптом:** страница Alerts → Event Definitions пустая или с ошибкой, событий нет,
+в `server.log` бесконечно повторяется:
+
+```
+ERROR [EventProcessorExecutionJob] Event processor <...> failed to execute ... (retry in 5000 ms)
+Caused by: UnrecognizedPropertyException: Unrecognized field "type"
+  (class ...NotificationParameters$FallbackParameters)
+```
+
+**Причина:** версия Graylog в памяти не совпадает с версией, которая записала документы
+в MongoDB (в нашем случае поверх пакета `rc.1` вручную подложили `graylog.jar` и
+storage-плагины от `beta.3`). Один нечитаемый алерт ломает весь список.
+
+**Проверка:**
+
+```bash
+rpm -V graylog-server                 # "S.5" у graylog.jar = файл подменён
+curl -s http://<graylog>:9000/api/     # какая версия реально запущена
+```
+
+**Решение:** вернуть файлы пакета (`dnf reinstall graylog-server`, лишние jar из
+`plugin/` убрать), в битых алертах сбросить `notification_parameters` в `null`
+через pymongo и перезапустить Graylog.
+
+---
+
+## 11. `Limit of total fields [1000] has been exceeded`
+
+**Симптом:** в System → Overview растёт счётчик failed indexing attempts,
+часть сообщений и все события алертов не попадают в индекс.
+
+**Причина:** auditd, macOS (osquery `columns_*`) и Windows (winlogbeat) пишут
+в один `graylog_*` индекс, и суммарно полей больше 1000. Плюс стримы
+«All events» / «All system events» были привязаны к Default index set.
+
+**Решение:**
+
+- отдельный index set на источник: `redos-auditd`, `macos`, `windows`;
+- «All events» → `gl-events`, «All system events» → `gl-system-events`;
+- ротировать наборы (System → Indices → Rotate active write index);
+- при необходимости поднять лимит на текущем индексе:
+  `PUT /<index>/_settings {"index.mapping.total_fields.limit": 2000}`.
+
+---
+
+## 12. `failed to parse field [level] of type [long] ... 'warn'`
+
+**Причина:** одно и то же поле приходит то числом (GELF/syslog level), то строкой
+(`warn` из unified log). Тип поля в индексе задаёт первый документ.
+
+**Решение:** зафиксировать тип в Graylog (System → Indices → набор → Field types →
+`level` = String) и ротировать индекс. Так же сделано для `macos_event_time`.
+
+---
+
+## 13. После создания index set: `deflector_exists_as_index`, ротация падает
+
+**Причина:** сообщения пришли раньше, чем Graylog создал алиас `<prefix>_deflector`,
+и OpenSearch автоматически создал *индекс* с этим именем.
+
+**Решение:** перенести документы и атомарно заменить индекс алиасом:
+
+```bash
+curl -XPOST "$OS/_reindex?refresh=true" -H 'Content-Type: application/json' \
+  -d '{"source":{"index":"<prefix>_deflector"},"dest":{"index":"<prefix>_0"}}'
+curl -XPOST "$OS/_aliases" -H 'Content-Type: application/json' \
+  -d '{"actions":[{"remove_index":{"index":"<prefix>_deflector"}},
+                  {"add":{"index":"<prefix>_0","alias":"<prefix>_deflector"}}]}'
+```
+
+Затем ротировать набор в Graylog.
