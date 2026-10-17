@@ -220,6 +220,49 @@ journalctl -u graylog-server | grep -i smtp
 Поиск по индексированным полям OpenSearch быстрее, точнее и даёт больше возможностей
 для группировки.
 
+### Готовые алерты: content pack
+
+Если не хочется собирать алерты руками — в [`graylog/content-pack-homelab-alerts.json`](../graylog/content-pack-homelab-alerts.json)
+лежат **19 условий алерта и 3 email-уведомления** (Linux, macOS, Windows). Проверено на Graylog 7.2.0-rc.1.
+
+Установка:
+
+1. Создай потоки с точно такими названиями: `RedOS auditd Logs`, `MacOS Logs`, `WindowsLogs` —
+   content pack ссылается на потоки по названию, а не по ID.
+2. **System → Content Packs → Upload** → выбери JSON → **Install**.
+3. В трёх уведомлениях (**Alerts → Notifications**) замени `<your>@mail.ru` на свой адрес
+   и `<Graylog server>` в ссылках — на адрес своего сервера.
+4. Нажми **Execute test notification** в каждом уведомлении.
+
+Что внутри:
+
+| Группа | Алерты | Уведомление |
+|--------|--------|-------------|
+| 🐧 Linux (auditd, РЕД ОС) | SSH-ключ в authorized_keys, добавление/удаление пользователя, chmod, брутфорс SSH (5+ за 5 мин), неудачный sudo, использование sudo, systemctl stop | Mail.ru Alert Linux |
+| 🍎 macOS | изменение /etc/sudoers, подозрительный процесс на TCP-порту, sudo, неудачный sudo, plist в автозагрузке, AirDrop, Apple-устройство по USB, USB-накопитель, мобильное устройство не Apple | Mail.ru Alert MacOS |
+| 🪟 Windows | группа «Администраторы домена», подбор пароля (5+ событий 4625 за 5 мин), net user /add и /delete | Mail.ru Alert Windows |
+
+Все алерты раз в 5 минут проверяют последние 5 минут, группируют по `source`
+и прикладывают к письму до 5 исходных сообщений.
+
+Как выглядит письмо:
+
+- тема — `🐧 [HIGH] <название алерта> — <хост>` (🍎 для macOS, 🪟 для Windows);
+- цвет шапки по приоритету: 🔴 HIGH, 🟠 MEDIUM, 🔵 LOW;
+- в теле — хост, время, окно проверки, описание алерта, поля события и исходные сообщения
+  с деталями под ОС: инициатор, uid и команда `a0…a3` для Linux; процесс, порт и путь plist
+  для macOS; пользователь, IP и CommandLine для Windows.
+
+На что легко наступить:
+
+- **`${event.source}` — это узел самого Graylog**, а не хост, где случилось событие.
+  Хост бери из `${event.group_by_fields.source}` (если алерт группирует по `source`)
+  или из поля события `host` = `${source.source}`.
+- **Поля события с флагом «require values»** не дают создать событие, если поля нет
+  в сообщении — алерт молча не срабатывает. Ставь поля необязательными.
+- Проблемы на стороне сервера (битые Event Definitions, лимит 1000 полей, конфликт типов
+  поля `level`) — в [troubleshooting.md](troubleshooting.md), пункты 10–13.
+
 ## Дальше
 
 Разделы по каждой операционной системе:

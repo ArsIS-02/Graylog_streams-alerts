@@ -44,6 +44,8 @@
 ├── config/                           ← конфиги сервера Graylog/OpenSearch
 │   ├── server.conf.smtp.example      ← SMTP для email-алертов (Mail.ru)
 │   └── opensearch.yml.example        ← OpenSearch для Graylog
+├── graylog/                          ← готовые объекты Graylog
+│   └── content-pack-homelab-alerts.json ← 19 алертов + 3 email-уведомления
 ├── linux/                            ← агенты для Linux-хостов
 │   └── rsyslog.conf.example          ← пересылка syslog в Graylog
 ├── windows/                          ← агенты для Windows-хостов
@@ -64,7 +66,8 @@
    OpenSearch, Graylog server.
 2. **Настрой агенты** по своей ОС: [Windows](docs/03-windows.md),
    [Linux](docs/04-linux.md), [macOS](docs/05-macos.md).
-3. **Создай потоки и алерты** по [части 2](docs/02-streams-alerts.md).
+3. **Создай потоки и алерты** по [части 2](docs/02-streams-alerts.md) — или импортируй
+   готовые 19 алертов из [content pack](graylog/content-pack-homelab-alerts.json).
 4. **Подключи декодер auditd** из [`decoder/`](decoder/auditd_decoder.py) — и
    события auditd станут читаемыми.
 
