@@ -281,3 +281,75 @@ curl -XPOST "$OS/_aliases" -H 'Content-Type: application/json' \
 ```
 
 Затем ротировать набор в Graylog.
+
+---
+
+## 14. Fluent Bit: `could not open the Journal: Permission denied (error=-13)`
+
+**Симптом:** контейнер fluent-bit запущен, но input `systemd` падает при инициализации,
+в журнале сервиса повторяется `failed initialize input systemd.0`.
+
+**Причина:** SELinux блокирует доступ контейнера к файлам журнала. Так было на одном из
+хостов РЕД ОС; на остальных с тем же конфигом проблемы не было.
+
+**Решение:** отключить SELinux-метки только для этого контейнера:
+
+```ini
+# /etc/containers/systemd/fluent-bit.container, секция [Container]
+SecurityLabelDisable=true
+```
+
+```bash
+sudo systemctl daemon-reload && sudo systemctl restart fluent-bit
+```
+
+Это ослабляет изоляцию именно контейнера fluent-bit. Остальная система остаётся под SELinux.
+
+---
+
+## 15. Fluent Bit: `statfs /var/log/journal: no such file or directory`
+
+**Симптом:** контейнер не стартует, `podman` пишет `Error: statfs /var/log/journal`.
+
+**Причина:** journald на хосте работает в volatile-режиме, каталога `/var/log/journal` нет,
+журнал лежит только в `/run/log/journal`.
+
+**Решение:** читать `/run/log/journal`. В Quadlet убрать монтирование `/var/log/journal`,
+в конфиге Fluent Bit заменить `Path`:
+
+```bash
+sudo sed -i '/\/var\/log\/journal:\/var\/log\/journal/d' /etc/containers/systemd/fluent-bit.container
+sudo sed -i 's#/var/log/journal#/run/log/journal#' /etc/fluent-bit/fluent-bit.conf
+sudo systemctl daemon-reload && sudo systemctl restart fluent-bit
+```
+
+Важно: на хостах с постоянным журналом (`/var/log/journal` есть) конфиг должен читать именно
+`/var/log/journal`. Путь `/run/log/journal` там покажет только текущую загрузку, новые записи
+в него не попадут.
+
+---
+
+## 16. Extractor ломает обработку: `Could not apply extractor ... Unrecognized token`
+
+**Симптом:** в Graylog растёт счётчик processing errors, у сообщений поле
+`gl2_processing_error: Could not apply extractor <... JSON from message ...> - Unrecognized token 'chown'`.
+
+**Причина:** JSON-extractor применяется ко всем сообщениям входа, а строки вида
+`chown: changing ownership ...` и `level=warn ...` не JSON. Ошибка разбора отмечает
+сообщение, и обработка для него нарушается.
+
+**Решение:** задать условие на extractor: тип условия **regex**, значение `^\{`.
+Тогда extractor обрабатывает только сообщения, которые начинаются с `{`.
+
+---
+
+## 17. Regex extractor: `named capturing group is missing trailing '>'`
+
+**Симптом:** создание extractor-а через API или UI падает с этой ошибкой.
+
+**Причина:** имена групп в Java-регулярках допускают только латинские буквы и цифры.
+`(?<chown_path>...)` с подчёркиванием не проходит.
+
+**Решение:** `(?<chownpath>...)`. Имя группы становится именем поля в Graylog.
+Тип extractor-а `key_value` в Graylog 7.2 API не существует (ошибка `No enum constant
+KEY_VALUE`): для `key=value` используем regex-extractor-ы на отдельные поля.

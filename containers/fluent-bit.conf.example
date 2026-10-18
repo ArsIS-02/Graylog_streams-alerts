@@ -1,0 +1,31 @@
+[SERVICE]
+    Flush            5
+    Log_Level        info
+    storage.path     /var/lib/fluent-bit/storage
+
+# Читаем journald. Путь: /var/log/journal (постоянный журнал) или /run/log/journal (volatile)
+[INPUT]
+    Name             systemd
+    Tag              journal.*
+    Path             /var/log/journal
+    DB               /var/lib/fluent-bit/journal.db
+    Read_From_Tail   On
+    Strip_Underscores On
+
+# Оставляем только записи контейнеров (у них есть поле CONTAINER_NAME из драйвера journald Podman)
+[FILTER]
+    Name             grep
+    Match            journal.*
+    Regex            CONTAINER_NAME .+
+
+# Отправка в Graylog по GELF TCP. Замени <graylog> на адрес сервера Graylog.
+# Порт 12202 — input "GELF TCP", отдельный от GELF UDP (12201).
+[OUTPUT]
+    Name                     gelf
+    Match                    journal.*
+    Host                     <graylog>
+    Port                     12202
+    Mode                     tcp
+    Gelf_Short_Message_Key   MESSAGE
+    Gelf_Host_Key            HOSTNAME
+    Gelf_Level_Key           PRIORITY
