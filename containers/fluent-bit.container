@@ -1,0 +1,27 @@
+[Unit]
+Description=Fluent Bit: journald -> Graylog
+Wants=network-online.target
+After=network-online.target
+
+[Container]
+# Мультиархитектурный образ: amd64 и arm64 берутся автоматически
+Image=ghcr.io/fluent/fluent-bit:latest
+ContainerName=fluent-bit
+Network=host
+Volume=/etc/fluent-bit/fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf:ro,Z
+# Постоянный журнал. Если /var/log/journal на хосте нет (volatile journald),
+# замени строку на: Volume=/run/log/journal:/run/log/journal:ro
+Volume=/var/log/journal:/var/log/journal:ro
+Volume=/run/log/journal:/run/log/journal:ro
+Volume=/etc/machine-id:/etc/machine-id:ro
+Volume=/var/lib/fluent-bit:/var/lib/fluent-bit:Z
+# Если на хосте Permission denied при открытии журнала (SELinux), раскомментируй:
+# SecurityLabelDisable=true
+AutoUpdate=registry
+
+[Service]
+Restart=on-failure
+RestartSec=10s
+
+[Install]
+WantedBy=multi-user.target
