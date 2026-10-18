@@ -92,6 +92,7 @@
 - [macOS: телеметрия через BI.ZONE Triage](docs/06-macos-bztriage.md)
 - [Дашборды для доклада](docs/07-dashboards.md)
 - [Контейнеры: логи Podman в Graylog](docs/08-containers.md)
+- [Контейнеры: дашборды, поиски и события в Graylog](docs/09-containers-dashboards.md)
 - [Troubleshooting](docs/troubleshooting.md)
 
 ## 🔗 Ссылки
