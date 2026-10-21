@@ -72,6 +72,7 @@
 |---|---|---|
 | 7 | [Дашборды](docs/07-dashboards.md) | Семь дашбордов для доклада и шесть рабочих: детекты, здоровье сбора, неудачные входы |
 | 9 | [Контейнеры: дашборды, поиски, события](docs/09-containers-dashboards.md) | Дашборды через API, Saved Searches, 18 детектов по контейнерам |
+| 10 | [Дашборды руками](docs/10-dashboards-manual.md) | Мини-инструкция по каждому из 22 дашбордов: что выбрать в каждом виджете |
 
 ### Разбор проблем
 
@@ -105,12 +106,13 @@
 │   ├── 07-dashboards.md               ← дашборды для доклада
 │   ├── 08-containers.md               ← контейнеры: Podman → Fluent Bit → Graylog
 │   ├── 09-containers-dashboards.md    ← контейнеры: дашборды, поиски, события
+│   ├── 10-dashboards-manual.md        ← 22 дашборда руками, виджет за виджетом
 │   ├── troubleshooting.md             ← грабли и решения
 │   └── images/                        ← скриншоты и иллюстрации к главам
 ├── decoder/                           ← декодер auditd (auditd_decoder.py, systemd-юнит)
 ├── config/                            ← server.conf (SMTP), opensearch.yml
 ├── containers/                        ← Fluent Bit: Quadlet-юнит и конфиг
-├── graylog/                           ← content pack (63 алерта + 3 email-уведомления) и 18 детектов по контейнерам
+├── graylog/                           ← content pack (63 алерта + 3 email-уведомления) и 18 детектов по контейнерам, 22 дашборда (`dashboards-spec.json` + `import-dashboards.js`)
 ├── linux/                             ← rsyslog.conf.example
 ├── windows/                           ← winlogbeat.yml.example
 └── macos/                             ← Filebeat, osquery, LaunchDaemon-ы, bztriage/

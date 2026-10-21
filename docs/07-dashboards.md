@@ -169,6 +169,14 @@ Graylog тем же способом, что и в [главе 9](09-containers-
 | 📦 Контейнеры, 🔧 диагностика, ⚙️ процессы | Три дашборда из [главы 9](09-containers-dashboards.md) |
 | 📊 Общий базовый дашборд | Все источники: объём по входам, потокам и узлам |
 
+## Дашборды в репозитории
+
+Все 22 дашборда описаны в [`graylog/dashboards-spec.json`](../graylog/dashboards-spec.json) (потоки по названию,
+не по ID). Скрипт [`graylog/import-dashboards.js`](../graylog/import-dashboards.js) создаёт их через API: вставь
+его в консоль браузера на странице Graylog и вызови `await importDashboards(SPEC, {dryRun: true})`, затем без
+`dryRun`. Если хочешь собрать руками, смотри [главу 10](10-dashboards-manual.md): там по каждому виджету
+расписано, что выбрать в редакторе.
+
 ## Как это устроено
 
 Каждый дашборд — это Graylog View (`DASHBOARD`) с одной страницей. Все виджеты
