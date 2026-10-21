@@ -47,10 +47,6 @@ Graylog без дополнительного парсинга.
    Правило: поле `CONTAINER_NAME`, тип **field presence**, must match.
    Галочку «Remove matches from Default Stream» не ставим, чтобы логи оставались и в Default.
 
-![Input «Podman Logs» и его extractor-ы](images/containers-inputs.png)
-*Input «Podman Logs» и его extractor-ы (иллюстрация, пример результата).*
-
-
 ## Шаг 2. Fluent Bit на хосте
 
 Файлы лежат в [`containers/`](../containers/):
@@ -82,10 +78,6 @@ ls -d /var/log/journal || echo "volatile: используй /run/log/journal"
 Если Fluent Bit пишет `could not open the Journal: Permission denied` и систему включён SELinux,
 добавь в `[Container]` строку `SecurityLabelDisable=true` и перезапусти сервис.
 Подробнее: troubleshooting, раздел 14.
-
-![Fluent Bit на хосте: сервис запущен, GELF-вывод работает](images/containers-fluentbit.png)
-*Fluent Bit на хосте: сервис запущен, GELF-вывод работает (иллюстрация, пример результата).*
-
 
 ## Шаг 3. Разбор сообщений
 
@@ -129,6 +121,10 @@ Regex extractor, условие `changing ownership`, regex:
 и `IMAGE_NAME` в `image_name`. Поле `IMAGE_NAME` в journal Podman не приходит, поэтому
 `image_name` остаётся пустым: для таблиц используем `container_name` и `source`.
 
+![Extractor-ы на input «Podman Logs»](images/containers-extractors.png)
+*Extractor-ы на input «Podman Logs» (воссоздано по реальным данным лаборатории).*
+
+
 ## Шаг 4. Saved Searches и дашборд
 
 Saved Searches на потоке **Containers**, окно 24 часа:
@@ -145,8 +141,8 @@ Saved Searches на потоке **Containers**, окно 24 часа:
 `container_name`, Pie по `source` для `level:3`, таблица последних сообщений с полями
 `timestamp`, `source`, `container_name`, `log_s`, `log_msg`.
 
-![Поиск по потоку Containers: promtail и loki](images/containers-search.png)
-*Поиск по потоку Containers: promtail и loki (иллюстрация, пример результата).*
+![Поиск по потоку Containers: promtail, loki, MongoDB](images/containers-search.png)
+*Поиск по потоку Containers: promtail, loki, MongoDB (воссоздано по реальным данным лаборатории).*
 
 
 ## Открытые вопросы

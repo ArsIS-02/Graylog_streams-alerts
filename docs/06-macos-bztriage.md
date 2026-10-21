@@ -110,8 +110,8 @@ sudo /usr/local/bin/bzt-diagnose.sh
 echo "EXIT=$?"
 ```
 
-![Диагностика агентов bzt-diagnose.sh](images/bztriage-diagnose.png)
-*Диагностика агентов bzt-diagnose.sh (иллюстрация, пример результата).*
+![Потоки лаборатории и число сообщений за 24 часа (BiZone_macOS — телеметрия Triage)](images/streams-24h.png)
+*Потоки лаборатории и число сообщений за 24 часа (BiZone_macOS — телеметрия Triage) (воссоздано по реальным данным лаборатории).*
 
 
 ## Настройка Graylog
@@ -127,7 +127,7 @@ echo "EXIT=$?"
 Пошагово — в [`macos/bztriage/docs/graylog-setup.md`](../macos/bztriage/docs/graylog-setup.md).
 
 ![Сообщение BI.ZONE Triage в Graylog с извлечёнными полями](images/bztriage-message.png)
-*Сообщение BI.ZONE Triage в Graylog с извлечёнными полями (иллюстрация, пример результата).*
+*Сообщение BI.ZONE Triage в Graylog с извлечёнными полями (воссоздано по реальным данным лаборатории).*
 
 
 ## Что фильтруется на хосте

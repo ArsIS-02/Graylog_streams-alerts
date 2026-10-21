@@ -65,10 +65,6 @@ sudo chmod 644 /Library/LaunchDaemons/com.user.logstream.plist
 sudo launchctl load /Library/LaunchDaemons/com.user.logstream.plist
 ```
 
-![Ротация unified.json.log: архивы и правило newsyslog](images/macos-rotation.png)
-*Ротация unified.json.log: архивы и правило newsyslog (иллюстрация, пример результата).*
-
-
 ### Логирование команд (опционально)
 
 ```bash
@@ -86,11 +82,11 @@ sudo log show --predicate 'process == "filebeat"' --last 5m --info | \
   grep -iE "events.sent|connection"          # данные идут в Graylog?
 ```
 
-![Проверка Filebeat: агент запущен и отправляет события](images/macos-filebeat-check.png)
-*Проверка Filebeat: агент запущен и отправляет события (иллюстрация, пример результата).*
+![Inputs в Graylog: приёмники для macOS (MacOS Beats, порт 5046) и остальных источников](images/inputs-list.png)
+*Inputs в Graylog: приёмники для macOS (MacOS Beats, порт 5046) и остальных источников (воссоздано по реальным данным лаборатории).*
 
-![Поиск по macOS-логам в Graylog: TCC, USB, AirDrop, osquery](images/macos-search.png)
-*Поиск по macOS-логам в Graylog: TCC, USB, AirDrop, osquery (иллюстрация, пример результата).*
+![Поиск по wifi.log: события USB от Filebeat на MacBookPro-M4Pro](images/macos-usb.png)
+*Поиск по wifi.log: события USB от Filebeat на MacBookPro-M4Pro (воссоздано по реальным данным лаборатории).*
 
 
 ## Важные замечания

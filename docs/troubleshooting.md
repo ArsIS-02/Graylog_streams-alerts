@@ -26,10 +26,6 @@ LaunchDaemon `com.user.logstream`. Штатный `newsyslog` про этот ф
 Даже если `newsyslog` переименует файл, процесс продолжит писать
 в старый inode. Единственный способ — перезапустить процесс.
 
-![Диск заполнен: unified.json.log вырос до 14 ГБ](images/ts-disk-growth.png)
-*Диск заполнен: unified.json.log вырос до 14 ГБ (иллюстрация, пример результата).*
-
-
 ---
 
 ## 2. Дубли команд в `commands.log` и в Graylog
@@ -190,10 +186,6 @@ for inp in d.get('inputs', []):
 sudo tail -50 /var/log/graylog-server/server.log | grep -iE "bind|error"
 ```
 
-![Проверка порта Beats input и состояния input-ов](images/ts-beats-port.png)
-*Проверка порта Beats input и состояния input-ов (иллюстрация, пример результата).*
-
-
 ---
 
 ## 9. Диагностика «идут ли вообще данные?»
@@ -213,10 +205,6 @@ curl -s "http://<graylog>:9200/graylog_0/_count?pretty" -H 'Content-Type: applic
 # 3. Лог Filebeat
 sudo tail -20 /usr/local/filebeat/logs/filebeat.log
 ```
-
-![Три проверки «идут ли данные»](images/ts-diagnose-data.png)
-*Три проверки «идут ли данные» (иллюстрация, пример результата).*
-
 
 ---
 
@@ -265,10 +253,6 @@ curl -s http://<graylog>:9000/api/     # какая версия реально 
 - при необходимости поднять лимит на текущем индексе:
   `PUT /<index>/_settings {"index.mapping.total_fields.limit": 2000}`.
 
-![Лимит полей индекса: Limit of total fields [1000]](images/ts-field-limit.png)
-*Лимит полей индекса: Limit of total fields [1000] (иллюстрация, пример результата).*
-
-
 ---
 
 ## 12. `failed to parse field [level] of type [long] ... 'warn'`
@@ -279,8 +263,8 @@ curl -s http://<graylog>:9000/api/     # какая версия реально 
 **Решение:** зафиксировать тип в Graylog (System → Indices → набор → Field types →
 `level` = String) и ротировать индекс. Так же сделано для `macos_event_time`.
 
-![Баннер Indexer failures в Graylog](images/ts-index-failures.png)
-*Баннер Indexer failures в Graylog (иллюстрация, пример результата).*
+![Баннер о неудачных попытках индексации в Graylog](images/ts-index-failures.png)
+*Баннер о неудачных попытках индексации в Graylog (воссоздано по реальным данным лаборатории).*
 
 
 ---
