@@ -1,7 +1,7 @@
 # Часть 9. Контейнеры: дашборды, поиски и события в Graylog
 
 В части 8 логи контейнеров попадают в поток **Containers** и разбираются extractor-ами.
-Здесь — что строим поверх потока: три дашборда, сохранённые поиски и пороговые события.
+Здесь — что строим поверх потока: три дашборда, сохранённые поиски и 18 пороговых событий (детектов).
 
 Дашборды создавались не кликами, а через API Graylog 7.2: скриптом из консоли браузера,
 под своей сессией администратора. Так структура объектов фиксируется в коде, а повторить
@@ -16,7 +16,7 @@
 | **Контейнеры: диагностика** | Дашборд, 6 виджетов | Ошибки и перезапуски MariaDB по времени, ошибки прав по контейнерам, источники логов (хосты), уровни MongoDB, уровни Loki и Promtail |
 | **Контейнеры: процессы** | Дашборд, 6 виджетов | Готовность и остановки MariaDB, компоненты MongoDB, подключения без авторизации, компоненты Loki, активность `observiumapp` |
 | Контейнеры: observiumdb, MongoDB, promtail и loki | Сохранённые поиски | Просмотр логов одного сервиса |
-| Контейнеры: всплеск ошибок, перезапуски MariaDB, ошибки прав доступа | Event Definitions | Пороговые события по потоку, без уведомлений (см. «Открытые вопросы») |
+| 18 правил «Контейнеры: …» | Event Definitions | Работоспособность, ошибки и безопасность контейнеров; без уведомлений у 15 новых (см. «Детекты» и «Открытые вопросы») |
 
 Виджеты MariaDB и `observiumapp` в «процессах» и часть «диагностики» остаются пустыми,
 пока сервисы не запущены: это ожидаемо.
@@ -115,6 +115,8 @@ console.log('HTTP',vr.status,(await vr.text()).slice(0,300));
 
 ## События (Event Definitions)
 
+Все 18 правил лежат в файле [`graylog/container-event-definitions.json`](../graylog/container-event-definitions.json) и импортируются скриптом из раздела «Импорт правил» ниже.
+
 Пороговое событие: счётчик сообщений по запросу, сгруппированный по контейнеру, сравнивается
 с порогом за окно времени. Тело запроса — `POST /api/events/definitions?schedule=true`
 с обёрткой `{"entity": ...}`:
@@ -166,17 +168,42 @@ field_spec:{},key_spec:[],notification_settings:{grace_period_ms:0,backlog_size:
 за окно нет ни одной записи. Общее правило «тишины всех контейнеров» срабатывает, только когда молчит весь поток (упал input «Podman Logs» или все хосты разом): Graylog не умеет срабатывать на пропавшую группу, поэтому отдельный хост по одному правилу с группировкой не отследить. Для `promtail` и `observiumdb` отдельное правило не делали: в
 исправном состоянии первый пишет мало, второй сейчас остановлен.
 
+### Импорт правил
+
+Файл [`container-event-definitions.json`](../graylog/container-event-definitions.json) содержит
+все 18 правил. Вместо `<CONTAINERS_STREAM_ID>` подставляется id потока **Containers**.
+Скрипт запускается в консоли (F12) открытой страницы Graylog, уже существующие названия
+пропускаются:
+
+```javascript
+(async()=>{
+const h={'Accept':'application/json','Content-Type':'application/json','X-Requested-By':'graylog-web-interface'};
+const STREAM='<stream-id>';
+const raw=await (await fetch('https://raw.githubusercontent.com/ArsIS-02/Graylog_streams-alerts/main/graylog/container-event-definitions.json')).text();
+const defs=JSON.parse(raw.replaceAll('<CONTAINERS_STREAM_ID>',STREAM));
+const have=new Set((await (await fetch('/api/events/definitions?per_page=500',{headers:h})).json()).event_definitions.map(d=>d.title));
+for(const d of defs){
+  if(have.has(d.title)){console.log('есть',d.title);continue;}
+  const r=await fetch('/api/events/definitions?schedule=true',{method:'POST',headers:h,body:JSON.stringify({entity:d})});
+  console.log(r.status,d.title);
+}})();
+```
+
+Запрос к `raw.githubusercontent.com` из страницы Graylog может блокироваться политикой
+браузера (CSP). Тогда открой файл, скопируй массив в переменную `defs` и запусти цикл.
+
 ## Проверка
 
 1. **Dashboards**: у каждого дашборда виджеты показывают данные за последние сутки.
-2. **Event Definitions**: все три события в состоянии «scheduled», после срабатывания появляются в **Events**.
+2. **Event Definitions**: все 18 правил в состоянии «Enabled», после срабатывания появляются в **Events**.
 3. Если виджет пустой, открой его редактор: какой запрос и поле в нём стоят. Чаще всего
    причина в имени поля, которое Graylog не извлёк (см. «Открытые вопросы»).
 
 ## Открытые вопросы
 
-- **Уведомления по событиям не подключены.** Пороги подбираем по факту, а почта подключается
+- **У 15 новых правил нет уведомлений.** У трёх базовых почта подключена, у остальных события пишутся только в поток All events и на дашборд SOC. Пороги подбираем по факту, а почта подключается
   отдельно через объекты уведомлений и SMTP-сервер Graylog.
+- **promtail по-прежнему не доставляет часть логов в Loki.** После перехода на `--network host` на `homeserver` и `redos-raspi` остаются ошибки «context deadline exceeded» (около 27 в час), причина не найдена. Правило «promtail не доставляет логи» стоит с порогом на ухудшение.
 - **События Podman не попадают в поток.** Fluent Bit собирает только записи контейнеров
   (`CONTAINER_NAME`). Смерть контейнера (`died`), OOM, `exec` и запуск привилегированного
   контейнера приходят в journal как события Podman без `CONTAINER_NAME`. Чтобы их видеть,

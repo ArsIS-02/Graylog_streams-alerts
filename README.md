@@ -71,7 +71,7 @@
 | # | Глава | О чём |
 |---|---|---|
 | 7 | [Дашборды для доклада](docs/07-dashboards.md) | Семь дашбордов: от обзора до SOC |
-| 9 | [Контейнеры: дашборды, поиски, события](docs/09-containers-dashboards.md) | Дашборды через API, Saved Searches, Event Definitions |
+| 9 | [Контейнеры: дашборды, поиски, события](docs/09-containers-dashboards.md) | Дашборды через API, Saved Searches, 18 детектов по контейнерам |
 
 ### Разбор проблем
 
@@ -110,7 +110,7 @@
 ├── decoder/                           ← декодер auditd (auditd_decoder.py, systemd-юнит)
 ├── config/                            ← server.conf (SMTP), opensearch.yml
 ├── containers/                        ← Fluent Bit: Quadlet-юнит и конфиг
-├── graylog/                           ← content pack: 63 алерта + 3 email-уведомления
+├── graylog/                           ← content pack (63 алерта + 3 email-уведомления) и 18 детектов по контейнерам
 ├── linux/                             ← rsyslog.conf.example
 ├── windows/                           ← winlogbeat.yml.example
 └── macos/                             ← Filebeat, osquery, LaunchDaemon-ы, bztriage/
