@@ -7,93 +7,114 @@
 
 # 🛡️ Graylog: домашняя лаборатория со сбором логов, потоками и алертами
 
-> **Единая история** — от первого опыта до активного мониторинга безопасности.
-> Разворачиваем Graylog, собираем логи с Windows, Linux и macOS, раскладываем их по
-> потокам, декодируем auditd и настраиваем email-алерты на подозрительную активность.
+> Единая история: от установки Graylog до активного мониторинга безопасности.
+> Собираем логи с Windows, Linux, macOS и контейнеров, раскладываем по потокам,
+> декодируем auditd и настраиваем email-алерты на подозрительную активность.
 
----
+## 📑 Оглавление
 
-## 📖 О чём этот репозиторий
+- [О репозитории](#-о-репозитории)
+- [Быстрый старт](#-быстрый-старт)
+- [Главы](#-главы)
+  - [Основа: установка, потоки, алерты](#основа-установка-потоки-алерты)
+  - [Источники логов: Windows, Linux, macOS, контейнеры](#источники-логов-windows-linux-macos-контейнеры)
+  - [Дашборды](#дашборды)
+  - [Разбор проблем](#разбор-проблем)
+- [Что внутри](#-что-внутри)
+- [Структура репозитория](#-структура-репозитория)
+- [Ссылки](#-ссылки)
 
-Централизованный сбор логов становится по-настоящему полезным, когда система сама
-сортирует события и предупреждает о проблемах. В этом репозитории — полный путь:
+## 📖 О репозитории
 
-1. **База** — разворачиваем Graylog (Java + MongoDB + OpenSearch) и настраиваем приём логов.
-2. **Потоки** — раскладываем логи по смыслу: Windows, Linux, Security, Errors.
-3. **Декодер auditd** — переводим шестнадцатеричные поля в читаемый вид (собственный Python-демон).
-4. **Алерты** — email-уведомления о неудачных входах на Linux и Windows.
+Централизованный сбор логов полезен, когда система сама сортирует события и
+предупреждает о проблемах. Здесь собран весь путь:
 
-Материал объединяет мои статьи о Graylog и дополнен конфигурацией для macOS, Linux, Windows.
+1. **База**: Graylog на Java, MongoDB и OpenSearch, приём логов.
+2. **Потоки**: логи раскладываются по смыслу (Windows, Linux, Security, Errors, Containers).
+3. **Декодер auditd**: собственный Python-демон переводит hex-поля в читаемый вид.
+4. **Алерты**: email-уведомления о неудачных входах, sudo, USB и других событиях.
+5. **Дашборды**: от обзора лаборатории до центра безопасности (SOC).
 
-## 🗂 Структура
-
-```
-.
-├── README.md                         ← этот обзор
-├── docs/                             ← единая история по главам
-│   ├── 01-home-lab.md                ← часть 1: установка Graylog, MongoDB, OpenSearch
-│   ├── 02-streams-alerts.md          ← часть 2: потоки, алерты, декодер auditd
-│   ├── 03-windows.md                 ← Windows: Sysmon, Winlogbeat, алерт 4625
-│   ├── 04-linux.md                   ← Linux: auditd, rsyslog, алерт SSH
-│   ├── 05-macos.md                   ← macOS: unified log, Filebeat, osquery
-│   ├── 06-macos-bztriage.md          ← macOS: телеметрия через BI.ZONE Triage
-│   ├── 07-dashboards.md              ← дашборды для доклада
-│   └── troubleshooting.md            ← грабли и их решения
-├── decoder/                          ← декодер auditd (на сервере)
-│   ├── auditd_decoder.py             ← Python-демон: UDP → GELF
-│   └── audit-decoder.service         ← systemd-юнит
-├── config/                           ← конфиги сервера Graylog/OpenSearch
-│   ├── server.conf.smtp.example      ← SMTP для email-алертов (Mail.ru)
-│   └── opensearch.yml.example        ← OpenSearch для Graylog
-├── graylog/                          ← готовые объекты Graylog
-│   └── content-pack-homelab-alerts.json ← 63 алерта + 3 email-уведомления
-├── linux/                            ← агенты для Linux-хостов
-│   └── rsyslog.conf.example          ← пересылка syslog в Graylog
-├── windows/                          ← агенты для Windows-хостов
-│   └── winlogbeat.yml.example        ← доставка событий Windows
-└── macos/                            ← агенты для macOS-хостов
-    ├── filebeat.yml                  ← Filebeat (unified log, wifi.log, osquery)
-    ├── osquery.conf                  ← osquery
-    ├── co.elastic.filebeat.plist     ← LaunchDaemon Filebeat
-    ├── com.user.logstream.plist      ← LaunchDaemon log stream
-    ├── zshrc.local                   ← хук логирования команд
-    ├── logstream/                    ← ротация unified.json.log
-    └── bztriage/                     ← BI.ZONE Triage: скрипты, plist-ы, документация
-```
+> Картинки в главах 05–09 и в разделе «Troubleshooting» — иллюстрации с примерными
+> результатами, отрисованные в стиле интерфейса Graylog. Значения на них условные.
 
 ## 🚀 Быстрый старт
 
-1. **Установи стек** по [части 1](docs/01-home-lab.md): Java 17, MongoDB,
-   OpenSearch, Graylog server.
-2. **Настрой агенты** по своей ОС: [Windows](docs/03-windows.md),
-   [Linux](docs/04-linux.md), [macOS](docs/05-macos.md).
-3. **Создай потоки и алерты** по [части 2](docs/02-streams-alerts.md) — или импортируй
-   готовые 63 алерта (в том числе 44 правила детектирования) из [content pack](graylog/content-pack-homelab-alerts.json).
-4. **Подключи декодер auditd** из [`decoder/`](decoder/auditd_decoder.py) — и
-   события auditd станут читаемыми.
+1. Установи стек по [части 1](docs/01-home-lab.md): Java 17, MongoDB, OpenSearch, Graylog.
+2. Подключи агенты своей ОС: [Windows](docs/03-windows.md), [Linux](docs/04-linux.md),
+   [macOS](docs/05-macos.md), [контейнеры](docs/08-containers.md).
+3. Создай потоки и алерты по [части 2](docs/02-streams-alerts.md) или импортируй готовые
+   63 алерта из [content pack](graylog/content-pack-homelab-alerts.json).
+4. Подключи [декодер auditd](decoder/auditd_decoder.py): события станут читаемыми.
 
-## ✨ Что мы получаем
+## 📚 Главы
+
+### Основа: установка, потоки, алерты
+
+| # | Глава | О чём |
+|---|---|---|
+| 1 | [Домашняя лаборатория: разворачиваем Graylog](docs/01-home-lab.md) | Java, MongoDB, OpenSearch, Graylog server |
+| 2 | [Потоки, алерты и декодер auditd](docs/02-streams-alerts.md) | Потоки, email-уведомления, декодер auditd |
+
+### Источники логов: Windows, Linux, macOS, контейнеры
+
+| # | Глава | О чём |
+|---|---|---|
+| 3 | [Windows](docs/03-windows.md) | Sysmon, Winlogbeat, алерт на событие 4625 |
+| 4 | [Linux](docs/04-linux.md) | auditd, rsyslog, алерт на SSH |
+| 5 | [macOS: unified log, Filebeat, osquery](docs/05-macos.md) | Unified log, USB, osquery, ротация логов |
+| 6 | [macOS: BI.ZONE Triage](docs/06-macos-bztriage.md) | Три launchd-агента, телеметрия по `nc` |
+| 8 | [Контейнеры: логи Podman](docs/08-containers.md) | Fluent Bit, GELF, extractor-ы, поток Containers |
+
+### Дашборды
+
+| # | Глава | О чём |
+|---|---|---|
+| 7 | [Дашборды для доклада](docs/07-dashboards.md) | Семь дашбордов: от обзора до SOC |
+| 9 | [Контейнеры: дашборды, поиски, события](docs/09-containers-dashboards.md) | Дашборды через API, Saved Searches, Event Definitions |
+
+### Разбор проблем
+
+| Глава | О чём |
+|---|---|
+| [Troubleshooting](docs/troubleshooting.md) | 17 граблей: ротация логов, дубли, лимит полей, extractor-ы, Fluent Bit |
+
+## ✨ Что внутри
 
 | Функция | Описание |
 |---|---|
-| 📂 **Потоки** | Windows Logs, Linux Logs, Security Events, Errors — всё разложено |
+| 📂 **Потоки** | Windows, Linux, Security Events, Errors, Containers |
 | 🐍 **Декодер auditd** | Python-демон принимает сырые логи по UDP, декодирует hex-поля, отправляет GELF |
 | 📧 **Алерты по email** | SMTP через Mail.ru, письмо с прямой ссылкой на событие |
 | ⚡ **Быстрая реакция** | Проверка условий каждые 5 минут, уведомление в течение 1–2 минут |
-| 🖥 **Три платформы** | Windows, Linux (РЕД ОС), macOS |
+| 🖥 **Четыре источника** | Windows, Linux (РЕД ОС), macOS, контейнеры Podman |
+| 📊 **Дашборды** | Семь дашбордов для доклада и три для контейнеров |
 
-## 📚 Читай по главам
+## 🗂 Структура репозитория
 
-- [Часть 1. Домашняя лаборатория: разворачиваем Graylog](docs/01-home-lab.md)
-- [Часть 2. Потоки, алерты и декодер auditd](docs/02-streams-alerts.md)
-- [Windows: Sysmon, Winlogbeat и алерт 4625](docs/03-windows.md)
-- [Linux: auditd, rsyslog и алерт SSH](docs/04-linux.md)
-- [macOS: unified log, Filebeat и osquery](docs/05-macos.md)
-- [macOS: телеметрия через BI.ZONE Triage](docs/06-macos-bztriage.md)
-- [Дашборды для доклада](docs/07-dashboards.md)
-- [Контейнеры: логи Podman в Graylog](docs/08-containers.md)
-- [Контейнеры: дашборды, поиски и события в Graylog](docs/09-containers-dashboards.md)
-- [Troubleshooting](docs/troubleshooting.md)
+```
+.
+├── README.md                          ← этот обзор
+├── docs/                              ← главы
+│   ├── 01-home-lab.md                 ← установка Graylog, MongoDB, OpenSearch
+│   ├── 02-streams-alerts.md           ← потоки, алерты, декодер auditd
+│   ├── 03-windows.md                  ← Windows: Sysmon, Winlogbeat, алерт 4625
+│   ├── 04-linux.md                    ← Linux: auditd, rsyslog, алерт SSH
+│   ├── 05-macos.md                    ← macOS: unified log, Filebeat, osquery
+│   ├── 06-macos-bztriage.md           ← macOS: BI.ZONE Triage
+│   ├── 07-dashboards.md               ← дашборды для доклада
+│   ├── 08-containers.md               ← контейнеры: Podman → Fluent Bit → Graylog
+│   ├── 09-containers-dashboards.md    ← контейнеры: дашборды, поиски, события
+│   ├── troubleshooting.md             ← грабли и решения
+│   └── images/                        ← скриншоты и иллюстрации к главам
+├── decoder/                           ← декодер auditd (auditd_decoder.py, systemd-юнит)
+├── config/                            ← server.conf (SMTP), opensearch.yml
+├── containers/                        ← Fluent Bit: Quadlet-юнит и конфиг
+├── graylog/                           ← content pack: 63 алерта + 3 email-уведомления
+├── linux/                             ← rsyslog.conf.example
+├── windows/                           ← winlogbeat.yml.example
+└── macos/                             ← Filebeat, osquery, LaunchDaemon-ы, bztriage/
+```
 
 ## 🔗 Ссылки
 
@@ -102,3 +123,4 @@
 - [Winlogbeat Documentation](https://www.elastic.co/guide/en/beats/winlogbeat/current/index.html)
 - [osquery Documentation](https://osquery.readthedocs.io/)
 - [Sysmon (Sysinternals)](https://learn.microsoft.com/sysinternals/downloads/sysmon)
+- [Fluent Bit Documentation](https://docs.fluentbit.io/)
