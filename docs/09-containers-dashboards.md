@@ -22,10 +22,7 @@
 пока сервисы не запущены: это ожидаемо.
 
 ![Дашборд «Контейнеры»](images/containers-dashboard.png)
-*Дашборд «Контейнеры» (иллюстрация, пример результата).*
-
-![Дашборд «Контейнеры: диагностика»](images/containers-diagnostics.png)
-*Дашборд «Контейнеры: диагностика» (иллюстрация, пример результата).*
+*Дашборд «Контейнеры» (воссоздано по реальным данным лаборатории).*
 
 
 ## Как устроен дашборд в Graylog 7.2
@@ -109,10 +106,6 @@ console.log('HTTP',vr.status,(await vr.text()).slice(0,300));
 
 Результат смотрим в ответе консоли. `HTTP 200` — дашборд создан; проверка — на странице **Dashboards**.
 
-![Результат запуска скрипта в консоли браузера](images/containers-api-console.png)
-*Результат запуска скрипта в консоли браузера (иллюстрация, пример результата).*
-
-
 ## Сохранённые поиски
 
 Сохранённый поиск — тот же view, но типа `SEARCH`, без виджетов. Создаётся в два запроса:
@@ -141,15 +134,15 @@ field_spec:{},key_spec:[],notification_settings:{grace_period_ms:0,backlog_size:
 
 | Событие | Запрос | Порог | Окно | Приоритет |
 |---|---|---|---|---|
-| Всплеск ошибок | `level:3` | больше 20 | 5 минут | 2 |
-| Перезапуски MariaDB | `message:"Entrypoint script"` | больше 2 | 15 минут | 3 |
-| Ошибки прав доступа | `message:"Operation not permitted"` | больше 50 | 10 минут | 2 |
+| Всплеск ошибок | `(loglevel:(error OR warn OR fatal) OR message:(error OR fatal OR panic OR exception OR traceback)) AND _exists_:container_name AND NOT container_name:(cadvisor OR fluent-bit OR promtail)` | больше 10 | 5 минут | 2 |
+| Ошибки прав доступа | `message:"Operation not permitted" AND _exists_:container_name` | больше 50 | 10 минут | 2 |
+| Перезапуски MariaDB | `container_name:observiumdb AND message:"Entrypoint script"` | больше 2 | 15 минут | 3 |
 
 Событие «Перезапуски MariaDB» опирается на то, что entrypoint образа MariaDB печатает строку
 при каждом старте контейнера: три старта за 15 минут означают цикл перезапусков.
 
 ![Event Definitions по контейнерам](images/containers-events.png)
-*Event Definitions по контейнерам (иллюстрация, пример результата).*
+*Event Definitions по контейнерам (воссоздано по реальным данным лаборатории).*
 
 
 ## Проверка
