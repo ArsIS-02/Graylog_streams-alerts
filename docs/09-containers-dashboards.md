@@ -130,7 +130,7 @@ field_spec:{},key_spec:[],notification_settings:{grace_period_ms:0,backlog_size:
 });
 ```
 
-Созданы три:
+Первые три правила:
 
 | Событие | Запрос | Порог | Окно | Приоритет |
 |---|---|---|---|---|
@@ -144,6 +144,27 @@ field_spec:{},key_spec:[],notification_settings:{grace_period_ms:0,backlog_size:
 ![Event Definitions по контейнерам](images/containers-events.png)
 *Event Definitions по контейнерам (воссоздано по реальным данным лаборатории).*
 
+
+### Ещё 19 правил
+
+Поверх трёх базовых добавлены правила на работоспособность и на безопасность. Все без
+уведомлений: события попадают в поток **All events** и на дашборд SOC.
+
+| Правило | Запрос / условие | Окно | Приоритет |
+|---|---|---|---|
+| Нехватка памяти или падение процесса | `message:("out of memory" OR OOM OR "Killed process" OR segfault OR "core dumped")`, больше 0 | 5 минут | 3 |
+| promtail не доставляет логи в Loki | `message:"context deadline exceeded" AND container_name:promtail`, больше 15 на хост | 10 минут | 2 |
+| MongoDB: ошибки | `container_name:komodo_mongo_1 AND log_s:E`, больше 0 | 10 минут | 2 |
+| Loki: ошибки приёма | `container_name:loki AND loglevel:error`, больше 0 | 15 минут | 2 |
+| Grafana: подбор пароля | `Invalid username or password`, `Failed to authenticate`, `login attempt failed`, больше 5 | 5 минут | 3 |
+| netalertx: новое устройство | строка `Scan Stats` с `New Devices`, не равным нулю | 5 минут | 2 |
+| netalertx: всплеск объёма | больше 4500 сообщений (норма около 1500) | 15 минут | 1 |
+| Тишина контейнера (7 правил) | `grafana`, `loki`, `zaslon`, `atrium`, `komodo_mongo_1`, `wazuh.dashboard`, `netalertx`: число сообщений меньше 1 | 15 минут | 3 |
+| Тишина хоста (5 правил) | `source:<хост>*` для `homeserver`, `redos-server`, `wazuh-homelab`, `redosrp16`, `redos-raspi`: число сообщений меньше 1 | 30 минут | 3 |
+
+Правила «тишины» работают без группировки: условие «меньше 1» срабатывает, только когда
+за окно нет ни одной записи. Для `promtail` и `observiumdb` такое правило не делали: в
+исправном состоянии первый пишет мало, второй сейчас остановлен.
 
 ## Проверка
 
