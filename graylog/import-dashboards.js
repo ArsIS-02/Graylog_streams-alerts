@@ -40,12 +40,14 @@ async function importDashboards(SPEC, opts = {}) {
 
   const result = [];
   for (const D of SPEC) {
+    const queries = [], state = {};
+    for (const P of D.pages) {
     const qid = uuid(), widgets = [], mapping = {}, positions = {}, titles = {}, types = [];
-    for (const W of D.widgets) {
+    for (const W of P.widgets) {
       const id = uuid();
       const sids = (W.s || []).map(sid);
       const base = {id, type: W.v === 'messages' ? 'messages' : (W.v === 'text' ? 'text' : 'aggregation'),
-        filter: null, timerange: {type: 'relative', range: W.r || D.timerange},
+        filter: null, timerange: {type: 'relative', range: W.r || P.timerange},
         query: {type: 'elasticsearch', query_string: W.q || ''}, streams: sids, stream_categories: []};
       positions[id] = {col: W.pos[0], row: W.pos[1], height: W.h, width: W.w};
       titles[id] = W.t;
@@ -55,7 +57,6 @@ async function importDashboards(SPEC, opts = {}) {
       }
       const stId = uuid(); mapping[id] = [stId];
       if (W.v === 'messages') {
-        const sort = [{type: 'pivot', field: 'timestamp', direction: 'Descending'}];
         widgets.push({...base, config: {fields: W.f, show_message_row: true, show_summary: false,
           decorators: [], sort: [{field: 'timestamp', direction: 'DESC'}], sortDirection: 'DESC'}});
         types.push({type: 'messages', id: stId, limit: W.lim || 100, offset: 0, sort: [{field: 'timestamp', order: 'DESC'}],
@@ -73,12 +74,15 @@ async function importDashboards(SPEC, opts = {}) {
         column_groups: (W.cols || []).map(p => pivot(p, true)), sort: sorts(W.sort, ser), rollup: true,
         filters: [], event_annotation: false});
     }
-    const search = {queries: [{id: qid, query: {type: 'elasticsearch', query_string: ''},
-      timerange: {type: 'relative', range: D.timerange}, search_types: types}], parameters: []};
-    const view = {type: 'DASHBOARD', title: D.title, summary: D.summary, description: D.description, properties: [], requires: {},
-      state: {[qid]: {selected_fields: null, static_message_list_id: null, titles: {widget: titles}, widgets, widget_mapping: mapping,
-        positions, formatting: {highlighting: []}}}};
-    if (opts.dryRun) { result.push({title: D.title, widgets: widgets.length, search, view}); continue; }
+    queries.push({id: qid, query: {type: 'elasticsearch', query_string: ''},
+      timerange: {type: 'relative', range: P.timerange}, search_types: types});
+    state[qid] = {selected_fields: null, static_message_list_id: null,
+      titles: {widget: titles, tab: {title: P.title || 'Страница'}}, widgets, widget_mapping: mapping,
+      positions, formatting: {highlighting: []}};
+    }
+    const search = {queries, parameters: []};
+    const view = {type: 'DASHBOARD', title: D.title, summary: D.summary, description: D.description, properties: [], requires: {}, state};
+    if (opts.dryRun) { result.push({title: D.title, pages: D.pages.length, search, view}); continue; }
     const s = await api('POST', '/api/views/search', search);
     view.search_id = s.id;
     const v = await api('POST', '/api/views', {entity: view});

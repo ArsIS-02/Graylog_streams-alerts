@@ -3,203 +3,213 @@
   "title": "🏠 Лаборатория за 60 секунд",
   "summary": "Обзор всей лаборатории: объём, хосты, источники",
   "description": "Масштаб домашней лаборатории мониторинга одним экраном.",
-  "timerange": 300,
-  "widgets": [
+  "pages": [
    {
-    "t": "🔴 HIGH за 24 ч",
-    "v": "numeric",
-    "q": "priority:3",
-    "s": [
-     "All events"
-    ],
-    "r": 86400,
-    "rows": [],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 3,
-    "h": 2,
-    "pos": [
-     10,
-     1
-    ]
-   },
-   {
-    "t": "📈 Поток сообщений по источникам",
-    "v": "bar",
-    "q": "",
-    "s": [
-     "Syslog Logs",
-     "FreeIPA Logs",
-     "WindowsLogs",
-     "BiZone_macOS",
-     "MacOS Logs",
-     "RedOS auditd Logs"
-    ],
-    "r": 86400,
-    "rows": [
-     [
-      "t",
-      "timestamp",
-      "auto"
-     ]
-    ],
-    "cols": [
-     [
-      "v",
-      "streams",
-      8
-     ]
-    ],
-    "m": [
-     "count()"
-    ],
-    "bm": "stack",
-    "w": 12,
-    "h": 5,
-    "pos": [
-     1,
-     3
-    ]
-   },
-   {
-    "t": "🥧 Доли источников",
-    "v": "pie",
-    "q": "",
-    "s": [
-     "Syslog Logs",
-     "FreeIPA Logs",
-     "WindowsLogs",
-     "BiZone_macOS",
-     "MacOS Logs",
-     "RedOS auditd Logs"
-    ],
-    "r": 86400,
-    "rows": [
-     [
-      "v",
-      "streams",
-      8
-     ]
-    ],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "sort": [
-     "count() Descending"
-    ],
-    "w": 6,
-    "h": 5,
-    "pos": [
-     1,
-     8
-    ]
-   },
-   {
-    "t": "🛡️ Событий ИБ за 24 ч",
-    "v": "numeric",
-    "q": "",
-    "s": [
-     "All events"
-    ],
-    "r": 86400,
-    "rows": [],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 3,
-    "h": 2,
-    "pos": [
-     7,
-     1
-    ]
-   },
-   {
-    "t": "📨 Сообщений за 24 ч",
-    "v": "numeric",
-    "q": "",
-    "s": [
-     "Syslog Logs",
-     "FreeIPA Logs",
-     "WindowsLogs",
-     "BiZone_macOS",
-     "MacOS Logs",
-     "RedOS auditd Logs"
-    ],
-    "r": 86400,
-    "rows": [],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 3,
-    "h": 2,
-    "pos": [
-     1,
-     1
-    ]
-   },
-   {
-    "t": "🔊 Самые «болтливые» хосты",
-    "v": "bar",
-    "q": "",
-    "s": [
-     "Syslog Logs",
-     "FreeIPA Logs",
-     "WindowsLogs",
-     "BiZone_macOS",
-     "MacOS Logs",
-     "RedOS auditd Logs"
-    ],
-    "r": 86400,
-    "rows": [
-     [
-      "v",
-      "source",
-      12
-     ]
-    ],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "sort": [
-     "count() Descending"
-    ],
-    "bm": "group",
-    "w": 6,
-    "h": 5,
-    "pos": [
-     7,
-     8
-    ]
-   },
-   {
-    "t": "🖥️ Уникальных хостов",
-    "v": "numeric",
-    "q": "",
-    "s": [
-     "Syslog Logs",
-     "FreeIPA Logs",
-     "WindowsLogs",
-     "BiZone_macOS",
-     "MacOS Logs",
-     "RedOS auditd Logs"
-    ],
-    "r": 86400,
-    "rows": [],
-    "cols": [],
-    "m": [
-     "card(source)"
-    ],
-    "w": 3,
-    "h": 2,
-    "pos": [
-     4,
-     1
+    "title": "",
+    "timerange": 300,
+    "widgets": [
+     {
+      "t": "🔴 HIGH за 24 ч",
+      "v": "numeric",
+      "w": 3,
+      "h": 2,
+      "pos": [
+       10,
+       1
+      ],
+      "q": "priority:3",
+      "s": [
+       "All events"
+      ],
+      "r": 86400,
+      "rows": [],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "📈 Поток сообщений по источникам",
+      "v": "bar",
+      "w": 12,
+      "h": 5,
+      "pos": [
+       1,
+       3
+      ],
+      "q": "",
+      "s": [
+       "Syslog Logs",
+       "FreeIPA Logs",
+       "WindowsLogs",
+       "BiZone_macOS",
+       "MacOS Logs",
+       "RedOS auditd Logs"
+      ],
+      "r": 86400,
+      "rows": [
+       [
+        "t",
+        "timestamp",
+        "auto"
+       ]
+      ],
+      "cols": [
+       [
+        "v",
+        "streams",
+        8
+       ]
+      ],
+      "m": [
+       "count()"
+      ],
+      "sort": [],
+      "bm": "stack"
+     },
+     {
+      "t": "🥧 Доли источников",
+      "v": "pie",
+      "w": 6,
+      "h": 5,
+      "pos": [
+       1,
+       8
+      ],
+      "q": "",
+      "s": [
+       "Syslog Logs",
+       "FreeIPA Logs",
+       "WindowsLogs",
+       "BiZone_macOS",
+       "MacOS Logs",
+       "RedOS auditd Logs"
+      ],
+      "r": 86400,
+      "rows": [
+       [
+        "v",
+        "streams",
+        8
+       ]
+      ],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": [
+       "count() Descending"
+      ]
+     },
+     {
+      "t": "🛡️ Событий ИБ за 24 ч",
+      "v": "numeric",
+      "w": 3,
+      "h": 2,
+      "pos": [
+       7,
+       1
+      ],
+      "q": "",
+      "s": [
+       "All events"
+      ],
+      "r": 86400,
+      "rows": [],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "📨 Сообщений за 24 ч",
+      "v": "numeric",
+      "w": 3,
+      "h": 2,
+      "pos": [
+       1,
+       1
+      ],
+      "q": "",
+      "s": [
+       "Syslog Logs",
+       "FreeIPA Logs",
+       "WindowsLogs",
+       "BiZone_macOS",
+       "MacOS Logs",
+       "RedOS auditd Logs"
+      ],
+      "r": 86400,
+      "rows": [],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "🔊 Самые «болтливые» хосты",
+      "v": "bar",
+      "w": 6,
+      "h": 5,
+      "pos": [
+       7,
+       8
+      ],
+      "q": "",
+      "s": [
+       "Syslog Logs",
+       "FreeIPA Logs",
+       "WindowsLogs",
+       "BiZone_macOS",
+       "MacOS Logs",
+       "RedOS auditd Logs"
+      ],
+      "r": 86400,
+      "rows": [
+       [
+        "v",
+        "source",
+        12
+       ]
+      ],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": [
+       "count() Descending"
+      ],
+      "bm": "group"
+     },
+     {
+      "t": "🖥️ Уникальных хостов",
+      "v": "numeric",
+      "w": 3,
+      "h": 2,
+      "pos": [
+       4,
+       1
+      ],
+      "q": "",
+      "s": [
+       "Syslog Logs",
+       "FreeIPA Logs",
+       "WindowsLogs",
+       "BiZone_macOS",
+       "MacOS Logs",
+       "RedOS auditd Logs"
+      ],
+      "r": 86400,
+      "rows": [],
+      "cols": [],
+      "m": [
+       "card(source)"
+      ],
+      "sort": []
+     }
     ]
    }
   ]
@@ -208,201 +218,211 @@
   "title": "🛡️ Центр безопасности (SOC)",
   "summary": "Алерты детектирования: приоритеты, правила, хосты",
   "description": "Что система находит и о чём сообщает. Приоритет: 3=HIGH, 2=MEDIUM, 1=LOW.",
-  "timerange": 300,
-  "widgets": [
+  "pages": [
    {
-    "t": "🛡️ Событий ИБ за 7 дней",
-    "v": "numeric",
-    "q": "",
-    "s": [
-     "All events"
-    ],
-    "r": 604800,
-    "rows": [],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 3,
-    "h": 2,
-    "pos": [
-     1,
-     1
-    ]
-   },
-   {
-    "t": "🔴 HIGH",
-    "v": "numeric",
-    "q": "priority:3",
-    "s": [
-     "All events"
-    ],
-    "r": 604800,
-    "rows": [],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 3,
-    "h": 2,
-    "pos": [
-     4,
-     1
-    ]
-   },
-   {
-    "t": "🟠 MEDIUM",
-    "v": "numeric",
-    "q": "priority:2",
-    "s": [
-     "All events"
-    ],
-    "r": 604800,
-    "rows": [],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 3,
-    "h": 2,
-    "pos": [
-     7,
-     1
-    ]
-   },
-   {
-    "t": "📋 Лента последних событий ИБ",
-    "v": "messages",
-    "q": "",
-    "s": [
-     "All events"
-    ],
-    "r": 604800,
-    "f": [
-     "timestamp",
-     "priority",
-     "source",
-     "event_definition_id",
-     "message"
-    ],
-    "lim": 100,
-    "w": 12,
-    "h": 6,
-    "pos": [
-     1,
-     13
-    ]
-   },
-   {
-    "t": "🖥️ Хосты с наибольшим числом событий",
-    "v": "bar",
-    "q": "",
-    "s": [
-     "All events"
-    ],
-    "r": 604800,
-    "rows": [
-     [
-      "v",
-      "source",
-      12
-     ]
-    ],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "sort": [
-     "count() Descending"
-    ],
-    "bm": "group",
-    "w": 6,
-    "h": 5,
-    "pos": [
-     7,
-     8
-    ]
-   },
-   {
-    "t": "🎯 По приоритету (3=HIGH · 2=MED · 1=LOW)",
-    "v": "pie",
-    "q": "",
-    "s": [
-     "All events"
-    ],
-    "r": 604800,
-    "rows": [
-     [
-      "v",
-      "priority",
-      3
-     ]
-    ],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "sort": [
-     "count() Descending"
-    ],
-    "w": 6,
-    "h": 5,
-    "pos": [
-     1,
-     8
-    ]
-   },
-   {
-    "t": "🔵 LOW",
-    "v": "numeric",
-    "q": "priority:1",
-    "s": [
-     "All events"
-    ],
-    "r": 604800,
-    "rows": [],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 3,
-    "h": 2,
-    "pos": [
-     10,
-     1
-    ]
-   },
-   {
-    "t": "📈 Алерты во времени по приоритету",
-    "v": "bar",
-    "q": "",
-    "s": [
-     "All events"
-    ],
-    "r": 604800,
-    "rows": [
-     [
-      "t",
-      "timestamp",
-      "auto"
-     ]
-    ],
-    "cols": [
-     [
-      "v",
-      "priority",
-      3
-     ]
-    ],
-    "m": [
-     "count()"
-    ],
-    "bm": "stack",
-    "w": 12,
-    "h": 5,
-    "pos": [
-     1,
-     3
+    "title": "",
+    "timerange": 300,
+    "widgets": [
+     {
+      "t": "🛡️ Событий ИБ за 7 дней",
+      "v": "numeric",
+      "w": 3,
+      "h": 2,
+      "pos": [
+       1,
+       1
+      ],
+      "q": "",
+      "s": [
+       "All events"
+      ],
+      "r": 604800,
+      "rows": [],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "🔴 HIGH",
+      "v": "numeric",
+      "w": 3,
+      "h": 2,
+      "pos": [
+       4,
+       1
+      ],
+      "q": "priority:3",
+      "s": [
+       "All events"
+      ],
+      "r": 604800,
+      "rows": [],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "🟠 MEDIUM",
+      "v": "numeric",
+      "w": 3,
+      "h": 2,
+      "pos": [
+       7,
+       1
+      ],
+      "q": "priority:2",
+      "s": [
+       "All events"
+      ],
+      "r": 604800,
+      "rows": [],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "📋 Лента последних событий ИБ",
+      "v": "messages",
+      "w": 12,
+      "h": 6,
+      "pos": [
+       1,
+       13
+      ],
+      "q": "",
+      "s": [
+       "All events"
+      ],
+      "r": 604800,
+      "f": [
+       "timestamp",
+       "priority",
+       "source",
+       "event_definition_id",
+       "message"
+      ],
+      "lim": 100
+     },
+     {
+      "t": "🖥️ Хосты с наибольшим числом событий",
+      "v": "bar",
+      "w": 6,
+      "h": 5,
+      "pos": [
+       7,
+       8
+      ],
+      "q": "",
+      "s": [
+       "All events"
+      ],
+      "r": 604800,
+      "rows": [
+       [
+        "v",
+        "source",
+        12
+       ]
+      ],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": [
+       "count() Descending"
+      ],
+      "bm": "group"
+     },
+     {
+      "t": "🎯 По приоритету (3=HIGH · 2=MED · 1=LOW)",
+      "v": "pie",
+      "w": 6,
+      "h": 5,
+      "pos": [
+       1,
+       8
+      ],
+      "q": "",
+      "s": [
+       "All events"
+      ],
+      "r": 604800,
+      "rows": [
+       [
+        "v",
+        "priority",
+        3
+       ]
+      ],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": [
+       "count() Descending"
+      ]
+     },
+     {
+      "t": "🔵 LOW",
+      "v": "numeric",
+      "w": 3,
+      "h": 2,
+      "pos": [
+       10,
+       1
+      ],
+      "q": "priority:1",
+      "s": [
+       "All events"
+      ],
+      "r": 604800,
+      "rows": [],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "📈 Алерты во времени по приоритету",
+      "v": "bar",
+      "w": 12,
+      "h": 5,
+      "pos": [
+       1,
+       3
+      ],
+      "q": "",
+      "s": [
+       "All events"
+      ],
+      "r": 604800,
+      "rows": [
+       [
+        "t",
+        "timestamp",
+        "auto"
+       ]
+      ],
+      "cols": [
+       [
+        "v",
+        "priority",
+        3
+       ]
+      ],
+      "m": [
+       "count()"
+      ],
+      "sort": [],
+      "bm": "stack"
+     }
     ]
    }
   ]
@@ -411,199 +431,209 @@
   "title": "🌐 Сеть глазами Keenetic",
   "summary": "WireGuard, конфликты ARP, SSH, Wi-Fi на домашнем роутере",
   "description": "Сетевая активность и аномалии по логам роутера Keenetic.",
-  "timerange": 300,
-  "widgets": [
+  "pages": [
    {
-    "t": "📈 Активность роутера по типам",
-    "v": "bar",
-    "q": "",
-    "s": [
-     "Syslog Logs"
-    ],
-    "r": 604800,
-    "rows": [
-     [
-      "t",
-      "timestamp",
-      "auto"
-     ]
-    ],
-    "cols": [
-     [
-      "v",
-      "kn_event_type",
-      8
-     ]
-    ],
-    "m": [
-     "count()"
-    ],
-    "bm": "stack",
-    "w": 12,
-    "h": 5,
-    "pos": [
-     1,
-     3
-    ]
-   },
-   {
-    "t": "⚡ Конфликты ARP по IP",
-    "v": "bar",
-    "q": "kn_event_type:ARP_Conflict",
-    "s": [
-     "Syslog Logs"
-    ],
-    "r": 604800,
-    "rows": [
-     [
-      "v",
-      "kn_conflict_ip",
-      10
-     ]
-    ],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "sort": [
-     "count() Descending"
-    ],
-    "bm": "group",
-    "w": 6,
-    "h": 5,
-    "pos": [
-     7,
-     8
-    ]
-   },
-   {
-    "t": "✅ WireGuard: успешно",
-    "v": "numeric",
-    "q": "kn_event_type:Wireguard_Success",
-    "s": [
-     "Syslog Logs"
-    ],
-    "r": 604800,
-    "rows": [],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 3,
-    "h": 2,
-    "pos": [
-     10,
-     1
-    ]
-   },
-   {
-    "t": "⚡ Конфликтов ARP",
-    "v": "numeric",
-    "q": "kn_event_type:ARP_Conflict",
-    "s": [
-     "Syslog Logs"
-    ],
-    "r": 604800,
-    "rows": [],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 3,
-    "h": 2,
-    "pos": [
-     4,
-     1
-    ]
-   },
-   {
-    "t": "🥧 Типы событий",
-    "v": "pie",
-    "q": "",
-    "s": [
-     "Syslog Logs"
-    ],
-    "r": 604800,
-    "rows": [
-     [
-      "v",
-      "kn_event_type",
-      10
-     ]
-    ],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "sort": [
-     "count() Descending"
-    ],
-    "w": 6,
-    "h": 5,
-    "pos": [
-     1,
-     8
-    ]
-   },
-   {
-    "t": "🔐 Активность WireGuard и SSH",
-    "v": "messages",
-    "q": "kn_event_type:(Wireguard_Failed OR Wireguard_Success OR SSH_Connection)",
-    "s": [
-     "Syslog Logs"
-    ],
-    "r": 604800,
-    "f": [
-     "timestamp",
-     "kn_event_type",
-     "message"
-    ],
-    "lim": 80,
-    "w": 12,
-    "h": 6,
-    "pos": [
-     1,
-     13
-    ]
-   },
-   {
-    "t": "📡 Событий роутера 7д",
-    "v": "numeric",
-    "q": "",
-    "s": [
-     "Syslog Logs"
-    ],
-    "r": 604800,
-    "rows": [],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 3,
-    "h": 2,
-    "pos": [
-     1,
-     1
-    ]
-   },
-   {
-    "t": "🔒 WireGuard: отказов",
-    "v": "numeric",
-    "q": "kn_event_type:Wireguard_Failed",
-    "s": [
-     "Syslog Logs"
-    ],
-    "r": 604800,
-    "rows": [],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 3,
-    "h": 2,
-    "pos": [
-     7,
-     1
+    "title": "Общий дашборд",
+    "timerange": 300,
+    "widgets": [
+     {
+      "t": "📈 Активность роутера по типам",
+      "v": "bar",
+      "w": 12,
+      "h": 5,
+      "pos": [
+       1,
+       3
+      ],
+      "q": "",
+      "s": [
+       "Syslog Logs"
+      ],
+      "r": 604800,
+      "rows": [
+       [
+        "t",
+        "timestamp",
+        "auto"
+       ]
+      ],
+      "cols": [
+       [
+        "v",
+        "kn_event_type",
+        8
+       ]
+      ],
+      "m": [
+       "count()"
+      ],
+      "sort": [],
+      "bm": "stack"
+     },
+     {
+      "t": "⚡ Конфликты ARP по IP",
+      "v": "bar",
+      "w": 6,
+      "h": 5,
+      "pos": [
+       7,
+       8
+      ],
+      "q": "kn_event_type:ARP_Conflict",
+      "s": [
+       "Syslog Logs"
+      ],
+      "r": 604800,
+      "rows": [
+       [
+        "v",
+        "kn_conflict_ip",
+        10
+       ]
+      ],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": [
+       "count() Descending"
+      ],
+      "bm": "group"
+     },
+     {
+      "t": "✅ WireGuard: успешно",
+      "v": "numeric",
+      "w": 3,
+      "h": 2,
+      "pos": [
+       10,
+       1
+      ],
+      "q": "kn_event_type:Wireguard_Success",
+      "s": [
+       "Syslog Logs"
+      ],
+      "r": 604800,
+      "rows": [],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "⚡ Конфликтов ARP",
+      "v": "numeric",
+      "w": 3,
+      "h": 2,
+      "pos": [
+       4,
+       1
+      ],
+      "q": "kn_event_type:ARP_Conflict",
+      "s": [
+       "Syslog Logs"
+      ],
+      "r": 604800,
+      "rows": [],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "🥧 Типы событий",
+      "v": "pie",
+      "w": 6,
+      "h": 5,
+      "pos": [
+       1,
+       8
+      ],
+      "q": "",
+      "s": [
+       "Syslog Logs"
+      ],
+      "r": 604800,
+      "rows": [
+       [
+        "v",
+        "kn_event_type",
+        10
+       ]
+      ],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": [
+       "count() Descending"
+      ]
+     },
+     {
+      "t": "🔐 Активность WireGuard и SSH",
+      "v": "messages",
+      "w": 12,
+      "h": 6,
+      "pos": [
+       1,
+       13
+      ],
+      "q": "kn_event_type:(Wireguard_Failed OR Wireguard_Success OR SSH_Connection)",
+      "s": [
+       "Syslog Logs"
+      ],
+      "r": 604800,
+      "f": [
+       "timestamp",
+       "kn_event_type",
+       "message"
+      ],
+      "lim": 80
+     },
+     {
+      "t": "📡 Событий роутера 7д",
+      "v": "numeric",
+      "w": 3,
+      "h": 2,
+      "pos": [
+       1,
+       1
+      ],
+      "q": "",
+      "s": [
+       "Syslog Logs"
+      ],
+      "r": 604800,
+      "rows": [],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "🔒 WireGuard: отказов",
+      "v": "numeric",
+      "w": 3,
+      "h": 2,
+      "pos": [
+       7,
+       1
+      ],
+      "q": "kn_event_type:Wireguard_Failed",
+      "s": [
+       "Syslog Logs"
+      ],
+      "r": 604800,
+      "rows": [],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     }
     ]
    }
   ]
@@ -612,233 +642,244 @@
   "title": "🪟 Контроллер домена: кто и как заходит",
   "summary": "Входы, сетевые соединения, DNS и процессы на Windows DC",
   "description": "Доступ к контроллеру домена и активность процессов по Sysmon и журналу безопасности.",
-  "timerange": 300,
-  "widgets": [
+  "pages": [
    {
-    "t": "📈 Активность по журналам",
-    "v": "bar",
-    "q": "",
-    "s": [
-     "WindowsLogs"
-    ],
-    "r": 86400,
-    "rows": [
-     [
-      "t",
-      "timestamp",
-      "auto"
-     ]
-    ],
-    "cols": [
-     [
-      "v",
-      "win_channel",
-      6
-     ]
-    ],
-    "m": [
-     "count()"
-    ],
-    "bm": "stack",
-    "w": 12,
-    "h": 5,
-    "pos": [
-     1,
-     13
-    ]
-   },
-   {
-    "t": "🪟 События Windows 24ч",
-    "v": "numeric",
-    "q": "",
-    "s": [
-     "WindowsLogs"
-    ],
-    "r": 86400,
-    "rows": [],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 3,
-    "h": 2,
-    "pos": [
-     1,
-     1
-    ]
-   },
-   {
-    "t": "🔥 Соединения: порт × хост",
-    "v": "heatmap",
-    "q": "win_event_id:3",
-    "s": [
-     "WindowsLogs"
-    ],
-    "r": 86400,
-    "rows": [
-     [
-      "v",
-      "winlogbeat_winlog_event_data_DestinationPort",
-      15
-     ]
-    ],
-    "cols": [
-     [
-      "v",
-      "win_host",
-      6
-     ]
-    ],
-    "m": [
-     "count()"
-    ],
-    "w": 12,
-    "h": 5,
-    "pos": [
-     1,
-     3
-    ]
-   },
-   {
-    "t": "🔑 Успешных входов",
-    "v": "numeric",
-    "q": "win_event_id:4624",
-    "s": [
-     "WindowsLogs"
-    ],
-    "r": 86400,
-    "rows": [],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 3,
-    "h": 2,
-    "pos": [
-     10,
-     1
-    ]
-   },
-   {
-    "t": "🌍 Топ DNS-запросов",
-    "v": "bar",
-    "q": "win_event_id:22",
-    "s": [
-     "WindowsLogs"
-    ],
-    "r": 86400,
-    "rows": [
-     [
-      "v",
-      "winlogbeat_winlog_event_data_QueryName",
-      15
-     ]
-    ],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "sort": [
-     "count() Descending"
-    ],
-    "bm": "group",
-    "w": 6,
-    "h": 5,
-    "pos": [
-     1,
-     8
-    ]
-   },
-   {
-    "t": "🔑 Входы по типам (LogonType)",
-    "v": "pie",
-    "q": "win_event_id:4624",
-    "s": [
-     "WindowsLogs"
-    ],
-    "r": 86400,
-    "rows": [
-     [
-      "v",
-      "winlogbeat_winlog_event_data_LogonType",
-      8
-     ]
-    ],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "sort": [
-     "count() Descending"
-    ],
-    "w": 6,
-    "h": 5,
-    "pos": [
-     7,
-     8
-    ]
-   },
-   {
-    "t": "🌐 Сетевых соединений",
-    "v": "numeric",
-    "q": "win_event_id:3",
-    "s": [
-     "WindowsLogs"
-    ],
-    "r": 86400,
-    "rows": [],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 3,
-    "h": 2,
-    "pos": [
-     4,
-     1
-    ]
-   },
-   {
-    "t": "⚙️ Создание процессов",
-    "v": "messages",
-    "q": "win_event_id:1",
-    "s": [
-     "WindowsLogs"
-    ],
-    "r": 86400,
-    "f": [
-     "timestamp",
-     "win_host",
-     "win_user",
-     "win_image",
-     "win_command_line"
-    ],
-    "lim": 80,
-    "w": 12,
-    "h": 6,
-    "pos": [
-     1,
-     18
-    ]
-   },
-   {
-    "t": "⚙️ Запусков процессов",
-    "v": "numeric",
-    "q": "win_event_id:1",
-    "s": [
-     "WindowsLogs"
-    ],
-    "r": 86400,
-    "rows": [],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 3,
-    "h": 2,
-    "pos": [
-     7,
-     1
+    "title": "",
+    "timerange": 300,
+    "widgets": [
+     {
+      "t": "📈 Активность по журналам",
+      "v": "bar",
+      "w": 12,
+      "h": 5,
+      "pos": [
+       1,
+       13
+      ],
+      "q": "",
+      "s": [
+       "WindowsLogs"
+      ],
+      "r": 86400,
+      "rows": [
+       [
+        "t",
+        "timestamp",
+        "auto"
+       ]
+      ],
+      "cols": [
+       [
+        "v",
+        "win_channel",
+        6
+       ]
+      ],
+      "m": [
+       "count()"
+      ],
+      "sort": [],
+      "bm": "stack"
+     },
+     {
+      "t": "🪟 События Windows 24ч",
+      "v": "numeric",
+      "w": 3,
+      "h": 2,
+      "pos": [
+       1,
+       1
+      ],
+      "q": "",
+      "s": [
+       "WindowsLogs"
+      ],
+      "r": 86400,
+      "rows": [],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "🔥 Соединения: порт × хост",
+      "v": "heatmap",
+      "w": 12,
+      "h": 5,
+      "pos": [
+       1,
+       3
+      ],
+      "q": "win_event_id:3",
+      "s": [
+       "WindowsLogs"
+      ],
+      "r": 86400,
+      "rows": [
+       [
+        "v",
+        "winlogbeat_winlog_event_data_DestinationPort",
+        15
+       ]
+      ],
+      "cols": [
+       [
+        "v",
+        "win_host",
+        6
+       ]
+      ],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "🔑 Успешных входов",
+      "v": "numeric",
+      "w": 3,
+      "h": 2,
+      "pos": [
+       10,
+       1
+      ],
+      "q": "win_event_id:4624",
+      "s": [
+       "WindowsLogs"
+      ],
+      "r": 86400,
+      "rows": [],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "🌍 Топ DNS-запросов",
+      "v": "bar",
+      "w": 6,
+      "h": 5,
+      "pos": [
+       1,
+       8
+      ],
+      "q": "win_event_id:22",
+      "s": [
+       "WindowsLogs"
+      ],
+      "r": 86400,
+      "rows": [
+       [
+        "v",
+        "winlogbeat_winlog_event_data_QueryName",
+        15
+       ]
+      ],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": [
+       "count() Descending"
+      ],
+      "bm": "group"
+     },
+     {
+      "t": "🔑 Входы по типам (LogonType)",
+      "v": "pie",
+      "w": 6,
+      "h": 5,
+      "pos": [
+       7,
+       8
+      ],
+      "q": "win_event_id:4624",
+      "s": [
+       "WindowsLogs"
+      ],
+      "r": 86400,
+      "rows": [
+       [
+        "v",
+        "winlogbeat_winlog_event_data_LogonType",
+        8
+       ]
+      ],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": [
+       "count() Descending"
+      ]
+     },
+     {
+      "t": "🌐 Сетевых соединений",
+      "v": "numeric",
+      "w": 3,
+      "h": 2,
+      "pos": [
+       4,
+       1
+      ],
+      "q": "win_event_id:3",
+      "s": [
+       "WindowsLogs"
+      ],
+      "r": 86400,
+      "rows": [],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "⚙️ Создание процессов",
+      "v": "messages",
+      "w": 12,
+      "h": 6,
+      "pos": [
+       1,
+       18
+      ],
+      "q": "win_event_id:1",
+      "s": [
+       "WindowsLogs"
+      ],
+      "r": 86400,
+      "f": [
+       "timestamp",
+       "win_host",
+       "win_user",
+       "win_image",
+       "win_command_line"
+      ],
+      "lim": 80
+     },
+     {
+      "t": "⚙️ Запусков процессов",
+      "v": "numeric",
+      "w": 3,
+      "h": 2,
+      "pos": [
+       7,
+       1
+      ],
+      "q": "win_event_id:1",
+      "s": [
+       "WindowsLogs"
+      ],
+      "r": 86400,
+      "rows": [],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     }
     ]
    }
   ]
@@ -847,232 +888,242 @@
   "title": "🐧 Linux: кто что запускает",
   "summary": "auditd РЕД ОС: команды, sudo, категории правил, SELinux",
   "description": "Активность на Linux-хостах по данным auditd.",
-  "timerange": 300,
-  "widgets": [
+  "pages": [
    {
-    "t": "🔐 sudo",
-    "v": "numeric",
-    "q": "audit_type:EXECVE AND a0:\"sudo\"",
-    "s": [
-     "RedOS auditd Logs"
-    ],
-    "r": 86400,
-    "rows": [],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 3,
-    "h": 2,
-    "pos": [
-     7,
-     1
-    ]
-   },
-   {
-    "t": "🐧 Событий auditd 24ч",
-    "v": "numeric",
-    "q": "",
-    "s": [
-     "RedOS auditd Logs"
-    ],
-    "r": 86400,
-    "rows": [],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 3,
-    "h": 2,
-    "pos": [
-     1,
-     1
-    ]
-   },
-   {
-    "t": "🎯 Типы аудита",
-    "v": "pie",
-    "q": "",
-    "s": [
-     "RedOS auditd Logs"
-    ],
-    "r": 86400,
-    "rows": [
-     [
-      "v",
-      "audit_type",
-      12
-     ]
-    ],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "sort": [
-     "count() Descending"
-    ],
-    "w": 6,
-    "h": 5,
-    "pos": [
-     7,
-     8
-    ]
-   },
-   {
-    "t": "📈 Активность по хостам",
-    "v": "bar",
-    "q": "",
-    "s": [
-     "RedOS auditd Logs"
-    ],
-    "r": 86400,
-    "rows": [
-     [
-      "t",
-      "timestamp",
-      "auto"
-     ]
-    ],
-    "cols": [
-     [
-      "v",
-      "source",
-      8
-     ]
-    ],
-    "m": [
-     "count()"
-    ],
-    "bm": "stack",
-    "w": 12,
-    "h": 5,
-    "pos": [
-     1,
-     3
-    ]
-   },
-   {
-    "t": "🛡️ Отказов SELinux",
-    "v": "numeric",
-    "q": "audit_type:AVC",
-    "s": [
-     "RedOS auditd Logs"
-    ],
-    "r": 86400,
-    "rows": [],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 3,
-    "h": 2,
-    "pos": [
-     10,
-     1
-    ]
-   },
-   {
-    "t": "🏷️ Категории правил (key)",
-    "v": "bar",
-    "q": "",
-    "s": [
-     "RedOS auditd Logs"
-    ],
-    "r": 86400,
-    "rows": [
-     [
-      "v",
-      "key",
-      15
-     ]
-    ],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "sort": [
-     "count() Descending"
-    ],
-    "bm": "group",
-    "w": 6,
-    "h": 5,
-    "pos": [
-     1,
-     13
-    ]
-   },
-   {
-    "t": "⚡ EXECVE (запуски)",
-    "v": "numeric",
-    "q": "audit_type:EXECVE",
-    "s": [
-     "RedOS auditd Logs"
-    ],
-    "r": 86400,
-    "rows": [],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 3,
-    "h": 2,
-    "pos": [
-     4,
-     1
-    ]
-   },
-   {
-    "t": "⌨️ Топ команд (a0)",
-    "v": "bar",
-    "q": "audit_type:EXECVE",
-    "s": [
-     "RedOS auditd Logs"
-    ],
-    "r": 86400,
-    "rows": [
-     [
-      "v",
-      "a0",
-      15
-     ]
-    ],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "sort": [
-     "count() Descending"
-    ],
-    "bm": "group",
-    "w": 6,
-    "h": 5,
-    "pos": [
-     1,
-     8
-    ]
-   },
-   {
-    "t": "🔐 Запуски sudo",
-    "v": "messages",
-    "q": "audit_type:EXECVE AND a0:\"sudo\"",
-    "s": [
-     "RedOS auditd Logs"
-    ],
-    "r": 86400,
-    "f": [
-     "timestamp",
-     "source",
-     "auid_decoded",
-     "a1",
-     "a2",
-     "a3"
-    ],
-    "lim": 80,
-    "w": 12,
-    "h": 6,
-    "pos": [
-     1,
-     18
+    "title": "",
+    "timerange": 300,
+    "widgets": [
+     {
+      "t": "🔐 sudo",
+      "v": "numeric",
+      "w": 3,
+      "h": 2,
+      "pos": [
+       7,
+       1
+      ],
+      "q": "audit_type:EXECVE AND a0:\"sudo\"",
+      "s": [
+       "RedOS auditd Logs"
+      ],
+      "r": 86400,
+      "rows": [],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "🐧 Событий auditd 24ч",
+      "v": "numeric",
+      "w": 3,
+      "h": 2,
+      "pos": [
+       1,
+       1
+      ],
+      "q": "",
+      "s": [
+       "RedOS auditd Logs"
+      ],
+      "r": 86400,
+      "rows": [],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "🎯 Типы аудита",
+      "v": "pie",
+      "w": 6,
+      "h": 5,
+      "pos": [
+       7,
+       8
+      ],
+      "q": "",
+      "s": [
+       "RedOS auditd Logs"
+      ],
+      "r": 86400,
+      "rows": [
+       [
+        "v",
+        "audit_type",
+        12
+       ]
+      ],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": [
+       "count() Descending"
+      ]
+     },
+     {
+      "t": "📈 Активность по хостам",
+      "v": "bar",
+      "w": 12,
+      "h": 5,
+      "pos": [
+       1,
+       3
+      ],
+      "q": "",
+      "s": [
+       "RedOS auditd Logs"
+      ],
+      "r": 86400,
+      "rows": [
+       [
+        "t",
+        "timestamp",
+        "auto"
+       ]
+      ],
+      "cols": [
+       [
+        "v",
+        "source",
+        8
+       ]
+      ],
+      "m": [
+       "count()"
+      ],
+      "sort": [],
+      "bm": "stack"
+     },
+     {
+      "t": "🛡️ Отказов SELinux",
+      "v": "numeric",
+      "w": 3,
+      "h": 2,
+      "pos": [
+       10,
+       1
+      ],
+      "q": "audit_type:AVC",
+      "s": [
+       "RedOS auditd Logs"
+      ],
+      "r": 86400,
+      "rows": [],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "🏷️ Категории правил (key)",
+      "v": "bar",
+      "w": 6,
+      "h": 5,
+      "pos": [
+       1,
+       13
+      ],
+      "q": "",
+      "s": [
+       "RedOS auditd Logs"
+      ],
+      "r": 86400,
+      "rows": [
+       [
+        "v",
+        "key",
+        15
+       ]
+      ],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": [
+       "count() Descending"
+      ],
+      "bm": "group"
+     },
+     {
+      "t": "⚡ EXECVE (запуски)",
+      "v": "numeric",
+      "w": 3,
+      "h": 2,
+      "pos": [
+       4,
+       1
+      ],
+      "q": "audit_type:EXECVE",
+      "s": [
+       "RedOS auditd Logs"
+      ],
+      "r": 86400,
+      "rows": [],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "⌨️ Топ команд (a0)",
+      "v": "bar",
+      "w": 6,
+      "h": 5,
+      "pos": [
+       1,
+       8
+      ],
+      "q": "audit_type:EXECVE",
+      "s": [
+       "RedOS auditd Logs"
+      ],
+      "r": 86400,
+      "rows": [
+       [
+        "v",
+        "a0",
+        15
+       ]
+      ],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": [
+       "count() Descending"
+      ],
+      "bm": "group"
+     },
+     {
+      "t": "🔐 Запуски sudo",
+      "v": "messages",
+      "w": 12,
+      "h": 6,
+      "pos": [
+       1,
+       18
+      ],
+      "q": "audit_type:EXECVE AND a0:\"sudo\"",
+      "s": [
+       "RedOS auditd Logs"
+      ],
+      "r": 86400,
+      "f": [
+       "timestamp",
+       "source",
+       "auid_decoded",
+       "a1",
+       "a2",
+       "a3"
+      ],
+      "lim": 80
+     }
     ]
    }
   ]
@@ -1081,231 +1132,241 @@
   "title": "🍎 macOS: приватность и периферия",
   "summary": "TCC, USB, AirDrop и запуск программ на Маках",
   "description": "Приватность и активность приложений на хостах macOS.",
-  "timerange": 300,
-  "widgets": [
+  "pages": [
    {
-    "t": "🔌 USB / AirDrop",
-    "v": "numeric",
-    "q": "log_type:macos_wifi_usb OR processImagePath:\"/usr/libexec/sharingd\"",
-    "s": [
-     "MacOS Logs"
-    ],
-    "r": 86400,
-    "rows": [],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 3,
-    "h": 2,
-    "pos": [
-     10,
-     1
-    ]
-   },
-   {
-    "t": "⚙️ Запусков процессов",
-    "v": "numeric",
-    "q": "name:es_process_events",
-    "s": [
-     "MacOS Logs"
-    ],
-    "r": 86400,
-    "rows": [],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 3,
-    "h": 2,
-    "pos": [
-     4,
-     1
-    ]
-   },
-   {
-    "t": "📦 Запуск программ (Endpoint Security)",
-    "v": "messages",
-    "q": "name:es_process_events",
-    "s": [
-     "MacOS Logs"
-    ],
-    "r": 86400,
-    "f": [
-     "timestamp",
-     "source",
-     "columns_username",
-     "columns_path",
-     "columns_cmdline"
-    ],
-    "lim": 80,
-    "w": 12,
-    "h": 6,
-    "pos": [
-     1,
-     18
-    ]
-   },
-   {
-    "t": "⚙️ Топ процессов (unified log)",
-    "v": "bar",
-    "q": "log_type:macos_unified",
-    "s": [
-     "MacOS Logs"
-    ],
-    "r": 86400,
-    "rows": [
-     [
-      "v",
-      "processImagePath",
-      12
-     ]
-    ],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "sort": [
-     "count() Descending"
-    ],
-    "bm": "group",
-    "w": 6,
-    "h": 5,
-    "pos": [
-     1,
-     13
-    ]
-   },
-   {
-    "t": "🔒 Обращений к TCC",
-    "v": "numeric",
-    "q": "processImagePath:\"/System/Library/PrivateFrameworks/TCC.framework/Support/tccd\"",
-    "s": [
-     "MacOS Logs"
-    ],
-    "r": 86400,
-    "rows": [],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 3,
-    "h": 2,
-    "pos": [
-     7,
-     1
-    ]
-   },
-   {
-    "t": "📦 Топ запускаемых программ",
-    "v": "bar",
-    "q": "name:es_process_events",
-    "s": [
-     "MacOS Logs"
-    ],
-    "r": 86400,
-    "rows": [
-     [
-      "v",
-      "columns_path",
-      15
-     ]
-    ],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "sort": [
-     "count() Descending"
-    ],
-    "bm": "group",
-    "w": 6,
-    "h": 5,
-    "pos": [
-     7,
-     3
-    ]
-   },
-   {
-    "t": "📈 Активность по типам логов",
-    "v": "bar",
-    "q": "",
-    "s": [
-     "MacOS Logs"
-    ],
-    "r": 86400,
-    "rows": [
-     [
-      "t",
-      "timestamp",
-      "auto"
-     ]
-    ],
-    "cols": [
-     [
-      "v",
-      "log_type",
-      6
-     ]
-    ],
-    "m": [
-     "count()"
-    ],
-    "bm": "stack",
-    "w": 12,
-    "h": 5,
-    "pos": [
-     1,
-     8
-    ]
-   },
-   {
-    "t": "🍎 События macOS 24ч",
-    "v": "numeric",
-    "q": "",
-    "s": [
-     "MacOS Logs"
-    ],
-    "r": 86400,
-    "rows": [],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 3,
-    "h": 2,
-    "pos": [
-     1,
-     1
-    ]
-   },
-   {
-    "t": "🔒 Категории запросов TCC",
-    "v": "pie",
-    "q": "processImagePath:\"/System/Library/PrivateFrameworks/TCC.framework/Support/tccd\"",
-    "s": [
-     "MacOS Logs"
-    ],
-    "r": 86400,
-    "rows": [
-     [
-      "v",
-      "macos_category",
-      10
-     ]
-    ],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "sort": [
-     "count() Descending"
-    ],
-    "w": 6,
-    "h": 5,
-    "pos": [
-     1,
-     3
+    "title": "",
+    "timerange": 300,
+    "widgets": [
+     {
+      "t": "🔌 USB / AirDrop",
+      "v": "numeric",
+      "w": 3,
+      "h": 2,
+      "pos": [
+       10,
+       1
+      ],
+      "q": "log_type:macos_wifi_usb OR processImagePath:\"/usr/libexec/sharingd\"",
+      "s": [
+       "MacOS Logs"
+      ],
+      "r": 86400,
+      "rows": [],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "⚙️ Запусков процессов",
+      "v": "numeric",
+      "w": 3,
+      "h": 2,
+      "pos": [
+       4,
+       1
+      ],
+      "q": "name:es_process_events",
+      "s": [
+       "MacOS Logs"
+      ],
+      "r": 86400,
+      "rows": [],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "📦 Запуск программ (Endpoint Security)",
+      "v": "messages",
+      "w": 12,
+      "h": 6,
+      "pos": [
+       1,
+       18
+      ],
+      "q": "name:es_process_events",
+      "s": [
+       "MacOS Logs"
+      ],
+      "r": 86400,
+      "f": [
+       "timestamp",
+       "source",
+       "columns_username",
+       "columns_path",
+       "columns_cmdline"
+      ],
+      "lim": 80
+     },
+     {
+      "t": "⚙️ Топ процессов (unified log)",
+      "v": "bar",
+      "w": 6,
+      "h": 5,
+      "pos": [
+       1,
+       13
+      ],
+      "q": "log_type:macos_unified",
+      "s": [
+       "MacOS Logs"
+      ],
+      "r": 86400,
+      "rows": [
+       [
+        "v",
+        "processImagePath",
+        12
+       ]
+      ],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": [
+       "count() Descending"
+      ],
+      "bm": "group"
+     },
+     {
+      "t": "🔒 Обращений к TCC",
+      "v": "numeric",
+      "w": 3,
+      "h": 2,
+      "pos": [
+       7,
+       1
+      ],
+      "q": "processImagePath:\"/System/Library/PrivateFrameworks/TCC.framework/Support/tccd\"",
+      "s": [
+       "MacOS Logs"
+      ],
+      "r": 86400,
+      "rows": [],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "📦 Топ запускаемых программ",
+      "v": "bar",
+      "w": 6,
+      "h": 5,
+      "pos": [
+       7,
+       3
+      ],
+      "q": "name:es_process_events",
+      "s": [
+       "MacOS Logs"
+      ],
+      "r": 86400,
+      "rows": [
+       [
+        "v",
+        "columns_path",
+        15
+       ]
+      ],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": [
+       "count() Descending"
+      ],
+      "bm": "group"
+     },
+     {
+      "t": "📈 Активность по типам логов",
+      "v": "bar",
+      "w": 12,
+      "h": 5,
+      "pos": [
+       1,
+       8
+      ],
+      "q": "",
+      "s": [
+       "MacOS Logs"
+      ],
+      "r": 86400,
+      "rows": [
+       [
+        "t",
+        "timestamp",
+        "auto"
+       ]
+      ],
+      "cols": [
+       [
+        "v",
+        "log_type",
+        6
+       ]
+      ],
+      "m": [
+       "count()"
+      ],
+      "sort": [],
+      "bm": "stack"
+     },
+     {
+      "t": "🍎 События macOS 24ч",
+      "v": "numeric",
+      "w": 3,
+      "h": 2,
+      "pos": [
+       1,
+       1
+      ],
+      "q": "",
+      "s": [
+       "MacOS Logs"
+      ],
+      "r": 86400,
+      "rows": [],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "🔒 Категории запросов TCC",
+      "v": "pie",
+      "w": 6,
+      "h": 5,
+      "pos": [
+       1,
+       3
+      ],
+      "q": "processImagePath:\"/System/Library/PrivateFrameworks/TCC.framework/Support/tccd\"",
+      "s": [
+       "MacOS Logs"
+      ],
+      "r": 86400,
+      "rows": [
+       [
+        "v",
+        "macos_category",
+        10
+       ]
+      ],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": [
+       "count() Descending"
+      ]
+     }
     ]
    }
   ]
@@ -1314,199 +1375,209 @@
   "title": "🔐 FreeIPA: аутентификация в домене",
   "summary": "Kerberos, LDAP, SSSD и объём логов FreeIPA",
   "description": "Аутентификация в домене monitoring.test и доля служебного шума.",
-  "timerange": 300,
-  "widgets": [
+  "pages": [
    {
-    "t": "🔁 SSSD",
-    "v": "numeric",
-    "q": "application_name:freeipa_sssd",
-    "s": [
-     "FreeIPA Logs"
-    ],
-    "r": 86400,
-    "rows": [],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 3,
-    "h": 2,
-    "pos": [
-     10,
-     1
-    ]
-   },
-   {
-    "t": "📇 LDAP-доступ (389)",
-    "v": "numeric",
-    "q": "application_name:freeipa_389_access",
-    "s": [
-     "FreeIPA Logs"
-    ],
-    "r": 86400,
-    "rows": [],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 3,
-    "h": 2,
-    "pos": [
-     7,
-     1
-    ]
-   },
-   {
-    "t": "🔒 Журнал безопасности",
-    "v": "messages",
-    "q": "application_name:freeipa_secure",
-    "s": [
-     "FreeIPA Logs"
-    ],
-    "r": 86400,
-    "f": [
-     "timestamp",
-     "source",
-     "message"
-    ],
-    "lim": 80,
-    "w": 12,
-    "h": 6,
-    "pos": [
-     1,
-     18
-    ]
-   },
-   {
-    "t": "🥧 Доли подсистем",
-    "v": "pie",
-    "q": "",
-    "s": [
-     "FreeIPA Logs"
-    ],
-    "r": 86400,
-    "rows": [
-     [
-      "v",
-      "application_name",
-      10
-     ]
-    ],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "sort": [
-     "count() Descending"
-    ],
-    "w": 6,
-    "h": 5,
-    "pos": [
-     1,
-     3
-    ]
-   },
-   {
-    "t": "📈 Активность по подсистемам",
-    "v": "bar",
-    "q": "",
-    "s": [
-     "FreeIPA Logs"
-    ],
-    "r": 86400,
-    "rows": [
-     [
-      "t",
-      "timestamp",
-      "auto"
-     ]
-    ],
-    "cols": [
-     [
-      "v",
-      "application_name",
-      8
-     ]
-    ],
-    "m": [
-     "count()"
-    ],
-    "bm": "stack",
-    "w": 12,
-    "h": 5,
-    "pos": [
-     1,
-     8
-    ]
-   },
-   {
-    "t": "🎫 Kerberos (krb5kdc)",
-    "v": "numeric",
-    "q": "application_name:freeipa_krb5kdc",
-    "s": [
-     "FreeIPA Logs"
-    ],
-    "r": 86400,
-    "rows": [],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 3,
-    "h": 2,
-    "pos": [
-     4,
-     1
-    ]
-   },
-   {
-    "t": "🔐 Сообщений FreeIPA 24ч",
-    "v": "numeric",
-    "q": "",
-    "s": [
-     "FreeIPA Logs"
-    ],
-    "r": 86400,
-    "rows": [],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 3,
-    "h": 2,
-    "pos": [
-     1,
-     1
-    ]
-   },
-   {
-    "t": "📊 Объём по подсистемам",
-    "v": "bar",
-    "q": "",
-    "s": [
-     "FreeIPA Logs"
-    ],
-    "r": 86400,
-    "rows": [
-     [
-      "v",
-      "application_name",
-      10
-     ]
-    ],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "sort": [
-     "count() Descending"
-    ],
-    "bm": "group",
-    "w": 6,
-    "h": 5,
-    "pos": [
-     1,
-     13
+    "title": "",
+    "timerange": 300,
+    "widgets": [
+     {
+      "t": "🔁 SSSD",
+      "v": "numeric",
+      "w": 3,
+      "h": 2,
+      "pos": [
+       10,
+       1
+      ],
+      "q": "application_name:freeipa_sssd",
+      "s": [
+       "FreeIPA Logs"
+      ],
+      "r": 86400,
+      "rows": [],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "📇 LDAP-доступ (389)",
+      "v": "numeric",
+      "w": 3,
+      "h": 2,
+      "pos": [
+       7,
+       1
+      ],
+      "q": "application_name:freeipa_389_access",
+      "s": [
+       "FreeIPA Logs"
+      ],
+      "r": 86400,
+      "rows": [],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "🔒 Журнал безопасности",
+      "v": "messages",
+      "w": 12,
+      "h": 6,
+      "pos": [
+       1,
+       18
+      ],
+      "q": "application_name:freeipa_secure",
+      "s": [
+       "FreeIPA Logs"
+      ],
+      "r": 86400,
+      "f": [
+       "timestamp",
+       "source",
+       "message"
+      ],
+      "lim": 80
+     },
+     {
+      "t": "🥧 Доли подсистем",
+      "v": "pie",
+      "w": 6,
+      "h": 5,
+      "pos": [
+       1,
+       3
+      ],
+      "q": "",
+      "s": [
+       "FreeIPA Logs"
+      ],
+      "r": 86400,
+      "rows": [
+       [
+        "v",
+        "application_name",
+        10
+       ]
+      ],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": [
+       "count() Descending"
+      ]
+     },
+     {
+      "t": "📈 Активность по подсистемам",
+      "v": "bar",
+      "w": 12,
+      "h": 5,
+      "pos": [
+       1,
+       8
+      ],
+      "q": "",
+      "s": [
+       "FreeIPA Logs"
+      ],
+      "r": 86400,
+      "rows": [
+       [
+        "t",
+        "timestamp",
+        "auto"
+       ]
+      ],
+      "cols": [
+       [
+        "v",
+        "application_name",
+        8
+       ]
+      ],
+      "m": [
+       "count()"
+      ],
+      "sort": [],
+      "bm": "stack"
+     },
+     {
+      "t": "🎫 Kerberos (krb5kdc)",
+      "v": "numeric",
+      "w": 3,
+      "h": 2,
+      "pos": [
+       4,
+       1
+      ],
+      "q": "application_name:freeipa_krb5kdc",
+      "s": [
+       "FreeIPA Logs"
+      ],
+      "r": 86400,
+      "rows": [],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "🔐 Сообщений FreeIPA 24ч",
+      "v": "numeric",
+      "w": 3,
+      "h": 2,
+      "pos": [
+       1,
+       1
+      ],
+      "q": "",
+      "s": [
+       "FreeIPA Logs"
+      ],
+      "r": 86400,
+      "rows": [],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "📊 Объём по подсистемам",
+      "v": "bar",
+      "w": 6,
+      "h": 5,
+      "pos": [
+       1,
+       13
+      ],
+      "q": "",
+      "s": [
+       "FreeIPA Logs"
+      ],
+      "r": 86400,
+      "rows": [
+       [
+        "v",
+        "application_name",
+        10
+       ]
+      ],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": [
+       "count() Descending"
+      ],
+      "bm": "group"
+     }
     ]
    }
   ]
@@ -1515,230 +1586,243 @@
   "title": "🔥 Детекты: кто шумит",
   "summary": "Какие правила срабатывают чаще всего и на каких объектах",
   "description": "",
-  "timerange": 604800,
-  "widgets": [
+  "pages": [
    {
-    "t": "HIGH за 7 дней",
-    "v": "numeric",
-    "q": "priority:3",
-    "s": [
-     "All events"
-    ],
-    "r": 604800,
-    "rows": [],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 3,
-    "h": 3,
-    "pos": [
-     4,
-     1
-    ]
-   },
-   {
-    "t": "Топ правил (по id)",
-    "v": "bar",
-    "q": "",
-    "s": [
-     "All events"
-    ],
-    "r": 604800,
-    "rows": [
-     [
-      "v",
-      "event_definition_id",
-      15
-     ]
-    ],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 6,
-    "h": 6,
-    "pos": [
-     1,
-     9
-    ]
-   },
-   {
-    "t": "События за 7 дней",
-    "v": "numeric",
-    "q": "",
-    "s": [
-     "All events"
-    ],
-    "r": 604800,
-    "rows": [],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 3,
-    "h": 3,
-    "pos": [
-     1,
-     1
-    ]
-   },
-   {
-    "t": "События за 24 ч",
-    "v": "numeric",
-    "q": "",
-    "s": [
-     "All events"
-    ],
-    "r": 86400,
-    "rows": [],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 3,
-    "h": 3,
-    "pos": [
-     10,
-     1
-    ]
-   },
-   {
-    "t": "Справочник правил",
-    "v": "text",
-    "txt": "**Справочник: id правила → название**\n\n- `1d7ddf` … LNX - Отказ SELinux (AVC)\n- `225c18` … Контейнеры: всплеск ошибок\n- `1d7dc7` … LNX - Исполнение из памяти (memfd_create)\n- `1d903d` … macOS - Bi.Zone: новый элемент автозагрузки\n- `1d8195` … 6ad30b47cc18050c4f1d8195\n- `225c28` … Контейнеры: перезапуски MariaDB\n- `1d7dbf` … LNX - Подозрительные утилиты (base64, nc, socat, scp)\n- `1d814b` … 6ad30b46cc18050c4f1d814b\n- `1d7dd7` … LNX - Изменение правил firewall (iptables, nft)\n- `1d816f` … 6ad30b46cc18050c4f1d816f\n- `9ed46e` … LNX - Использование sudo\n- `9ed450` … LNX - Изменение прав доступа (chmod)\n- `1d7e3c` … Windows - Автозагрузка через ключ реестра Run\n- `1ecca8` … KEENETIC - Новое устройство в сети\n- `1d7de7` … LNX - Разведка (id, whoami)",
-    "w": 12,
-    "h": 6,
-    "pos": [
-     1,
-     15
-    ]
-   },
-   {
-    "t": "MEDIUM за 7 дней",
-    "v": "numeric",
-    "q": "priority:2",
-    "s": [
-     "All events"
-    ],
-    "r": 604800,
-    "rows": [],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 3,
-    "h": 3,
-    "pos": [
-     7,
-     1
-    ]
-   },
-   {
-    "t": "Топ объектов срабатываний (key)",
-    "v": "bar",
-    "q": "",
-    "s": [
-     "All events"
-    ],
-    "r": 604800,
-    "rows": [
-     [
-      "v",
-      "key",
-      12
-     ]
-    ],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 6,
-    "h": 6,
-    "pos": [
-     7,
-     9
-    ]
-   },
-   {
-    "t": "По приоритету",
-    "v": "pie",
-    "q": "",
-    "s": [
-     "All events"
-    ],
-    "r": 604800,
-    "rows": [
-     [
-      "v",
-      "priority",
-      3
-     ]
-    ],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 4,
-    "h": 5,
-    "pos": [
-     1,
-     4
-    ]
-   },
-   {
-    "t": "Срабатывания по времени и приоритету",
-    "v": "area",
-    "q": "",
-    "s": [
-     "All events"
-    ],
-    "r": 604800,
-    "rows": [
-     [
-      "t",
-      "timestamp",
-      "auto"
-     ]
-    ],
-    "cols": [
-     [
-      "v",
-      "priority",
-      3
-     ]
-    ],
-    "m": [
-     "count()"
-    ],
-    "w": 8,
-    "h": 5,
-    "pos": [
-     5,
-     4
-    ]
-   },
-   {
-    "t": "Последние события",
-    "v": "messages",
-    "q": "",
-    "s": [
-     "All events"
-    ],
-    "r": 604800,
-    "f": [
-     "timestamp",
-     "priority",
-     "source",
-     "event_definition_id",
-     "message"
-    ],
-    "lim": 30,
-    "w": 12,
-    "h": 6,
-    "pos": [
-     1,
-     21
+    "title": "",
+    "timerange": 604800,
+    "widgets": [
+     {
+      "t": "HIGH за 7 дней",
+      "v": "numeric",
+      "w": 3,
+      "h": 3,
+      "pos": [
+       4,
+       1
+      ],
+      "q": "priority:3",
+      "s": [
+       "All events"
+      ],
+      "r": 604800,
+      "rows": [],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "Топ правил (по id)",
+      "v": "bar",
+      "w": 6,
+      "h": 6,
+      "pos": [
+       1,
+       9
+      ],
+      "q": "",
+      "s": [
+       "All events"
+      ],
+      "r": 604800,
+      "rows": [
+       [
+        "v",
+        "event_definition_id",
+        15
+       ]
+      ],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "События за 7 дней",
+      "v": "numeric",
+      "w": 3,
+      "h": 3,
+      "pos": [
+       1,
+       1
+      ],
+      "q": "",
+      "s": [
+       "All events"
+      ],
+      "r": 604800,
+      "rows": [],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "События за 24 ч",
+      "v": "numeric",
+      "w": 3,
+      "h": 3,
+      "pos": [
+       10,
+       1
+      ],
+      "q": "",
+      "s": [
+       "All events"
+      ],
+      "r": 86400,
+      "rows": [],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "Справочник правил",
+      "v": "text",
+      "w": 12,
+      "h": 16,
+      "pos": [
+       1,
+       15
+      ],
+      "txt": "**Справочник: id правила → название** (последние 6 символов `event_definition_id`)\n\n- `1ed7eb` … FREEIPA - Выпуск сертификата в CA (Dogtag)\n- `1ecca0` … FREEIPA - Подбор пароля (10+ PREAUTH_FAILED за 5 мин)\n- `1ecc98` … HEALTH - Клиенты не могут связаться с KDC\n- `1ed7e3` … KEENETIC - Вход в админку роутера (SSH)\n- `1ecca8` … KEENETIC - Новое устройство в сети\n- `1edb48` … KEENETIC - Отказы WireGuard (ежедневная сводка)\n- `9ed45a` … LNX - Брутфорс SSH (5+ неудачных входов за 5 мин)\n- `9edafa` … LNX - Добавление SSH-ключа в authorized_keys\n- `9ed448` … LNX - Добавление/удаление пользователя\n- `1d7dcf` … LNX - Закрепление через systemctl enable\n- `1d7daf` … LNX - Затирание следов (shred, history, truncate логов)\n- `1d7d96` … LNX - Изменение /etc/passwd, shadow, group\n- `1d7d9e` … LNX - Изменение sshd_config\n- `9ed450` … LNX - Изменение прав доступа (chmod)\n- `1d7dd7` … LNX - Изменение правил firewall (iptables, nft)\n- `1d7dc7` … LNX - Исполнение из памяти (memfd_create)\n- `9ed46e` … LNX - Использование sudo\n- `9ed462` … LNX - Неудачная попытка sudo\n- `1d7da6` … LNX - Обратная оболочка (/dev/tcp)\n- `9ed477` … LNX - Остановка службы (systemctl stop)\n- `1d7ddf` … LNX - Отказ SELinux (AVC)\n- `1d7db7` … LNX - Отключение аудита или удаление правил auditd\n- `1d7dbf` … LNX - Подозрительные утилиты (base64, nc, socat, scp)\n- `1d7de7` … LNX - Разведка (id, whoami)\n- `19e330` … System notification events\n- `1d7dff` … Windows - Defender обнаружил угрозу или отключён\n- `1d7e44` … Windows - LOLBins (certutil, mshta, bitsadmin, regsvr32)\n- `1d7e17` … Windows - PowerShell с закодированной командой\n- `1d7e1f` … Windows - PowerShell скачивает и исполняет код\n- `1d7e3c` … Windows - Автозагрузка через ключ реестра Run\n- `1d7e57` … Windows - Вход по RDP\n- `1d7df7` … Windows - Доступ к памяти LSASS\n- `9ed4c9` … Windows - Изменение группы «Администраторы домена»\n- `1d7e27` … Windows - Изменение привилегированных групп и учёток\n- `1d7e31` … Windows - Новая служба\n- `1ed7f3` … Windows - Отключение Firewall (netsh или PS)\n- `1d7e0f` … Windows - Офисное приложение запустило оболочку\n- `1d7def` … Windows - Очистка журнала событий\n- `9ed4d1` … Windows - Подбор пароля (5+ ошибок входа 4625 за 5 мин)\n- `1d7e5f` … Windows - Серия разведки (5+ команд за 5 мин)\n- `1d7e4c` … Windows - Создание задачи через schtasks\n- `9ed4d9` … Windows - Создание/удаление локального пользователя (net user)\n- `1d7e07` … Windows - Удаление теневых копий\n- `1d904c` … macOS - Bi.Zone: неизвестный SSH-ключ в authorized_keys\n- `1d909c` … macOS - Bi.Zone: неудачные входы по SSH\n- `1d9059` … macOS - Bi.Zone: новое правило в sudoers\n- `1d9066` … macOS - Bi.Zone: новый пользователь\n- `1d903d` … macOS - Bi.Zone: новый элемент автозагрузки\n- `1d90a9` … macOS - Bi.Zone: опасная команда в истории оболочки\n- `1d9080` … macOS - Bi.Zone: подозрительная запись в hosts\n- `1d908f` … macOS - Bi.Zone: процесс из /tmp или /Users/Shared\n- `1d9073` … macOS - Bi.Zone: смена DNS-серверов\n- `9ed4a7` … macOS - Активность AirDrop\n- `1d7eac` … macOS - Включение удалённого входа или Screen Sharing\n- `1d7e8c` … macOS - Вмешательство в TCC\n- `1d7e70` … macOS - Выгрузка паролей из Keychain\n- `9ed48f` … macOS - Выполнение команды через sudo\n- `1d7ea4` … macOS - Загрузка расширения ядра\n- `1d7e9c` … macOS - Запуск программы из /tmp или /Users/Shared\n- `9ed47f` … macOS - Изменение /etc/sudoers\n- `9ed497` … macOS - Неудачная попытка sudo (неверный пароль)\n- `9ed49f` … macOS - Новый/изменённый plist в автозагрузке\n- `1d7e84` … macOS - Обратная оболочка (/dev/tcp, pty.spawn)\n- `1d7e67` … macOS - Отключение SIP или Gatekeeper\n- `9ed4b1` … macOS - Подключено Apple-устройство (iPhone/iPad/iPod)\n- `9ed4c1` … macOS - Подключено мобильное устройство (не Apple)\n- `9ed4b9` … macOS - Подключён USB-накопитель\n- `9ed487` … macOS - Подозрительный процесс открыл TCP-порт\n- `1d7eb4` … macOS - Снятие карантина с приложения\n- `1d7e94` … macOS - Создание пользователя или изменение групп\n- `1d7e78` … macOS - Фишинговый запрос пароля через osascript\n- `55fed7` … Контейнеры: Grafana — неудачный вход (подбор пароля)\n- `55fecf` … Контейнеры: Loki — ошибки приёма\n- `55fec7` … Контейнеры: MongoDB — ошибки\n- `55fee9` … Контейнеры: netalertx — всплеск объёма логов\n- `55fedf` … Контейнеры: netalertx — новое устройство в сети\n- `55febf` … Контейнеры: promtail не доставляет логи в Loki\n- `225c18` … Контейнеры: всплеск ошибок\n- `55feb3` … Контейнеры: нехватка памяти или падение процесса\n- `225c30` … Контейнеры: ошибки прав доступа\n- `225c28` … Контейнеры: перезапуски MariaDB\n- `55fd98` … Контейнеры: тишина — atrium\n- `55fd80` … Контейнеры: тишина — grafana\n- `55fda0` … Контейнеры: тишина — komodo_mongo_1\n- `55fd88` … Контейнеры: тишина — loki\n- `55fdb6` … Контейнеры: тишина — netalertx\n- `55fdaa` … Контейнеры: тишина — wazuh.dashboard\n- `55fd90` … Контейнеры: тишина — zaslon\n- `5601a1` … Контейнеры: тишина — нет логов ни от одного контейнера\n\nПравила с ids `1d8195`, `1d814b`, `1d817c`, `1d816f`, `1d81c2` удалены из Graylog, но их события ещё лежат в индексе."
+     },
+     {
+      "t": "MEDIUM за 7 дней",
+      "v": "numeric",
+      "w": 3,
+      "h": 3,
+      "pos": [
+       7,
+       1
+      ],
+      "q": "priority:2",
+      "s": [
+       "All events"
+      ],
+      "r": 604800,
+      "rows": [],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "Топ объектов срабатываний (key)",
+      "v": "bar",
+      "w": 6,
+      "h": 6,
+      "pos": [
+       7,
+       9
+      ],
+      "q": "",
+      "s": [
+       "All events"
+      ],
+      "r": 604800,
+      "rows": [
+       [
+        "v",
+        "key",
+        12
+       ]
+      ],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "По приоритету",
+      "v": "pie",
+      "w": 4,
+      "h": 5,
+      "pos": [
+       1,
+       4
+      ],
+      "q": "",
+      "s": [
+       "All events"
+      ],
+      "r": 604800,
+      "rows": [
+       [
+        "v",
+        "priority",
+        3
+       ]
+      ],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "Срабатывания по времени и приоритету",
+      "v": "area",
+      "w": 8,
+      "h": 5,
+      "pos": [
+       5,
+       4
+      ],
+      "q": "",
+      "s": [
+       "All events"
+      ],
+      "r": 604800,
+      "rows": [
+       [
+        "t",
+        "timestamp",
+        "auto"
+       ]
+      ],
+      "cols": [
+       [
+        "v",
+        "priority",
+        3
+       ]
+      ],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "Последние события",
+      "v": "messages",
+      "w": 12,
+      "h": 6,
+      "pos": [
+       1,
+       21
+      ],
+      "q": "",
+      "s": [
+       "All events"
+      ],
+      "r": 604800,
+      "f": [
+       "timestamp",
+       "priority",
+       "source",
+       "event_definition_id",
+       "message"
+      ],
+      "lim": 30
+     }
     ]
    }
   ]
@@ -1747,159 +1831,169 @@
   "title": "🩺 Здоровье сбора логов",
   "summary": "Доходят ли логи: объём по входам и потокам, последнее сообщение от каждого источника",
   "description": "",
-  "timerange": 86400,
-  "widgets": [
+  "pages": [
    {
-    "t": "Доли входов",
-    "v": "pie",
-    "q": "",
-    "s": [],
-    "r": 86400,
-    "rows": [
-     [
-      "v",
-      "gl2_source_input",
-      8
-     ]
-    ],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 6,
-    "h": 6,
-    "pos": [
-     7,
-     10
-    ]
-   },
-   {
-    "t": "Источников (хостов)",
-    "v": "numeric",
-    "q": "",
-    "s": [],
-    "r": 86400,
-    "rows": [],
-    "cols": [],
-    "m": [
-     "card(source)"
-    ],
-    "w": 6,
-    "h": 3,
-    "pos": [
-     7,
-     1
-    ]
-   },
-   {
-    "t": "Сообщений за 24 ч",
-    "v": "numeric",
-    "q": "",
-    "s": [],
-    "r": 86400,
-    "rows": [],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 6,
-    "h": 3,
-    "pos": [
-     1,
-     1
-    ]
-   },
-   {
-    "t": "Последнее сообщение по источникам (самые «тихие» сверху)",
-    "v": "table",
-    "q": "",
-    "s": [],
-    "r": 86400,
-    "rows": [
-     [
-      "v",
-      "source",
-      40
-     ]
-    ],
-    "cols": [],
-    "m": [
-     "latest(timestamp)",
-     "count()"
-    ],
-    "sort": [
-     "latest(timestamp) Ascending"
-    ],
-    "w": 12,
-    "h": 8,
-    "pos": [
-     1,
-     16
-    ]
-   },
-   {
-    "t": "Объём по входам во времени",
-    "v": "area",
-    "q": "",
-    "s": [],
-    "r": 86400,
-    "rows": [
-     [
-      "t",
-      "timestamp",
-      "auto"
-     ]
-    ],
-    "cols": [
-     [
-      "v",
-      "gl2_source_input",
-      8
-     ]
-    ],
-    "m": [
-     "count()"
-    ],
-    "w": 12,
-    "h": 6,
-    "pos": [
-     1,
-     4
-    ]
-   },
-   {
-    "t": "Объём по потокам",
-    "v": "bar",
-    "q": "",
-    "s": [],
-    "r": 86400,
-    "rows": [
-     [
-      "v",
-      "streams",
-      10
-     ]
-    ],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 6,
-    "h": 6,
-    "pos": [
-     1,
-     10
-    ]
-   },
-   {
-    "t": "Справочник",
-    "v": "text",
-    "txt": "**Справочник: входы и потоки**\n\n- вход `2882bf` … MacOS Beats\n- вход `5b20b1` … BiZone macOS\n- вход `fdb8f8` … Syslog UDP\n- вход `fdb8ef` … Beats Input\n- вход `fdb8e5` … GELF UDP\n- вход `1f2e27` … Podman Logs\n- поток `2559a4` … RedOS auditd Logs\n- поток `fde88f` … Syslog Logs\n- поток `fdd94e` … MacOS Logs\n- поток `1a556b` … BiZone_macOS\n- поток `fde575` … WindowsLogs\n- поток `885bca` … FreeIPA Logs\n- поток `1fa113` … Containers",
-    "w": 12,
-    "h": 6,
-    "pos": [
-     1,
-     24
+    "title": "",
+    "timerange": 86400,
+    "widgets": [
+     {
+      "t": "Доли входов",
+      "v": "pie",
+      "w": 6,
+      "h": 6,
+      "pos": [
+       7,
+       10
+      ],
+      "q": "",
+      "s": [],
+      "r": 86400,
+      "rows": [
+       [
+        "v",
+        "gl2_source_input",
+        8
+       ]
+      ],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "Источников (хостов)",
+      "v": "numeric",
+      "w": 6,
+      "h": 3,
+      "pos": [
+       7,
+       1
+      ],
+      "q": "",
+      "s": [],
+      "r": 86400,
+      "rows": [],
+      "cols": [],
+      "m": [
+       "card(source)"
+      ],
+      "sort": []
+     },
+     {
+      "t": "Сообщений за 24 ч",
+      "v": "numeric",
+      "w": 6,
+      "h": 3,
+      "pos": [
+       1,
+       1
+      ],
+      "q": "",
+      "s": [],
+      "r": 86400,
+      "rows": [],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "Последнее сообщение по источникам (самые «тихие» сверху)",
+      "v": "table",
+      "w": 12,
+      "h": 8,
+      "pos": [
+       1,
+       16
+      ],
+      "q": "",
+      "s": [],
+      "r": 86400,
+      "rows": [
+       [
+        "v",
+        "source",
+        40
+       ]
+      ],
+      "cols": [],
+      "m": [
+       "latest(timestamp)",
+       "count()"
+      ],
+      "sort": [
+       "latest(timestamp) Ascending"
+      ]
+     },
+     {
+      "t": "Объём по входам во времени",
+      "v": "area",
+      "w": 12,
+      "h": 6,
+      "pos": [
+       1,
+       4
+      ],
+      "q": "",
+      "s": [],
+      "r": 86400,
+      "rows": [
+       [
+        "t",
+        "timestamp",
+        "auto"
+       ]
+      ],
+      "cols": [
+       [
+        "v",
+        "gl2_source_input",
+        8
+       ]
+      ],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "Объём по потокам",
+      "v": "bar",
+      "w": 6,
+      "h": 6,
+      "pos": [
+       1,
+       10
+      ],
+      "q": "",
+      "s": [],
+      "r": 86400,
+      "rows": [
+       [
+        "v",
+        "streams",
+        10
+       ]
+      ],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "Справочник",
+      "v": "text",
+      "w": 12,
+      "h": 6,
+      "pos": [
+       1,
+       24
+      ],
+      "txt": "**Справочник: входы и потоки**\n\n- вход `2882bf` … MacOS Beats\n- вход `5b20b1` … BiZone macOS\n- вход `fdb8f8` … Syslog UDP\n- вход `fdb8ef` … Beats Input\n- вход `fdb8e5` … GELF UDP\n- вход `1f2e27` … Podman Logs\n- поток `2559a4` … RedOS auditd Logs\n- поток `fde88f` … Syslog Logs\n- поток `fdd94e` … MacOS Logs\n- поток `1a556b` … BiZone_macOS\n- поток `fde575` … WindowsLogs\n- поток `885bca` … FreeIPA Logs\n- поток `1fa113` … Containers"
+     }
     ]
    }
   ]
@@ -1908,296 +2002,312 @@
   "title": "🚨 Кто ломится: неудачные входы",
   "summary": "Неудачная аутентификация со всех источников за 7 дней",
   "description": "",
-  "timerange": 604800,
-  "widgets": [
+  "pages": [
    {
-    "t": "Linux: SSH",
-    "v": "numeric",
-    "q": "(message:\"sshd-session\" AND message:\"Authentication failure\") OR (message:\"sshd\" AND message:\"Failed password\")",
-    "s": [
-     "RedOS auditd Logs"
-    ],
-    "r": 604800,
-    "rows": [],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 3,
-    "h": 3,
-    "pos": [
-     4,
-     1
-    ]
-   },
-   {
-    "t": "FreeIPA: PREAUTH_FAILED",
-    "v": "numeric",
-    "q": "message:PREAUTH_FAILED",
-    "s": [
-     "FreeIPA Logs"
-    ],
-    "r": 604800,
-    "rows": [],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 3,
-    "h": 3,
-    "pos": [
-     10,
-     1
-    ]
-   },
-   {
-    "t": "Хосты, на которые идут попытки",
-    "v": "bar",
-    "q": "(winlogbeat_event_code:4625 AND winlogbeat_event_outcome:failure) OR ((message:\"sshd-session\" AND message:\"Authentication failure\") OR (message:\"sshd\" AND message:\"Failed password\")) OR message:PREAUTH_FAILED OR kn_event_type:Wireguard_Failed OR (container_name:grafana AND (message:\"Invalid username or password\" OR message:\"Failed to authenticate\" OR message:\"login attempt failed\")) OR mac_bz_event_type:LogonHistoryFailure OR (message:\"sudo\" AND (message:\"authentication failure\" OR message:\"incorrect password\" OR (message:\"pam_sss\" AND message:\"failure\")))",
-    "s": [
-     "FreeIPA Logs",
-     "Syslog Logs",
-     "WindowsLogs",
-     "BiZone_macOS",
-     "Containers",
-     "RedOS auditd Logs"
-    ],
-    "r": 604800,
-    "rows": [
-     [
-      "v",
-      "source",
-      12
-     ]
-    ],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 12,
-    "h": 5,
-    "pos": [
-     1,
-     12
-    ]
-   },
-   {
-    "t": "Linux: неудачный sudo",
-    "v": "numeric",
-    "q": "message:\"sudo\" AND (message:\"authentication failure\" OR message:\"incorrect password\" OR (message:\"pam_sss\" AND message:\"failure\"))",
-    "s": [
-     "RedOS auditd Logs"
-    ],
-    "r": 604800,
-    "rows": [],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 3,
-    "h": 3,
-    "pos": [
-     7,
-     1
-    ]
-   },
-   {
-    "t": "Попытки по времени и хостам",
-    "v": "area",
-    "q": "(winlogbeat_event_code:4625 AND winlogbeat_event_outcome:failure) OR ((message:\"sshd-session\" AND message:\"Authentication failure\") OR (message:\"sshd\" AND message:\"Failed password\")) OR message:PREAUTH_FAILED OR kn_event_type:Wireguard_Failed OR (container_name:grafana AND (message:\"Invalid username or password\" OR message:\"Failed to authenticate\" OR message:\"login attempt failed\")) OR mac_bz_event_type:LogonHistoryFailure OR (message:\"sudo\" AND (message:\"authentication failure\" OR message:\"incorrect password\" OR (message:\"pam_sss\" AND message:\"failure\")))",
-    "s": [
-     "FreeIPA Logs",
-     "Syslog Logs",
-     "WindowsLogs",
-     "BiZone_macOS",
-     "Containers",
-     "RedOS auditd Logs"
-    ],
-    "r": 604800,
-    "rows": [
-     [
-      "t",
-      "timestamp",
-      "auto"
-     ]
-    ],
-    "cols": [
-     [
-      "v",
-      "source",
-      6
-     ]
-    ],
-    "m": [
-     "count()"
-    ],
-    "w": 8,
-    "h": 5,
-    "pos": [
-     1,
-     7
-    ]
-   },
-   {
-    "t": "Keenetic: отказы WireGuard",
-    "v": "numeric",
-    "q": "kn_event_type:Wireguard_Failed",
-    "s": [
-     "Syslog Logs"
-    ],
-    "r": 604800,
-    "rows": [],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 3,
-    "h": 3,
-    "pos": [
-     1,
-     4
-    ]
-   },
-   {
-    "t": "macOS: неудачный вход (Triage)",
-    "v": "numeric",
-    "q": "mac_bz_event_type:LogonHistoryFailure",
-    "s": [
-     "BiZone_macOS"
-    ],
-    "r": 604800,
-    "rows": [],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 3,
-    "h": 3,
-    "pos": [
-     7,
-     4
-    ]
-   },
-   {
-    "t": "Grafana: неудачный вход",
-    "v": "numeric",
-    "q": "container_name:grafana AND (message:\"Invalid username or password\" OR message:\"Failed to authenticate\" OR message:\"login attempt failed\")",
-    "s": [
-     "Containers"
-    ],
-    "r": 604800,
-    "rows": [],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 3,
-    "h": 3,
-    "pos": [
-     4,
-     4
-    ]
-   },
-   {
-    "t": "Windows: ошибки входа 4625",
-    "v": "numeric",
-    "q": "winlogbeat_event_code:4625 AND winlogbeat_event_outcome:failure",
-    "s": [
-     "WindowsLogs"
-    ],
-    "r": 604800,
-    "rows": [],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 3,
-    "h": 3,
-    "pos": [
-     1,
-     1
-    ]
-   },
-   {
-    "t": "По источникам данных",
-    "v": "pie",
-    "q": "(winlogbeat_event_code:4625 AND winlogbeat_event_outcome:failure) OR ((message:\"sshd-session\" AND message:\"Authentication failure\") OR (message:\"sshd\" AND message:\"Failed password\")) OR message:PREAUTH_FAILED OR kn_event_type:Wireguard_Failed OR (container_name:grafana AND (message:\"Invalid username or password\" OR message:\"Failed to authenticate\" OR message:\"login attempt failed\")) OR mac_bz_event_type:LogonHistoryFailure OR (message:\"sudo\" AND (message:\"authentication failure\" OR message:\"incorrect password\" OR (message:\"pam_sss\" AND message:\"failure\")))",
-    "s": [
-     "FreeIPA Logs",
-     "Syslog Logs",
-     "WindowsLogs",
-     "BiZone_macOS",
-     "Containers",
-     "RedOS auditd Logs"
-    ],
-    "r": 604800,
-    "rows": [
-     [
-      "v",
-      "streams",
-      6
-     ]
-    ],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 4,
-    "h": 5,
-    "pos": [
-     9,
-     7
-    ]
-   },
-   {
-    "t": "Всего за 7 дней",
-    "v": "numeric",
-    "q": "(winlogbeat_event_code:4625 AND winlogbeat_event_outcome:failure) OR ((message:\"sshd-session\" AND message:\"Authentication failure\") OR (message:\"sshd\" AND message:\"Failed password\")) OR message:PREAUTH_FAILED OR kn_event_type:Wireguard_Failed OR (container_name:grafana AND (message:\"Invalid username or password\" OR message:\"Failed to authenticate\" OR message:\"login attempt failed\")) OR mac_bz_event_type:LogonHistoryFailure OR (message:\"sudo\" AND (message:\"authentication failure\" OR message:\"incorrect password\" OR (message:\"pam_sss\" AND message:\"failure\")))",
-    "s": [
-     "FreeIPA Logs",
-     "Syslog Logs",
-     "WindowsLogs",
-     "BiZone_macOS",
-     "Containers",
-     "RedOS auditd Logs"
-    ],
-    "r": 604800,
-    "rows": [],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 3,
-    "h": 3,
-    "pos": [
-     10,
-     4
-    ]
-   },
-   {
-    "t": "Последние неудачные входы",
-    "v": "messages",
-    "q": "(winlogbeat_event_code:4625 AND winlogbeat_event_outcome:failure) OR ((message:\"sshd-session\" AND message:\"Authentication failure\") OR (message:\"sshd\" AND message:\"Failed password\")) OR message:PREAUTH_FAILED OR kn_event_type:Wireguard_Failed OR (container_name:grafana AND (message:\"Invalid username or password\" OR message:\"Failed to authenticate\" OR message:\"login attempt failed\")) OR mac_bz_event_type:LogonHistoryFailure OR (message:\"sudo\" AND (message:\"authentication failure\" OR message:\"incorrect password\" OR (message:\"pam_sss\" AND message:\"failure\")))",
-    "s": [
-     "FreeIPA Logs",
-     "Syslog Logs",
-     "WindowsLogs",
-     "BiZone_macOS",
-     "Containers",
-     "RedOS auditd Logs"
-    ],
-    "r": 604800,
-    "f": [
-     "timestamp",
-     "source",
-     "message"
-    ],
-    "lim": 25,
-    "w": 12,
-    "h": 6,
-    "pos": [
-     1,
-     17
+    "title": "",
+    "timerange": 604800,
+    "widgets": [
+     {
+      "t": "Linux: SSH",
+      "v": "numeric",
+      "w": 3,
+      "h": 3,
+      "pos": [
+       4,
+       1
+      ],
+      "q": "(message:\"sshd-session\" AND message:\"Authentication failure\") OR (message:\"sshd\" AND message:\"Failed password\")",
+      "s": [
+       "RedOS auditd Logs"
+      ],
+      "r": 604800,
+      "rows": [],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "FreeIPA: PREAUTH_FAILED",
+      "v": "numeric",
+      "w": 3,
+      "h": 3,
+      "pos": [
+       10,
+       1
+      ],
+      "q": "message:PREAUTH_FAILED",
+      "s": [
+       "FreeIPA Logs"
+      ],
+      "r": 604800,
+      "rows": [],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "Хосты, на которые идут попытки",
+      "v": "bar",
+      "w": 12,
+      "h": 5,
+      "pos": [
+       1,
+       12
+      ],
+      "q": "(winlogbeat_event_code:4625 AND winlogbeat_event_outcome:failure) OR ((message:\"sshd-session\" AND message:\"Authentication failure\") OR (message:\"sshd\" AND message:\"Failed password\")) OR message:PREAUTH_FAILED OR kn_event_type:Wireguard_Failed OR (container_name:grafana AND (message:\"Invalid username or password\" OR message:\"Failed to authenticate\" OR message:\"login attempt failed\")) OR mac_bz_event_type:LogonHistoryFailure OR (message:\"sudo\" AND (message:\"authentication failure\" OR message:\"incorrect password\" OR (message:\"pam_sss\" AND message:\"failure\")))",
+      "s": [
+       "FreeIPA Logs",
+       "Syslog Logs",
+       "WindowsLogs",
+       "BiZone_macOS",
+       "Containers",
+       "RedOS auditd Logs"
+      ],
+      "r": 604800,
+      "rows": [
+       [
+        "v",
+        "source",
+        12
+       ]
+      ],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "Linux: неудачный sudo",
+      "v": "numeric",
+      "w": 3,
+      "h": 3,
+      "pos": [
+       7,
+       1
+      ],
+      "q": "message:\"sudo\" AND (message:\"authentication failure\" OR message:\"incorrect password\" OR (message:\"pam_sss\" AND message:\"failure\"))",
+      "s": [
+       "RedOS auditd Logs"
+      ],
+      "r": 604800,
+      "rows": [],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "Попытки по времени и хостам",
+      "v": "area",
+      "w": 8,
+      "h": 5,
+      "pos": [
+       1,
+       7
+      ],
+      "q": "(winlogbeat_event_code:4625 AND winlogbeat_event_outcome:failure) OR ((message:\"sshd-session\" AND message:\"Authentication failure\") OR (message:\"sshd\" AND message:\"Failed password\")) OR message:PREAUTH_FAILED OR kn_event_type:Wireguard_Failed OR (container_name:grafana AND (message:\"Invalid username or password\" OR message:\"Failed to authenticate\" OR message:\"login attempt failed\")) OR mac_bz_event_type:LogonHistoryFailure OR (message:\"sudo\" AND (message:\"authentication failure\" OR message:\"incorrect password\" OR (message:\"pam_sss\" AND message:\"failure\")))",
+      "s": [
+       "FreeIPA Logs",
+       "Syslog Logs",
+       "WindowsLogs",
+       "BiZone_macOS",
+       "Containers",
+       "RedOS auditd Logs"
+      ],
+      "r": 604800,
+      "rows": [
+       [
+        "t",
+        "timestamp",
+        "auto"
+       ]
+      ],
+      "cols": [
+       [
+        "v",
+        "source",
+        6
+       ]
+      ],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "Keenetic: отказы WireGuard",
+      "v": "numeric",
+      "w": 3,
+      "h": 3,
+      "pos": [
+       1,
+       4
+      ],
+      "q": "kn_event_type:Wireguard_Failed",
+      "s": [
+       "Syslog Logs"
+      ],
+      "r": 604800,
+      "rows": [],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "macOS: неудачный вход (Triage)",
+      "v": "numeric",
+      "w": 3,
+      "h": 3,
+      "pos": [
+       7,
+       4
+      ],
+      "q": "mac_bz_event_type:LogonHistoryFailure",
+      "s": [
+       "BiZone_macOS"
+      ],
+      "r": 604800,
+      "rows": [],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "Grafana: неудачный вход",
+      "v": "numeric",
+      "w": 3,
+      "h": 3,
+      "pos": [
+       4,
+       4
+      ],
+      "q": "container_name:grafana AND (message:\"Invalid username or password\" OR message:\"Failed to authenticate\" OR message:\"login attempt failed\")",
+      "s": [
+       "Containers"
+      ],
+      "r": 604800,
+      "rows": [],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "Windows: ошибки входа 4625",
+      "v": "numeric",
+      "w": 3,
+      "h": 3,
+      "pos": [
+       1,
+       1
+      ],
+      "q": "winlogbeat_event_code:4625 AND winlogbeat_event_outcome:failure",
+      "s": [
+       "WindowsLogs"
+      ],
+      "r": 604800,
+      "rows": [],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "По источникам данных",
+      "v": "pie",
+      "w": 4,
+      "h": 5,
+      "pos": [
+       9,
+       7
+      ],
+      "q": "(winlogbeat_event_code:4625 AND winlogbeat_event_outcome:failure) OR ((message:\"sshd-session\" AND message:\"Authentication failure\") OR (message:\"sshd\" AND message:\"Failed password\")) OR message:PREAUTH_FAILED OR kn_event_type:Wireguard_Failed OR (container_name:grafana AND (message:\"Invalid username or password\" OR message:\"Failed to authenticate\" OR message:\"login attempt failed\")) OR mac_bz_event_type:LogonHistoryFailure OR (message:\"sudo\" AND (message:\"authentication failure\" OR message:\"incorrect password\" OR (message:\"pam_sss\" AND message:\"failure\")))",
+      "s": [
+       "FreeIPA Logs",
+       "Syslog Logs",
+       "WindowsLogs",
+       "BiZone_macOS",
+       "Containers",
+       "RedOS auditd Logs"
+      ],
+      "r": 604800,
+      "rows": [
+       [
+        "v",
+        "streams",
+        6
+       ]
+      ],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "Всего за 7 дней",
+      "v": "numeric",
+      "w": 3,
+      "h": 3,
+      "pos": [
+       10,
+       4
+      ],
+      "q": "(winlogbeat_event_code:4625 AND winlogbeat_event_outcome:failure) OR ((message:\"sshd-session\" AND message:\"Authentication failure\") OR (message:\"sshd\" AND message:\"Failed password\")) OR message:PREAUTH_FAILED OR kn_event_type:Wireguard_Failed OR (container_name:grafana AND (message:\"Invalid username or password\" OR message:\"Failed to authenticate\" OR message:\"login attempt failed\")) OR mac_bz_event_type:LogonHistoryFailure OR (message:\"sudo\" AND (message:\"authentication failure\" OR message:\"incorrect password\" OR (message:\"pam_sss\" AND message:\"failure\")))",
+      "s": [
+       "FreeIPA Logs",
+       "Syslog Logs",
+       "WindowsLogs",
+       "BiZone_macOS",
+       "Containers",
+       "RedOS auditd Logs"
+      ],
+      "r": 604800,
+      "rows": [],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "Последние неудачные входы",
+      "v": "messages",
+      "w": 12,
+      "h": 6,
+      "pos": [
+       1,
+       17
+      ],
+      "q": "(winlogbeat_event_code:4625 AND winlogbeat_event_outcome:failure) OR ((message:\"sshd-session\" AND message:\"Authentication failure\") OR (message:\"sshd\" AND message:\"Failed password\")) OR message:PREAUTH_FAILED OR kn_event_type:Wireguard_Failed OR (container_name:grafana AND (message:\"Invalid username or password\" OR message:\"Failed to authenticate\" OR message:\"login attempt failed\")) OR mac_bz_event_type:LogonHistoryFailure OR (message:\"sudo\" AND (message:\"authentication failure\" OR message:\"incorrect password\" OR (message:\"pam_sss\" AND message:\"failure\")))",
+      "s": [
+       "FreeIPA Logs",
+       "Syslog Logs",
+       "WindowsLogs",
+       "BiZone_macOS",
+       "Containers",
+       "RedOS auditd Logs"
+      ],
+      "r": 604800,
+      "f": [
+       "timestamp",
+       "source",
+       "message"
+      ],
+      "lim": 25
+     }
     ]
    }
   ]
@@ -2206,206 +2316,218 @@
   "title": "🌐 Сеть и устройства (Keenetic + netalertx)",
   "summary": "Роутер и сканер сети в одной картине",
   "description": "",
-  "timerange": 86400,
-  "widgets": [
+  "pages": [
    {
-    "t": "Сканов netalertx за 24 ч",
-    "v": "numeric",
-    "q": "container_name:netalertx AND message:\"Scan Stats\" AND message:\"New Devices\"",
-    "s": [
-     "Containers"
-    ],
-    "r": 86400,
-    "rows": [],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 3,
-    "h": 3,
-    "pos": [
-     10,
-     1
-    ]
-   },
-   {
-    "t": "Событий роутера за 7 дней",
-    "v": "numeric",
-    "q": "",
-    "s": [
-     "Syslog Logs"
-    ],
-    "r": 604800,
-    "rows": [],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 3,
-    "h": 3,
-    "pos": [
-     1,
-     1
-    ]
-   },
-   {
-    "t": "Типы событий роутера",
-    "v": "pie",
-    "q": "",
-    "s": [
-     "Syslog Logs"
-    ],
-    "r": 604800,
-    "rows": [
-     [
-      "v",
-      "kn_event_type",
-      8
-     ]
-    ],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 4,
-    "h": 5,
-    "pos": [
-     1,
-     4
-    ]
-   },
-   {
-    "t": "Wi-Fi: подключения и отключения клиентов",
-    "v": "messages",
-    "q": "message:\"WifiMonitor\" AND message:(\"deauthenticated\" OR \"authenticated\")",
-    "s": [
-     "Syslog Logs"
-    ],
-    "r": 604800,
-    "f": [
-     "timestamp",
-     "source",
-     "message"
-    ],
-    "lim": 20,
-    "w": 12,
-    "h": 6,
-    "pos": [
-     1,
-     15
-    ]
-   },
-   {
-    "t": "WireGuard: отказов за 7 дней",
-    "v": "numeric",
-    "q": "kn_event_type:Wireguard_Failed",
-    "s": [
-     "Syslog Logs"
-    ],
-    "r": 604800,
-    "rows": [],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 3,
-    "h": 3,
-    "pos": [
-     7,
-     1
-    ]
-   },
-   {
-    "t": "Активность netalertx по времени",
-    "v": "area",
-    "q": "container_name:netalertx",
-    "s": [
-     "Containers"
-    ],
-    "r": 86400,
-    "rows": [
-     [
-      "t",
-      "timestamp",
-      "auto"
-     ]
-    ],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 4,
-    "h": 5,
-    "pos": [
-     9,
-     4
-    ]
-   },
-   {
-    "t": "ARP-конфликтов за 7 дней",
-    "v": "numeric",
-    "q": "kn_event_type:ARP_Conflict",
-    "s": [
-     "Syslog Logs"
-    ],
-    "r": 604800,
-    "rows": [],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 3,
-    "h": 3,
-    "pos": [
-     4,
-     1
-    ]
-   },
-   {
-    "t": "Конфликты ARP по IP",
-    "v": "bar",
-    "q": "kn_event_type:ARP_Conflict",
-    "s": [
-     "Syslog Logs"
-    ],
-    "r": 604800,
-    "rows": [
-     [
-      "v",
-      "kn_conflict_ip",
-      8
-     ]
-    ],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 4,
-    "h": 5,
-    "pos": [
-     5,
-     4
-    ]
-   },
-   {
-    "t": "Результаты сканов netalertx (New Devices)",
-    "v": "messages",
-    "q": "container_name:netalertx AND message:\"Scan Stats\" AND message:\"New Devices\"",
-    "s": [
-     "Containers"
-    ],
-    "r": 86400,
-    "f": [
-     "timestamp",
-     "source",
-     "message"
-    ],
-    "lim": 20,
-    "w": 12,
-    "h": 6,
-    "pos": [
-     1,
-     9
+    "title": "",
+    "timerange": 86400,
+    "widgets": [
+     {
+      "t": "Сканов netalertx за 24 ч",
+      "v": "numeric",
+      "w": 3,
+      "h": 3,
+      "pos": [
+       10,
+       1
+      ],
+      "q": "container_name:netalertx AND message:\"Scan Stats\" AND message:\"New Devices\"",
+      "s": [
+       "Containers"
+      ],
+      "r": 86400,
+      "rows": [],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "Событий роутера за 7 дней",
+      "v": "numeric",
+      "w": 3,
+      "h": 3,
+      "pos": [
+       1,
+       1
+      ],
+      "q": "",
+      "s": [
+       "Syslog Logs"
+      ],
+      "r": 604800,
+      "rows": [],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "Типы событий роутера",
+      "v": "pie",
+      "w": 4,
+      "h": 5,
+      "pos": [
+       1,
+       4
+      ],
+      "q": "",
+      "s": [
+       "Syslog Logs"
+      ],
+      "r": 604800,
+      "rows": [
+       [
+        "v",
+        "kn_event_type",
+        8
+       ]
+      ],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "Wi-Fi: подключения и отключения клиентов",
+      "v": "messages",
+      "w": 12,
+      "h": 6,
+      "pos": [
+       1,
+       15
+      ],
+      "q": "message:\"WifiMonitor\" AND message:(\"deauthenticated\" OR \"authenticated\")",
+      "s": [
+       "Syslog Logs"
+      ],
+      "r": 604800,
+      "f": [
+       "timestamp",
+       "source",
+       "message"
+      ],
+      "lim": 20
+     },
+     {
+      "t": "WireGuard: отказов за 7 дней",
+      "v": "numeric",
+      "w": 3,
+      "h": 3,
+      "pos": [
+       7,
+       1
+      ],
+      "q": "kn_event_type:Wireguard_Failed",
+      "s": [
+       "Syslog Logs"
+      ],
+      "r": 604800,
+      "rows": [],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "Активность netalertx по времени",
+      "v": "area",
+      "w": 4,
+      "h": 5,
+      "pos": [
+       9,
+       4
+      ],
+      "q": "container_name:netalertx",
+      "s": [
+       "Containers"
+      ],
+      "r": 86400,
+      "rows": [
+       [
+        "t",
+        "timestamp",
+        "auto"
+       ]
+      ],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "ARP-конфликтов за 7 дней",
+      "v": "numeric",
+      "w": 3,
+      "h": 3,
+      "pos": [
+       4,
+       1
+      ],
+      "q": "kn_event_type:ARP_Conflict",
+      "s": [
+       "Syslog Logs"
+      ],
+      "r": 604800,
+      "rows": [],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "Конфликты ARP по IP",
+      "v": "bar",
+      "w": 4,
+      "h": 5,
+      "pos": [
+       5,
+       4
+      ],
+      "q": "kn_event_type:ARP_Conflict",
+      "s": [
+       "Syslog Logs"
+      ],
+      "r": 604800,
+      "rows": [
+       [
+        "v",
+        "kn_conflict_ip",
+        8
+       ]
+      ],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "Результаты сканов netalertx (New Devices)",
+      "v": "messages",
+      "w": 12,
+      "h": 6,
+      "pos": [
+       1,
+       9
+      ],
+      "q": "container_name:netalertx AND message:\"Scan Stats\" AND message:\"New Devices\"",
+      "s": [
+       "Containers"
+      ],
+      "r": 86400,
+      "f": [
+       "timestamp",
+       "source",
+       "message"
+      ],
+      "lim": 20
+     }
     ]
    }
   ]
@@ -2414,218 +2536,230 @@
   "title": "📦 Контейнеры: доставка логов",
   "summary": "promtail → Loki, ошибки Loki и объём логов по хостам",
   "description": "",
-  "timerange": 86400,
-  "widgets": [
+  "pages": [
    {
-    "t": "Хостов с контейнерами",
-    "v": "numeric",
-    "q": "",
-    "s": [
-     "Containers"
-    ],
-    "r": 86400,
-    "rows": [],
-    "cols": [],
-    "m": [
-     "card(source)"
-    ],
-    "w": 4,
-    "h": 3,
-    "pos": [
-     9,
-     1
-    ]
-   },
-   {
-    "t": "Последние ошибки доставки promtail",
-    "v": "messages",
-    "q": "message:\"context deadline exceeded\" AND container_name:promtail",
-    "s": [
-     "Containers"
-    ],
-    "r": 86400,
-    "f": [
-     "timestamp",
-     "source",
-     "message"
-    ],
-    "lim": 15,
-    "w": 12,
-    "h": 6,
-    "pos": [
-     1,
-     20
-    ]
-   },
-   {
-    "t": "Объём логов по хостам",
-    "v": "bar",
-    "q": "",
-    "s": [
-     "Containers"
-    ],
-    "r": 86400,
-    "rows": [
-     [
-      "v",
-      "source",
-      8
-     ]
-    ],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 6,
-    "h": 5,
-    "pos": [
-     1,
-     9
-    ]
-   },
-   {
-    "t": "Ошибки Loki по компонентам",
-    "v": "bar",
-    "q": "container_name:loki AND loglevel:error",
-    "s": [
-     "Containers"
-    ],
-    "r": 86400,
-    "rows": [
-     [
-      "v",
-      "logcaller",
-      8
-     ]
-    ],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 6,
-    "h": 5,
-    "pos": [
-     7,
-     9
-    ]
-   },
-   {
-    "t": "Последние ошибки Loki",
-    "v": "messages",
-    "q": "container_name:loki AND loglevel:error",
-    "s": [
-     "Containers"
-    ],
-    "r": 86400,
-    "f": [
-     "timestamp",
-     "source",
-     "message"
-    ],
-    "lim": 15,
-    "w": 12,
-    "h": 6,
-    "pos": [
-     1,
-     14
-    ]
-   },
-   {
-    "t": "promtail → Loki: ошибки доставки",
-    "v": "numeric",
-    "q": "message:\"context deadline exceeded\" AND container_name:promtail",
-    "s": [
-     "Containers"
-    ],
-    "r": 86400,
-    "rows": [],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 4,
-    "h": 3,
-    "pos": [
-     1,
-     1
-    ]
-   },
-   {
-    "t": "Loki: ошибки приёма",
-    "v": "numeric",
-    "q": "container_name:loki AND loglevel:error",
-    "s": [
-     "Containers"
-    ],
-    "r": 86400,
-    "rows": [],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 4,
-    "h": 3,
-    "pos": [
-     5,
-     1
-    ]
-   },
-   {
-    "t": "Ошибки доставки по времени и хостам",
-    "v": "area",
-    "q": "message:\"context deadline exceeded\" AND container_name:promtail",
-    "s": [
-     "Containers"
-    ],
-    "r": 86400,
-    "rows": [
-     [
-      "t",
-      "timestamp",
-      "auto"
-     ]
-    ],
-    "cols": [
-     [
-      "v",
-      "source",
-      6
-     ]
-    ],
-    "m": [
-     "count()"
-    ],
-    "w": 8,
-    "h": 5,
-    "pos": [
-     1,
-     4
-    ]
-   },
-   {
-    "t": "Ошибки доставки по хостам",
-    "v": "bar",
-    "q": "message:\"context deadline exceeded\" AND container_name:promtail",
-    "s": [
-     "Containers"
-    ],
-    "r": 86400,
-    "rows": [
-     [
-      "v",
-      "source",
-      6
-     ]
-    ],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 4,
-    "h": 5,
-    "pos": [
-     9,
-     4
+    "title": "",
+    "timerange": 86400,
+    "widgets": [
+     {
+      "t": "Хостов с контейнерами",
+      "v": "numeric",
+      "w": 4,
+      "h": 3,
+      "pos": [
+       9,
+       1
+      ],
+      "q": "",
+      "s": [
+       "Containers"
+      ],
+      "r": 86400,
+      "rows": [],
+      "cols": [],
+      "m": [
+       "card(source)"
+      ],
+      "sort": []
+     },
+     {
+      "t": "Последние ошибки доставки promtail",
+      "v": "messages",
+      "w": 12,
+      "h": 6,
+      "pos": [
+       1,
+       20
+      ],
+      "q": "message:\"context deadline exceeded\" AND container_name:promtail",
+      "s": [
+       "Containers"
+      ],
+      "r": 86400,
+      "f": [
+       "timestamp",
+       "source",
+       "message"
+      ],
+      "lim": 15
+     },
+     {
+      "t": "Объём логов по хостам",
+      "v": "bar",
+      "w": 6,
+      "h": 5,
+      "pos": [
+       1,
+       9
+      ],
+      "q": "",
+      "s": [
+       "Containers"
+      ],
+      "r": 86400,
+      "rows": [
+       [
+        "v",
+        "source",
+        8
+       ]
+      ],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "Ошибки Loki по компонентам",
+      "v": "bar",
+      "w": 6,
+      "h": 5,
+      "pos": [
+       7,
+       9
+      ],
+      "q": "container_name:loki AND loglevel:error",
+      "s": [
+       "Containers"
+      ],
+      "r": 86400,
+      "rows": [
+       [
+        "v",
+        "logcaller",
+        8
+       ]
+      ],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "Последние ошибки Loki",
+      "v": "messages",
+      "w": 12,
+      "h": 6,
+      "pos": [
+       1,
+       14
+      ],
+      "q": "container_name:loki AND loglevel:error",
+      "s": [
+       "Containers"
+      ],
+      "r": 86400,
+      "f": [
+       "timestamp",
+       "source",
+       "message"
+      ],
+      "lim": 15
+     },
+     {
+      "t": "promtail → Loki: ошибки доставки",
+      "v": "numeric",
+      "w": 4,
+      "h": 3,
+      "pos": [
+       1,
+       1
+      ],
+      "q": "message:\"context deadline exceeded\" AND container_name:promtail",
+      "s": [
+       "Containers"
+      ],
+      "r": 86400,
+      "rows": [],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "Loki: ошибки приёма",
+      "v": "numeric",
+      "w": 4,
+      "h": 3,
+      "pos": [
+       5,
+       1
+      ],
+      "q": "container_name:loki AND loglevel:error",
+      "s": [
+       "Containers"
+      ],
+      "r": 86400,
+      "rows": [],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "Ошибки доставки по времени и хостам",
+      "v": "area",
+      "w": 8,
+      "h": 5,
+      "pos": [
+       1,
+       4
+      ],
+      "q": "message:\"context deadline exceeded\" AND container_name:promtail",
+      "s": [
+       "Containers"
+      ],
+      "r": 86400,
+      "rows": [
+       [
+        "t",
+        "timestamp",
+        "auto"
+       ]
+      ],
+      "cols": [
+       [
+        "v",
+        "source",
+        6
+       ]
+      ],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "Ошибки доставки по хостам",
+      "v": "bar",
+      "w": 4,
+      "h": 5,
+      "pos": [
+       9,
+       4
+      ],
+      "q": "message:\"context deadline exceeded\" AND container_name:promtail",
+      "s": [
+       "Containers"
+      ],
+      "r": 86400,
+      "rows": [
+       [
+        "v",
+        "source",
+        6
+       ]
+      ],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     }
     ]
    }
   ]
@@ -2634,237 +2768,251 @@
   "title": "📅 Недельный обзор",
   "summary": "Тренды: события ИБ за 30 дней и объём логов за 7 дней",
   "description": "",
-  "timerange": 2592000,
-  "widgets": [
+  "pages": [
    {
-    "t": "Справочник",
-    "v": "text",
-    "txt": "**Справочник: id правила → название**\n\n- `1d7ddf` … LNX - Отказ SELinux (AVC)\n- `225c18` … Контейнеры: всплеск ошибок\n- `1d7dc7` … LNX - Исполнение из памяти (memfd_create)\n- `1d8195` … 6ad30b47cc18050c4f1d8195\n- `1d903d` … macOS - Bi.Zone: новый элемент автозагрузки\n- `225c28` … Контейнеры: перезапуски MariaDB\n- `1d814b` … 6ad30b46cc18050c4f1d814b\n- `1d7dbf` … LNX - Подозрительные утилиты (base64, nc, socat, scp)\n- `1d817c` … 6ad30b47cc18050c4f1d817c\n- `1d7dd7` … LNX - Изменение правил firewall (iptables, nft)\n- `1d816f` … 6ad30b46cc18050c4f1d816f\n- `9ed46e` … LNX - Использование sudo\n- `1d81c2` … 6ad30b48cc18050c4f1d81c2\n- `9ed450` … LNX - Изменение прав доступа (chmod)\n- `1d7e3c` … Windows - Автозагрузка через ключ реестра Run\n\n**Потоки**\n\n- `2559a4` … RedOS auditd Logs\n- `fde88f` … Syslog Logs\n- `fdd94e` … MacOS Logs\n- `1a556b` … BiZone_macOS\n- `fde575` … WindowsLogs\n- `885bca` … FreeIPA Logs\n- `1fa113` … Containers",
-    "w": 12,
-    "h": 6,
-    "pos": [
-     1,
-     20
-    ]
-   },
-   {
-    "t": "Топ объектов срабатываний за 30 дней",
-    "v": "bar",
-    "q": "",
-    "s": [
-     "All events"
-    ],
-    "r": 2592000,
-    "rows": [
-     [
-      "v",
-      "key",
-      10
-     ]
-    ],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 6,
-    "h": 5,
-    "pos": [
-     7,
-     15
-    ]
-   },
-   {
-    "t": "События за 30 дней",
-    "v": "numeric",
-    "q": "",
-    "s": [
-     "All events"
-    ],
-    "r": 2592000,
-    "rows": [],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 3,
-    "h": 3,
-    "pos": [
-     1,
-     1
-    ]
-   },
-   {
-    "t": "Топ-15 правил за 30 дней (по id)",
-    "v": "bar",
-    "q": "",
-    "s": [
-     "All events"
-    ],
-    "r": 2592000,
-    "rows": [
-     [
-      "v",
-      "event_definition_id",
-      15
-     ]
-    ],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 6,
-    "h": 6,
-    "pos": [
-     1,
-     9
-    ]
-   },
-   {
-    "t": "Доли потоков за 7 дней",
-    "v": "pie",
-    "q": "",
-    "s": [],
-    "r": 604800,
-    "rows": [
-     [
-      "v",
-      "streams",
-      10
-     ]
-    ],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 6,
-    "h": 5,
-    "pos": [
-     1,
-     15
-    ]
-   },
-   {
-    "t": "События по дням и приоритету",
-    "v": "bar",
-    "q": "",
-    "s": [
-     "All events"
-    ],
-    "r": 2592000,
-    "rows": [
-     [
-      "t",
-      "timestamp",
-      "1days"
-     ]
-    ],
-    "cols": [
-     [
-      "v",
-      "priority",
-      3
-     ]
-    ],
-    "m": [
-     "count()"
-    ],
-    "bm": "stack",
-    "w": 12,
-    "h": 5,
-    "pos": [
-     1,
-     4
-    ]
-   },
-   {
-    "t": "MEDIUM за 30 дней",
-    "v": "numeric",
-    "q": "priority:2",
-    "s": [
-     "All events"
-    ],
-    "r": 2592000,
-    "rows": [],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 3,
-    "h": 3,
-    "pos": [
-     7,
-     1
-    ]
-   },
-   {
-    "t": "LOW за 30 дней",
-    "v": "numeric",
-    "q": "priority:1",
-    "s": [
-     "All events"
-    ],
-    "r": 2592000,
-    "rows": [],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 3,
-    "h": 3,
-    "pos": [
-     10,
-     1
-    ]
-   },
-   {
-    "t": "HIGH за 30 дней",
-    "v": "numeric",
-    "q": "priority:3",
-    "s": [
-     "All events"
-    ],
-    "r": 2592000,
-    "rows": [],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 3,
-    "h": 3,
-    "pos": [
-     4,
-     1
-    ]
-   },
-   {
-    "t": "Объём логов по дням и потокам (7 дней)",
-    "v": "bar",
-    "q": "",
-    "s": [],
-    "r": 604800,
-    "rows": [
-     [
-      "t",
-      "timestamp",
-      "1days"
-     ]
-    ],
-    "cols": [
-     [
-      "v",
-      "streams",
-      10
-     ]
-    ],
-    "m": [
-     "count()"
-    ],
-    "bm": "stack",
-    "w": 6,
-    "h": 6,
-    "pos": [
-     7,
-     9
+    "title": "",
+    "timerange": 2592000,
+    "widgets": [
+     {
+      "t": "Справочник",
+      "v": "text",
+      "w": 12,
+      "h": 16,
+      "pos": [
+       1,
+       20
+      ],
+      "txt": "**Справочник: id правила → название** (последние 6 символов `event_definition_id`)\n\n- `1ed7eb` … FREEIPA - Выпуск сертификата в CA (Dogtag)\n- `1ecca0` … FREEIPA - Подбор пароля (10+ PREAUTH_FAILED за 5 мин)\n- `1ecc98` … HEALTH - Клиенты не могут связаться с KDC\n- `1ed7e3` … KEENETIC - Вход в админку роутера (SSH)\n- `1ecca8` … KEENETIC - Новое устройство в сети\n- `1edb48` … KEENETIC - Отказы WireGuard (ежедневная сводка)\n- `9ed45a` … LNX - Брутфорс SSH (5+ неудачных входов за 5 мин)\n- `9edafa` … LNX - Добавление SSH-ключа в authorized_keys\n- `9ed448` … LNX - Добавление/удаление пользователя\n- `1d7dcf` … LNX - Закрепление через systemctl enable\n- `1d7daf` … LNX - Затирание следов (shred, history, truncate логов)\n- `1d7d96` … LNX - Изменение /etc/passwd, shadow, group\n- `1d7d9e` … LNX - Изменение sshd_config\n- `9ed450` … LNX - Изменение прав доступа (chmod)\n- `1d7dd7` … LNX - Изменение правил firewall (iptables, nft)\n- `1d7dc7` … LNX - Исполнение из памяти (memfd_create)\n- `9ed46e` … LNX - Использование sudo\n- `9ed462` … LNX - Неудачная попытка sudo\n- `1d7da6` … LNX - Обратная оболочка (/dev/tcp)\n- `9ed477` … LNX - Остановка службы (systemctl stop)\n- `1d7ddf` … LNX - Отказ SELinux (AVC)\n- `1d7db7` … LNX - Отключение аудита или удаление правил auditd\n- `1d7dbf` … LNX - Подозрительные утилиты (base64, nc, socat, scp)\n- `1d7de7` … LNX - Разведка (id, whoami)\n- `19e330` … System notification events\n- `1d7dff` … Windows - Defender обнаружил угрозу или отключён\n- `1d7e44` … Windows - LOLBins (certutil, mshta, bitsadmin, regsvr32)\n- `1d7e17` … Windows - PowerShell с закодированной командой\n- `1d7e1f` … Windows - PowerShell скачивает и исполняет код\n- `1d7e3c` … Windows - Автозагрузка через ключ реестра Run\n- `1d7e57` … Windows - Вход по RDP\n- `1d7df7` … Windows - Доступ к памяти LSASS\n- `9ed4c9` … Windows - Изменение группы «Администраторы домена»\n- `1d7e27` … Windows - Изменение привилегированных групп и учёток\n- `1d7e31` … Windows - Новая служба\n- `1ed7f3` … Windows - Отключение Firewall (netsh или PS)\n- `1d7e0f` … Windows - Офисное приложение запустило оболочку\n- `1d7def` … Windows - Очистка журнала событий\n- `9ed4d1` … Windows - Подбор пароля (5+ ошибок входа 4625 за 5 мин)\n- `1d7e5f` … Windows - Серия разведки (5+ команд за 5 мин)\n- `1d7e4c` … Windows - Создание задачи через schtasks\n- `9ed4d9` … Windows - Создание/удаление локального пользователя (net user)\n- `1d7e07` … Windows - Удаление теневых копий\n- `1d904c` … macOS - Bi.Zone: неизвестный SSH-ключ в authorized_keys\n- `1d909c` … macOS - Bi.Zone: неудачные входы по SSH\n- `1d9059` … macOS - Bi.Zone: новое правило в sudoers\n- `1d9066` … macOS - Bi.Zone: новый пользователь\n- `1d903d` … macOS - Bi.Zone: новый элемент автозагрузки\n- `1d90a9` … macOS - Bi.Zone: опасная команда в истории оболочки\n- `1d9080` … macOS - Bi.Zone: подозрительная запись в hosts\n- `1d908f` … macOS - Bi.Zone: процесс из /tmp или /Users/Shared\n- `1d9073` … macOS - Bi.Zone: смена DNS-серверов\n- `9ed4a7` … macOS - Активность AirDrop\n- `1d7eac` … macOS - Включение удалённого входа или Screen Sharing\n- `1d7e8c` … macOS - Вмешательство в TCC\n- `1d7e70` … macOS - Выгрузка паролей из Keychain\n- `9ed48f` … macOS - Выполнение команды через sudo\n- `1d7ea4` … macOS - Загрузка расширения ядра\n- `1d7e9c` … macOS - Запуск программы из /tmp или /Users/Shared\n- `9ed47f` … macOS - Изменение /etc/sudoers\n- `9ed497` … macOS - Неудачная попытка sudo (неверный пароль)\n- `9ed49f` … macOS - Новый/изменённый plist в автозагрузке\n- `1d7e84` … macOS - Обратная оболочка (/dev/tcp, pty.spawn)\n- `1d7e67` … macOS - Отключение SIP или Gatekeeper\n- `9ed4b1` … macOS - Подключено Apple-устройство (iPhone/iPad/iPod)\n- `9ed4c1` … macOS - Подключено мобильное устройство (не Apple)\n- `9ed4b9` … macOS - Подключён USB-накопитель\n- `9ed487` … macOS - Подозрительный процесс открыл TCP-порт\n- `1d7eb4` … macOS - Снятие карантина с приложения\n- `1d7e94` … macOS - Создание пользователя или изменение групп\n- `1d7e78` … macOS - Фишинговый запрос пароля через osascript\n- `55fed7` … Контейнеры: Grafana — неудачный вход (подбор пароля)\n- `55fecf` … Контейнеры: Loki — ошибки приёма\n- `55fec7` … Контейнеры: MongoDB — ошибки\n- `55fee9` … Контейнеры: netalertx — всплеск объёма логов\n- `55fedf` … Контейнеры: netalertx — новое устройство в сети\n- `55febf` … Контейнеры: promtail не доставляет логи в Loki\n- `225c18` … Контейнеры: всплеск ошибок\n- `55feb3` … Контейнеры: нехватка памяти или падение процесса\n- `225c30` … Контейнеры: ошибки прав доступа\n- `225c28` … Контейнеры: перезапуски MariaDB\n- `55fd98` … Контейнеры: тишина — atrium\n- `55fd80` … Контейнеры: тишина — grafana\n- `55fda0` … Контейнеры: тишина — komodo_mongo_1\n- `55fd88` … Контейнеры: тишина — loki\n- `55fdb6` … Контейнеры: тишина — netalertx\n- `55fdaa` … Контейнеры: тишина — wazuh.dashboard\n- `55fd90` … Контейнеры: тишина — zaslon\n- `5601a1` … Контейнеры: тишина — нет логов ни от одного контейнера\n\nПравила с ids `1d8195`, `1d814b`, `1d817c`, `1d816f`, `1d81c2` удалены из Graylog, но их события ещё лежат в индексе."
+     },
+     {
+      "t": "Топ объектов срабатываний за 30 дней",
+      "v": "bar",
+      "w": 6,
+      "h": 5,
+      "pos": [
+       7,
+       15
+      ],
+      "q": "",
+      "s": [
+       "All events"
+      ],
+      "r": 2592000,
+      "rows": [
+       [
+        "v",
+        "key",
+        10
+       ]
+      ],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "События за 30 дней",
+      "v": "numeric",
+      "w": 3,
+      "h": 3,
+      "pos": [
+       1,
+       1
+      ],
+      "q": "",
+      "s": [
+       "All events"
+      ],
+      "r": 2592000,
+      "rows": [],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "Топ-15 правил за 30 дней (по id)",
+      "v": "bar",
+      "w": 6,
+      "h": 6,
+      "pos": [
+       1,
+       9
+      ],
+      "q": "",
+      "s": [
+       "All events"
+      ],
+      "r": 2592000,
+      "rows": [
+       [
+        "v",
+        "event_definition_id",
+        15
+       ]
+      ],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "Доли потоков за 7 дней",
+      "v": "pie",
+      "w": 6,
+      "h": 5,
+      "pos": [
+       1,
+       15
+      ],
+      "q": "",
+      "s": [],
+      "r": 604800,
+      "rows": [
+       [
+        "v",
+        "streams",
+        10
+       ]
+      ],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "События по дням и приоритету",
+      "v": "bar",
+      "w": 12,
+      "h": 5,
+      "pos": [
+       1,
+       4
+      ],
+      "q": "",
+      "s": [
+       "All events"
+      ],
+      "r": 2592000,
+      "rows": [
+       [
+        "t",
+        "timestamp",
+        "1days"
+       ]
+      ],
+      "cols": [
+       [
+        "v",
+        "priority",
+        3
+       ]
+      ],
+      "m": [
+       "count()"
+      ],
+      "sort": [],
+      "bm": "stack"
+     },
+     {
+      "t": "MEDIUM за 30 дней",
+      "v": "numeric",
+      "w": 3,
+      "h": 3,
+      "pos": [
+       7,
+       1
+      ],
+      "q": "priority:2",
+      "s": [
+       "All events"
+      ],
+      "r": 2592000,
+      "rows": [],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "LOW за 30 дней",
+      "v": "numeric",
+      "w": 3,
+      "h": 3,
+      "pos": [
+       10,
+       1
+      ],
+      "q": "priority:1",
+      "s": [
+       "All events"
+      ],
+      "r": 2592000,
+      "rows": [],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "HIGH за 30 дней",
+      "v": "numeric",
+      "w": 3,
+      "h": 3,
+      "pos": [
+       4,
+       1
+      ],
+      "q": "priority:3",
+      "s": [
+       "All events"
+      ],
+      "r": 2592000,
+      "rows": [],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "Объём логов по дням и потокам (7 дней)",
+      "v": "bar",
+      "w": 6,
+      "h": 6,
+      "pos": [
+       7,
+       9
+      ],
+      "q": "",
+      "s": [],
+      "r": 604800,
+      "rows": [
+       [
+        "t",
+        "timestamp",
+        "1days"
+       ]
+      ],
+      "cols": [
+       [
+        "v",
+        "streams",
+        10
+       ]
+      ],
+      "m": [
+       "count()"
+      ],
+      "sort": [],
+      "bm": "stack"
+     }
     ]
    }
   ]
@@ -2873,237 +3021,799 @@
   "title": "🍎 macOS: журналы Unified и osquery",
   "summary": "Сбои, ошибки, TCC и события безопасности macOS (Unified и osquery через Filebeat)",
   "description": "Данные Filebeat с macOS-хостов (поток MacOS Logs): unified log, osquery, wifi.log.",
-  "timerange": 300,
-  "widgets": [
+  "pages": [
    {
-    "t": "Fault Count (Критические сбои)",
-    "v": "numeric",
-    "q": "macos_level:\"Fault\"",
-    "s": [
-     "MacOS Logs"
-    ],
-    "r": 86400,
-    "rows": [],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "sort": [
-     "count() Ascending"
-    ],
-    "w": 3,
-    "h": 1,
-    "pos": [
-     7,
-     2
+    "title": "Security & Health",
+    "timerange": 300,
+    "widgets": [
+     {
+      "t": "Fault Count (Критические сбои)",
+      "v": "numeric",
+      "w": 3,
+      "h": 1,
+      "pos": [
+       7,
+       2
+      ],
+      "q": "macos_level:\"Fault\"",
+      "s": [
+       "MacOS Logs"
+      ],
+      "r": 86400,
+      "rows": [],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": [
+       "count() Ascending"
+      ]
+     },
+     {
+      "t": "📊Activity Over Time (Активность по времени)",
+      "v": "line",
+      "w": "Infinity",
+      "h": 2,
+      "pos": [
+       1,
+       4
+      ],
+      "q": "",
+      "s": [
+       "MacOS Logs"
+      ],
+      "r": 86400,
+      "rows": [
+       [
+        "t",
+        "timestamp",
+        "auto"
+       ]
+      ],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "❌ Error Count (Ошибки)",
+      "v": "numeric",
+      "w": 3,
+      "h": 1,
+      "pos": [
+       4,
+       2
+      ],
+      "q": "macos_level:\"Error\"",
+      "s": [
+       "MacOS Logs"
+      ],
+      "r": 86400,
+      "rows": [],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": [
+       "count() Ascending"
+      ]
+     },
+     {
+      "t": "🛡️ Security Events (События безопасности)",
+      "v": "numeric",
+      "w": "Infinity",
+      "h": 1,
+      "pos": [
+       1,
+       3
+      ],
+      "q": "macos_subsystem:\"com.apple.securityd\"",
+      "s": [
+       "MacOS Logs"
+      ],
+      "r": 86400,
+      "rows": [],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": [
+       "count() Ascending"
+      ]
+     },
+     {
+      "t": "",
+      "v": "text",
+      "w": "Infinity",
+      "h": 1,
+      "pos": [
+       1,
+       1
+      ],
+      "txt": "🍎 **Overview (Обзор)**\n━━━━━━━━━━━━━━━━━━━━━━━"
+     },
+     {
+      "t": "🔒 TCC Violations (Нарушения приватности)",
+      "v": "messages",
+      "w": "Infinity",
+      "h": 8,
+      "pos": [
+       1,
+       14
+      ],
+      "q": "macos_subsystem:\"com.apple.TCC\" OR macos_eventMessage:\"privacy\"",
+      "s": [
+       "MacOS Logs"
+      ],
+      "r": 86400,
+      "f": [
+       "timestamp",
+       "source",
+       "subsystem",
+       "eventMessage"
+      ],
+      "lim": 150
+     },
+     {
+      "t": "",
+      "v": "text",
+      "w": "Infinity",
+      "h": 1,
+      "pos": [
+       1,
+       6
+      ],
+      "txt": "   🍎 **Security Deep Dive (Детали безопасности)**\n   ━━━━━━━━━━━━━━━━━━━━━━"
+     },
+     {
+      "t": "🔒 TCC Events (Приватность TCC)",
+      "v": "numeric",
+      "w": 3,
+      "h": 1,
+      "pos": [
+       10,
+       2
+      ],
+      "q": "macos_subsystem:\"com.apple.TCC\"",
+      "s": [
+       "MacOS Logs"
+      ],
+      "r": 86400,
+      "rows": [],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": [
+       "count() Ascending"
+      ]
+     },
+     {
+      "t": "⚠️ Fault Events (Критические сбои)",
+      "v": "messages",
+      "w": "Infinity",
+      "h": 6,
+      "pos": [
+       1,
+       22
+      ],
+      "q": "macos_level:\"Fault\"",
+      "s": [
+       "MacOS Logs"
+      ],
+      "r": 86400,
+      "f": [
+       "timestamp",
+       "source",
+       "subsystem",
+       "eventMessage"
+      ],
+      "lim": 150
+     },
+     {
+      "t": "Total Events(Всего событий за сутки)",
+      "v": "numeric",
+      "w": 3,
+      "h": 1,
+      "pos": [
+       1,
+       2
+      ],
+      "q": "",
+      "s": [
+       "MacOS Logs"
+      ],
+      "r": 86400,
+      "rows": [],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": [
+       "count() Ascending"
+      ]
+     },
+     {
+      "t": "🔴 Security Errors (Ошибки безопасности)",
+      "v": "messages",
+      "w": "Infinity",
+      "h": 7,
+      "pos": [
+       1,
+       7
+      ],
+      "q": "macos_level:Error",
+      "s": [
+       "MacOS Logs"
+      ],
+      "r": 86400,
+      "f": [
+       "timestamp",
+       "source",
+       "log_type",
+       "macos_eventType",
+       "macos_eventMessage",
+       "subsystem"
+      ],
+      "lim": 150
+     }
     ]
    },
    {
-    "t": "📊Activity Over Time (Активность по времени)",
-    "v": "line",
-    "q": "",
-    "s": [
-     "MacOS Logs"
-    ],
-    "r": 86400,
-    "rows": [
-     [
-      "t",
-      "timestamp",
-      "auto"
-     ]
-    ],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 12,
-    "h": 2,
-    "pos": [
-     1,
-     4
+    "title": "",
+    "timerange": 300,
+    "widgets": [
+     {
+      "t": "🔐 Admin Access Monitor (таблица)",
+      "v": "messages",
+      "w": 7,
+      "h": 4,
+      "pos": [
+       6,
+       9
+      ],
+      "q": "event_type:LogonInfo OR mac_bz_event_type:LogonInfo",
+      "s": [
+       "BiZone_macOS"
+      ],
+      "r": 300,
+      "f": [
+       "timestamp",
+       "mac_bz_host",
+       "mac_bz_user",
+       "usr_tgt_groups",
+       "mac_bz_rule"
+      ],
+      "lim": 150
+     },
+     {
+      "t": "🔍 Подозрительные командные строки",
+      "v": "messages",
+      "w": "Infinity",
+      "h": 3,
+      "pos": [
+       1,
+       27
+      ],
+      "q": "mac_bz_cmdline:(curl OR wget OR base64 OR python OR osascript OR \"hidden\")",
+      "s": [
+       "BiZone_macOS"
+      ],
+      "r": 86400,
+      "f": [
+       "timestamp",
+       "source",
+       "mac_bz_host",
+       "mac_bz_user",
+       "mac_bz_cmdline"
+      ],
+      "lim": 150
+     },
+     {
+      "t": "Виджет для поиска администраторов",
+      "v": "messages",
+      "w": "Infinity",
+      "h": 3,
+      "pos": [
+       1,
+       19
+      ],
+      "q": "usr_tgt_groups:80(admin)",
+      "s": [
+       "BiZone_macOS"
+      ],
+      "r": 86400,
+      "f": [
+       "timestamp",
+       "mac_bz_host",
+       "mac_bz_user",
+       "usr_tgt_groups",
+       "mac_bz_rule"
+      ],
+      "lim": 150
+     },
+     {
+      "t": "🛡️Неподписанные процессы",
+      "v": "messages",
+      "w": "Infinity",
+      "h": 5,
+      "pos": [
+       1,
+       22
+      ],
+      "q": "proc_file_signed:false",
+      "s": [
+       "BiZone_macOS"
+      ],
+      "r": 3600,
+      "f": [
+       "timestamp",
+       "mac_bz_host",
+       "usr_tgt_name",
+       "proc_file_path",
+       "proc_file_name",
+       "proc_file_sha256"
+      ],
+      "lim": 150
+     },
+     {
+      "t": "💻 Инвентаризация сенсоров",
+      "v": "messages",
+      "w": "Infinity",
+      "h": 5,
+      "pos": [
+       1,
+       35
+      ],
+      "q": "mac_bz_event_type:HostInfo",
+      "s": [
+       "BiZone_macOS"
+      ],
+      "r": 86400,
+      "f": [
+       "timestamp",
+       "mac_bz_host",
+       "source",
+       "dev_serial",
+       "mac_bz_os",
+       "mac_bz_sensor_version"
+      ],
+      "lim": 150
+     },
+     {
+      "t": "👥 Топ пользователей (Horizontal Bar Chart)",
+      "v": "bar",
+      "w": 7,
+      "h": 5,
+      "pos": [
+       6,
+       4
+      ],
+      "q": "_exists_: mac_bz_user",
+      "s": [
+       "BiZone_macOS"
+      ],
+      "r": 86400,
+      "rows": [
+       [
+        "v",
+        "mac_bz_user",
+        10
+       ]
+      ],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": [],
+      "bm": "group"
+     },
+     {
+      "t": "📉 Активность во времени (Line Chart)",
+      "v": "line",
+      "w": "Infinity",
+      "h": 3,
+      "pos": [
+       1,
+       1
+      ],
+      "q": "",
+      "s": [
+       "BiZone_macOS"
+      ],
+      "r": 86400,
+      "rows": [
+       [
+        "t",
+        "timestamp",
+        "auto"
+       ]
+      ],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "📋 Журнал событий (Message Table)",
+      "v": "messages",
+      "w": "Infinity",
+      "h": 6,
+      "pos": [
+       1,
+       13
+      ],
+      "q": "",
+      "s": [
+       "BiZone_macOS"
+      ],
+      "r": 86400,
+      "f": [
+       "timestamp",
+       "mac_bz_host",
+       "mac_bz_event_type",
+       "mac_bz_rule",
+       "mac_bz_os"
+      ],
+      "lim": 150
+     },
+     {
+      "t": "🥧 Типы событий (Donut Chart)",
+      "v": "pie",
+      "w": 5,
+      "h": 5,
+      "pos": [
+       1,
+       4
+      ],
+      "q": "",
+      "s": [
+       "BiZone_macOS"
+      ],
+      "r": 86400,
+      "rows": [
+       [
+        "v",
+        "mac_bz_event_type",
+        8
+       ]
+      ],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "🌳 Дерево процессов (Parent → Child)",
+      "v": "messages",
+      "w": "Infinity",
+      "h": 5,
+      "pos": [
+       1,
+       30
+      ],
+      "q": "mac_bz_event_type:ProcessInfo",
+      "s": [
+       "BiZone_macOS"
+      ],
+      "r": 86400,
+      "f": [
+       "timestamp",
+       "source",
+       "mac_bz_host",
+       "mac_bz_cmdline"
+      ],
+      "lim": 150
+     },
+     {
+      "t": "🖥️ Топ хостов (Horizontal Bar Chart)",
+      "v": "bar",
+      "w": 5,
+      "h": 4,
+      "pos": [
+       1,
+       9
+      ],
+      "q": "",
+      "s": [
+       "BiZone_macOS"
+      ],
+      "r": 86400,
+      "rows": [
+       [
+        "v",
+        "mac_bz_host",
+        10
+       ]
+      ],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": [],
+      "bm": "group"
+     }
     ]
    },
    {
-    "t": "❌ Error Count (Ошибки)",
-    "v": "numeric",
-    "q": "macos_level:\"Error\"",
-    "s": [
-     "MacOS Logs"
-    ],
-    "r": 86400,
-    "rows": [],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "sort": [
-     "count() Ascending"
-    ],
-    "w": 3,
-    "h": 1,
-    "pos": [
-     4,
-     2
-    ]
-   },
-   {
-    "t": "🛡️ Security Events (События безопасности)",
-    "v": "numeric",
-    "q": "macos_subsystem:\"com.apple.securityd\"",
-    "s": [
-     "MacOS Logs"
-    ],
-    "r": 86400,
-    "rows": [],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "sort": [
-     "count() Ascending"
-    ],
-    "w": 12,
-    "h": 1,
-    "pos": [
-     1,
-     3
-    ]
-   },
-   {
-    "t": "",
-    "v": "text",
-    "txt": "🍎 **Overview (Обзор)**\n━━━━━━━━━━━━━━━━━━━━━━━",
-    "w": 12,
-    "h": 1,
-    "pos": [
-     1,
-     1
-    ]
-   },
-   {
-    "t": "🔒 TCC Violations (Нарушения приватности)",
-    "v": "messages",
-    "q": "macos_subsystem:\"com.apple.TCC\" OR macos_eventMessage:\"privacy\"",
-    "s": [
-     "MacOS Logs"
-    ],
-    "r": 86400,
-    "f": [
-     "timestamp",
-     "source",
-     "subsystem",
-     "eventMessage"
-    ],
-    "lim": 150,
-    "w": 12,
-    "h": 8,
-    "pos": [
-     1,
-     14
-    ]
-   },
-   {
-    "t": "",
-    "v": "text",
-    "txt": "   🍎 **Security Deep Dive (Детали безопасности)**\n   ━━━━━━━━━━━━━━━━━━━━━━",
-    "w": 12,
-    "h": 1,
-    "pos": [
-     1,
-     6
-    ]
-   },
-   {
-    "t": "🔒 TCC Events (Приватность TCC)",
-    "v": "numeric",
-    "q": "macos_subsystem:\"com.apple.TCC\"",
-    "s": [
-     "MacOS Logs"
-    ],
-    "r": 86400,
-    "rows": [],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "sort": [
-     "count() Ascending"
-    ],
-    "w": 3,
-    "h": 1,
-    "pos": [
-     10,
-     2
-    ]
-   },
-   {
-    "t": "⚠️ Fault Events (Критические сбои)",
-    "v": "messages",
-    "q": "macos_level:\"Fault\"",
-    "s": [
-     "MacOS Logs"
-    ],
-    "r": 86400,
-    "f": [
-     "timestamp",
-     "source",
-     "subsystem",
-     "eventMessage"
-    ],
-    "lim": 150,
-    "w": 12,
-    "h": 6,
-    "pos": [
-     1,
-     22
-    ]
-   },
-   {
-    "t": "Total Events(Всего событий за сутки)",
-    "v": "numeric",
-    "q": "",
-    "s": [
-     "MacOS Logs"
-    ],
-    "r": 86400,
-    "rows": [],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "sort": [
-     "count() Ascending"
-    ],
-    "w": 3,
-    "h": 1,
-    "pos": [
-     1,
-     2
-    ]
-   },
-   {
-    "t": "🔴 Security Errors (Ошибки безопасности)",
-    "v": "messages",
-    "q": "macos_level:Error",
-    "s": [
-     "MacOS Logs"
-    ],
-    "r": 86400,
-    "f": [
-     "timestamp",
-     "source",
-     "log_type",
-     "macos_eventType",
-     "macos_eventMessage",
-     "subsystem"
-    ],
-    "lim": 150,
-    "w": 12,
-    "h": 7,
-    "pos": [
-     1,
-     7
+    "title": "",
+    "timerange": 300,
+    "widgets": [
+     {
+      "t": "🖥️ Топ хостов (Horizontal Bar Chart)",
+      "v": "bar",
+      "w": 5,
+      "h": 4,
+      "pos": [
+       1,
+       9
+      ],
+      "q": "",
+      "s": [
+       "BiZone_macOS"
+      ],
+      "r": 86400,
+      "rows": [
+       [
+        "v",
+        "mac_bz_host",
+        10
+       ]
+      ],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": [],
+      "bm": "group"
+     },
+     {
+      "t": "🥧 Типы событий (Donut Chart)",
+      "v": "pie",
+      "w": 5,
+      "h": 5,
+      "pos": [
+       1,
+       4
+      ],
+      "q": "",
+      "s": [
+       "BiZone_macOS"
+      ],
+      "r": 86400,
+      "rows": [
+       [
+        "v",
+        "mac_bz_event_type",
+        8
+       ]
+      ],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "📋 Журнал событий (Message Table)",
+      "v": "messages",
+      "w": "Infinity",
+      "h": 6,
+      "pos": [
+       1,
+       13
+      ],
+      "q": "",
+      "s": [
+       "BiZone_macOS"
+      ],
+      "r": 86400,
+      "f": [
+       "timestamp",
+       "mac_bz_host",
+       "mac_bz_event_type",
+       "mac_bz_rule",
+       "mac_bz_os"
+      ],
+      "lim": 150
+     },
+     {
+      "t": "📉 Активность во времени (Line Chart)",
+      "v": "line",
+      "w": "Infinity",
+      "h": 3,
+      "pos": [
+       1,
+       1
+      ],
+      "q": "",
+      "s": [
+       "BiZone_macOS"
+      ],
+      "r": 86400,
+      "rows": [
+       [
+        "t",
+        "timestamp",
+        "auto"
+       ]
+      ],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "💻 Инвентаризация сенсоров",
+      "v": "messages",
+      "w": "Infinity",
+      "h": 5,
+      "pos": [
+       1,
+       35
+      ],
+      "q": "mac_bz_event_type:HostInfo",
+      "s": [
+       "BiZone_macOS"
+      ],
+      "r": 86400,
+      "f": [
+       "timestamp",
+       "mac_bz_host",
+       "source",
+       "dev_serial",
+       "mac_bz_os",
+       "mac_bz_sensor_version"
+      ],
+      "lim": 150
+     },
+     {
+      "t": "🌳 Дерево процессов (Parent → Child)",
+      "v": "messages",
+      "w": "Infinity",
+      "h": 5,
+      "pos": [
+       1,
+       30
+      ],
+      "q": "mac_bz_event_type:ProcessInfo",
+      "s": [
+       "BiZone_macOS"
+      ],
+      "r": 86400,
+      "f": [
+       "timestamp",
+       "source",
+       "mac_bz_host",
+       "mac_bz_cmdline"
+      ],
+      "lim": 150
+     },
+     {
+      "t": "👥 Топ пользователей (Horizontal Bar Chart)",
+      "v": "bar",
+      "w": 7,
+      "h": 5,
+      "pos": [
+       6,
+       4
+      ],
+      "q": "_exists_: mac_bz_user",
+      "s": [
+       "BiZone_macOS"
+      ],
+      "r": 86400,
+      "rows": [
+       [
+        "v",
+        "mac_bz_user",
+        10
+       ]
+      ],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": [],
+      "bm": "group"
+     },
+     {
+      "t": "🔐 Admin Access Monitor (таблица)",
+      "v": "messages",
+      "w": 7,
+      "h": 4,
+      "pos": [
+       6,
+       9
+      ],
+      "q": "event_type:LogonInfo OR mac_bz_event_type:LogonInfo",
+      "s": [
+       "BiZone_macOS"
+      ],
+      "r": 300,
+      "f": [
+       "timestamp",
+       "mac_bz_host",
+       "mac_bz_user",
+       "usr_tgt_groups",
+       "mac_bz_rule"
+      ],
+      "lim": 150
+     },
+     {
+      "t": "🛡️Неподписанные процессы",
+      "v": "messages",
+      "w": "Infinity",
+      "h": 5,
+      "pos": [
+       1,
+       22
+      ],
+      "q": "proc_file_signed:false",
+      "s": [
+       "BiZone_macOS"
+      ],
+      "r": 3600,
+      "f": [
+       "timestamp",
+       "mac_bz_host",
+       "usr_tgt_name",
+       "proc_file_path",
+       "proc_file_name",
+       "proc_file_sha256"
+      ],
+      "lim": 150
+     },
+     {
+      "t": "🔍 Подозрительные командные строки",
+      "v": "messages",
+      "w": "Infinity",
+      "h": 3,
+      "pos": [
+       1,
+       27
+      ],
+      "q": "mac_bz_cmdline:(curl OR wget OR base64 OR python OR osascript OR \"hidden\")",
+      "s": [
+       "BiZone_macOS"
+      ],
+      "r": 86400,
+      "f": [
+       "timestamp",
+       "source",
+       "mac_bz_host",
+       "mac_bz_user",
+       "mac_bz_cmdline"
+      ],
+      "lim": 150
+     },
+     {
+      "t": "Виджет для поиска администраторов",
+      "v": "messages",
+      "w": "Infinity",
+      "h": 3,
+      "pos": [
+       1,
+       19
+      ],
+      "q": "usr_tgt_groups:80(admin)",
+      "s": [
+       "BiZone_macOS"
+      ],
+      "r": 86400,
+      "f": [
+       "timestamp",
+       "mac_bz_host",
+       "mac_bz_user",
+       "usr_tgt_groups",
+       "mac_bz_rule"
+      ],
+      "lim": 150
+     }
     ]
    }
   ]
@@ -3112,274 +3822,283 @@
   "title": "🛡️ macOS: BI.ZONE Triage",
   "summary": "Телеметрия BI.ZONE Triage: процессы, пользователи, неподписанные файлы, подозрительные команды",
   "description": "Данные агентов bz_triage (поток BiZone_macOS): активность хостов, администраторы, дерево процессов, инвентаризация сенсоров.",
-  "timerange": 300,
-  "widgets": [
+  "pages": [
    {
-    "t": "🖥️ Топ хостов (Horizontal Bar Chart)",
-    "v": "bar",
-    "q": "",
-    "s": [
-     "BiZone_macOS"
-    ],
-    "r": 86400,
-    "rows": [
-     [
-      "v",
-      "mac_bz_host",
-      10
-     ]
-    ],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "bm": "group",
-    "w": 5,
-    "h": 4,
-    "pos": [
-     1,
-     9
-    ]
-   },
-   {
-    "t": "🔐 Admin Access Monitor (таблица)",
-    "v": "messages",
-    "q": "event_type:LogonInfo OR mac_bz_event_type:LogonInfo",
-    "s": [
-     "BiZone_macOS"
-    ],
-    "r": 300,
-    "f": [
-     "timestamp",
-     "mac_bz_host",
-     "mac_bz_user",
-     "usr_tgt_groups",
-     "mac_bz_rule"
-    ],
-    "lim": 150,
-    "w": 7,
-    "h": 4,
-    "pos": [
-     6,
-     9
-    ]
-   },
-   {
-    "t": "📋 Журнал событий (Message Table)",
-    "v": "messages",
-    "q": "",
-    "s": [
-     "BiZone_macOS"
-    ],
-    "r": 86400,
-    "f": [
-     "timestamp",
-     "mac_bz_host",
-     "mac_bz_event_type",
-     "mac_bz_rule",
-     "mac_bz_os"
-    ],
-    "lim": 150,
-    "w": 12,
-    "h": 6,
-    "pos": [
-     1,
-     13
-    ]
-   },
-   {
-    "t": "📉 Активность во времени (Line Chart)",
-    "v": "line",
-    "q": "",
-    "s": [
-     "BiZone_macOS"
-    ],
-    "r": 86400,
-    "rows": [
-     [
-      "t",
-      "timestamp",
-      "auto"
-     ]
-    ],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 12,
-    "h": 3,
-    "pos": [
-     1,
-     1
-    ]
-   },
-   {
-    "t": "🔍 Подозрительные командные строки",
-    "v": "messages",
-    "q": "mac_bz_cmdline:(curl OR wget OR base64 OR python OR osascript OR \"hidden\")",
-    "s": [
-     "BiZone_macOS"
-    ],
-    "r": 86400,
-    "f": [
-     "timestamp",
-     "source",
-     "mac_bz_host",
-     "mac_bz_user",
-     "mac_bz_cmdline"
-    ],
-    "lim": 150,
-    "w": 12,
-    "h": 3,
-    "pos": [
-     1,
-     27
-    ]
-   },
-   {
-    "t": "🛡️Неподписанные процессы",
-    "v": "messages",
-    "q": "proc_file_signed:false",
-    "s": [
-     "BiZone_macOS"
-    ],
-    "r": 3600,
-    "f": [
-     "timestamp",
-     "mac_bz_host",
-     "usr_tgt_name",
-     "proc_file_path",
-     "proc_file_name",
-     "proc_file_sha256"
-    ],
-    "lim": 150,
-    "w": 12,
-    "h": 5,
-    "pos": [
-     1,
-     22
-    ]
-   },
-   {
-    "t": "🥧 Типы событий (Donut Chart)",
-    "v": "pie",
-    "q": "",
-    "s": [
-     "BiZone_macOS"
-    ],
-    "r": 86400,
-    "rows": [
-     [
-      "v",
-      "mac_bz_event_type",
-      8
-     ]
-    ],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 5,
-    "h": 5,
-    "pos": [
-     1,
-     4
-    ]
-   },
-   {
-    "t": "Виджет для поиска администраторов",
-    "v": "messages",
-    "q": "usr_tgt_groups:80(admin)",
-    "s": [
-     "BiZone_macOS"
-    ],
-    "r": 86400,
-    "f": [
-     "timestamp",
-     "mac_bz_host",
-     "mac_bz_user",
-     "usr_tgt_groups",
-     "mac_bz_rule"
-    ],
-    "lim": 150,
-    "w": 12,
-    "h": 3,
-    "pos": [
-     1,
-     19
-    ]
-   },
-   {
-    "t": "🌳 Дерево процессов (Parent → Child)",
-    "v": "messages",
-    "q": "mac_bz_event_type:ProcessInfo",
-    "s": [
-     "BiZone_macOS"
-    ],
-    "r": 86400,
-    "f": [
-     "timestamp",
-     "source",
-     "mac_bz_host",
-     "mac_bz_cmdline"
-    ],
-    "lim": 150,
-    "w": 12,
-    "h": 5,
-    "pos": [
-     1,
-     30
-    ]
-   },
-   {
-    "t": "👥 Топ пользователей (Horizontal Bar Chart)",
-    "v": "bar",
-    "q": "_exists_: mac_bz_user",
-    "s": [
-     "BiZone_macOS"
-    ],
-    "r": 86400,
-    "rows": [
-     [
-      "v",
-      "mac_bz_user",
-      10
-     ]
-    ],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "bm": "group",
-    "w": 7,
-    "h": 5,
-    "pos": [
-     6,
-     4
-    ]
-   },
-   {
-    "t": "💻 Инвентаризация сенсоров",
-    "v": "messages",
-    "q": "mac_bz_event_type:HostInfo",
-    "s": [
-     "BiZone_macOS"
-    ],
-    "r": 86400,
-    "f": [
-     "timestamp",
-     "mac_bz_host",
-     "source",
-     "dev_serial",
-     "mac_bz_os",
-     "mac_bz_sensor_version"
-    ],
-    "lim": 150,
-    "w": 12,
-    "h": 5,
-    "pos": [
-     1,
-     35
+    "title": "",
+    "timerange": 300,
+    "widgets": [
+     {
+      "t": "🖥️ Топ хостов (Horizontal Bar Chart)",
+      "v": "bar",
+      "w": 5,
+      "h": 4,
+      "pos": [
+       1,
+       9
+      ],
+      "q": "",
+      "s": [
+       "BiZone_macOS"
+      ],
+      "r": 86400,
+      "rows": [
+       [
+        "v",
+        "mac_bz_host",
+        10
+       ]
+      ],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": [],
+      "bm": "group"
+     },
+     {
+      "t": "🔐 Admin Access Monitor (таблица)",
+      "v": "messages",
+      "w": 7,
+      "h": 4,
+      "pos": [
+       6,
+       9
+      ],
+      "q": "event_type:LogonInfo OR mac_bz_event_type:LogonInfo",
+      "s": [
+       "BiZone_macOS"
+      ],
+      "r": 300,
+      "f": [
+       "timestamp",
+       "mac_bz_host",
+       "mac_bz_user",
+       "usr_tgt_groups",
+       "mac_bz_rule"
+      ],
+      "lim": 150
+     },
+     {
+      "t": "📋 Журнал событий (Message Table)",
+      "v": "messages",
+      "w": "Infinity",
+      "h": 6,
+      "pos": [
+       1,
+       13
+      ],
+      "q": "",
+      "s": [
+       "BiZone_macOS"
+      ],
+      "r": 86400,
+      "f": [
+       "timestamp",
+       "mac_bz_host",
+       "mac_bz_event_type",
+       "mac_bz_rule",
+       "mac_bz_os"
+      ],
+      "lim": 150
+     },
+     {
+      "t": "📉 Активность во времени (Line Chart)",
+      "v": "line",
+      "w": "Infinity",
+      "h": 3,
+      "pos": [
+       1,
+       1
+      ],
+      "q": "",
+      "s": [
+       "BiZone_macOS"
+      ],
+      "r": 86400,
+      "rows": [
+       [
+        "t",
+        "timestamp",
+        "auto"
+       ]
+      ],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "🔍 Подозрительные командные строки",
+      "v": "messages",
+      "w": "Infinity",
+      "h": 3,
+      "pos": [
+       1,
+       27
+      ],
+      "q": "mac_bz_cmdline:(curl OR wget OR base64 OR python OR osascript OR \"hidden\")",
+      "s": [
+       "BiZone_macOS"
+      ],
+      "r": 86400,
+      "f": [
+       "timestamp",
+       "source",
+       "mac_bz_host",
+       "mac_bz_user",
+       "mac_bz_cmdline"
+      ],
+      "lim": 150
+     },
+     {
+      "t": "🛡️Неподписанные процессы",
+      "v": "messages",
+      "w": "Infinity",
+      "h": 5,
+      "pos": [
+       1,
+       22
+      ],
+      "q": "proc_file_signed:false",
+      "s": [
+       "BiZone_macOS"
+      ],
+      "r": 3600,
+      "f": [
+       "timestamp",
+       "mac_bz_host",
+       "usr_tgt_name",
+       "proc_file_path",
+       "proc_file_name",
+       "proc_file_sha256"
+      ],
+      "lim": 150
+     },
+     {
+      "t": "🥧 Типы событий (Donut Chart)",
+      "v": "pie",
+      "w": 5,
+      "h": 5,
+      "pos": [
+       1,
+       4
+      ],
+      "q": "",
+      "s": [
+       "BiZone_macOS"
+      ],
+      "r": 86400,
+      "rows": [
+       [
+        "v",
+        "mac_bz_event_type",
+        8
+       ]
+      ],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "Виджет для поиска администраторов",
+      "v": "messages",
+      "w": "Infinity",
+      "h": 3,
+      "pos": [
+       1,
+       19
+      ],
+      "q": "usr_tgt_groups:80(admin)",
+      "s": [
+       "BiZone_macOS"
+      ],
+      "r": 86400,
+      "f": [
+       "timestamp",
+       "mac_bz_host",
+       "mac_bz_user",
+       "usr_tgt_groups",
+       "mac_bz_rule"
+      ],
+      "lim": 150
+     },
+     {
+      "t": "🌳 Дерево процессов (Parent → Child)",
+      "v": "messages",
+      "w": "Infinity",
+      "h": 5,
+      "pos": [
+       1,
+       30
+      ],
+      "q": "mac_bz_event_type:ProcessInfo",
+      "s": [
+       "BiZone_macOS"
+      ],
+      "r": 86400,
+      "f": [
+       "timestamp",
+       "source",
+       "mac_bz_host",
+       "mac_bz_cmdline"
+      ],
+      "lim": 150
+     },
+     {
+      "t": "👥 Топ пользователей (Horizontal Bar Chart)",
+      "v": "bar",
+      "w": 7,
+      "h": 5,
+      "pos": [
+       6,
+       4
+      ],
+      "q": "_exists_: mac_bz_user",
+      "s": [
+       "BiZone_macOS"
+      ],
+      "r": 86400,
+      "rows": [
+       [
+        "v",
+        "mac_bz_user",
+        10
+       ]
+      ],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": [],
+      "bm": "group"
+     },
+     {
+      "t": "💻 Инвентаризация сенсоров",
+      "v": "messages",
+      "w": "Infinity",
+      "h": 5,
+      "pos": [
+       1,
+       35
+      ],
+      "q": "mac_bz_event_type:HostInfo",
+      "s": [
+       "BiZone_macOS"
+      ],
+      "r": 86400,
+      "f": [
+       "timestamp",
+       "mac_bz_host",
+       "source",
+       "dev_serial",
+       "mac_bz_os",
+       "mac_bz_sensor_version"
+      ],
+      "lim": 150
+     }
     ]
    }
   ]
@@ -3388,322 +4107,334 @@
   "title": "🪟 Windows: Sysmon и события входа",
   "summary": "Sysmon и Security с Windows-хостов: процессы, входы, реестр, загрузка DLL",
   "description": "Данные Winlogbeat (поток WindowsLogs): Sysmon и журнал Security контроллера домена и рабочей станции.",
-  "timerange": 300,
-  "widgets": [
+  "pages": [
    {
-    "t": "",
-    "v": "text",
-    "txt": "🪟 **Overview (Обзор)**\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
-    "w": 12,
-    "h": 1,
-    "pos": [
-     1,
-     1
-    ]
-   },
-   {
-    "t": "🔄 Process Creation",
-    "v": "messages",
-    "q": "win_event_id:\"1\" AND message:\"powershell\"",
-    "s": [
-     "WindowsLogs"
-    ],
-    "r": 300,
-    "f": [
-     "timestamp",
-     "win_host",
-     "win_image",
-     "win_user",
-     "win_command_line",
-     "message"
-    ],
-    "lim": 150,
-    "w": 12,
-    "h": 5,
-    "pos": [
-     1,
-     37
-    ]
-   },
-   {
-    "t": "Process Create (Создание процессов)",
-    "v": "numeric",
-    "q": "win_event_id:\"1\"",
-    "s": [
-     "WindowsLogs"
-    ],
-    "r": 86400,
-    "rows": [],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 3,
-    "h": 1,
-    "pos": [
-     4,
-     2
-    ]
-   },
-   {
-    "t": "Total Windows Events (Всего событий Windows)",
-    "v": "numeric",
-    "q": "",
-    "s": [
-     "WindowsLogs"
-    ],
-    "r": 86400,
-    "rows": [],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 3,
-    "h": 1,
-    "pos": [
-     1,
-     2
-    ]
-   },
-   {
-    "t": "🎯 Event ID Distribution (Распределение Event ID)",
-    "v": "pie",
-    "q": "_exists_:win_event_id",
-    "s": [
-     "WindowsLogs"
-    ],
-    "r": 86400,
-    "rows": [
-     [
-      "v",
-      "winlogbeat_event_code",
-      10
-     ]
-    ],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "sort": [
-     "count() Descending"
-    ],
-    "w": 6,
-    "h": 6,
-    "pos": [
-     1,
-     8
-    ]
-   },
-   {
-    "t": "🔐 Success Logins (Успешные входы)",
-    "v": "numeric",
-    "q": "win_event_id:\"4624\"",
-    "s": [
-     "WindowsLogs"
-    ],
-    "r": 86400,
-    "rows": [],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 3,
-    "h": 1,
-    "pos": [
-     1,
-     3
-    ]
-   },
-   {
-    "t": "📝 Registry Changes (Event ID 13)",
-    "v": "messages",
-    "q": "win_event_id:\"13\"",
-    "s": [
-     "WindowsLogs"
-    ],
-    "r": 300,
-    "f": [
-     "timestamp",
-     "win_host",
-     "win_image",
-     "win_registry_key",
-     "win_user"
-    ],
-    "lim": 150,
-    "w": 12,
-    "h": 5,
-    "pos": [
-     1,
-     32
-    ]
-   },
-   {
-    "t": "🖥️ Top Hosts",
-    "v": "bar",
-    "q": "",
-    "s": [
-     "WindowsLogs"
-    ],
-    "r": 86400,
-    "rows": [
-     [
-      "v",
-      "win_host",
-      5
-     ]
-    ],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "sort": [
-     "count() Descending"
-    ],
-    "bm": "overlay",
-    "w": 6,
-    "h": 5,
-    "pos": [
-     1,
-     14
-    ]
-   },
-   {
-    "t": "📈 Activity Over Time (Активность по времени)",
-    "v": "line",
-    "q": "",
-    "s": [
-     "WindowsLogs"
-    ],
-    "r": 86400,
-    "rows": [
-     [
-      "t",
-      "timestamp",
-      "15minutes"
-     ]
-    ],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 12,
-    "h": 4,
-    "pos": [
-     1,
-     4
-    ]
-   },
-   {
-    "t": "📋 Recent Windows Events",
-    "v": "messages",
-    "q": "win_event_id:\"13\" OR win_event_id:\"4624\"",
-    "s": [
-     "WindowsLogs"
-    ],
-    "r": 86400,
-    "f": [
-     "timestamp",
-     "win_event_id",
-     "win_host",
-     "win_image",
-     "win_user",
-     "message"
-    ],
-    "lim": 150,
-    "w": 12,
-    "h": 7,
-    "pos": [
-     1,
-     19
-    ]
-   },
-   {
-    "t": "🔑 Recent Logins (Последние входы)",
-    "v": "messages",
-    "q": "winlogbeat_winlog_event_id:\"4624\"",
-    "s": [
-     "WindowsLogs"
-    ],
-    "r": 300,
-    "f": [
-     "timestamp",
-     "source",
-     "win_user",
-     "win_channel"
-    ],
-    "lim": 150,
-    "w": 12,
-    "h": 6,
-    "pos": [
-     1,
-     26
-    ]
-   },
-   {
-    "t": "Image Load (Загрузка DLL)",
-    "v": "numeric",
-    "q": "win_event_id:\"7\"",
-    "s": [
-     "WindowsLogs"
-    ],
-    "r": 86400,
-    "rows": [],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 3,
-    "h": 1,
-    "pos": [
-     7,
-     2
-    ]
-   },
-   {
-    "t": "Registry Events (Реестр)",
-    "v": "numeric",
-    "q": "win_event_id:\"13\"",
-    "s": [
-     "WindowsLogs"
-    ],
-    "r": 86400,
-    "rows": [],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 3,
-    "h": 1,
-    "pos": [
-     10,
-     2
-    ]
-   },
-   {
-    "t": "📂 Event Sources (Channels)",
-    "v": "bar",
-    "q": "",
-    "s": [
-     "WindowsLogs"
-    ],
-    "r": 300,
-    "rows": [
-     [
-      "v",
-      "win_channel",
-      15
-     ]
-    ],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "bm": "overlay",
-    "w": 6,
-    "h": 6,
-    "pos": [
-     7,
-     8
+    "title": "Sysmon+Security Events",
+    "timerange": 300,
+    "widgets": [
+     {
+      "t": "",
+      "v": "text",
+      "w": "Infinity",
+      "h": 1,
+      "pos": [
+       1,
+       1
+      ],
+      "txt": "🪟 **Overview (Обзор)**\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+     },
+     {
+      "t": "🔄 Process Creation",
+      "v": "messages",
+      "w": "Infinity",
+      "h": 5,
+      "pos": [
+       1,
+       37
+      ],
+      "q": "win_event_id:\"1\" AND message:\"powershell\"",
+      "s": [
+       "WindowsLogs"
+      ],
+      "r": 300,
+      "f": [
+       "timestamp",
+       "win_host",
+       "win_image",
+       "win_user",
+       "win_command_line",
+       "message"
+      ],
+      "lim": 150
+     },
+     {
+      "t": "Process Create (Создание процессов)",
+      "v": "numeric",
+      "w": 3,
+      "h": 1,
+      "pos": [
+       4,
+       2
+      ],
+      "q": "win_event_id:\"1\"",
+      "s": [
+       "WindowsLogs"
+      ],
+      "r": 86400,
+      "rows": [],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "Total Windows Events (Всего событий Windows)",
+      "v": "numeric",
+      "w": 3,
+      "h": 1,
+      "pos": [
+       1,
+       2
+      ],
+      "q": "",
+      "s": [
+       "WindowsLogs"
+      ],
+      "r": 86400,
+      "rows": [],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "🎯 Event ID Distribution (Распределение Event ID)",
+      "v": "pie",
+      "w": 6,
+      "h": 6,
+      "pos": [
+       1,
+       8
+      ],
+      "q": "_exists_:win_event_id",
+      "s": [
+       "WindowsLogs"
+      ],
+      "r": 86400,
+      "rows": [
+       [
+        "v",
+        "winlogbeat_event_code",
+        10
+       ]
+      ],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": [
+       "count() Descending"
+      ]
+     },
+     {
+      "t": "🔐 Success Logins (Успешные входы)",
+      "v": "numeric",
+      "w": 3,
+      "h": 1,
+      "pos": [
+       1,
+       3
+      ],
+      "q": "win_event_id:\"4624\"",
+      "s": [
+       "WindowsLogs"
+      ],
+      "r": 86400,
+      "rows": [],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "📝 Registry Changes (Event ID 13)",
+      "v": "messages",
+      "w": "Infinity",
+      "h": 5,
+      "pos": [
+       1,
+       32
+      ],
+      "q": "win_event_id:\"13\"",
+      "s": [
+       "WindowsLogs"
+      ],
+      "r": 300,
+      "f": [
+       "timestamp",
+       "win_host",
+       "win_image",
+       "win_registry_key",
+       "win_user"
+      ],
+      "lim": 150
+     },
+     {
+      "t": "🖥️ Top Hosts",
+      "v": "bar",
+      "w": 6,
+      "h": 5,
+      "pos": [
+       1,
+       14
+      ],
+      "q": "",
+      "s": [
+       "WindowsLogs"
+      ],
+      "r": 86400,
+      "rows": [
+       [
+        "v",
+        "win_host",
+        5
+       ]
+      ],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": [
+       "count() Descending"
+      ],
+      "bm": "overlay"
+     },
+     {
+      "t": "📈 Activity Over Time (Активность по времени)",
+      "v": "line",
+      "w": "Infinity",
+      "h": 4,
+      "pos": [
+       1,
+       4
+      ],
+      "q": "",
+      "s": [
+       "WindowsLogs"
+      ],
+      "r": 86400,
+      "rows": [
+       [
+        "t",
+        "timestamp",
+        "15minutes"
+       ]
+      ],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "📋 Recent Windows Events",
+      "v": "messages",
+      "w": "Infinity",
+      "h": 7,
+      "pos": [
+       1,
+       19
+      ],
+      "q": "win_event_id:\"13\" OR win_event_id:\"4624\"",
+      "s": [
+       "WindowsLogs"
+      ],
+      "r": 86400,
+      "f": [
+       "timestamp",
+       "win_event_id",
+       "win_host",
+       "win_image",
+       "win_user",
+       "message"
+      ],
+      "lim": 150
+     },
+     {
+      "t": "🔑 Recent Logins (Последние входы)",
+      "v": "messages",
+      "w": "Infinity",
+      "h": 6,
+      "pos": [
+       1,
+       26
+      ],
+      "q": "winlogbeat_winlog_event_id:\"4624\"",
+      "s": [
+       "WindowsLogs"
+      ],
+      "r": 300,
+      "f": [
+       "timestamp",
+       "source",
+       "win_user",
+       "win_channel"
+      ],
+      "lim": 150
+     },
+     {
+      "t": "Image Load (Загрузка DLL)",
+      "v": "numeric",
+      "w": 3,
+      "h": 1,
+      "pos": [
+       7,
+       2
+      ],
+      "q": "win_event_id:\"7\"",
+      "s": [
+       "WindowsLogs"
+      ],
+      "r": 86400,
+      "rows": [],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "Registry Events (Реестр)",
+      "v": "numeric",
+      "w": 3,
+      "h": 1,
+      "pos": [
+       10,
+       2
+      ],
+      "q": "win_event_id:\"13\"",
+      "s": [
+       "WindowsLogs"
+      ],
+      "r": 86400,
+      "rows": [],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "📂 Event Sources (Channels)",
+      "v": "bar",
+      "w": 6,
+      "h": 6,
+      "pos": [
+       7,
+       8
+      ],
+      "q": "",
+      "s": [
+       "WindowsLogs"
+      ],
+      "r": 300,
+      "rows": [
+       [
+        "v",
+        "win_channel",
+        15
+       ]
+      ],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": [],
+      "bm": "overlay"
+     }
     ]
    }
   ]
@@ -3712,284 +4443,296 @@
   "title": "🐧 РЕД ОС: auditd",
   "summary": "События auditd РЕД ОС после декодера: команды, сервисы, сессии, типы аудита",
   "description": "Данные auditd с хостов РЕД ОС (поток RedOS auditd Logs), обработанные Python-декодером.",
-  "timerange": 300,
-  "widgets": [
+  "pages": [
    {
-    "t": "🔄 Service Changes (Изменения сервисов)",
-    "v": "messages",
-    "q": "audit_type:(\"SERVICE_START\" OR \"SERVICE_STOP\")",
-    "s": [
-     "RedOS auditd Logs"
-    ],
-    "r": 300,
-    "f": [
-     "timestamp",
-     "source",
-     "audit_type",
-     "ses",
-     "comm",
-     "pid",
-     "exe",
-     "msg"
-    ],
-    "lim": 150,
-    "w": 12,
-    "h": 5,
-    "pos": [
-     1,
-     16
-    ]
-   },
-   {
-    "t": "Service Events (События сервисов)",
-    "v": "numeric",
-    "q": "audit_type:(\"SERVICE_START\" OR \"SERVICE_STOP\")",
-    "s": [
-     "RedOS auditd Logs"
-    ],
-    "r": 300,
-    "rows": [],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 6,
-    "h": 1,
-    "pos": [
-     1,
-     3
-    ]
-   },
-   {
-    "t": "📊 Total Audit Events (Всего событий аудита)",
-    "v": "numeric",
-    "q": "",
-    "s": [
-     "RedOS auditd Logs"
-    ],
-    "r": 300,
-    "rows": [],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 5,
-    "h": 1,
-    "pos": [
-     1,
-     2
-    ]
-   },
-   {
-    "t": "⚡ EXECVE Commands (Запущенные команды)",
-    "v": "messages",
-    "q": "audit_type:\"EXECVE\"",
-    "s": [
-     "RedOS auditd Logs"
-    ],
-    "r": 300,
-    "f": [
-     "timestamp",
-     "source",
-     "a0",
-     "a1",
-     "a2",
-     "a3"
-    ],
-    "lim": 150,
-    "w": 12,
-    "h": 4,
-    "pos": [
-     1,
-     12
-    ]
-   },
-   {
-    "t": "👥 User Sessions (Пользовательские сессии)",
-    "v": "numeric",
-    "q": "audit_type:(\"USER_START\" OR \"USER_END\")",
-    "s": [
-     "RedOS auditd Logs"
-    ],
-    "r": 300,
-    "rows": [],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 6,
-    "h": 1,
-    "pos": [
-     7,
-     3
-    ]
-   },
-   {
-    "t": "👥 User Logins (Входы пользователей)",
-    "v": "messages",
-    "q": "audit_type:(\"USER_START\" OR \"USER_END\" OR \"USER_LOGIN\")",
-    "s": [
-     "RedOS auditd Logs"
-    ],
-    "r": 300,
-    "f": [
-     "timestamp",
-     "source",
-     "audit_type",
-     "uid",
-     "auid",
-     "message"
-    ],
-    "lim": 150,
-    "w": 12,
-    "h": 7,
-    "pos": [
-     1,
-     21
-    ]
-   },
-   {
-    "t": "Top Hosts (Топ хостов)",
-    "v": "bar",
-    "q": "",
-    "s": [
-     "RedOS auditd Logs"
-    ],
-    "r": 300,
-    "rows": [
-     [
-      "v",
-      "syslog_hostname",
-      15
-     ]
-    ],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "sort": [
-     "syslog_hostname Descending"
-    ],
-    "bm": "group",
-    "w": 8,
-    "h": 5,
-    "pos": [
-     5,
-     6
-    ]
-   },
-   {
-    "t": "",
-    "v": "text",
-    "txt": " **Security Deep Dive (Детали безопасности)**\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
-    "w": 12,
-    "h": 1,
-    "pos": [
-     1,
-     11
-    ]
-   },
-   {
-    "t": "Activity Over Time (Активность по времени)",
-    "v": "line",
-    "q": "",
-    "s": [
-     "RedOS auditd Logs"
-    ],
-    "r": 300,
-    "rows": [
-     [
-      "t",
-      "timestamp",
-      "auto"
-     ]
-    ],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 12,
-    "h": 2,
-    "pos": [
-     1,
-     4
-    ]
-   },
-   {
-    "t": "⚡ EXECVE Events (Запуски команд)",
-    "v": "numeric",
-    "q": "audit_type:\"EXECVE\"",
-    "s": [
-     "RedOS auditd Logs"
-    ],
-    "r": 300,
-    "rows": [],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 3,
-    "h": 1,
-    "pos": [
-     10,
-     2
-    ]
-   },
-   {
-    "t": "",
-    "v": "text",
-    "txt": " **Overview (Обзор)**\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
-    "w": 12,
-    "h": 1,
-    "pos": [
-     1,
-     1
-    ]
-   },
-   {
-    "t": "🎯 Audit Types (Типы аудита)",
-    "v": "pie",
-    "q": "",
-    "s": [
-     "RedOS auditd Logs"
-    ],
-    "r": 300,
-    "rows": [
-     [
-      "v",
-      "audit_type",
-      15
-     ]
-    ],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 4,
-    "h": 5,
-    "pos": [
-     1,
-     6
-    ]
-   },
-   {
-    "t": "SYSCALL Events (Системные вызовы)",
-    "v": "numeric",
-    "q": "audit_type:\"SYSCALL\"",
-    "s": [
-     "RedOS auditd Logs"
-    ],
-    "r": 300,
-    "rows": [],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 4,
-    "h": 1,
-    "pos": [
-     6,
-     2
+    "title": "РЕД ОС auditd",
+    "timerange": 300,
+    "widgets": [
+     {
+      "t": "🔄 Service Changes (Изменения сервисов)",
+      "v": "messages",
+      "w": "Infinity",
+      "h": 5,
+      "pos": [
+       1,
+       16
+      ],
+      "q": "audit_type:(\"SERVICE_START\" OR \"SERVICE_STOP\")",
+      "s": [
+       "RedOS auditd Logs"
+      ],
+      "r": 300,
+      "f": [
+       "timestamp",
+       "source",
+       "audit_type",
+       "ses",
+       "comm",
+       "pid",
+       "exe",
+       "msg"
+      ],
+      "lim": 150
+     },
+     {
+      "t": "Service Events (События сервисов)",
+      "v": "numeric",
+      "w": 6,
+      "h": 1,
+      "pos": [
+       1,
+       3
+      ],
+      "q": "audit_type:(\"SERVICE_START\" OR \"SERVICE_STOP\")",
+      "s": [
+       "RedOS auditd Logs"
+      ],
+      "r": 300,
+      "rows": [],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "📊 Total Audit Events (Всего событий аудита)",
+      "v": "numeric",
+      "w": 5,
+      "h": 1,
+      "pos": [
+       1,
+       2
+      ],
+      "q": "",
+      "s": [
+       "RedOS auditd Logs"
+      ],
+      "r": 300,
+      "rows": [],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "⚡ EXECVE Commands (Запущенные команды)",
+      "v": "messages",
+      "w": "Infinity",
+      "h": 4,
+      "pos": [
+       1,
+       12
+      ],
+      "q": "audit_type:\"EXECVE\"",
+      "s": [
+       "RedOS auditd Logs"
+      ],
+      "r": 300,
+      "f": [
+       "timestamp",
+       "source",
+       "a0",
+       "a1",
+       "a2",
+       "a3"
+      ],
+      "lim": 150
+     },
+     {
+      "t": "👥 User Sessions (Пользовательские сессии)",
+      "v": "numeric",
+      "w": 6,
+      "h": 1,
+      "pos": [
+       7,
+       3
+      ],
+      "q": "audit_type:(\"USER_START\" OR \"USER_END\")",
+      "s": [
+       "RedOS auditd Logs"
+      ],
+      "r": 300,
+      "rows": [],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "👥 User Logins (Входы пользователей)",
+      "v": "messages",
+      "w": "Infinity",
+      "h": 7,
+      "pos": [
+       1,
+       21
+      ],
+      "q": "audit_type:(\"USER_START\" OR \"USER_END\" OR \"USER_LOGIN\")",
+      "s": [
+       "RedOS auditd Logs"
+      ],
+      "r": 300,
+      "f": [
+       "timestamp",
+       "source",
+       "audit_type",
+       "uid",
+       "auid",
+       "message"
+      ],
+      "lim": 150
+     },
+     {
+      "t": "Top Hosts (Топ хостов)",
+      "v": "bar",
+      "w": 8,
+      "h": 5,
+      "pos": [
+       5,
+       6
+      ],
+      "q": "",
+      "s": [
+       "RedOS auditd Logs"
+      ],
+      "r": 300,
+      "rows": [
+       [
+        "v",
+        "syslog_hostname",
+        15
+       ]
+      ],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": [
+       "syslog_hostname Descending"
+      ],
+      "bm": "group"
+     },
+     {
+      "t": "",
+      "v": "text",
+      "w": "Infinity",
+      "h": 1,
+      "pos": [
+       1,
+       11
+      ],
+      "txt": " **Security Deep Dive (Детали безопасности)**\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+     },
+     {
+      "t": "Activity Over Time (Активность по времени)",
+      "v": "line",
+      "w": "Infinity",
+      "h": 2,
+      "pos": [
+       1,
+       4
+      ],
+      "q": "",
+      "s": [
+       "RedOS auditd Logs"
+      ],
+      "r": 300,
+      "rows": [
+       [
+        "t",
+        "timestamp",
+        "auto"
+       ]
+      ],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "⚡ EXECVE Events (Запуски команд)",
+      "v": "numeric",
+      "w": 3,
+      "h": 1,
+      "pos": [
+       10,
+       2
+      ],
+      "q": "audit_type:\"EXECVE\"",
+      "s": [
+       "RedOS auditd Logs"
+      ],
+      "r": 300,
+      "rows": [],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "",
+      "v": "text",
+      "w": "Infinity",
+      "h": 1,
+      "pos": [
+       1,
+       1
+      ],
+      "txt": " **Overview (Обзор)**\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+     },
+     {
+      "t": "🎯 Audit Types (Типы аудита)",
+      "v": "pie",
+      "w": 4,
+      "h": 5,
+      "pos": [
+       1,
+       6
+      ],
+      "q": "",
+      "s": [
+       "RedOS auditd Logs"
+      ],
+      "r": 300,
+      "rows": [
+       [
+        "v",
+        "audit_type",
+        15
+       ]
+      ],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "SYSCALL Events (Системные вызовы)",
+      "v": "numeric",
+      "w": 4,
+      "h": 1,
+      "pos": [
+       6,
+       2
+      ],
+      "q": "audit_type:\"SYSCALL\"",
+      "s": [
+       "RedOS auditd Logs"
+      ],
+      "r": 300,
+      "rows": [],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     }
     ]
    }
   ]
@@ -3998,169 +4741,177 @@
   "title": "📡 Keenetic: журналы роутера",
   "summary": "Активность роутера, ARP-конфликты, SSH, Wi-Fi и WireGuard: детальные журналы",
   "description": "Подробные журналы Keenetic (поток Syslog Logs). Сводные цифры — на дашборде «Сеть глазами Keenetic».",
-  "timerange": 300,
-  "widgets": [
+  "pages": [
    {
-    "t": "📈 Keenetic Activity Timeline (Line Chart) Router Activity Over Time",
-    "v": "line",
-    "q": "source:Keenetic\\-7625",
-    "s": [
-     "Syslog Logs"
-    ],
-    "r": 86400,
-    "rows": [
-     [
-      "t",
-      "timestamp",
-      "1hours"
-     ]
-    ],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 10,
-    "h": 2,
-    "pos": [
-     3,
-     1
-    ]
-   },
-   {
-    "t": "SSH Connections",
-    "v": "messages",
-    "q": "message:\"dropbear\"",
-    "s": [
-     "Syslog Logs"
-    ],
-    "r": 0,
-    "f": [
-     "timestamp",
-     "source",
-     "facility",
-     "level",
-     "message"
-    ],
-    "lim": 150,
-    "w": 12,
-    "h": 6,
-    "pos": [
-     1,
-     12
-    ]
-   },
-   {
-    "t": "WiFi Events (отключение/подключение клиентов)",
-    "v": "messages",
-    "q": "message:\"WifiMonitor\" AND message:(\"deauthenticated\" OR \"authenticated\")",
-    "s": [
-     "Syslog Logs"
-    ],
-    "r": 0,
-    "f": [
-     "timestamp",
-     "source",
-     "level",
-     "message"
-    ],
-    "lim": 150,
-    "w": 12,
-    "h": 5,
-    "pos": [
-     1,
-     23
-    ]
-   },
-   {
-    "t": "🚨 Total ARP Conflicts (KPI)",
-    "v": "numeric",
-    "q": "message:\"network conflict\"",
-    "s": [
-     "Syslog Logs"
-    ],
-    "r": 300,
-    "rows": [],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 2,
-    "h": 2,
-    "pos": [
-     1,
-     1
-    ]
-   },
-   {
-    "t": "📋 Detailed Conflict Log (Message Table)",
-    "v": "messages",
-    "q": "message:\"network conflict\"",
-    "s": [
-     "Syslog Logs"
-    ],
-    "r": 86400,
-    "f": [
-     "timestamp",
-     "source",
-     "arp_ip",
-     "arp_mac1",
-     "arp_mac2"
-    ],
-    "lim": 150,
-    "w": 12,
-    "h": 5,
-    "pos": [
-     1,
-     3
-    ]
-   },
-   {
-    "t": "Конфликты ARP по IP",
-    "v": "bar",
-    "q": "",
-    "s": [
-     "Syslog Logs"
-    ],
-    "r": 3600,
-    "rows": [
-     [
-      "v",
-      "kn_conflict_ip",
-      15
-     ]
-    ],
-    "cols": [],
-    "m": [
-     "count(source)"
-    ],
-    "bm": "group",
-    "w": 12,
-    "h": 4,
-    "pos": [
-     1,
-     8
-    ]
-   },
-   {
-    "t": "WireGuard: отказы и успешные входы",
-    "v": "messages",
-    "q": "kn_event_type:(Wireguard_Failed OR Wireguard_Success)",
-    "s": [
-     "Syslog Logs"
-    ],
-    "r": 86400,
-    "f": [
-     "timestamp",
-     "source",
-     "level",
-     "message"
-    ],
-    "lim": 150,
-    "w": 12,
-    "h": 5,
-    "pos": [
-     1,
-     18
+    "title": "",
+    "timerange": 300,
+    "widgets": [
+     {
+      "t": "📈 Keenetic Activity Timeline (Line Chart) Router Activity Over Time",
+      "v": "line",
+      "w": 10,
+      "h": 2,
+      "pos": [
+       3,
+       1
+      ],
+      "q": "source:Keenetic\\-7625",
+      "s": [
+       "Syslog Logs"
+      ],
+      "r": 86400,
+      "rows": [
+       [
+        "t",
+        "timestamp",
+        "1hours"
+       ]
+      ],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "SSH Connections",
+      "v": "messages",
+      "w": "Infinity",
+      "h": 6,
+      "pos": [
+       1,
+       12
+      ],
+      "q": "message:\"dropbear\"",
+      "s": [
+       "Syslog Logs"
+      ],
+      "r": 0,
+      "f": [
+       "timestamp",
+       "source",
+       "facility",
+       "level",
+       "message"
+      ],
+      "lim": 150
+     },
+     {
+      "t": "WiFi Events (отключение/подключение клиентов)",
+      "v": "messages",
+      "w": "Infinity",
+      "h": 5,
+      "pos": [
+       1,
+       23
+      ],
+      "q": "message:\"WifiMonitor\" AND message:(\"deauthenticated\" OR \"authenticated\")",
+      "s": [
+       "Syslog Logs"
+      ],
+      "r": 0,
+      "f": [
+       "timestamp",
+       "source",
+       "level",
+       "message"
+      ],
+      "lim": 150
+     },
+     {
+      "t": "🚨 Total ARP Conflicts (KPI)",
+      "v": "numeric",
+      "w": 2,
+      "h": 2,
+      "pos": [
+       1,
+       1
+      ],
+      "q": "message:\"network conflict\"",
+      "s": [
+       "Syslog Logs"
+      ],
+      "r": 300,
+      "rows": [],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "📋 Detailed Conflict Log (Message Table)",
+      "v": "messages",
+      "w": "Infinity",
+      "h": 5,
+      "pos": [
+       1,
+       3
+      ],
+      "q": "message:\"network conflict\"",
+      "s": [
+       "Syslog Logs"
+      ],
+      "r": 86400,
+      "f": [
+       "timestamp",
+       "source",
+       "arp_ip",
+       "arp_mac1",
+       "arp_mac2"
+      ],
+      "lim": 150
+     },
+     {
+      "t": "Конфликты ARP по IP",
+      "v": "bar",
+      "w": "Infinity",
+      "h": 4,
+      "pos": [
+       1,
+       8
+      ],
+      "q": "",
+      "s": [
+       "Syslog Logs"
+      ],
+      "r": 3600,
+      "rows": [
+       [
+        "v",
+        "kn_conflict_ip",
+        15
+       ]
+      ],
+      "cols": [],
+      "m": [
+       "count(source)"
+      ],
+      "sort": [],
+      "bm": "group"
+     },
+     {
+      "t": "WireGuard: отказы и успешные входы",
+      "v": "messages",
+      "w": "Infinity",
+      "h": 5,
+      "pos": [
+       1,
+       18
+      ],
+      "q": "kn_event_type:(Wireguard_Failed OR Wireguard_Success)",
+      "s": [
+       "Syslog Logs"
+      ],
+      "r": 86400,
+      "f": [
+       "timestamp",
+       "source",
+       "level",
+       "message"
+      ],
+      "lim": 150
+     }
     ]
    }
   ]
@@ -4169,181 +4920,193 @@
   "title": "📦 Контейнеры",
   "summary": "Логи Podman-контейнеров: объём, уровни, ошибки",
   "description": "Контейнеры с хостов Podman через Fluent Bit, стрим Containers",
-  "timerange": 86400,
-  "widgets": [
+  "pages": [
    {
-    "t": "Ошибки и предупреждения (24 ч)",
-    "v": "numeric",
-    "q": "(loglevel:(error OR warn OR fatal) OR message:(error OR fatal OR panic OR exception OR traceback)) AND NOT container_name:(cadvisor OR fluent-bit)",
-    "s": [
-     "Containers"
-    ],
-    "r": 86400,
-    "rows": [],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 4,
-    "h": 3,
-    "pos": [
-     5,
-     1
-    ]
-   },
-   {
-    "t": "Приоритет journald (6 — stdout, 3 — stderr)",
-    "v": "pie",
-    "q": "",
-    "s": [
-     "Containers"
-    ],
-    "r": 86400,
-    "rows": [
-     [
-      "v",
-      "level",
-      10
-     ]
-    ],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 4,
-    "h": 3,
-    "pos": [
-     9,
-     1
-    ]
-   },
-   {
-    "t": "Контейнер × уровень",
-    "v": "table",
-    "q": "",
-    "s": [
-     "Containers"
-    ],
-    "r": 86400,
-    "rows": [
-     [
-      "v",
-      "container_name",
-      30
-     ],
-     [
-      "v",
-      "level",
-      30
-     ]
-    ],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 12,
-    "h": 5,
-    "pos": [
-     1,
-     13
-    ]
-   },
-   {
-    "t": "Всего сообщений",
-    "v": "numeric",
-    "q": "",
-    "s": [
-     "Containers"
-    ],
-    "r": 86400,
-    "rows": [],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 4,
-    "h": 3,
-    "pos": [
-     1,
-     1
-    ]
-   },
-   {
-    "t": "Ошибки и предупреждения по контейнерам",
-    "v": "bar",
-    "q": "(loglevel:(error OR warn OR fatal) OR message:(error OR fatal OR panic OR exception OR traceback)) AND NOT container_name:(cadvisor OR fluent-bit)",
-    "s": [
-     "Containers"
-    ],
-    "r": 86400,
-    "rows": [
-     [
-      "v",
-      "container_name",
-      15
-     ]
-    ],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 6,
-    "h": 5,
-    "pos": [
-     7,
-     8
-    ]
-   },
-   {
-    "t": "Активность по времени",
-    "v": "area",
-    "q": "",
-    "s": [
-     "Containers"
-    ],
-    "r": 86400,
-    "rows": [
-     [
-      "t",
-      "timestamp",
-      "auto"
-     ]
-    ],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 12,
-    "h": 4,
-    "pos": [
-     1,
-     4
-    ]
-   },
-   {
-    "t": "Сообщения по контейнерам",
-    "v": "bar",
-    "q": "",
-    "s": [
-     "Containers"
-    ],
-    "r": 86400,
-    "rows": [
-     [
-      "v",
-      "container_name",
-      15
-     ]
-    ],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 6,
-    "h": 5,
-    "pos": [
-     1,
-     8
+    "title": "",
+    "timerange": 86400,
+    "widgets": [
+     {
+      "t": "Ошибки и предупреждения (24 ч)",
+      "v": "numeric",
+      "w": 4,
+      "h": 3,
+      "pos": [
+       5,
+       1
+      ],
+      "q": "(loglevel:(error OR warn OR fatal) OR message:(error OR fatal OR panic OR exception OR traceback)) AND NOT container_name:(cadvisor OR fluent-bit)",
+      "s": [
+       "Containers"
+      ],
+      "r": 86400,
+      "rows": [],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "Приоритет journald (6 — stdout, 3 — stderr)",
+      "v": "pie",
+      "w": 4,
+      "h": 3,
+      "pos": [
+       9,
+       1
+      ],
+      "q": "",
+      "s": [
+       "Containers"
+      ],
+      "r": 86400,
+      "rows": [
+       [
+        "v",
+        "level",
+        10
+       ]
+      ],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "Контейнер × уровень",
+      "v": "table",
+      "w": 12,
+      "h": 5,
+      "pos": [
+       1,
+       13
+      ],
+      "q": "",
+      "s": [
+       "Containers"
+      ],
+      "r": 86400,
+      "rows": [
+       [
+        "v",
+        "container_name",
+        30
+       ],
+       [
+        "v",
+        "level",
+        30
+       ]
+      ],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "Всего сообщений",
+      "v": "numeric",
+      "w": 4,
+      "h": 3,
+      "pos": [
+       1,
+       1
+      ],
+      "q": "",
+      "s": [
+       "Containers"
+      ],
+      "r": 86400,
+      "rows": [],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "Ошибки и предупреждения по контейнерам",
+      "v": "bar",
+      "w": 6,
+      "h": 5,
+      "pos": [
+       7,
+       8
+      ],
+      "q": "(loglevel:(error OR warn OR fatal) OR message:(error OR fatal OR panic OR exception OR traceback)) AND NOT container_name:(cadvisor OR fluent-bit)",
+      "s": [
+       "Containers"
+      ],
+      "r": 86400,
+      "rows": [
+       [
+        "v",
+        "container_name",
+        15
+       ]
+      ],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "Активность по времени",
+      "v": "area",
+      "w": 12,
+      "h": 4,
+      "pos": [
+       1,
+       4
+      ],
+      "q": "",
+      "s": [
+       "Containers"
+      ],
+      "r": 86400,
+      "rows": [
+       [
+        "t",
+        "timestamp",
+        "auto"
+       ]
+      ],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "Сообщения по контейнерам",
+      "v": "bar",
+      "w": 6,
+      "h": 5,
+      "pos": [
+       1,
+       8
+      ],
+      "q": "",
+      "s": [
+       "Containers"
+      ],
+      "r": 86400,
+      "rows": [
+       [
+        "v",
+        "container_name",
+        15
+       ]
+      ],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     }
     ]
    }
   ]
@@ -4352,162 +5115,173 @@
   "title": "🔧 Контейнеры: диагностика",
   "summary": "Ошибки, перезапуски, права доступа, уровни логов контейнеров",
   "description": "Диагностика контейнеров: Observium, MongoDB, Loki/Promtail, источники логов",
-  "timerange": 86400,
-  "widgets": [
+  "pages": [
    {
-    "t": "Ошибки прав доступа по контейнерам",
-    "v": "bar",
-    "q": "",
-    "s": [
-     "Containers"
-    ],
-    "r": 86400,
-    "rows": [
-     [
-      "v",
-      "container_name",
-      15
-     ]
-    ],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 6,
-    "h": 5,
-    "pos": [
-     1,
-     5
-    ]
-   },
-   {
-    "t": "Источники логов (хосты)",
-    "v": "bar",
-    "q": "",
-    "s": [
-     "Containers"
-    ],
-    "r": 86400,
-    "rows": [
-     [
-      "v",
-      "source",
-      15
-     ]
-    ],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 6,
-    "h": 5,
-    "pos": [
-     7,
-     5
-    ]
-   },
-   {
-    "t": "Уровни Loki и Promtail",
-    "v": "pie",
-    "q": "",
-    "s": [
-     "Containers"
-    ],
-    "r": 86400,
-    "rows": [
-     [
-      "v",
-      "loglevel",
-      10
-     ]
-    ],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 6,
-    "h": 4,
-    "pos": [
-     7,
-     10
-    ]
-   },
-   {
-    "t": "Уровни MongoDB (log_s)",
-    "v": "pie",
-    "q": "",
-    "s": [
-     "Containers"
-    ],
-    "r": 86400,
-    "rows": [
-     [
-      "v",
-      "log_s",
-      10
-     ]
-    ],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 6,
-    "h": 4,
-    "pos": [
-     1,
-     10
-    ]
-   },
-   {
-    "t": "Перезапуски MariaDB по времени",
-    "v": "area",
-    "q": "",
-    "s": [
-     "Containers"
-    ],
-    "r": 86400,
-    "rows": [
-     [
-      "t",
-      "timestamp",
-      "auto"
-     ]
-    ],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 6,
-    "h": 4,
-    "pos": [
-     7,
-     1
-    ]
-   },
-   {
-    "t": "Ошибки и предупреждения по времени",
-    "v": "area",
-    "q": "(loglevel:(error OR warn OR fatal) OR message:(error OR fatal OR panic OR exception OR traceback)) AND NOT container_name:(cadvisor OR fluent-bit)",
-    "s": [
-     "Containers"
-    ],
-    "r": 86400,
-    "rows": [
-     [
-      "t",
-      "timestamp",
-      "auto"
-     ]
-    ],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 6,
-    "h": 4,
-    "pos": [
-     1,
-     1
+    "title": "",
+    "timerange": 86400,
+    "widgets": [
+     {
+      "t": "Ошибки прав доступа по контейнерам",
+      "v": "bar",
+      "w": 6,
+      "h": 5,
+      "pos": [
+       1,
+       5
+      ],
+      "q": "",
+      "s": [
+       "Containers"
+      ],
+      "r": 86400,
+      "rows": [
+       [
+        "v",
+        "container_name",
+        15
+       ]
+      ],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "Источники логов (хосты)",
+      "v": "bar",
+      "w": 6,
+      "h": 5,
+      "pos": [
+       7,
+       5
+      ],
+      "q": "",
+      "s": [
+       "Containers"
+      ],
+      "r": 86400,
+      "rows": [
+       [
+        "v",
+        "source",
+        15
+       ]
+      ],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "Уровни Loki и Promtail",
+      "v": "pie",
+      "w": 6,
+      "h": 4,
+      "pos": [
+       7,
+       10
+      ],
+      "q": "",
+      "s": [
+       "Containers"
+      ],
+      "r": 86400,
+      "rows": [
+       [
+        "v",
+        "loglevel",
+        10
+       ]
+      ],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "Уровни MongoDB (log_s)",
+      "v": "pie",
+      "w": 6,
+      "h": 4,
+      "pos": [
+       1,
+       10
+      ],
+      "q": "",
+      "s": [
+       "Containers"
+      ],
+      "r": 86400,
+      "rows": [
+       [
+        "v",
+        "log_s",
+        10
+       ]
+      ],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "Перезапуски MariaDB по времени",
+      "v": "area",
+      "w": 6,
+      "h": 4,
+      "pos": [
+       7,
+       1
+      ],
+      "q": "",
+      "s": [
+       "Containers"
+      ],
+      "r": 86400,
+      "rows": [
+       [
+        "t",
+        "timestamp",
+        "auto"
+       ]
+      ],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "Ошибки и предупреждения по времени",
+      "v": "area",
+      "w": 6,
+      "h": 4,
+      "pos": [
+       1,
+       1
+      ],
+      "q": "(loglevel:(error OR warn OR fatal) OR message:(error OR fatal OR panic OR exception OR traceback)) AND NOT container_name:(cadvisor OR fluent-bit)",
+      "s": [
+       "Containers"
+      ],
+      "r": 86400,
+      "rows": [
+       [
+        "t",
+        "timestamp",
+        "auto"
+       ]
+      ],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     }
     ]
    }
   ]
@@ -4516,162 +5290,173 @@
   "title": "⚙️ Контейнеры: процессы",
   "summary": "Жизненный цикл MariaDB, компоненты MongoDB и Loki, попытки без авторизации, активность Observium",
   "description": "Процессы внутри контейнеров по логам stdout/stderr",
-  "timerange": 86400,
-  "widgets": [
+  "pages": [
    {
-    "t": "MongoDB: компоненты логов",
-    "v": "pie",
-    "q": "",
-    "s": [
-     "Containers"
-    ],
-    "r": 86400,
-    "rows": [
-     [
-      "v",
-      "log_c",
-      10
-     ]
-    ],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 6,
-    "h": 4,
-    "pos": [
-     1,
-     5
-    ]
-   },
-   {
-    "t": "Loki и Promtail: компоненты с ошибками",
-    "v": "pie",
-    "q": "",
-    "s": [
-     "Containers"
-    ],
-    "r": 86400,
-    "rows": [
-     [
-      "v",
-      "logcaller",
-      10
-     ]
-    ],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 6,
-    "h": 4,
-    "pos": [
-     1,
-     9
-    ]
-   },
-   {
-    "t": "MariaDB: остановки",
-    "v": "area",
-    "q": "",
-    "s": [
-     "Containers"
-    ],
-    "r": 86400,
-    "rows": [
-     [
-      "t",
-      "timestamp",
-      "auto"
-     ]
-    ],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 6,
-    "h": 4,
-    "pos": [
-     7,
-     1
-    ]
-   },
-   {
-    "t": "MariaDB: готовность к подключению",
-    "v": "area",
-    "q": "",
-    "s": [
-     "Containers"
-    ],
-    "r": 86400,
-    "rows": [
-     [
-      "t",
-      "timestamp",
-      "auto"
-     ]
-    ],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 6,
-    "h": 4,
-    "pos": [
-     1,
-     1
-    ]
-   },
-   {
-    "t": "Observium: активность по времени",
-    "v": "area",
-    "q": "",
-    "s": [
-     "Containers"
-    ],
-    "r": 86400,
-    "rows": [
-     [
-      "t",
-      "timestamp",
-      "auto"
-     ]
-    ],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 6,
-    "h": 4,
-    "pos": [
-     7,
-     9
-    ]
-   },
-   {
-    "t": "MongoDB: подключения без авторизации (клиенты)",
-    "v": "bar",
-    "q": "",
-    "s": [
-     "Containers"
-    ],
-    "r": 86400,
-    "rows": [
-     [
-      "v",
-      "log_attr_client",
-      15
-     ]
-    ],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "w": 6,
-    "h": 4,
-    "pos": [
-     7,
-     5
+    "title": "",
+    "timerange": 86400,
+    "widgets": [
+     {
+      "t": "MongoDB: компоненты логов",
+      "v": "pie",
+      "w": 6,
+      "h": 4,
+      "pos": [
+       1,
+       5
+      ],
+      "q": "",
+      "s": [
+       "Containers"
+      ],
+      "r": 86400,
+      "rows": [
+       [
+        "v",
+        "log_c",
+        10
+       ]
+      ],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "Loki и Promtail: компоненты с ошибками",
+      "v": "pie",
+      "w": 6,
+      "h": 4,
+      "pos": [
+       1,
+       9
+      ],
+      "q": "",
+      "s": [
+       "Containers"
+      ],
+      "r": 86400,
+      "rows": [
+       [
+        "v",
+        "logcaller",
+        10
+       ]
+      ],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "MariaDB: остановки",
+      "v": "area",
+      "w": 6,
+      "h": 4,
+      "pos": [
+       7,
+       1
+      ],
+      "q": "",
+      "s": [
+       "Containers"
+      ],
+      "r": 86400,
+      "rows": [
+       [
+        "t",
+        "timestamp",
+        "auto"
+       ]
+      ],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "MariaDB: готовность к подключению",
+      "v": "area",
+      "w": 6,
+      "h": 4,
+      "pos": [
+       1,
+       1
+      ],
+      "q": "",
+      "s": [
+       "Containers"
+      ],
+      "r": 86400,
+      "rows": [
+       [
+        "t",
+        "timestamp",
+        "auto"
+       ]
+      ],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "Observium: активность по времени",
+      "v": "area",
+      "w": 6,
+      "h": 4,
+      "pos": [
+       7,
+       9
+      ],
+      "q": "",
+      "s": [
+       "Containers"
+      ],
+      "r": 86400,
+      "rows": [
+       [
+        "t",
+        "timestamp",
+        "auto"
+       ]
+      ],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "MongoDB: подключения без авторизации (клиенты)",
+      "v": "bar",
+      "w": 6,
+      "h": 4,
+      "pos": [
+       7,
+       5
+      ],
+      "q": "",
+      "s": [
+       "Containers"
+      ],
+      "r": 86400,
+      "rows": [
+       [
+        "v",
+        "log_attr_client",
+        15
+       ]
+      ],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     }
     ]
    }
   ]
@@ -4679,154 +5464,314 @@
  {
   "title": "📊 Общий базовый дашборд",
   "summary": "Все источники: объём сообщений по входам, потокам и узлам",
-  "description": "Это список всех источников, отправивших сообщения.  Вы можете сузить временной диапазон, увеличив масштаб гистограммы сообщений, или расширить его, выбрав более",
-  "timerange": 300,
-  "widgets": [
+  "description": "Это список всех источников, отправивших сообщения.  Вы можете сузить временной диапазон, увеличив масштаб гистограммы сообщений, или расширить его, выбрав более широкий диапазон в элементах управления вверху.  Вы также можете задать фильтры, чтобы ограничить отображаемые результаты.  Кроме того, вы можете добавить на эту панель управления дополнительные виджеты или изменить внешний вид существующих в соответствии со своими потребностями.",
+  "pages": [
    {
-    "t": "Messages per Source",
-    "v": "pie",
-    "q": "",
-    "s": [],
-    "r": 300,
-    "rows": [
-     [
-      "v",
-      "source",
-      10
-     ]
-    ],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "sort": [
-     "count() Descending"
-    ],
-    "w": 6,
-    "h": 4,
-    "pos": [
-     7,
-     9
+    "title": "Log Volume by Message Count",
+    "timerange": 300,
+    "widgets": [
+     {
+      "t": "Messages per Source",
+      "v": "pie",
+      "w": 6,
+      "h": 4,
+      "pos": [
+       7,
+       9
+      ],
+      "q": "",
+      "s": [],
+      "r": 300,
+      "rows": [
+       [
+        "v",
+        "source",
+        10
+       ]
+      ],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": [
+       "count() Descending"
+      ]
+     },
+     {
+      "t": "Messages over time by Inputs",
+      "v": "bar",
+      "w": 6,
+      "h": 4,
+      "pos": [
+       1,
+       5
+      ],
+      "q": "",
+      "s": [],
+      "r": 300,
+      "rows": [
+       [
+        "t",
+        "timestamp",
+        "auto"
+       ]
+      ],
+      "cols": [
+       [
+        "v",
+        "gl2_source_input",
+        15
+       ]
+      ],
+      "m": [
+       "count()"
+      ],
+      "sort": [],
+      "bm": "stack"
+     },
+     {
+      "t": "Messages over time by Streams",
+      "v": "bar",
+      "w": "Infinity",
+      "h": 4,
+      "pos": [
+       1,
+       1
+      ],
+      "q": "",
+      "s": [],
+      "r": 300,
+      "rows": [
+       [
+        "t",
+        "timestamp",
+        "auto"
+       ]
+      ],
+      "cols": [
+       [
+        "v",
+        "streams",
+        15
+       ]
+      ],
+      "m": [
+       "count()"
+      ],
+      "sort": [],
+      "bm": "stack"
+     },
+     {
+      "t": "Messages over time by Nodes",
+      "v": "bar",
+      "w": 6,
+      "h": 4,
+      "pos": [
+       7,
+       5
+      ],
+      "q": "",
+      "s": [],
+      "r": 300,
+      "rows": [
+       [
+        "t",
+        "timestamp",
+        "auto"
+       ]
+      ],
+      "cols": [
+       [
+        "v",
+        "gl2_source_node",
+        15
+       ]
+      ],
+      "m": [
+       "count()"
+      ],
+      "sort": [],
+      "bm": "stack"
+     },
+     {
+      "t": "Selected sources",
+      "v": "table",
+      "w": 6,
+      "h": 4,
+      "pos": [
+       1,
+       9
+      ],
+      "q": "",
+      "s": [],
+      "r": 300,
+      "rows": [
+       [
+        "v",
+        "source",
+        15
+       ]
+      ],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": [
+       "count() Descending"
+      ]
+     }
     ]
    },
    {
-    "t": "Messages over time by Inputs",
-    "v": "bar",
-    "q": "",
-    "s": [],
-    "r": 300,
-    "rows": [
-     [
-      "t",
-      "timestamp",
-      "auto"
-     ]
-    ],
-    "cols": [
-     [
-      "v",
-      "gl2_source_input",
-      15
-     ]
-    ],
-    "m": [
-     "count()"
-    ],
-    "bm": "stack",
-    "w": 6,
-    "h": 4,
-    "pos": [
-     1,
-     5
-    ]
-   },
-   {
-    "t": "Messages over time by Streams",
-    "v": "bar",
-    "q": "",
-    "s": [],
-    "r": 300,
-    "rows": [
-     [
-      "t",
-      "timestamp",
-      "auto"
-     ]
-    ],
-    "cols": [
-     [
-      "v",
-      "streams",
-      15
-     ]
-    ],
-    "m": [
-     "count()"
-    ],
-    "bm": "stack",
-    "w": 12,
-    "h": 4,
-    "pos": [
-     1,
-     1
-    ]
-   },
-   {
-    "t": "Messages over time by Nodes",
-    "v": "bar",
-    "q": "",
-    "s": [],
-    "r": 300,
-    "rows": [
-     [
-      "t",
-      "timestamp",
-      "auto"
-     ]
-    ],
-    "cols": [
-     [
-      "v",
-      "gl2_source_node",
-      15
-     ]
-    ],
-    "m": [
-     "count()"
-    ],
-    "bm": "stack",
-    "w": 6,
-    "h": 4,
-    "pos": [
-     7,
-     5
-    ]
-   },
-   {
-    "t": "Selected sources",
-    "v": "table",
-    "q": "",
-    "s": [],
-    "r": 300,
-    "rows": [
-     [
-      "v",
-      "source",
-      15
-     ]
-    ],
-    "cols": [],
-    "m": [
-     "count()"
-    ],
-    "sort": [
-     "count() Descending"
-    ],
-    "w": 6,
-    "h": 4,
-    "pos": [
-     1,
-     9
+    "title": "Log Volume by Message Size",
+    "timerange": 300,
+    "widgets": [
+     {
+      "t": "Messages over time by Streams",
+      "v": "bar",
+      "w": "Infinity",
+      "h": 4,
+      "pos": [
+       1,
+       1
+      ],
+      "q": "",
+      "s": [],
+      "r": 300,
+      "rows": [
+       [
+        "t",
+        "timestamp",
+        "auto"
+       ]
+      ],
+      "cols": [
+       [
+        "v",
+        "streams",
+        15
+       ]
+      ],
+      "m": [
+       "sum(gl2_accounted_message_size)"
+      ],
+      "sort": [],
+      "bm": "stack"
+     },
+     {
+      "t": "Selected sources",
+      "v": "table",
+      "w": 6,
+      "h": 4,
+      "pos": [
+       1,
+       9
+      ],
+      "q": "",
+      "s": [],
+      "r": 300,
+      "rows": [
+       [
+        "v",
+        "source",
+        15
+       ]
+      ],
+      "cols": [],
+      "m": [
+       "sum(gl2_accounted_message_size)"
+      ],
+      "sort": []
+     },
+     {
+      "t": "Messages over time by Inputs",
+      "v": "bar",
+      "w": 6,
+      "h": 4,
+      "pos": [
+       1,
+       5
+      ],
+      "q": "",
+      "s": [],
+      "r": 300,
+      "rows": [
+       [
+        "t",
+        "timestamp",
+        "auto"
+       ]
+      ],
+      "cols": [
+       [
+        "v",
+        "gl2_source_input",
+        15
+       ]
+      ],
+      "m": [
+       "sum(gl2_accounted_message_size)"
+      ],
+      "sort": [],
+      "bm": "stack"
+     },
+     {
+      "t": "Messages over time by Nodes",
+      "v": "bar",
+      "w": 6,
+      "h": 4,
+      "pos": [
+       7,
+       5
+      ],
+      "q": "",
+      "s": [],
+      "r": 300,
+      "rows": [
+       [
+        "t",
+        "timestamp",
+        "auto"
+       ]
+      ],
+      "cols": [
+       [
+        "v",
+        "gl2_source_node",
+        15
+       ]
+      ],
+      "m": [
+       "sum(gl2_accounted_message_size)"
+      ],
+      "sort": [],
+      "bm": "stack"
+     },
+     {
+      "t": "Messages per Source",
+      "v": "pie",
+      "w": 6,
+      "h": 4,
+      "pos": [
+       7,
+       9
+      ],
+      "q": "",
+      "s": [],
+      "r": 300,
+      "rows": [
+       [
+        "v",
+        "source",
+        10
+       ]
+      ],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     }
     ]
    }
   ]

@@ -1,7 +1,7 @@
 # Часть 10. Дашборды руками: инструкция по каждому виджету
 
 > Эта глава для тех, кто собирает дашборды не скриптом, а мышкой. Для каждого из 22 дашбордов
-> перечислены виджеты и то, что выбрать в каждом поле редактора. Автоматический вариант:
+> перечислены вкладки и виджеты и то, что выбрать в каждом поле редактора. Автоматический вариант:
 > [`graylog/import-dashboards.js`](../graylog/import-dashboards.js) и
 > [`graylog/dashboards-spec.json`](../graylog/dashboards-spec.json).
 
@@ -36,8 +36,8 @@
 > потока другое, выбери свой поток с тем же смыслом. Названия полей (`kn_event_type`, `winlogbeat_event_code`,
 > `container_name` и другие) зависят от твоих пайплайнов и extractor-ов.
 
-## Оглавление
 
+## Оглавление
 
 1. [🏠 Лаборатория за 60 секунд](#1-dash)
 2. [🛡️ Центр безопасности (SOC)](#2-dash)
@@ -68,8 +68,7 @@
 
 - **Краткое описание (Summary):** Обзор всей лаборатории: объём, хосты, источники
 - **Описание (Description):** Масштаб домашней лаборатории мониторинга одним экраном.
-- **Окно времени дашборда:** 5 минут
-- **Виджетов:** 7
+- **Вкладок:** 1, **виджетов:** 7
 
 ### 1.1. 📨 Сообщений за 24 ч
 
@@ -162,8 +161,7 @@
 
 - **Краткое описание (Summary):** Алерты детектирования: приоритеты, правила, хосты
 - **Описание (Description):** Что система находит и о чём сообщает. Приоритет: 3=HIGH, 2=MEDIUM, 1=LOW.
-- **Окно времени дашборда:** 5 минут
-- **Виджетов:** 8
+- **Вкладок:** 1, **виджетов:** 8
 
 ### 2.1. 🛡️ Событий ИБ за 7 дней
 
@@ -268,8 +266,7 @@
 
 - **Краткое описание (Summary):** WireGuard, конфликты ARP, SSH, Wi-Fi на домашнем роутере
 - **Описание (Description):** Сетевая активность и аномалии по логам роутера Keenetic.
-- **Окно времени дашборда:** 5 минут
-- **Виджетов:** 8
+- **Вкладок:** 1, **виджетов:** 8
 
 ### 3.1. 📡 Событий роутера 7д
 
@@ -374,8 +371,7 @@
 
 - **Краткое описание (Summary):** Входы, сетевые соединения, DNS и процессы на Windows DC
 - **Описание (Description):** Доступ к контроллеру домена и активность процессов по Sysmon и журналу безопасности.
-- **Окно времени дашборда:** 5 минут
-- **Виджетов:** 9
+- **Вкладок:** 1, **виджетов:** 9
 
 ### 4.1. 🪟 События Windows 24ч
 
@@ -493,8 +489,7 @@
 
 - **Краткое описание (Summary):** auditd РЕД ОС: команды, sudo, категории правил, SELinux
 - **Описание (Description):** Активность на Linux-хостах по данным auditd.
-- **Окно времени дашборда:** 5 минут
-- **Виджетов:** 9
+- **Вкладок:** 1, **виджетов:** 9
 
 ### 5.1. 🐧 Событий auditd 24ч
 
@@ -613,8 +608,7 @@
 
 - **Краткое описание (Summary):** TCC, USB, AirDrop и запуск программ на Маках
 - **Описание (Description):** Приватность и активность приложений на хостах macOS.
-- **Окно времени дашборда:** 5 минут
-- **Виджетов:** 9
+- **Вкладок:** 1, **виджетов:** 9
 
 ### 6.1. 🍎 События macOS 24ч
 
@@ -733,8 +727,7 @@
 
 - **Краткое описание (Summary):** Kerberos, LDAP, SSSD и объём логов FreeIPA
 - **Описание (Description):** Аутентификация в домене monitoring.test и доля служебного шума.
-- **Окно времени дашборда:** 5 минут
-- **Виджетов:** 8
+- **Вкладок:** 1, **виджетов:** 8
 
 ### 7.1. 🔐 Сообщений FreeIPA 24ч
 
@@ -839,8 +832,7 @@
 
 - **Краткое описание (Summary):** Какие правила срабатывают чаще всего и на каких объектах
 - **Описание (Description):** 
-- **Окно времени дашборда:** 7 дней
-- **Виджетов:** 10
+- **Вкладок:** 1, **виджетов:** 10
 
 ### 8.1. События за 7 дней
 
@@ -849,7 +841,7 @@
 | Тип | **Single Number** |
 | Потоки | All events |
 | Запрос | пусто |
-| Окно времени | 7 дней (как у дашборда) |
+| Окно времени | 7 дней (как у вкладки) |
 | Metrics | `count()` |
 | Размер (ш×в) | 3×3 |
 
@@ -860,7 +852,7 @@
 | Тип | **Single Number** |
 | Потоки | All events |
 | Запрос | `priority:3` |
-| Окно времени | 7 дней (как у дашборда) |
+| Окно времени | 7 дней (как у вкладки) |
 | Metrics | `count()` |
 | Размер (ш×в) | 3×3 |
 
@@ -871,7 +863,7 @@
 | Тип | **Single Number** |
 | Потоки | All events |
 | Запрос | `priority:2` |
-| Окно времени | 7 дней (как у дашборда) |
+| Окно времени | 7 дней (как у вкладки) |
 | Metrics | `count()` |
 | Размер (ш×в) | 3×3 |
 
@@ -893,7 +885,7 @@
 | Тип | **Pie Chart** |
 | Потоки | All events |
 | Запрос | пусто |
-| Окно времени | 7 дней (как у дашборда) |
+| Окно времени | 7 дней (как у вкладки) |
 | Group By → Rows | `priority` — **Values**, Limit 3 |
 | Metrics | `count()` |
 | Размер (ш×в) | 4×5 |
@@ -905,7 +897,7 @@
 | Тип | **Area Chart** |
 | Потоки | All events |
 | Запрос | пусто |
-| Окно времени | 7 дней (как у дашборда) |
+| Окно времени | 7 дней (как у вкладки) |
 | Group By → Rows | `timestamp` — **Time**, интервал Auto |
 | Group By → Columns | `priority` — **Values**, Limit 3 |
 | Metrics | `count()` |
@@ -918,7 +910,7 @@
 | Тип | **Bar Chart** |
 | Потоки | All events |
 | Запрос | пусто |
-| Окно времени | 7 дней (как у дашборда) |
+| Окно времени | 7 дней (как у вкладки) |
 | Group By → Rows | `event_definition_id` — **Values**, Limit 15 |
 | Metrics | `count()` |
 | Размер (ш×в) | 6×6 |
@@ -930,7 +922,7 @@
 | Тип | **Bar Chart** |
 | Потоки | All events |
 | Запрос | пусто |
-| Окно времени | 7 дней (как у дашборда) |
+| Окно времени | 7 дней (как у вкладки) |
 | Group By → Rows | `key` — **Values**, Limit 12 |
 | Metrics | `count()` |
 | Размер (ш×в) | 6×6 |
@@ -940,29 +932,105 @@
 | Поле | Значение |
 |---|---|
 | Тип | **Markdown (Text)** |
-| Размер (ш×в) | 12×6 |
+| Размер (ш×в) | 12×16 |
 
 Текст виджета (вставь в редактор Markdown):
 
-```markdown
-**Справочник: id правила → название**
+````markdown
+**Справочник: id правила → название** (последние 6 символов `event_definition_id`)
 
-- `1d7ddf` … LNX - Отказ SELinux (AVC)
-- `225c18` … Контейнеры: всплеск ошибок
-- `1d7dc7` … LNX - Исполнение из памяти (memfd_create)
-- `1d903d` … macOS - Bi.Zone: новый элемент автозагрузки
-- `1d8195` … 6ad30b47cc18050c4f1d8195
-- `225c28` … Контейнеры: перезапуски MariaDB
-- `1d7dbf` … LNX - Подозрительные утилиты (base64, nc, socat, scp)
-- `1d814b` … 6ad30b46cc18050c4f1d814b
-- `1d7dd7` … LNX - Изменение правил firewall (iptables, nft)
-- `1d816f` … 6ad30b46cc18050c4f1d816f
-- `9ed46e` … LNX - Использование sudo
-- `9ed450` … LNX - Изменение прав доступа (chmod)
-- `1d7e3c` … Windows - Автозагрузка через ключ реестра Run
+- `1ed7eb` … FREEIPA - Выпуск сертификата в CA (Dogtag)
+- `1ecca0` … FREEIPA - Подбор пароля (10+ PREAUTH_FAILED за 5 мин)
+- `1ecc98` … HEALTH - Клиенты не могут связаться с KDC
+- `1ed7e3` … KEENETIC - Вход в админку роутера (SSH)
 - `1ecca8` … KEENETIC - Новое устройство в сети
+- `1edb48` … KEENETIC - Отказы WireGuard (ежедневная сводка)
+- `9ed45a` … LNX - Брутфорс SSH (5+ неудачных входов за 5 мин)
+- `9edafa` … LNX - Добавление SSH-ключа в authorized_keys
+- `9ed448` … LNX - Добавление/удаление пользователя
+- `1d7dcf` … LNX - Закрепление через systemctl enable
+- `1d7daf` … LNX - Затирание следов (shred, history, truncate логов)
+- `1d7d96` … LNX - Изменение /etc/passwd, shadow, group
+- `1d7d9e` … LNX - Изменение sshd_config
+- `9ed450` … LNX - Изменение прав доступа (chmod)
+- `1d7dd7` … LNX - Изменение правил firewall (iptables, nft)
+- `1d7dc7` … LNX - Исполнение из памяти (memfd_create)
+- `9ed46e` … LNX - Использование sudo
+- `9ed462` … LNX - Неудачная попытка sudo
+- `1d7da6` … LNX - Обратная оболочка (/dev/tcp)
+- `9ed477` … LNX - Остановка службы (systemctl stop)
+- `1d7ddf` … LNX - Отказ SELinux (AVC)
+- `1d7db7` … LNX - Отключение аудита или удаление правил auditd
+- `1d7dbf` … LNX - Подозрительные утилиты (base64, nc, socat, scp)
 - `1d7de7` … LNX - Разведка (id, whoami)
-```
+- `19e330` … System notification events
+- `1d7dff` … Windows - Defender обнаружил угрозу или отключён
+- `1d7e44` … Windows - LOLBins (certutil, mshta, bitsadmin, regsvr32)
+- `1d7e17` … Windows - PowerShell с закодированной командой
+- `1d7e1f` … Windows - PowerShell скачивает и исполняет код
+- `1d7e3c` … Windows - Автозагрузка через ключ реестра Run
+- `1d7e57` … Windows - Вход по RDP
+- `1d7df7` … Windows - Доступ к памяти LSASS
+- `9ed4c9` … Windows - Изменение группы «Администраторы домена»
+- `1d7e27` … Windows - Изменение привилегированных групп и учёток
+- `1d7e31` … Windows - Новая служба
+- `1ed7f3` … Windows - Отключение Firewall (netsh или PS)
+- `1d7e0f` … Windows - Офисное приложение запустило оболочку
+- `1d7def` … Windows - Очистка журнала событий
+- `9ed4d1` … Windows - Подбор пароля (5+ ошибок входа 4625 за 5 мин)
+- `1d7e5f` … Windows - Серия разведки (5+ команд за 5 мин)
+- `1d7e4c` … Windows - Создание задачи через schtasks
+- `9ed4d9` … Windows - Создание/удаление локального пользователя (net user)
+- `1d7e07` … Windows - Удаление теневых копий
+- `1d904c` … macOS - Bi.Zone: неизвестный SSH-ключ в authorized_keys
+- `1d909c` … macOS - Bi.Zone: неудачные входы по SSH
+- `1d9059` … macOS - Bi.Zone: новое правило в sudoers
+- `1d9066` … macOS - Bi.Zone: новый пользователь
+- `1d903d` … macOS - Bi.Zone: новый элемент автозагрузки
+- `1d90a9` … macOS - Bi.Zone: опасная команда в истории оболочки
+- `1d9080` … macOS - Bi.Zone: подозрительная запись в hosts
+- `1d908f` … macOS - Bi.Zone: процесс из /tmp или /Users/Shared
+- `1d9073` … macOS - Bi.Zone: смена DNS-серверов
+- `9ed4a7` … macOS - Активность AirDrop
+- `1d7eac` … macOS - Включение удалённого входа или Screen Sharing
+- `1d7e8c` … macOS - Вмешательство в TCC
+- `1d7e70` … macOS - Выгрузка паролей из Keychain
+- `9ed48f` … macOS - Выполнение команды через sudo
+- `1d7ea4` … macOS - Загрузка расширения ядра
+- `1d7e9c` … macOS - Запуск программы из /tmp или /Users/Shared
+- `9ed47f` … macOS - Изменение /etc/sudoers
+- `9ed497` … macOS - Неудачная попытка sudo (неверный пароль)
+- `9ed49f` … macOS - Новый/изменённый plist в автозагрузке
+- `1d7e84` … macOS - Обратная оболочка (/dev/tcp, pty.spawn)
+- `1d7e67` … macOS - Отключение SIP или Gatekeeper
+- `9ed4b1` … macOS - Подключено Apple-устройство (iPhone/iPad/iPod)
+- `9ed4c1` … macOS - Подключено мобильное устройство (не Apple)
+- `9ed4b9` … macOS - Подключён USB-накопитель
+- `9ed487` … macOS - Подозрительный процесс открыл TCP-порт
+- `1d7eb4` … macOS - Снятие карантина с приложения
+- `1d7e94` … macOS - Создание пользователя или изменение групп
+- `1d7e78` … macOS - Фишинговый запрос пароля через osascript
+- `55fed7` … Контейнеры: Grafana — неудачный вход (подбор пароля)
+- `55fecf` … Контейнеры: Loki — ошибки приёма
+- `55fec7` … Контейнеры: MongoDB — ошибки
+- `55fee9` … Контейнеры: netalertx — всплеск объёма логов
+- `55fedf` … Контейнеры: netalertx — новое устройство в сети
+- `55febf` … Контейнеры: promtail не доставляет логи в Loki
+- `225c18` … Контейнеры: всплеск ошибок
+- `55feb3` … Контейнеры: нехватка памяти или падение процесса
+- `225c30` … Контейнеры: ошибки прав доступа
+- `225c28` … Контейнеры: перезапуски MariaDB
+- `55fd98` … Контейнеры: тишина — atrium
+- `55fd80` … Контейнеры: тишина — grafana
+- `55fda0` … Контейнеры: тишина — komodo_mongo_1
+- `55fd88` … Контейнеры: тишина — loki
+- `55fdb6` … Контейнеры: тишина — netalertx
+- `55fdaa` … Контейнеры: тишина — wazuh.dashboard
+- `55fd90` … Контейнеры: тишина — zaslon
+- `5601a1` … Контейнеры: тишина — нет логов ни от одного контейнера
+
+Правила с ids `1d8195`, `1d814b`, `1d817c`, `1d816f`, `1d81c2` удалены из Graylog, но их события ещё лежат в индексе.
+````
 
 ### 8.10. Последние события
 
@@ -971,7 +1039,7 @@
 | Тип | **Message List** |
 | Потоки | All events |
 | Запрос | пусто |
-| Окно времени | 7 дней (как у дашборда) |
+| Окно времени | 7 дней (как у вкладки) |
 | Fields | `timestamp`, `priority`, `source`, `event_definition_id`, `message` |
 | Sort | `timestamp` по убыванию; строк: 30 |
 | Размер (ш×в) | 12×6 |
@@ -982,8 +1050,7 @@
 
 - **Краткое описание (Summary):** Доходят ли логи: объём по входам и потокам, последнее сообщение от каждого источника
 - **Описание (Description):** 
-- **Окно времени дашборда:** 24 часа
-- **Виджетов:** 7
+- **Вкладок:** 1, **виджетов:** 7
 
 ### 9.1. Сообщений за 24 ч
 
@@ -992,7 +1059,7 @@
 | Тип | **Single Number** |
 | Потоки | все |
 | Запрос | пусто |
-| Окно времени | 24 часа (как у дашборда) |
+| Окно времени | 24 часа (как у вкладки) |
 | Metrics | `count()` |
 | Размер (ш×в) | 6×3 |
 
@@ -1003,7 +1070,7 @@
 | Тип | **Single Number** |
 | Потоки | все |
 | Запрос | пусто |
-| Окно времени | 24 часа (как у дашборда) |
+| Окно времени | 24 часа (как у вкладки) |
 | Metrics | `card(source)` |
 | Размер (ш×в) | 6×3 |
 
@@ -1014,7 +1081,7 @@
 | Тип | **Area Chart** |
 | Потоки | все |
 | Запрос | пусто |
-| Окно времени | 24 часа (как у дашборда) |
+| Окно времени | 24 часа (как у вкладки) |
 | Group By → Rows | `timestamp` — **Time**, интервал Auto |
 | Group By → Columns | `gl2_source_input` — **Values**, Limit 8 |
 | Metrics | `count()` |
@@ -1027,7 +1094,7 @@
 | Тип | **Bar Chart** |
 | Потоки | все |
 | Запрос | пусто |
-| Окно времени | 24 часа (как у дашборда) |
+| Окно времени | 24 часа (как у вкладки) |
 | Group By → Rows | `streams` — **Values**, Limit 10 |
 | Metrics | `count()` |
 | Размер (ш×в) | 6×6 |
@@ -1039,7 +1106,7 @@
 | Тип | **Pie Chart** |
 | Потоки | все |
 | Запрос | пусто |
-| Окно времени | 24 часа (как у дашборда) |
+| Окно времени | 24 часа (как у вкладки) |
 | Group By → Rows | `gl2_source_input` — **Values**, Limit 8 |
 | Metrics | `count()` |
 | Размер (ш×в) | 6×6 |
@@ -1051,7 +1118,7 @@
 | Тип | **Data Table** |
 | Потоки | все |
 | Запрос | пусто |
-| Окно времени | 24 часа (как у дашборда) |
+| Окно времени | 24 часа (как у вкладки) |
 | Group By → Rows | `source` — **Values**, Limit 40 |
 | Metrics | `latest(timestamp)`, `count()` |
 | Sort | latest(timestamp) по возрастанию |
@@ -1066,7 +1133,7 @@
 
 Текст виджета (вставь в редактор Markdown):
 
-```markdown
+````markdown
 **Справочник: входы и потоки**
 
 - вход `2882bf` … MacOS Beats
@@ -1082,7 +1149,7 @@
 - поток `fde575` … WindowsLogs
 - поток `885bca` … FreeIPA Logs
 - поток `1fa113` … Containers
-```
+````
 
 <a id="10-dash"></a>
 
@@ -1090,8 +1157,7 @@
 
 - **Краткое описание (Summary):** Неудачная аутентификация со всех источников за 7 дней
 - **Описание (Description):** 
-- **Окно времени дашборда:** 7 дней
-- **Виджетов:** 12
+- **Вкладок:** 1, **виджетов:** 12
 
 ### 10.1. Windows: ошибки входа 4625
 
@@ -1100,7 +1166,7 @@
 | Тип | **Single Number** |
 | Потоки | WindowsLogs |
 | Запрос | `winlogbeat_event_code:4625 AND winlogbeat_event_outcome:failure` |
-| Окно времени | 7 дней (как у дашборда) |
+| Окно времени | 7 дней (как у вкладки) |
 | Metrics | `count()` |
 | Размер (ш×в) | 3×3 |
 
@@ -1111,7 +1177,7 @@
 | Тип | **Single Number** |
 | Потоки | RedOS auditd Logs |
 | Запрос | `(message:"sshd-session" AND message:"Authentication failure") OR (message:"sshd" AND message:"Failed password")` |
-| Окно времени | 7 дней (как у дашборда) |
+| Окно времени | 7 дней (как у вкладки) |
 | Metrics | `count()` |
 | Размер (ш×в) | 3×3 |
 
@@ -1122,7 +1188,7 @@
 | Тип | **Single Number** |
 | Потоки | RedOS auditd Logs |
 | Запрос | `message:"sudo" AND (message:"authentication failure" OR message:"incorrect password" OR (message:"pam_sss" AND message:"failure"))` |
-| Окно времени | 7 дней (как у дашборда) |
+| Окно времени | 7 дней (как у вкладки) |
 | Metrics | `count()` |
 | Размер (ш×в) | 3×3 |
 
@@ -1133,7 +1199,7 @@
 | Тип | **Single Number** |
 | Потоки | FreeIPA Logs |
 | Запрос | `message:PREAUTH_FAILED` |
-| Окно времени | 7 дней (как у дашборда) |
+| Окно времени | 7 дней (как у вкладки) |
 | Metrics | `count()` |
 | Размер (ш×в) | 3×3 |
 
@@ -1144,7 +1210,7 @@
 | Тип | **Single Number** |
 | Потоки | Syslog Logs |
 | Запрос | `kn_event_type:Wireguard_Failed` |
-| Окно времени | 7 дней (как у дашборда) |
+| Окно времени | 7 дней (как у вкладки) |
 | Metrics | `count()` |
 | Размер (ш×в) | 3×3 |
 
@@ -1155,7 +1221,7 @@
 | Тип | **Single Number** |
 | Потоки | Containers |
 | Запрос | `container_name:grafana AND (message:"Invalid username or password" OR message:"Failed to authenticate" OR message:"login attempt failed")` |
-| Окно времени | 7 дней (как у дашборда) |
+| Окно времени | 7 дней (как у вкладки) |
 | Metrics | `count()` |
 | Размер (ш×в) | 3×3 |
 
@@ -1166,7 +1232,7 @@
 | Тип | **Single Number** |
 | Потоки | BiZone_macOS |
 | Запрос | `mac_bz_event_type:LogonHistoryFailure` |
-| Окно времени | 7 дней (как у дашборда) |
+| Окно времени | 7 дней (как у вкладки) |
 | Metrics | `count()` |
 | Размер (ш×в) | 3×3 |
 
@@ -1177,7 +1243,7 @@
 | Тип | **Single Number** |
 | Потоки | FreeIPA Logs, Syslog Logs, WindowsLogs, BiZone_macOS, Containers, RedOS auditd Logs |
 | Запрос | `(winlogbeat_event_code:4625 AND winlogbeat_event_outcome:failure) OR ((message:"sshd-session" AND message:"Authentication failure") OR (message:"sshd" AND message:"Failed password")) OR message:PREAUTH_FAILED OR kn_event_type:Wireguard_Failed OR (container_name:grafana AND (message:"Invalid username or password" OR message:"Failed to authenticate" OR message:"login attempt failed")) OR mac_bz_event_type:LogonHistoryFailure OR (message:"sudo" AND (message:"authentication failure" OR message:"incorrect password" OR (message:"pam_sss" AND message:"failure")))` |
-| Окно времени | 7 дней (как у дашборда) |
+| Окно времени | 7 дней (как у вкладки) |
 | Metrics | `count()` |
 | Размер (ш×в) | 3×3 |
 
@@ -1188,7 +1254,7 @@
 | Тип | **Area Chart** |
 | Потоки | FreeIPA Logs, Syslog Logs, WindowsLogs, BiZone_macOS, Containers, RedOS auditd Logs |
 | Запрос | `(winlogbeat_event_code:4625 AND winlogbeat_event_outcome:failure) OR ((message:"sshd-session" AND message:"Authentication failure") OR (message:"sshd" AND message:"Failed password")) OR message:PREAUTH_FAILED OR kn_event_type:Wireguard_Failed OR (container_name:grafana AND (message:"Invalid username or password" OR message:"Failed to authenticate" OR message:"login attempt failed")) OR mac_bz_event_type:LogonHistoryFailure OR (message:"sudo" AND (message:"authentication failure" OR message:"incorrect password" OR (message:"pam_sss" AND message:"failure")))` |
-| Окно времени | 7 дней (как у дашборда) |
+| Окно времени | 7 дней (как у вкладки) |
 | Group By → Rows | `timestamp` — **Time**, интервал Auto |
 | Group By → Columns | `source` — **Values**, Limit 6 |
 | Metrics | `count()` |
@@ -1201,7 +1267,7 @@
 | Тип | **Pie Chart** |
 | Потоки | FreeIPA Logs, Syslog Logs, WindowsLogs, BiZone_macOS, Containers, RedOS auditd Logs |
 | Запрос | `(winlogbeat_event_code:4625 AND winlogbeat_event_outcome:failure) OR ((message:"sshd-session" AND message:"Authentication failure") OR (message:"sshd" AND message:"Failed password")) OR message:PREAUTH_FAILED OR kn_event_type:Wireguard_Failed OR (container_name:grafana AND (message:"Invalid username or password" OR message:"Failed to authenticate" OR message:"login attempt failed")) OR mac_bz_event_type:LogonHistoryFailure OR (message:"sudo" AND (message:"authentication failure" OR message:"incorrect password" OR (message:"pam_sss" AND message:"failure")))` |
-| Окно времени | 7 дней (как у дашборда) |
+| Окно времени | 7 дней (как у вкладки) |
 | Group By → Rows | `streams` — **Values**, Limit 6 |
 | Metrics | `count()` |
 | Размер (ш×в) | 4×5 |
@@ -1213,7 +1279,7 @@
 | Тип | **Bar Chart** |
 | Потоки | FreeIPA Logs, Syslog Logs, WindowsLogs, BiZone_macOS, Containers, RedOS auditd Logs |
 | Запрос | `(winlogbeat_event_code:4625 AND winlogbeat_event_outcome:failure) OR ((message:"sshd-session" AND message:"Authentication failure") OR (message:"sshd" AND message:"Failed password")) OR message:PREAUTH_FAILED OR kn_event_type:Wireguard_Failed OR (container_name:grafana AND (message:"Invalid username or password" OR message:"Failed to authenticate" OR message:"login attempt failed")) OR mac_bz_event_type:LogonHistoryFailure OR (message:"sudo" AND (message:"authentication failure" OR message:"incorrect password" OR (message:"pam_sss" AND message:"failure")))` |
-| Окно времени | 7 дней (как у дашборда) |
+| Окно времени | 7 дней (как у вкладки) |
 | Group By → Rows | `source` — **Values**, Limit 12 |
 | Metrics | `count()` |
 | Размер (ш×в) | 12×5 |
@@ -1225,7 +1291,7 @@
 | Тип | **Message List** |
 | Потоки | FreeIPA Logs, Syslog Logs, WindowsLogs, BiZone_macOS, Containers, RedOS auditd Logs |
 | Запрос | `(winlogbeat_event_code:4625 AND winlogbeat_event_outcome:failure) OR ((message:"sshd-session" AND message:"Authentication failure") OR (message:"sshd" AND message:"Failed password")) OR message:PREAUTH_FAILED OR kn_event_type:Wireguard_Failed OR (container_name:grafana AND (message:"Invalid username or password" OR message:"Failed to authenticate" OR message:"login attempt failed")) OR mac_bz_event_type:LogonHistoryFailure OR (message:"sudo" AND (message:"authentication failure" OR message:"incorrect password" OR (message:"pam_sss" AND message:"failure")))` |
-| Окно времени | 7 дней (как у дашборда) |
+| Окно времени | 7 дней (как у вкладки) |
 | Fields | `timestamp`, `source`, `message` |
 | Sort | `timestamp` по убыванию; строк: 25 |
 | Размер (ш×в) | 12×6 |
@@ -1236,8 +1302,7 @@
 
 - **Краткое описание (Summary):** Роутер и сканер сети в одной картине
 - **Описание (Description):** 
-- **Окно времени дашборда:** 24 часа
-- **Виджетов:** 9
+- **Вкладок:** 1, **виджетов:** 9
 
 ### 11.1. Событий роутера за 7 дней
 
@@ -1279,7 +1344,7 @@
 | Тип | **Single Number** |
 | Потоки | Containers |
 | Запрос | `container_name:netalertx AND message:"Scan Stats" AND message:"New Devices"` |
-| Окно времени | 24 часа (как у дашборда) |
+| Окно времени | 24 часа (как у вкладки) |
 | Metrics | `count()` |
 | Размер (ш×в) | 3×3 |
 
@@ -1314,7 +1379,7 @@
 | Тип | **Area Chart** |
 | Потоки | Containers |
 | Запрос | `container_name:netalertx` |
-| Окно времени | 24 часа (как у дашборда) |
+| Окно времени | 24 часа (как у вкладки) |
 | Group By → Rows | `timestamp` — **Time**, интервал Auto |
 | Metrics | `count()` |
 | Размер (ш×в) | 4×5 |
@@ -1326,7 +1391,7 @@
 | Тип | **Message List** |
 | Потоки | Containers |
 | Запрос | `container_name:netalertx AND message:"Scan Stats" AND message:"New Devices"` |
-| Окно времени | 24 часа (как у дашборда) |
+| Окно времени | 24 часа (как у вкладки) |
 | Fields | `timestamp`, `source`, `message` |
 | Sort | `timestamp` по убыванию; строк: 20 |
 | Размер (ш×в) | 12×6 |
@@ -1349,8 +1414,7 @@
 
 - **Краткое описание (Summary):** promtail → Loki, ошибки Loki и объём логов по хостам
 - **Описание (Description):** 
-- **Окно времени дашборда:** 24 часа
-- **Виджетов:** 9
+- **Вкладок:** 1, **виджетов:** 9
 
 ### 12.1. promtail → Loki: ошибки доставки
 
@@ -1359,7 +1423,7 @@
 | Тип | **Single Number** |
 | Потоки | Containers |
 | Запрос | `message:"context deadline exceeded" AND container_name:promtail` |
-| Окно времени | 24 часа (как у дашборда) |
+| Окно времени | 24 часа (как у вкладки) |
 | Metrics | `count()` |
 | Размер (ш×в) | 4×3 |
 
@@ -1370,7 +1434,7 @@
 | Тип | **Single Number** |
 | Потоки | Containers |
 | Запрос | `container_name:loki AND loglevel:error` |
-| Окно времени | 24 часа (как у дашборда) |
+| Окно времени | 24 часа (как у вкладки) |
 | Metrics | `count()` |
 | Размер (ш×в) | 4×3 |
 
@@ -1381,7 +1445,7 @@
 | Тип | **Single Number** |
 | Потоки | Containers |
 | Запрос | пусто |
-| Окно времени | 24 часа (как у дашборда) |
+| Окно времени | 24 часа (как у вкладки) |
 | Metrics | `card(source)` |
 | Размер (ш×в) | 4×3 |
 
@@ -1392,7 +1456,7 @@
 | Тип | **Area Chart** |
 | Потоки | Containers |
 | Запрос | `message:"context deadline exceeded" AND container_name:promtail` |
-| Окно времени | 24 часа (как у дашборда) |
+| Окно времени | 24 часа (как у вкладки) |
 | Group By → Rows | `timestamp` — **Time**, интервал Auto |
 | Group By → Columns | `source` — **Values**, Limit 6 |
 | Metrics | `count()` |
@@ -1405,7 +1469,7 @@
 | Тип | **Bar Chart** |
 | Потоки | Containers |
 | Запрос | `message:"context deadline exceeded" AND container_name:promtail` |
-| Окно времени | 24 часа (как у дашборда) |
+| Окно времени | 24 часа (как у вкладки) |
 | Group By → Rows | `source` — **Values**, Limit 6 |
 | Metrics | `count()` |
 | Размер (ш×в) | 4×5 |
@@ -1417,7 +1481,7 @@
 | Тип | **Bar Chart** |
 | Потоки | Containers |
 | Запрос | пусто |
-| Окно времени | 24 часа (как у дашборда) |
+| Окно времени | 24 часа (как у вкладки) |
 | Group By → Rows | `source` — **Values**, Limit 8 |
 | Metrics | `count()` |
 | Размер (ш×в) | 6×5 |
@@ -1429,7 +1493,7 @@
 | Тип | **Bar Chart** |
 | Потоки | Containers |
 | Запрос | `container_name:loki AND loglevel:error` |
-| Окно времени | 24 часа (как у дашборда) |
+| Окно времени | 24 часа (как у вкладки) |
 | Group By → Rows | `logcaller` — **Values**, Limit 8 |
 | Metrics | `count()` |
 | Размер (ш×в) | 6×5 |
@@ -1441,7 +1505,7 @@
 | Тип | **Message List** |
 | Потоки | Containers |
 | Запрос | `container_name:loki AND loglevel:error` |
-| Окно времени | 24 часа (как у дашборда) |
+| Окно времени | 24 часа (как у вкладки) |
 | Fields | `timestamp`, `source`, `message` |
 | Sort | `timestamp` по убыванию; строк: 15 |
 | Размер (ш×в) | 12×6 |
@@ -1453,7 +1517,7 @@
 | Тип | **Message List** |
 | Потоки | Containers |
 | Запрос | `message:"context deadline exceeded" AND container_name:promtail` |
-| Окно времени | 24 часа (как у дашборда) |
+| Окно времени | 24 часа (как у вкладки) |
 | Fields | `timestamp`, `source`, `message` |
 | Sort | `timestamp` по убыванию; строк: 15 |
 | Размер (ш×в) | 12×6 |
@@ -1464,8 +1528,7 @@
 
 - **Краткое описание (Summary):** Тренды: события ИБ за 30 дней и объём логов за 7 дней
 - **Описание (Description):** 
-- **Окно времени дашборда:** 30 дней
-- **Виджетов:** 10
+- **Вкладок:** 1, **виджетов:** 10
 
 ### 13.1. События за 30 дней
 
@@ -1474,7 +1537,7 @@
 | Тип | **Single Number** |
 | Потоки | All events |
 | Запрос | пусто |
-| Окно времени | 30 дней (как у дашборда) |
+| Окно времени | 30 дней (как у вкладки) |
 | Metrics | `count()` |
 | Размер (ш×в) | 3×3 |
 
@@ -1485,7 +1548,7 @@
 | Тип | **Single Number** |
 | Потоки | All events |
 | Запрос | `priority:3` |
-| Окно времени | 30 дней (как у дашборда) |
+| Окно времени | 30 дней (как у вкладки) |
 | Metrics | `count()` |
 | Размер (ш×в) | 3×3 |
 
@@ -1496,7 +1559,7 @@
 | Тип | **Single Number** |
 | Потоки | All events |
 | Запрос | `priority:2` |
-| Окно времени | 30 дней (как у дашборда) |
+| Окно времени | 30 дней (как у вкладки) |
 | Metrics | `count()` |
 | Размер (ш×в) | 3×3 |
 
@@ -1507,7 +1570,7 @@
 | Тип | **Single Number** |
 | Потоки | All events |
 | Запрос | `priority:1` |
-| Окно времени | 30 дней (как у дашборда) |
+| Окно времени | 30 дней (как у вкладки) |
 | Metrics | `count()` |
 | Размер (ш×в) | 3×3 |
 
@@ -1518,7 +1581,7 @@
 | Тип | **Bar Chart** |
 | Потоки | All events |
 | Запрос | пусто |
-| Окно времени | 30 дней (как у дашборда) |
+| Окно времени | 30 дней (как у вкладки) |
 | Group By → Rows | `timestamp` — **Time**, интервал 1 дн |
 | Group By → Columns | `priority` — **Values**, Limit 3 |
 | Metrics | `count()` |
@@ -1532,7 +1595,7 @@
 | Тип | **Bar Chart** |
 | Потоки | All events |
 | Запрос | пусто |
-| Окно времени | 30 дней (как у дашборда) |
+| Окно времени | 30 дней (как у вкладки) |
 | Group By → Rows | `event_definition_id` — **Values**, Limit 15 |
 | Metrics | `count()` |
 | Размер (ш×в) | 6×6 |
@@ -1570,7 +1633,7 @@
 | Тип | **Bar Chart** |
 | Потоки | All events |
 | Запрос | пусто |
-| Окно времени | 30 дней (как у дашборда) |
+| Окно времени | 30 дней (как у вкладки) |
 | Group By → Rows | `key` — **Values**, Limit 10 |
 | Metrics | `count()` |
 | Размер (ш×в) | 6×5 |
@@ -1580,39 +1643,105 @@
 | Поле | Значение |
 |---|---|
 | Тип | **Markdown (Text)** |
-| Размер (ш×в) | 12×6 |
+| Размер (ш×в) | 12×16 |
 
 Текст виджета (вставь в редактор Markdown):
 
-```markdown
-**Справочник: id правила → название**
+````markdown
+**Справочник: id правила → название** (последние 6 символов `event_definition_id`)
 
-- `1d7ddf` … LNX - Отказ SELinux (AVC)
-- `225c18` … Контейнеры: всплеск ошибок
-- `1d7dc7` … LNX - Исполнение из памяти (memfd_create)
-- `1d8195` … 6ad30b47cc18050c4f1d8195
-- `1d903d` … macOS - Bi.Zone: новый элемент автозагрузки
-- `225c28` … Контейнеры: перезапуски MariaDB
-- `1d814b` … 6ad30b46cc18050c4f1d814b
-- `1d7dbf` … LNX - Подозрительные утилиты (base64, nc, socat, scp)
-- `1d817c` … 6ad30b47cc18050c4f1d817c
-- `1d7dd7` … LNX - Изменение правил firewall (iptables, nft)
-- `1d816f` … 6ad30b46cc18050c4f1d816f
-- `9ed46e` … LNX - Использование sudo
-- `1d81c2` … 6ad30b48cc18050c4f1d81c2
+- `1ed7eb` … FREEIPA - Выпуск сертификата в CA (Dogtag)
+- `1ecca0` … FREEIPA - Подбор пароля (10+ PREAUTH_FAILED за 5 мин)
+- `1ecc98` … HEALTH - Клиенты не могут связаться с KDC
+- `1ed7e3` … KEENETIC - Вход в админку роутера (SSH)
+- `1ecca8` … KEENETIC - Новое устройство в сети
+- `1edb48` … KEENETIC - Отказы WireGuard (ежедневная сводка)
+- `9ed45a` … LNX - Брутфорс SSH (5+ неудачных входов за 5 мин)
+- `9edafa` … LNX - Добавление SSH-ключа в authorized_keys
+- `9ed448` … LNX - Добавление/удаление пользователя
+- `1d7dcf` … LNX - Закрепление через systemctl enable
+- `1d7daf` … LNX - Затирание следов (shred, history, truncate логов)
+- `1d7d96` … LNX - Изменение /etc/passwd, shadow, group
+- `1d7d9e` … LNX - Изменение sshd_config
 - `9ed450` … LNX - Изменение прав доступа (chmod)
+- `1d7dd7` … LNX - Изменение правил firewall (iptables, nft)
+- `1d7dc7` … LNX - Исполнение из памяти (memfd_create)
+- `9ed46e` … LNX - Использование sudo
+- `9ed462` … LNX - Неудачная попытка sudo
+- `1d7da6` … LNX - Обратная оболочка (/dev/tcp)
+- `9ed477` … LNX - Остановка службы (systemctl stop)
+- `1d7ddf` … LNX - Отказ SELinux (AVC)
+- `1d7db7` … LNX - Отключение аудита или удаление правил auditd
+- `1d7dbf` … LNX - Подозрительные утилиты (base64, nc, socat, scp)
+- `1d7de7` … LNX - Разведка (id, whoami)
+- `19e330` … System notification events
+- `1d7dff` … Windows - Defender обнаружил угрозу или отключён
+- `1d7e44` … Windows - LOLBins (certutil, mshta, bitsadmin, regsvr32)
+- `1d7e17` … Windows - PowerShell с закодированной командой
+- `1d7e1f` … Windows - PowerShell скачивает и исполняет код
 - `1d7e3c` … Windows - Автозагрузка через ключ реестра Run
+- `1d7e57` … Windows - Вход по RDP
+- `1d7df7` … Windows - Доступ к памяти LSASS
+- `9ed4c9` … Windows - Изменение группы «Администраторы домена»
+- `1d7e27` … Windows - Изменение привилегированных групп и учёток
+- `1d7e31` … Windows - Новая служба
+- `1ed7f3` … Windows - Отключение Firewall (netsh или PS)
+- `1d7e0f` … Windows - Офисное приложение запустило оболочку
+- `1d7def` … Windows - Очистка журнала событий
+- `9ed4d1` … Windows - Подбор пароля (5+ ошибок входа 4625 за 5 мин)
+- `1d7e5f` … Windows - Серия разведки (5+ команд за 5 мин)
+- `1d7e4c` … Windows - Создание задачи через schtasks
+- `9ed4d9` … Windows - Создание/удаление локального пользователя (net user)
+- `1d7e07` … Windows - Удаление теневых копий
+- `1d904c` … macOS - Bi.Zone: неизвестный SSH-ключ в authorized_keys
+- `1d909c` … macOS - Bi.Zone: неудачные входы по SSH
+- `1d9059` … macOS - Bi.Zone: новое правило в sudoers
+- `1d9066` … macOS - Bi.Zone: новый пользователь
+- `1d903d` … macOS - Bi.Zone: новый элемент автозагрузки
+- `1d90a9` … macOS - Bi.Zone: опасная команда в истории оболочки
+- `1d9080` … macOS - Bi.Zone: подозрительная запись в hosts
+- `1d908f` … macOS - Bi.Zone: процесс из /tmp или /Users/Shared
+- `1d9073` … macOS - Bi.Zone: смена DNS-серверов
+- `9ed4a7` … macOS - Активность AirDrop
+- `1d7eac` … macOS - Включение удалённого входа или Screen Sharing
+- `1d7e8c` … macOS - Вмешательство в TCC
+- `1d7e70` … macOS - Выгрузка паролей из Keychain
+- `9ed48f` … macOS - Выполнение команды через sudo
+- `1d7ea4` … macOS - Загрузка расширения ядра
+- `1d7e9c` … macOS - Запуск программы из /tmp или /Users/Shared
+- `9ed47f` … macOS - Изменение /etc/sudoers
+- `9ed497` … macOS - Неудачная попытка sudo (неверный пароль)
+- `9ed49f` … macOS - Новый/изменённый plist в автозагрузке
+- `1d7e84` … macOS - Обратная оболочка (/dev/tcp, pty.spawn)
+- `1d7e67` … macOS - Отключение SIP или Gatekeeper
+- `9ed4b1` … macOS - Подключено Apple-устройство (iPhone/iPad/iPod)
+- `9ed4c1` … macOS - Подключено мобильное устройство (не Apple)
+- `9ed4b9` … macOS - Подключён USB-накопитель
+- `9ed487` … macOS - Подозрительный процесс открыл TCP-порт
+- `1d7eb4` … macOS - Снятие карантина с приложения
+- `1d7e94` … macOS - Создание пользователя или изменение групп
+- `1d7e78` … macOS - Фишинговый запрос пароля через osascript
+- `55fed7` … Контейнеры: Grafana — неудачный вход (подбор пароля)
+- `55fecf` … Контейнеры: Loki — ошибки приёма
+- `55fec7` … Контейнеры: MongoDB — ошибки
+- `55fee9` … Контейнеры: netalertx — всплеск объёма логов
+- `55fedf` … Контейнеры: netalertx — новое устройство в сети
+- `55febf` … Контейнеры: promtail не доставляет логи в Loki
+- `225c18` … Контейнеры: всплеск ошибок
+- `55feb3` … Контейнеры: нехватка памяти или падение процесса
+- `225c30` … Контейнеры: ошибки прав доступа
+- `225c28` … Контейнеры: перезапуски MariaDB
+- `55fd98` … Контейнеры: тишина — atrium
+- `55fd80` … Контейнеры: тишина — grafana
+- `55fda0` … Контейнеры: тишина — komodo_mongo_1
+- `55fd88` … Контейнеры: тишина — loki
+- `55fdb6` … Контейнеры: тишина — netalertx
+- `55fdaa` … Контейнеры: тишина — wazuh.dashboard
+- `55fd90` … Контейнеры: тишина — zaslon
+- `5601a1` … Контейнеры: тишина — нет логов ни от одного контейнера
 
-**Потоки**
-
-- `2559a4` … RedOS auditd Logs
-- `fde88f` … Syslog Logs
-- `fdd94e` … MacOS Logs
-- `1a556b` … BiZone_macOS
-- `fde575` … WindowsLogs
-- `885bca` … FreeIPA Logs
-- `1fa113` … Containers
-```
+Правила с ids `1d8195`, `1d814b`, `1d817c`, `1d816f`, `1d81c2` удалены из Graylog, но их события ещё лежат в индексе.
+````
 
 <a id="14-dash"></a>
 
@@ -1620,24 +1749,27 @@
 
 - **Краткое описание (Summary):** Сбои, ошибки, TCC и события безопасности macOS (Unified и osquery через Filebeat)
 - **Описание (Description):** Данные Filebeat с macOS-хостов (поток MacOS Logs): unified log, osquery, wifi.log.
-- **Окно времени дашборда:** 5 минут
-- **Виджетов:** 11
+- **Вкладок:** 3, **виджетов:** 33
 
-### 14.1. Виджет без названия
+### 14.1. Вкладка «Security & Health»
+
+Новая вкладка: значок «+» рядом с вкладками внизу страницы дашборда, название — **Rename**.
+
+#### 14.1.1. Виджет без названия
 
 | Поле | Значение |
 |---|---|
 | Тип | **Markdown (Text)** |
-| Размер (ш×в) | 12×1 |
+| Размер (ш×в) | Infinity×1 |
 
 Текст виджета (вставь в редактор Markdown):
 
-```markdown
+````markdown
 🍎 **Overview (Обзор)**
 ━━━━━━━━━━━━━━━━━━━━━━━
-```
+````
 
-### 14.2. Total Events(Всего событий за сутки)
+#### 14.1.2. Total Events(Всего событий за сутки)
 
 | Поле | Значение |
 |---|---|
@@ -1649,7 +1781,7 @@
 | Sort | count() по возрастанию |
 | Размер (ш×в) | 3×1 |
 
-### 14.3. ❌ Error Count (Ошибки)
+#### 14.1.3. ❌ Error Count (Ошибки)
 
 | Поле | Значение |
 |---|---|
@@ -1661,7 +1793,7 @@
 | Sort | count() по возрастанию |
 | Размер (ш×в) | 3×1 |
 
-### 14.4. Fault Count (Критические сбои)
+#### 14.1.4. Fault Count (Критические сбои)
 
 | Поле | Значение |
 |---|---|
@@ -1673,7 +1805,7 @@
 | Sort | count() по возрастанию |
 | Размер (ш×в) | 3×1 |
 
-### 14.5. 🔒 TCC Events (Приватность TCC)
+#### 14.1.5. 🔒 TCC Events (Приватность TCC)
 
 | Поле | Значение |
 |---|---|
@@ -1685,7 +1817,7 @@
 | Sort | count() по возрастанию |
 | Размер (ш×в) | 3×1 |
 
-### 14.6. 🛡️ Security Events (События безопасности)
+#### 14.1.6. 🛡️ Security Events (События безопасности)
 
 | Поле | Значение |
 |---|---|
@@ -1695,9 +1827,9 @@
 | Окно времени | 24 часа (**Override** на виджете) |
 | Metrics | `count()` |
 | Sort | count() по возрастанию |
-| Размер (ш×в) | 12×1 |
+| Размер (ш×в) | Infinity×1 |
 
-### 14.7. 📊Activity Over Time (Активность по времени)
+#### 14.1.7. 📊Activity Over Time (Активность по времени)
 
 | Поле | Значение |
 |---|---|
@@ -1707,23 +1839,23 @@
 | Окно времени | 24 часа (**Override** на виджете) |
 | Group By → Rows | `timestamp` — **Time**, интервал Auto |
 | Metrics | `count()` |
-| Размер (ш×в) | 12×2 |
+| Размер (ш×в) | Infinity×2 |
 
-### 14.8. Виджет без названия
+#### 14.1.8. Виджет без названия
 
 | Поле | Значение |
 |---|---|
 | Тип | **Markdown (Text)** |
-| Размер (ш×в) | 12×1 |
+| Размер (ш×в) | Infinity×1 |
 
 Текст виджета (вставь в редактор Markdown):
 
-```markdown
+````markdown
 🍎 **Security Deep Dive (Детали безопасности)**
    ━━━━━━━━━━━━━━━━━━━━━━
-```
+````
 
-### 14.9. 🔴 Security Errors (Ошибки безопасности)
+#### 14.1.9. 🔴 Security Errors (Ошибки безопасности)
 
 | Поле | Значение |
 |---|---|
@@ -1733,9 +1865,9 @@
 | Окно времени | 24 часа (**Override** на виджете) |
 | Fields | `timestamp`, `source`, `log_type`, `macos_eventType`, `macos_eventMessage`, `subsystem` |
 | Sort | `timestamp` по убыванию; строк: 150 |
-| Размер (ш×в) | 12×7 |
+| Размер (ш×в) | Infinity×7 |
 
-### 14.10. 🔒 TCC Violations (Нарушения приватности)
+#### 14.1.10. 🔒 TCC Violations (Нарушения приватности)
 
 | Поле | Значение |
 |---|---|
@@ -1745,9 +1877,9 @@
 | Окно времени | 24 часа (**Override** на виджете) |
 | Fields | `timestamp`, `source`, `subsystem`, `eventMessage` |
 | Sort | `timestamp` по убыванию; строк: 150 |
-| Размер (ш×в) | 12×8 |
+| Размер (ш×в) | Infinity×8 |
 
-### 14.11. ⚠️ Fault Events (Критические сбои)
+#### 14.1.11. ⚠️ Fault Events (Критические сбои)
 
 | Поле | Значение |
 |---|---|
@@ -1757,7 +1889,283 @@
 | Окно времени | 24 часа (**Override** на виджете) |
 | Fields | `timestamp`, `source`, `subsystem`, `eventMessage` |
 | Sort | `timestamp` по убыванию; строк: 150 |
-| Размер (ш×в) | 12×6 |
+| Размер (ш×в) | Infinity×6 |
+
+### 14.2. Вкладка «без названия»
+
+Новая вкладка: значок «+» рядом с вкладками внизу страницы дашборда, название — **Rename**.
+
+#### 14.2.1. 📉 Активность во времени (Line Chart)
+
+| Поле | Значение |
+|---|---|
+| Тип | **Line Chart** |
+| Потоки | BiZone_macOS |
+| Запрос | пусто |
+| Окно времени | 24 часа (**Override** на виджете) |
+| Group By → Rows | `timestamp` — **Time**, интервал Auto |
+| Metrics | `count()` |
+| Размер (ш×в) | Infinity×3 |
+
+#### 14.2.2. 🥧 Типы событий (Donut Chart)
+
+| Поле | Значение |
+|---|---|
+| Тип | **Pie Chart** |
+| Потоки | BiZone_macOS |
+| Запрос | пусто |
+| Окно времени | 24 часа (**Override** на виджете) |
+| Group By → Rows | `mac_bz_event_type` — **Values**, Limit 8 |
+| Metrics | `count()` |
+| Размер (ш×в) | 5×5 |
+
+#### 14.2.3. 👥 Топ пользователей (Horizontal Bar Chart)
+
+| Поле | Значение |
+|---|---|
+| Тип | **Bar Chart** |
+| Потоки | BiZone_macOS |
+| Запрос | `_exists_: mac_bz_user` |
+| Окно времени | 24 часа (**Override** на виджете) |
+| Group By → Rows | `mac_bz_user` — **Values**, Limit 10 |
+| Metrics | `count()` |
+| Barmode | Group |
+| Размер (ш×в) | 7×5 |
+
+#### 14.2.4. 🖥️ Топ хостов (Horizontal Bar Chart)
+
+| Поле | Значение |
+|---|---|
+| Тип | **Bar Chart** |
+| Потоки | BiZone_macOS |
+| Запрос | пусто |
+| Окно времени | 24 часа (**Override** на виджете) |
+| Group By → Rows | `mac_bz_host` — **Values**, Limit 10 |
+| Metrics | `count()` |
+| Barmode | Group |
+| Размер (ш×в) | 5×4 |
+
+#### 14.2.5. 🔐 Admin Access Monitor (таблица)
+
+| Поле | Значение |
+|---|---|
+| Тип | **Message List** |
+| Потоки | BiZone_macOS |
+| Запрос | `event_type:LogonInfo OR mac_bz_event_type:LogonInfo` |
+| Окно времени | 5 минут (как у вкладки) |
+| Fields | `timestamp`, `mac_bz_host`, `mac_bz_user`, `usr_tgt_groups`, `mac_bz_rule` |
+| Sort | `timestamp` по убыванию; строк: 150 |
+| Размер (ш×в) | 7×4 |
+
+#### 14.2.6. 📋 Журнал событий (Message Table)
+
+| Поле | Значение |
+|---|---|
+| Тип | **Message List** |
+| Потоки | BiZone_macOS |
+| Запрос | пусто |
+| Окно времени | 24 часа (**Override** на виджете) |
+| Fields | `timestamp`, `mac_bz_host`, `mac_bz_event_type`, `mac_bz_rule`, `mac_bz_os` |
+| Sort | `timestamp` по убыванию; строк: 150 |
+| Размер (ш×в) | Infinity×6 |
+
+#### 14.2.7. Виджет для поиска администраторов
+
+| Поле | Значение |
+|---|---|
+| Тип | **Message List** |
+| Потоки | BiZone_macOS |
+| Запрос | `usr_tgt_groups:80(admin)` |
+| Окно времени | 24 часа (**Override** на виджете) |
+| Fields | `timestamp`, `mac_bz_host`, `mac_bz_user`, `usr_tgt_groups`, `mac_bz_rule` |
+| Sort | `timestamp` по убыванию; строк: 150 |
+| Размер (ш×в) | Infinity×3 |
+
+#### 14.2.8. 🛡️Неподписанные процессы
+
+| Поле | Значение |
+|---|---|
+| Тип | **Message List** |
+| Потоки | BiZone_macOS |
+| Запрос | `proc_file_signed:false` |
+| Окно времени | 1 час (**Override** на виджете) |
+| Fields | `timestamp`, `mac_bz_host`, `usr_tgt_name`, `proc_file_path`, `proc_file_name`, `proc_file_sha256` |
+| Sort | `timestamp` по убыванию; строк: 150 |
+| Размер (ш×в) | Infinity×5 |
+
+#### 14.2.9. 🔍 Подозрительные командные строки
+
+| Поле | Значение |
+|---|---|
+| Тип | **Message List** |
+| Потоки | BiZone_macOS |
+| Запрос | `mac_bz_cmdline:(curl OR wget OR base64 OR python OR osascript OR "hidden")` |
+| Окно времени | 24 часа (**Override** на виджете) |
+| Fields | `timestamp`, `source`, `mac_bz_host`, `mac_bz_user`, `mac_bz_cmdline` |
+| Sort | `timestamp` по убыванию; строк: 150 |
+| Размер (ш×в) | Infinity×3 |
+
+#### 14.2.10. 🌳 Дерево процессов (Parent → Child)
+
+| Поле | Значение |
+|---|---|
+| Тип | **Message List** |
+| Потоки | BiZone_macOS |
+| Запрос | `mac_bz_event_type:ProcessInfo` |
+| Окно времени | 24 часа (**Override** на виджете) |
+| Fields | `timestamp`, `source`, `mac_bz_host`, `mac_bz_cmdline` |
+| Sort | `timestamp` по убыванию; строк: 150 |
+| Размер (ш×в) | Infinity×5 |
+
+#### 14.2.11. 💻 Инвентаризация сенсоров
+
+| Поле | Значение |
+|---|---|
+| Тип | **Message List** |
+| Потоки | BiZone_macOS |
+| Запрос | `mac_bz_event_type:HostInfo` |
+| Окно времени | 24 часа (**Override** на виджете) |
+| Fields | `timestamp`, `mac_bz_host`, `source`, `dev_serial`, `mac_bz_os`, `mac_bz_sensor_version` |
+| Sort | `timestamp` по убыванию; строк: 150 |
+| Размер (ш×в) | Infinity×5 |
+
+### 14.3. Вкладка «без названия»
+
+Новая вкладка: значок «+» рядом с вкладками внизу страницы дашборда, название — **Rename**.
+
+#### 14.3.1. 📉 Активность во времени (Line Chart)
+
+| Поле | Значение |
+|---|---|
+| Тип | **Line Chart** |
+| Потоки | BiZone_macOS |
+| Запрос | пусто |
+| Окно времени | 24 часа (**Override** на виджете) |
+| Group By → Rows | `timestamp` — **Time**, интервал Auto |
+| Metrics | `count()` |
+| Размер (ш×в) | Infinity×3 |
+
+#### 14.3.2. 🥧 Типы событий (Donut Chart)
+
+| Поле | Значение |
+|---|---|
+| Тип | **Pie Chart** |
+| Потоки | BiZone_macOS |
+| Запрос | пусто |
+| Окно времени | 24 часа (**Override** на виджете) |
+| Group By → Rows | `mac_bz_event_type` — **Values**, Limit 8 |
+| Metrics | `count()` |
+| Размер (ш×в) | 5×5 |
+
+#### 14.3.3. 👥 Топ пользователей (Horizontal Bar Chart)
+
+| Поле | Значение |
+|---|---|
+| Тип | **Bar Chart** |
+| Потоки | BiZone_macOS |
+| Запрос | `_exists_: mac_bz_user` |
+| Окно времени | 24 часа (**Override** на виджете) |
+| Group By → Rows | `mac_bz_user` — **Values**, Limit 10 |
+| Metrics | `count()` |
+| Barmode | Group |
+| Размер (ш×в) | 7×5 |
+
+#### 14.3.4. 🖥️ Топ хостов (Horizontal Bar Chart)
+
+| Поле | Значение |
+|---|---|
+| Тип | **Bar Chart** |
+| Потоки | BiZone_macOS |
+| Запрос | пусто |
+| Окно времени | 24 часа (**Override** на виджете) |
+| Group By → Rows | `mac_bz_host` — **Values**, Limit 10 |
+| Metrics | `count()` |
+| Barmode | Group |
+| Размер (ш×в) | 5×4 |
+
+#### 14.3.5. 🔐 Admin Access Monitor (таблица)
+
+| Поле | Значение |
+|---|---|
+| Тип | **Message List** |
+| Потоки | BiZone_macOS |
+| Запрос | `event_type:LogonInfo OR mac_bz_event_type:LogonInfo` |
+| Окно времени | 5 минут (как у вкладки) |
+| Fields | `timestamp`, `mac_bz_host`, `mac_bz_user`, `usr_tgt_groups`, `mac_bz_rule` |
+| Sort | `timestamp` по убыванию; строк: 150 |
+| Размер (ш×в) | 7×4 |
+
+#### 14.3.6. 📋 Журнал событий (Message Table)
+
+| Поле | Значение |
+|---|---|
+| Тип | **Message List** |
+| Потоки | BiZone_macOS |
+| Запрос | пусто |
+| Окно времени | 24 часа (**Override** на виджете) |
+| Fields | `timestamp`, `mac_bz_host`, `mac_bz_event_type`, `mac_bz_rule`, `mac_bz_os` |
+| Sort | `timestamp` по убыванию; строк: 150 |
+| Размер (ш×в) | Infinity×6 |
+
+#### 14.3.7. Виджет для поиска администраторов
+
+| Поле | Значение |
+|---|---|
+| Тип | **Message List** |
+| Потоки | BiZone_macOS |
+| Запрос | `usr_tgt_groups:80(admin)` |
+| Окно времени | 24 часа (**Override** на виджете) |
+| Fields | `timestamp`, `mac_bz_host`, `mac_bz_user`, `usr_tgt_groups`, `mac_bz_rule` |
+| Sort | `timestamp` по убыванию; строк: 150 |
+| Размер (ш×в) | Infinity×3 |
+
+#### 14.3.8. 🛡️Неподписанные процессы
+
+| Поле | Значение |
+|---|---|
+| Тип | **Message List** |
+| Потоки | BiZone_macOS |
+| Запрос | `proc_file_signed:false` |
+| Окно времени | 1 час (**Override** на виджете) |
+| Fields | `timestamp`, `mac_bz_host`, `usr_tgt_name`, `proc_file_path`, `proc_file_name`, `proc_file_sha256` |
+| Sort | `timestamp` по убыванию; строк: 150 |
+| Размер (ш×в) | Infinity×5 |
+
+#### 14.3.9. 🔍 Подозрительные командные строки
+
+| Поле | Значение |
+|---|---|
+| Тип | **Message List** |
+| Потоки | BiZone_macOS |
+| Запрос | `mac_bz_cmdline:(curl OR wget OR base64 OR python OR osascript OR "hidden")` |
+| Окно времени | 24 часа (**Override** на виджете) |
+| Fields | `timestamp`, `source`, `mac_bz_host`, `mac_bz_user`, `mac_bz_cmdline` |
+| Sort | `timestamp` по убыванию; строк: 150 |
+| Размер (ш×в) | Infinity×3 |
+
+#### 14.3.10. 🌳 Дерево процессов (Parent → Child)
+
+| Поле | Значение |
+|---|---|
+| Тип | **Message List** |
+| Потоки | BiZone_macOS |
+| Запрос | `mac_bz_event_type:ProcessInfo` |
+| Окно времени | 24 часа (**Override** на виджете) |
+| Fields | `timestamp`, `source`, `mac_bz_host`, `mac_bz_cmdline` |
+| Sort | `timestamp` по убыванию; строк: 150 |
+| Размер (ш×в) | Infinity×5 |
+
+#### 14.3.11. 💻 Инвентаризация сенсоров
+
+| Поле | Значение |
+|---|---|
+| Тип | **Message List** |
+| Потоки | BiZone_macOS |
+| Запрос | `mac_bz_event_type:HostInfo` |
+| Окно времени | 24 часа (**Override** на виджете) |
+| Fields | `timestamp`, `mac_bz_host`, `source`, `dev_serial`, `mac_bz_os`, `mac_bz_sensor_version` |
+| Sort | `timestamp` по убыванию; строк: 150 |
+| Размер (ш×в) | Infinity×5 |
 
 <a id="15-dash"></a>
 
@@ -1765,8 +2173,7 @@
 
 - **Краткое описание (Summary):** Телеметрия BI.ZONE Triage: процессы, пользователи, неподписанные файлы, подозрительные команды
 - **Описание (Description):** Данные агентов bz_triage (поток BiZone_macOS): активность хостов, администраторы, дерево процессов, инвентаризация сенсоров.
-- **Окно времени дашборда:** 5 минут
-- **Виджетов:** 11
+- **Вкладок:** 1, **виджетов:** 11
 
 ### 15.1. 📉 Активность во времени (Line Chart)
 
@@ -1778,7 +2185,7 @@
 | Окно времени | 24 часа (**Override** на виджете) |
 | Group By → Rows | `timestamp` — **Time**, интервал Auto |
 | Metrics | `count()` |
-| Размер (ш×в) | 12×3 |
+| Размер (ш×в) | Infinity×3 |
 
 ### 15.2. 🥧 Типы событий (Donut Chart)
 
@@ -1825,7 +2232,7 @@
 | Тип | **Message List** |
 | Потоки | BiZone_macOS |
 | Запрос | `event_type:LogonInfo OR mac_bz_event_type:LogonInfo` |
-| Окно времени | 5 минут (как у дашборда) |
+| Окно времени | 5 минут (как у вкладки) |
 | Fields | `timestamp`, `mac_bz_host`, `mac_bz_user`, `usr_tgt_groups`, `mac_bz_rule` |
 | Sort | `timestamp` по убыванию; строк: 150 |
 | Размер (ш×в) | 7×4 |
@@ -1840,7 +2247,7 @@
 | Окно времени | 24 часа (**Override** на виджете) |
 | Fields | `timestamp`, `mac_bz_host`, `mac_bz_event_type`, `mac_bz_rule`, `mac_bz_os` |
 | Sort | `timestamp` по убыванию; строк: 150 |
-| Размер (ш×в) | 12×6 |
+| Размер (ш×в) | Infinity×6 |
 
 ### 15.7. Виджет для поиска администраторов
 
@@ -1852,7 +2259,7 @@
 | Окно времени | 24 часа (**Override** на виджете) |
 | Fields | `timestamp`, `mac_bz_host`, `mac_bz_user`, `usr_tgt_groups`, `mac_bz_rule` |
 | Sort | `timestamp` по убыванию; строк: 150 |
-| Размер (ш×в) | 12×3 |
+| Размер (ш×в) | Infinity×3 |
 
 ### 15.8. 🛡️Неподписанные процессы
 
@@ -1864,7 +2271,7 @@
 | Окно времени | 1 час (**Override** на виджете) |
 | Fields | `timestamp`, `mac_bz_host`, `usr_tgt_name`, `proc_file_path`, `proc_file_name`, `proc_file_sha256` |
 | Sort | `timestamp` по убыванию; строк: 150 |
-| Размер (ш×в) | 12×5 |
+| Размер (ш×в) | Infinity×5 |
 
 ### 15.9. 🔍 Подозрительные командные строки
 
@@ -1876,7 +2283,7 @@
 | Окно времени | 24 часа (**Override** на виджете) |
 | Fields | `timestamp`, `source`, `mac_bz_host`, `mac_bz_user`, `mac_bz_cmdline` |
 | Sort | `timestamp` по убыванию; строк: 150 |
-| Размер (ш×в) | 12×3 |
+| Размер (ш×в) | Infinity×3 |
 
 ### 15.10. 🌳 Дерево процессов (Parent → Child)
 
@@ -1888,7 +2295,7 @@
 | Окно времени | 24 часа (**Override** на виджете) |
 | Fields | `timestamp`, `source`, `mac_bz_host`, `mac_bz_cmdline` |
 | Sort | `timestamp` по убыванию; строк: 150 |
-| Размер (ш×в) | 12×5 |
+| Размер (ш×в) | Infinity×5 |
 
 ### 15.11. 💻 Инвентаризация сенсоров
 
@@ -1900,7 +2307,7 @@
 | Окно времени | 24 часа (**Override** на виджете) |
 | Fields | `timestamp`, `mac_bz_host`, `source`, `dev_serial`, `mac_bz_os`, `mac_bz_sensor_version` |
 | Sort | `timestamp` по убыванию; строк: 150 |
-| Размер (ш×в) | 12×5 |
+| Размер (ш×в) | Infinity×5 |
 
 <a id="16-dash"></a>
 
@@ -1908,22 +2315,21 @@
 
 - **Краткое описание (Summary):** Sysmon и Security с Windows-хостов: процессы, входы, реестр, загрузка DLL
 - **Описание (Description):** Данные Winlogbeat (поток WindowsLogs): Sysmon и журнал Security контроллера домена и рабочей станции.
-- **Окно времени дашборда:** 5 минут
-- **Виджетов:** 14
+- **Вкладок:** 1, **виджетов:** 14
 
 ### 16.1. Виджет без названия
 
 | Поле | Значение |
 |---|---|
 | Тип | **Markdown (Text)** |
-| Размер (ш×в) | 12×1 |
+| Размер (ш×в) | Infinity×1 |
 
 Текст виджета (вставь в редактор Markdown):
 
-```markdown
+````markdown
 🪟 **Overview (Обзор)**
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-```
+````
 
 ### 16.2. Total Windows Events (Всего событий Windows)
 
@@ -1990,7 +2396,7 @@
 | Окно времени | 24 часа (**Override** на виджете) |
 | Group By → Rows | `timestamp` — **Time**, интервал 15 мин |
 | Metrics | `count()` |
-| Размер (ш×в) | 12×4 |
+| Размер (ш×в) | Infinity×4 |
 
 ### 16.8. 🎯 Event ID Distribution (Распределение Event ID)
 
@@ -2012,7 +2418,7 @@
 | Тип | **Bar Chart** |
 | Потоки | WindowsLogs |
 | Запрос | пусто |
-| Окно времени | 5 минут (как у дашборда) |
+| Окно времени | 5 минут (как у вкладки) |
 | Group By → Rows | `win_channel` — **Values**, Limit 15 |
 | Metrics | `count()` |
 | Barmode | Overlay |
@@ -2042,7 +2448,7 @@
 | Окно времени | 24 часа (**Override** на виджете) |
 | Fields | `timestamp`, `win_event_id`, `win_host`, `win_image`, `win_user`, `message` |
 | Sort | `timestamp` по убыванию; строк: 150 |
-| Размер (ш×в) | 12×7 |
+| Размер (ш×в) | Infinity×7 |
 
 ### 16.12. 🔑 Recent Logins (Последние входы)
 
@@ -2051,10 +2457,10 @@
 | Тип | **Message List** |
 | Потоки | WindowsLogs |
 | Запрос | `winlogbeat_winlog_event_id:"4624"` |
-| Окно времени | 5 минут (как у дашборда) |
+| Окно времени | 5 минут (как у вкладки) |
 | Fields | `timestamp`, `source`, `win_user`, `win_channel` |
 | Sort | `timestamp` по убыванию; строк: 150 |
-| Размер (ш×в) | 12×6 |
+| Размер (ш×в) | Infinity×6 |
 
 ### 16.13. 📝 Registry Changes (Event ID 13)
 
@@ -2063,10 +2469,10 @@
 | Тип | **Message List** |
 | Потоки | WindowsLogs |
 | Запрос | `win_event_id:"13"` |
-| Окно времени | 5 минут (как у дашборда) |
+| Окно времени | 5 минут (как у вкладки) |
 | Fields | `timestamp`, `win_host`, `win_image`, `win_registry_key`, `win_user` |
 | Sort | `timestamp` по убыванию; строк: 150 |
-| Размер (ш×в) | 12×5 |
+| Размер (ш×в) | Infinity×5 |
 
 ### 16.14. 🔄 Process Creation
 
@@ -2075,10 +2481,10 @@
 | Тип | **Message List** |
 | Потоки | WindowsLogs |
 | Запрос | `win_event_id:"1" AND message:"powershell"` |
-| Окно времени | 5 минут (как у дашборда) |
+| Окно времени | 5 минут (как у вкладки) |
 | Fields | `timestamp`, `win_host`, `win_image`, `win_user`, `win_command_line`, `message` |
 | Sort | `timestamp` по убыванию; строк: 150 |
-| Размер (ш×в) | 12×5 |
+| Размер (ш×в) | Infinity×5 |
 
 <a id="17-dash"></a>
 
@@ -2086,22 +2492,21 @@
 
 - **Краткое описание (Summary):** События auditd РЕД ОС после декодера: команды, сервисы, сессии, типы аудита
 - **Описание (Description):** Данные auditd с хостов РЕД ОС (поток RedOS auditd Logs), обработанные Python-декодером.
-- **Окно времени дашборда:** 5 минут
-- **Виджетов:** 13
+- **Вкладок:** 1, **виджетов:** 13
 
 ### 17.1. Виджет без названия
 
 | Поле | Значение |
 |---|---|
 | Тип | **Markdown (Text)** |
-| Размер (ш×в) | 12×1 |
+| Размер (ш×в) | Infinity×1 |
 
 Текст виджета (вставь в редактор Markdown):
 
-```markdown
+````markdown
 **Overview (Обзор)**
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-```
+````
 
 ### 17.2. 📊 Total Audit Events (Всего событий аудита)
 
@@ -2110,7 +2515,7 @@
 | Тип | **Single Number** |
 | Потоки | RedOS auditd Logs |
 | Запрос | пусто |
-| Окно времени | 5 минут (как у дашборда) |
+| Окно времени | 5 минут (как у вкладки) |
 | Metrics | `count()` |
 | Размер (ш×в) | 5×1 |
 
@@ -2121,7 +2526,7 @@
 | Тип | **Single Number** |
 | Потоки | RedOS auditd Logs |
 | Запрос | `audit_type:"SYSCALL"` |
-| Окно времени | 5 минут (как у дашборда) |
+| Окно времени | 5 минут (как у вкладки) |
 | Metrics | `count()` |
 | Размер (ш×в) | 4×1 |
 
@@ -2132,7 +2537,7 @@
 | Тип | **Single Number** |
 | Потоки | RedOS auditd Logs |
 | Запрос | `audit_type:"EXECVE"` |
-| Окно времени | 5 минут (как у дашборда) |
+| Окно времени | 5 минут (как у вкладки) |
 | Metrics | `count()` |
 | Размер (ш×в) | 3×1 |
 
@@ -2143,7 +2548,7 @@
 | Тип | **Single Number** |
 | Потоки | RedOS auditd Logs |
 | Запрос | `audit_type:("SERVICE_START" OR "SERVICE_STOP")` |
-| Окно времени | 5 минут (как у дашборда) |
+| Окно времени | 5 минут (как у вкладки) |
 | Metrics | `count()` |
 | Размер (ш×в) | 6×1 |
 
@@ -2154,7 +2559,7 @@
 | Тип | **Single Number** |
 | Потоки | RedOS auditd Logs |
 | Запрос | `audit_type:("USER_START" OR "USER_END")` |
-| Окно времени | 5 минут (как у дашборда) |
+| Окно времени | 5 минут (как у вкладки) |
 | Metrics | `count()` |
 | Размер (ш×в) | 6×1 |
 
@@ -2165,10 +2570,10 @@
 | Тип | **Line Chart** |
 | Потоки | RedOS auditd Logs |
 | Запрос | пусто |
-| Окно времени | 5 минут (как у дашборда) |
+| Окно времени | 5 минут (как у вкладки) |
 | Group By → Rows | `timestamp` — **Time**, интервал Auto |
 | Metrics | `count()` |
-| Размер (ш×в) | 12×2 |
+| Размер (ш×в) | Infinity×2 |
 
 ### 17.8. 🎯 Audit Types (Типы аудита)
 
@@ -2177,7 +2582,7 @@
 | Тип | **Pie Chart** |
 | Потоки | RedOS auditd Logs |
 | Запрос | пусто |
-| Окно времени | 5 минут (как у дашборда) |
+| Окно времени | 5 минут (как у вкладки) |
 | Group By → Rows | `audit_type` — **Values**, Limit 15 |
 | Metrics | `count()` |
 | Размер (ш×в) | 4×5 |
@@ -2189,7 +2594,7 @@
 | Тип | **Bar Chart** |
 | Потоки | RedOS auditd Logs |
 | Запрос | пусто |
-| Окно времени | 5 минут (как у дашборда) |
+| Окно времени | 5 минут (как у вкладки) |
 | Group By → Rows | `syslog_hostname` — **Values**, Limit 15 |
 | Metrics | `count()` |
 | Sort | syslog_hostname по убыванию |
@@ -2201,14 +2606,14 @@
 | Поле | Значение |
 |---|---|
 | Тип | **Markdown (Text)** |
-| Размер (ш×в) | 12×1 |
+| Размер (ш×в) | Infinity×1 |
 
 Текст виджета (вставь в редактор Markdown):
 
-```markdown
+````markdown
 **Security Deep Dive (Детали безопасности)**
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-```
+````
 
 ### 17.11. ⚡ EXECVE Commands (Запущенные команды)
 
@@ -2217,10 +2622,10 @@
 | Тип | **Message List** |
 | Потоки | RedOS auditd Logs |
 | Запрос | `audit_type:"EXECVE"` |
-| Окно времени | 5 минут (как у дашборда) |
+| Окно времени | 5 минут (как у вкладки) |
 | Fields | `timestamp`, `source`, `a0`, `a1`, `a2`, `a3` |
 | Sort | `timestamp` по убыванию; строк: 150 |
-| Размер (ш×в) | 12×4 |
+| Размер (ш×в) | Infinity×4 |
 
 ### 17.12. 🔄 Service Changes (Изменения сервисов)
 
@@ -2229,10 +2634,10 @@
 | Тип | **Message List** |
 | Потоки | RedOS auditd Logs |
 | Запрос | `audit_type:("SERVICE_START" OR "SERVICE_STOP")` |
-| Окно времени | 5 минут (как у дашборда) |
+| Окно времени | 5 минут (как у вкладки) |
 | Fields | `timestamp`, `source`, `audit_type`, `ses`, `comm`, `pid`, `exe`, `msg` |
 | Sort | `timestamp` по убыванию; строк: 150 |
-| Размер (ш×в) | 12×5 |
+| Размер (ш×в) | Infinity×5 |
 
 ### 17.13. 👥 User Logins (Входы пользователей)
 
@@ -2241,10 +2646,10 @@
 | Тип | **Message List** |
 | Потоки | RedOS auditd Logs |
 | Запрос | `audit_type:("USER_START" OR "USER_END" OR "USER_LOGIN")` |
-| Окно времени | 5 минут (как у дашборда) |
+| Окно времени | 5 минут (как у вкладки) |
 | Fields | `timestamp`, `source`, `audit_type`, `uid`, `auid`, `message` |
 | Sort | `timestamp` по убыванию; строк: 150 |
-| Размер (ш×в) | 12×7 |
+| Размер (ш×в) | Infinity×7 |
 
 <a id="18-dash"></a>
 
@@ -2252,8 +2657,7 @@
 
 - **Краткое описание (Summary):** Активность роутера, ARP-конфликты, SSH, Wi-Fi и WireGuard: детальные журналы
 - **Описание (Description):** Подробные журналы Keenetic (поток Syslog Logs). Сводные цифры — на дашборде «Сеть глазами Keenetic».
-- **Окно времени дашборда:** 5 минут
-- **Виджетов:** 7
+- **Вкладок:** 1, **виджетов:** 7
 
 ### 18.1. 🚨 Total ARP Conflicts (KPI)
 
@@ -2262,7 +2666,7 @@
 | Тип | **Single Number** |
 | Потоки | Syslog Logs |
 | Запрос | `message:"network conflict"` |
-| Окно времени | 5 минут (как у дашборда) |
+| Окно времени | 5 минут (как у вкладки) |
 | Metrics | `count()` |
 | Размер (ш×в) | 2×2 |
 
@@ -2288,7 +2692,7 @@
 | Окно времени | 24 часа (**Override** на виджете) |
 | Fields | `timestamp`, `source`, `arp_ip`, `arp_mac1`, `arp_mac2` |
 | Sort | `timestamp` по убыванию; строк: 150 |
-| Размер (ш×в) | 12×5 |
+| Размер (ш×в) | Infinity×5 |
 
 ### 18.4. Конфликты ARP по IP
 
@@ -2301,7 +2705,7 @@
 | Group By → Rows | `kn_conflict_ip` — **Values**, Limit 15 |
 | Metrics | `count(source)` |
 | Barmode | Group |
-| Размер (ш×в) | 12×4 |
+| Размер (ш×в) | Infinity×4 |
 
 ### 18.5. SSH Connections
 
@@ -2313,7 +2717,7 @@
 | Окно времени | всё время (**Override** на виджете) |
 | Fields | `timestamp`, `source`, `facility`, `level`, `message` |
 | Sort | `timestamp` по убыванию; строк: 150 |
-| Размер (ш×в) | 12×6 |
+| Размер (ш×в) | Infinity×6 |
 
 ### 18.6. WireGuard: отказы и успешные входы
 
@@ -2325,7 +2729,7 @@
 | Окно времени | 24 часа (**Override** на виджете) |
 | Fields | `timestamp`, `source`, `level`, `message` |
 | Sort | `timestamp` по убыванию; строк: 150 |
-| Размер (ш×в) | 12×5 |
+| Размер (ш×в) | Infinity×5 |
 
 ### 18.7. WiFi Events (отключение/подключение клиентов)
 
@@ -2337,7 +2741,7 @@
 | Окно времени | всё время (**Override** на виджете) |
 | Fields | `timestamp`, `source`, `level`, `message` |
 | Sort | `timestamp` по убыванию; строк: 150 |
-| Размер (ш×в) | 12×5 |
+| Размер (ш×в) | Infinity×5 |
 
 <a id="19-dash"></a>
 
@@ -2345,8 +2749,7 @@
 
 - **Краткое описание (Summary):** Логи Podman-контейнеров: объём, уровни, ошибки
 - **Описание (Description):** Контейнеры с хостов Podman через Fluent Bit, стрим Containers
-- **Окно времени дашборда:** 24 часа
-- **Виджетов:** 7
+- **Вкладок:** 1, **виджетов:** 7
 
 ### 19.1. Всего сообщений
 
@@ -2355,7 +2758,7 @@
 | Тип | **Single Number** |
 | Потоки | Containers |
 | Запрос | пусто |
-| Окно времени | 24 часа (как у дашборда) |
+| Окно времени | 24 часа (как у вкладки) |
 | Metrics | `count()` |
 | Размер (ш×в) | 4×3 |
 
@@ -2366,7 +2769,7 @@
 | Тип | **Single Number** |
 | Потоки | Containers |
 | Запрос | `(loglevel:(error OR warn OR fatal) OR message:(error OR fatal OR panic OR exception OR traceback)) AND NOT container_name:(cadvisor OR fluent-bit)` |
-| Окно времени | 24 часа (как у дашборда) |
+| Окно времени | 24 часа (как у вкладки) |
 | Metrics | `count()` |
 | Размер (ш×в) | 4×3 |
 
@@ -2377,7 +2780,7 @@
 | Тип | **Pie Chart** |
 | Потоки | Containers |
 | Запрос | пусто |
-| Окно времени | 24 часа (как у дашборда) |
+| Окно времени | 24 часа (как у вкладки) |
 | Group By → Rows | `level` — **Values**, Limit 10 |
 | Metrics | `count()` |
 | Размер (ш×в) | 4×3 |
@@ -2389,7 +2792,7 @@
 | Тип | **Area Chart** |
 | Потоки | Containers |
 | Запрос | пусто |
-| Окно времени | 24 часа (как у дашборда) |
+| Окно времени | 24 часа (как у вкладки) |
 | Group By → Rows | `timestamp` — **Time**, интервал Auto |
 | Metrics | `count()` |
 | Размер (ш×в) | 12×4 |
@@ -2401,7 +2804,7 @@
 | Тип | **Bar Chart** |
 | Потоки | Containers |
 | Запрос | пусто |
-| Окно времени | 24 часа (как у дашборда) |
+| Окно времени | 24 часа (как у вкладки) |
 | Group By → Rows | `container_name` — **Values**, Limit 15 |
 | Metrics | `count()` |
 | Размер (ш×в) | 6×5 |
@@ -2413,7 +2816,7 @@
 | Тип | **Bar Chart** |
 | Потоки | Containers |
 | Запрос | `(loglevel:(error OR warn OR fatal) OR message:(error OR fatal OR panic OR exception OR traceback)) AND NOT container_name:(cadvisor OR fluent-bit)` |
-| Окно времени | 24 часа (как у дашборда) |
+| Окно времени | 24 часа (как у вкладки) |
 | Group By → Rows | `container_name` — **Values**, Limit 15 |
 | Metrics | `count()` |
 | Размер (ш×в) | 6×5 |
@@ -2425,7 +2828,7 @@
 | Тип | **Data Table** |
 | Потоки | Containers |
 | Запрос | пусто |
-| Окно времени | 24 часа (как у дашборда) |
+| Окно времени | 24 часа (как у вкладки) |
 | Group By → Rows | `container_name` — **Values**, Limit 30<br>`level` — **Values**, Limit 30 |
 | Metrics | `count()` |
 | Размер (ш×в) | 12×5 |
@@ -2436,8 +2839,7 @@
 
 - **Краткое описание (Summary):** Ошибки, перезапуски, права доступа, уровни логов контейнеров
 - **Описание (Description):** Диагностика контейнеров: Observium, MongoDB, Loki/Promtail, источники логов
-- **Окно времени дашборда:** 24 часа
-- **Виджетов:** 6
+- **Вкладок:** 1, **виджетов:** 6
 
 ### 20.1. Ошибки и предупреждения по времени
 
@@ -2446,7 +2848,7 @@
 | Тип | **Area Chart** |
 | Потоки | Containers |
 | Запрос | `(loglevel:(error OR warn OR fatal) OR message:(error OR fatal OR panic OR exception OR traceback)) AND NOT container_name:(cadvisor OR fluent-bit)` |
-| Окно времени | 24 часа (как у дашборда) |
+| Окно времени | 24 часа (как у вкладки) |
 | Group By → Rows | `timestamp` — **Time**, интервал Auto |
 | Metrics | `count()` |
 | Размер (ш×в) | 6×4 |
@@ -2458,7 +2860,7 @@
 | Тип | **Area Chart** |
 | Потоки | Containers |
 | Запрос | пусто |
-| Окно времени | 24 часа (как у дашборда) |
+| Окно времени | 24 часа (как у вкладки) |
 | Group By → Rows | `timestamp` — **Time**, интервал Auto |
 | Metrics | `count()` |
 | Размер (ш×в) | 6×4 |
@@ -2470,7 +2872,7 @@
 | Тип | **Bar Chart** |
 | Потоки | Containers |
 | Запрос | пусто |
-| Окно времени | 24 часа (как у дашборда) |
+| Окно времени | 24 часа (как у вкладки) |
 | Group By → Rows | `container_name` — **Values**, Limit 15 |
 | Metrics | `count()` |
 | Размер (ш×в) | 6×5 |
@@ -2482,7 +2884,7 @@
 | Тип | **Bar Chart** |
 | Потоки | Containers |
 | Запрос | пусто |
-| Окно времени | 24 часа (как у дашборда) |
+| Окно времени | 24 часа (как у вкладки) |
 | Group By → Rows | `source` — **Values**, Limit 15 |
 | Metrics | `count()` |
 | Размер (ш×в) | 6×5 |
@@ -2494,7 +2896,7 @@
 | Тип | **Pie Chart** |
 | Потоки | Containers |
 | Запрос | пусто |
-| Окно времени | 24 часа (как у дашборда) |
+| Окно времени | 24 часа (как у вкладки) |
 | Group By → Rows | `log_s` — **Values**, Limit 10 |
 | Metrics | `count()` |
 | Размер (ш×в) | 6×4 |
@@ -2506,7 +2908,7 @@
 | Тип | **Pie Chart** |
 | Потоки | Containers |
 | Запрос | пусто |
-| Окно времени | 24 часа (как у дашборда) |
+| Окно времени | 24 часа (как у вкладки) |
 | Group By → Rows | `loglevel` — **Values**, Limit 10 |
 | Metrics | `count()` |
 | Размер (ш×в) | 6×4 |
@@ -2517,8 +2919,7 @@
 
 - **Краткое описание (Summary):** Жизненный цикл MariaDB, компоненты MongoDB и Loki, попытки без авторизации, активность Observium
 - **Описание (Description):** Процессы внутри контейнеров по логам stdout/stderr
-- **Окно времени дашборда:** 24 часа
-- **Виджетов:** 6
+- **Вкладок:** 1, **виджетов:** 6
 
 ### 21.1. MariaDB: готовность к подключению
 
@@ -2527,7 +2928,7 @@
 | Тип | **Area Chart** |
 | Потоки | Containers |
 | Запрос | пусто |
-| Окно времени | 24 часа (как у дашборда) |
+| Окно времени | 24 часа (как у вкладки) |
 | Group By → Rows | `timestamp` — **Time**, интервал Auto |
 | Metrics | `count()` |
 | Размер (ш×в) | 6×4 |
@@ -2539,7 +2940,7 @@
 | Тип | **Area Chart** |
 | Потоки | Containers |
 | Запрос | пусто |
-| Окно времени | 24 часа (как у дашборда) |
+| Окно времени | 24 часа (как у вкладки) |
 | Group By → Rows | `timestamp` — **Time**, интервал Auto |
 | Metrics | `count()` |
 | Размер (ш×в) | 6×4 |
@@ -2551,7 +2952,7 @@
 | Тип | **Pie Chart** |
 | Потоки | Containers |
 | Запрос | пусто |
-| Окно времени | 24 часа (как у дашборда) |
+| Окно времени | 24 часа (как у вкладки) |
 | Group By → Rows | `log_c` — **Values**, Limit 10 |
 | Metrics | `count()` |
 | Размер (ш×в) | 6×4 |
@@ -2563,7 +2964,7 @@
 | Тип | **Bar Chart** |
 | Потоки | Containers |
 | Запрос | пусто |
-| Окно времени | 24 часа (как у дашборда) |
+| Окно времени | 24 часа (как у вкладки) |
 | Group By → Rows | `log_attr_client` — **Values**, Limit 15 |
 | Metrics | `count()` |
 | Размер (ш×в) | 6×4 |
@@ -2575,7 +2976,7 @@
 | Тип | **Pie Chart** |
 | Потоки | Containers |
 | Запрос | пусто |
-| Окно времени | 24 часа (как у дашборда) |
+| Окно времени | 24 часа (как у вкладки) |
 | Group By → Rows | `logcaller` — **Values**, Limit 10 |
 | Metrics | `count()` |
 | Размер (ш×в) | 6×4 |
@@ -2587,7 +2988,7 @@
 | Тип | **Area Chart** |
 | Потоки | Containers |
 | Запрос | пусто |
-| Окно времени | 24 часа (как у дашборда) |
+| Окно времени | 24 часа (как у вкладки) |
 | Group By → Rows | `timestamp` — **Time**, интервал Auto |
 | Metrics | `count()` |
 | Размер (ш×в) | 6×4 |
@@ -2597,76 +2998,149 @@
 ## 22. 📊 Общий базовый дашборд
 
 - **Краткое описание (Summary):** Все источники: объём сообщений по входам, потокам и узлам
-- **Описание (Description):** Это список всех источников, отправивших сообщения.  Вы можете сузить временной диапазон, увеличив масштаб гистограммы сообщений, или расширить его, выбрав более
-- **Окно времени дашборда:** 5 минут
-- **Виджетов:** 5
+- **Описание (Description):** Это список всех источников, отправивших сообщения.  Вы можете сузить временной диапазон, увеличив масштаб гистограммы сообщений, или расширить его, выбрав более широкий диапазон в элементах управления вверху.  Вы также можете задать фильтры, чтобы ограничить отображаемые результаты.  Кроме того, вы можете добавить на эту панель управления дополнительные виджеты или изменить внешний вид существующих в соответствии со своими потребностями.
+- **Вкладок:** 2, **виджетов:** 10
 
-### 22.1. Messages over time by Streams
+### 22.1. Вкладка «Log Volume by Message Count»
+
+Новая вкладка: значок «+» рядом с вкладками внизу страницы дашборда, название — **Rename**.
+
+#### 22.1.1. Messages over time by Streams
 
 | Поле | Значение |
 |---|---|
 | Тип | **Bar Chart** |
 | Потоки | все |
 | Запрос | пусто |
-| Окно времени | 5 минут (как у дашборда) |
+| Окно времени | 5 минут (как у вкладки) |
 | Group By → Rows | `timestamp` — **Time**, интервал Auto |
 | Group By → Columns | `streams` — **Values**, Limit 15 |
 | Metrics | `count()` |
 | Barmode | Stack |
-| Размер (ш×в) | 12×4 |
+| Размер (ш×в) | Infinity×4 |
 
-### 22.2. Messages over time by Inputs
+#### 22.1.2. Messages over time by Inputs
 
 | Поле | Значение |
 |---|---|
 | Тип | **Bar Chart** |
 | Потоки | все |
 | Запрос | пусто |
-| Окно времени | 5 минут (как у дашборда) |
+| Окно времени | 5 минут (как у вкладки) |
 | Group By → Rows | `timestamp` — **Time**, интервал Auto |
 | Group By → Columns | `gl2_source_input` — **Values**, Limit 15 |
 | Metrics | `count()` |
 | Barmode | Stack |
 | Размер (ш×в) | 6×4 |
 
-### 22.3. Messages over time by Nodes
+#### 22.1.3. Messages over time by Nodes
 
 | Поле | Значение |
 |---|---|
 | Тип | **Bar Chart** |
 | Потоки | все |
 | Запрос | пусто |
-| Окно времени | 5 минут (как у дашборда) |
+| Окно времени | 5 минут (как у вкладки) |
 | Group By → Rows | `timestamp` — **Time**, интервал Auto |
 | Group By → Columns | `gl2_source_node` — **Values**, Limit 15 |
 | Metrics | `count()` |
 | Barmode | Stack |
 | Размер (ш×в) | 6×4 |
 
-### 22.4. Selected sources
+#### 22.1.4. Selected sources
 
 | Поле | Значение |
 |---|---|
 | Тип | **Data Table** |
 | Потоки | все |
 | Запрос | пусто |
-| Окно времени | 5 минут (как у дашборда) |
+| Окно времени | 5 минут (как у вкладки) |
 | Group By → Rows | `source` — **Values**, Limit 15 |
 | Metrics | `count()` |
 | Sort | count() по убыванию |
 | Размер (ш×в) | 6×4 |
 
-### 22.5. Messages per Source
+#### 22.1.5. Messages per Source
 
 | Поле | Значение |
 |---|---|
 | Тип | **Pie Chart** |
 | Потоки | все |
 | Запрос | пусто |
-| Окно времени | 5 минут (как у дашборда) |
+| Окно времени | 5 минут (как у вкладки) |
 | Group By → Rows | `source` — **Values**, Limit 10 |
 | Metrics | `count()` |
 | Sort | count() по убыванию |
+| Размер (ш×в) | 6×4 |
+
+### 22.2. Вкладка «Log Volume by Message Size»
+
+Новая вкладка: значок «+» рядом с вкладками внизу страницы дашборда, название — **Rename**.
+
+#### 22.2.1. Messages over time by Streams
+
+| Поле | Значение |
+|---|---|
+| Тип | **Bar Chart** |
+| Потоки | все |
+| Запрос | пусто |
+| Окно времени | 5 минут (как у вкладки) |
+| Group By → Rows | `timestamp` — **Time**, интервал Auto |
+| Group By → Columns | `streams` — **Values**, Limit 15 |
+| Metrics | `sum(gl2_accounted_message_size)` |
+| Barmode | Stack |
+| Размер (ш×в) | Infinity×4 |
+
+#### 22.2.2. Messages over time by Inputs
+
+| Поле | Значение |
+|---|---|
+| Тип | **Bar Chart** |
+| Потоки | все |
+| Запрос | пусто |
+| Окно времени | 5 минут (как у вкладки) |
+| Group By → Rows | `timestamp` — **Time**, интервал Auto |
+| Group By → Columns | `gl2_source_input` — **Values**, Limit 15 |
+| Metrics | `sum(gl2_accounted_message_size)` |
+| Barmode | Stack |
+| Размер (ш×в) | 6×4 |
+
+#### 22.2.3. Messages over time by Nodes
+
+| Поле | Значение |
+|---|---|
+| Тип | **Bar Chart** |
+| Потоки | все |
+| Запрос | пусто |
+| Окно времени | 5 минут (как у вкладки) |
+| Group By → Rows | `timestamp` — **Time**, интервал Auto |
+| Group By → Columns | `gl2_source_node` — **Values**, Limit 15 |
+| Metrics | `sum(gl2_accounted_message_size)` |
+| Barmode | Stack |
+| Размер (ш×в) | 6×4 |
+
+#### 22.2.4. Selected sources
+
+| Поле | Значение |
+|---|---|
+| Тип | **Data Table** |
+| Потоки | все |
+| Запрос | пусто |
+| Окно времени | 5 минут (как у вкладки) |
+| Group By → Rows | `source` — **Values**, Limit 15 |
+| Metrics | `sum(gl2_accounted_message_size)` |
+| Размер (ш×в) | 6×4 |
+
+#### 22.2.5. Messages per Source
+
+| Поле | Значение |
+|---|---|
+| Тип | **Pie Chart** |
+| Потоки | все |
+| Запрос | пусто |
+| Окно времени | 5 минут (как у вкладки) |
+| Group By → Rows | `source` — **Values**, Limit 10 |
+| Metrics | `count()` |
 | Размер (ш×в) | 6×4 |
 
 ---
