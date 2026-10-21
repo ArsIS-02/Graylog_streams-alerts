@@ -65,6 +65,10 @@ sudo chmod 644 /Library/LaunchDaemons/com.user.logstream.plist
 sudo launchctl load /Library/LaunchDaemons/com.user.logstream.plist
 ```
 
+![Ротация unified.json.log: архивы и правило newsyslog](images/macos-rotation.png)
+*Ротация unified.json.log: архивы и правило newsyslog (иллюстрация, пример результата).*
+
+
 ### Логирование команд (опционально)
 
 ```bash
@@ -81,6 +85,13 @@ sudo ls -lah /var/log/unified.json.log       # log stream пишет?
 sudo log show --predicate 'process == "filebeat"' --last 5m --info | \
   grep -iE "events.sent|connection"          # данные идут в Graylog?
 ```
+
+![Проверка Filebeat: агент запущен и отправляет события](images/macos-filebeat-check.png)
+*Проверка Filebeat: агент запущен и отправляет события (иллюстрация, пример результата).*
+
+![Поиск по macOS-логам в Graylog: TCC, USB, AirDrop, osquery](images/macos-search.png)
+*Поиск по macOS-логам в Graylog: TCC, USB, AirDrop, osquery (иллюстрация, пример результата).*
+
 
 ## Важные замечания
 

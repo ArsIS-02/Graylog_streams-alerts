@@ -110,6 +110,10 @@ sudo /usr/local/bin/bzt-diagnose.sh
 echo "EXIT=$?"
 ```
 
+![Диагностика агентов bzt-diagnose.sh](images/bztriage-diagnose.png)
+*Диагностика агентов bzt-diagnose.sh (иллюстрация, пример результата).*
+
+
 ## Настройка Graylog
 
 На стороне сервера нужно:
@@ -121,6 +125,10 @@ echo "EXIT=$?"
 5. `http_publish_uri` (а не `publish_uri`) в `server.conf`.
 
 Пошагово — в [`macos/bztriage/docs/graylog-setup.md`](../macos/bztriage/docs/graylog-setup.md).
+
+![Сообщение BI.ZONE Triage в Graylog с извлечёнными полями](images/bztriage-message.png)
+*Сообщение BI.ZONE Triage в Graylog с извлечёнными полями (иллюстрация, пример результата).*
+
 
 ## Что фильтруется на хосте
 
