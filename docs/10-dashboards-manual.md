@@ -952,7 +952,16 @@
 - `1d7dc7` … LNX - Исполнение из памяти (memfd_create)
 - `1d903d` … macOS - Bi.Zone: новый элемент автозагрузки
 - `1d8195` … 6ad30b47cc18050c4f1d8195
-- `225c28` … Контейнеры: перезап
+- `225c28` … Контейнеры: перезапуски MariaDB
+- `1d7dbf` … LNX - Подозрительные утилиты (base64, nc, socat, scp)
+- `1d814b` … 6ad30b46cc18050c4f1d814b
+- `1d7dd7` … LNX - Изменение правил firewall (iptables, nft)
+- `1d816f` … 6ad30b46cc18050c4f1d816f
+- `9ed46e` … LNX - Использование sudo
+- `9ed450` … LNX - Изменение прав доступа (chmod)
+- `1d7e3c` … Windows - Автозагрузка через ключ реестра Run
+- `1ecca8` … KEENETIC - Новое устройство в сети
+- `1d7de7` … LNX - Разведка (id, whoami)
 ```
 
 ### 8.10. Последние события
@@ -1068,7 +1077,11 @@
 - вход `1f2e27` … Podman Logs
 - поток `2559a4` … RedOS auditd Logs
 - поток `fde88f` … Syslog Logs
-- поток `fdd94e` … MacO
+- поток `fdd94e` … MacOS Logs
+- поток `1a556b` … BiZone_macOS
+- поток `fde575` … WindowsLogs
+- поток `885bca` … FreeIPA Logs
+- поток `1fa113` … Containers
 ```
 
 <a id="10-dash"></a>
@@ -1579,7 +1592,26 @@
 - `1d7dc7` … LNX - Исполнение из памяти (memfd_create)
 - `1d8195` … 6ad30b47cc18050c4f1d8195
 - `1d903d` … macOS - Bi.Zone: новый элемент автозагрузки
-- `225c28` … Контейнеры: перезап
+- `225c28` … Контейнеры: перезапуски MariaDB
+- `1d814b` … 6ad30b46cc18050c4f1d814b
+- `1d7dbf` … LNX - Подозрительные утилиты (base64, nc, socat, scp)
+- `1d817c` … 6ad30b47cc18050c4f1d817c
+- `1d7dd7` … LNX - Изменение правил firewall (iptables, nft)
+- `1d816f` … 6ad30b46cc18050c4f1d816f
+- `9ed46e` … LNX - Использование sudo
+- `1d81c2` … 6ad30b48cc18050c4f1d81c2
+- `9ed450` … LNX - Изменение прав доступа (chmod)
+- `1d7e3c` … Windows - Автозагрузка через ключ реестра Run
+
+**Потоки**
+
+- `2559a4` … RedOS auditd Logs
+- `fde88f` … Syslog Logs
+- `fdd94e` … MacOS Logs
+- `1a556b` … BiZone_macOS
+- `fde575` … WindowsLogs
+- `885bca` … FreeIPA Logs
+- `1fa113` … Containers
 ```
 
 <a id="14-dash"></a>
