@@ -132,13 +132,13 @@ Saved Searches на потоке **Containers**, окно 24 часа:
 | Название | Запрос |
 |---|---|
 | Контейнеры: все | `*` |
-| Контейнеры: ошибки | `level:3` |
+| Контейнеры: ошибки | `level:3` (приоритет journald, то есть stderr; для реальных ошибок см. главу 9) |
 | Контейнеры: observiumdb | `container_name:observiumdb` |
 | Контейнеры: MongoDB | `container_name:komodo_mongo_1` |
 | Контейнеры: promtail и loki | `container_name:promtail OR container_name:loki` |
 
 Дашборд «Контейнеры»: Bar chart по `container_name`, Area chart по времени с разбивкой по
-`container_name`, Pie по `source` для `level:3`, таблица последних сообщений с полями
+`container_name`, Pie по `source` для `level:3` (stderr), таблица последних сообщений с полями
 `timestamp`, `source`, `container_name`, `log_s`, `log_msg`.
 
 ![Поиск по потоку Containers: promtail, loki, MongoDB](images/containers-search.png)
