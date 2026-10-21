@@ -1606,7 +1606,7 @@
    {
     "t": "Справочник правил",
     "v": "text",
-    "txt": "**Справочник: id правила → название**\n\n- `1d7ddf` … LNX - Отказ SELinux (AVC)\n- `225c18` … Контейнеры: всплеск ошибок\n- `1d7dc7` … LNX - Исполнение из памяти (memfd_create)\n- `1d903d` … macOS - Bi.Zone: новый элемент автозагрузки\n- `1d8195` … 6ad30b47cc18050c4f1d8195\n- `225c28` … Контейнеры: перезап",
+    "txt": "**Справочник: id правила → название**\n\n- `1d7ddf` … LNX - Отказ SELinux (AVC)\n- `225c18` … Контейнеры: всплеск ошибок\n- `1d7dc7` … LNX - Исполнение из памяти (memfd_create)\n- `1d903d` … macOS - Bi.Zone: новый элемент автозагрузки\n- `1d8195` … 6ad30b47cc18050c4f1d8195\n- `225c28` … Контейнеры: перезапуски MariaDB\n- `1d7dbf` … LNX - Подозрительные утилиты (base64, nc, socat, scp)\n- `1d814b` … 6ad30b46cc18050c4f1d814b\n- `1d7dd7` … LNX - Изменение правил firewall (iptables, nft)\n- `1d816f` … 6ad30b46cc18050c4f1d816f\n- `9ed46e` … LNX - Использование sudo\n- `9ed450` … LNX - Изменение прав доступа (chmod)\n- `1d7e3c` … Windows - Автозагрузка через ключ реестра Run\n- `1ecca8` … KEENETIC - Новое устройство в сети\n- `1d7de7` … LNX - Разведка (id, whoami)",
     "w": 12,
     "h": 6,
     "pos": [
@@ -1894,7 +1894,7 @@
    {
     "t": "Справочник",
     "v": "text",
-    "txt": "**Справочник: входы и потоки**\n\n- вход `2882bf` … MacOS Beats\n- вход `5b20b1` … BiZone macOS\n- вход `fdb8f8` … Syslog UDP\n- вход `fdb8ef` … Beats Input\n- вход `fdb8e5` … GELF UDP\n- вход `1f2e27` … Podman Logs\n- поток `2559a4` … RedOS auditd Logs\n- поток `fde88f` … Syslog Logs\n- поток `fdd94e` … MacO",
+    "txt": "**Справочник: входы и потоки**\n\n- вход `2882bf` … MacOS Beats\n- вход `5b20b1` … BiZone macOS\n- вход `fdb8f8` … Syslog UDP\n- вход `fdb8ef` … Beats Input\n- вход `fdb8e5` … GELF UDP\n- вход `1f2e27` … Podman Logs\n- поток `2559a4` … RedOS auditd Logs\n- поток `fde88f` … Syslog Logs\n- поток `fdd94e` … MacOS Logs\n- поток `1a556b` … BiZone_macOS\n- поток `fde575` … WindowsLogs\n- поток `885bca` … FreeIPA Logs\n- поток `1fa113` … Containers",
     "w": 12,
     "h": 6,
     "pos": [
@@ -2639,7 +2639,7 @@
    {
     "t": "Справочник",
     "v": "text",
-    "txt": "**Справочник: id правила → название**\n\n- `1d7ddf` … LNX - Отказ SELinux (AVC)\n- `225c18` … Контейнеры: всплеск ошибок\n- `1d7dc7` … LNX - Исполнение из памяти (memfd_create)\n- `1d8195` … 6ad30b47cc18050c4f1d8195\n- `1d903d` … macOS - Bi.Zone: новый элемент автозагрузки\n- `225c28` … Контейнеры: перезап",
+    "txt": "**Справочник: id правила → название**\n\n- `1d7ddf` … LNX - Отказ SELinux (AVC)\n- `225c18` … Контейнеры: всплеск ошибок\n- `1d7dc7` … LNX - Исполнение из памяти (memfd_create)\n- `1d8195` … 6ad30b47cc18050c4f1d8195\n- `1d903d` … macOS - Bi.Zone: новый элемент автозагрузки\n- `225c28` … Контейнеры: перезапуски MariaDB\n- `1d814b` … 6ad30b46cc18050c4f1d814b\n- `1d7dbf` … LNX - Подозрительные утилиты (base64, nc, socat, scp)\n- `1d817c` … 6ad30b47cc18050c4f1d817c\n- `1d7dd7` … LNX - Изменение правил firewall (iptables, nft)\n- `1d816f` … 6ad30b46cc18050c4f1d816f\n- `9ed46e` … LNX - Использование sudo\n- `1d81c2` … 6ad30b48cc18050c4f1d81c2\n- `9ed450` … LNX - Изменение прав доступа (chmod)\n- `1d7e3c` … Windows - Автозагрузка через ключ реестра Run\n\n**Потоки**\n\n- `2559a4` … RedOS auditd Logs\n- `fde88f` … Syslog Logs\n- `fdd94e` … MacOS Logs\n- `1a556b` … BiZone_macOS\n- `fde575` … WindowsLogs\n- `885bca` … FreeIPA Logs\n- `1fa113` … Containers",
     "w": 12,
     "h": 6,
     "pos": [
