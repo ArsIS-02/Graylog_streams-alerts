@@ -134,7 +134,7 @@ systemctl status opensearch    # должно быть active (running)
 ### Graylog
 
 ```bash
-# репозиторий Graylog (для 5.2; для 7.1 — соответствующий пакет)
+# репозиторий Graylog (здесь 5.2; для 7.2 — пакет соответствующей ветки)
 rpm -Uvh https://packages.graylog2.org/repo/packages/graylog5.2-repository_latest.rpm
 dnf install graylog-server
 ```
@@ -186,13 +186,25 @@ systemctl --type=service --state=active | grep graylog
 
 ## Совместимость версий
 
-Graylog 7.1 требует определённых версий компонентов стека. В лаборатории автора:
+Graylog требует определённых версий компонентов стека. В лаборатории автора сейчас:
 
 | Компонент | Версия |
 |---|---|
-| Graylog | 7.1.3 |
-| MongoDB | 7.0.37 |
+| Graylog | 7.2.1 |
+| MongoDB | 7.0.43 |
 | OpenSearch | 2.19.5 |
+| JVM | Eclipse Adoptium 21.0.12 |
+
+Лаборатория собиралась на Graylog 7.1.3 и MongoDB 7.0.37, а затем обновлена до версий из
+таблицы. Главы 1–10 писались до обновления, поэтому на части скриншотов видна прежняя
+версия; на работу описанного это не влияет. Что появилось в 7.2 — отдельная
+[глава 11 про Collectors](11-collectors.md).
+
+Поддерживаемые диапазоны для ветки 7.2.x по
+[документации Graylog](https://go2docs.graylog.org/current/downloading_and_installing_graylog/red_hat_installation_os.htm):
+MongoDB от 7.x до 8.2.x, OpenSearch от 1.1.x до 3.7.x (для Graylog Security — от 2.0.x).
+OpenSearch 3.x годится для новых установок; при обновлении существующей проверь индексы,
+созданные до версии 2.0, — они с 3.x несовместимы.
 
 ![Таблица совместимости версий компонентов](images/version-compat.png)
 

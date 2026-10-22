@@ -1,6 +1,6 @@
 <p align="center">
-  <img src="https://img.shields.io/badge/Graylog-7.1.3-FF6B00?style=for-the-badge&logo=graylog&logoColor=white" alt="Graylog version"/>
-  <img src="https://img.shields.io/badge/MongoDB-7.0.37-47A248?style=for-the-badge&logo=mongodb&logoColor=white" alt="MongoDB version"/>
+  <img src="https://img.shields.io/badge/Graylog-7.2.1-FF6B00?style=for-the-badge&logo=graylog&logoColor=white" alt="Graylog version"/>
+  <img src="https://img.shields.io/badge/MongoDB-7.0.43-47A248?style=for-the-badge&logo=mongodb&logoColor=white" alt="MongoDB version"/>
   <img src="https://img.shields.io/badge/OpenSearch-2.19.5-005EB8?style=for-the-badge&logo=opensearch&logoColor=white" alt="OpenSearch version"/>
   <img src="https://img.shields.io/badge/License-MIT-blue?style=for-the-badge" alt="License"/>
 </p>

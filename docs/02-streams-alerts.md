@@ -223,7 +223,7 @@ journalctl -u graylog-server | grep -i smtp
 ### Готовые алерты: content pack
 
 Если не хочется собирать алерты руками — в [`graylog/content-pack-homelab-alerts.json`](../graylog/content-pack-homelab-alerts.json)
-лежат **63 условия алерта и 3 email-уведомления** (Linux, macOS, Windows): 19 базовых алертов и 44 правила детектирования. Проверено на Graylog 7.2.0-rc.1.
+лежат **63 условия алерта и 3 email-уведомления** (Linux, macOS, Windows): 19 базовых алертов и 44 правила детектирования. Проверено на Graylog 7.2.0-rc.1, работает и на 7.2.1.
 
 Установка:
 
