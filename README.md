@@ -42,7 +42,8 @@
 
 1. Установи стек по [части 1](docs/01-home-lab.md): Java 17, MongoDB, OpenSearch, Graylog.
 2. Подключи агенты своей ОС: [Windows](docs/03-windows.md), [Linux](docs/04-linux.md),
-   [macOS](docs/05-macos.md), [контейнеры](docs/08-containers.md).
+   [macOS](docs/05-macos.md), [контейнеры](docs/08-containers.md) — или сразу
+   [Collectors](docs/11-collectors.md), где настройка всех ОС живёт на сервере.
 3. Создай потоки и алерты по [части 2](docs/02-streams-alerts.md) или импортируй готовые
    63 алерта из [content pack](graylog/content-pack-homelab-alerts.json).
 4. Подключи [декодер auditd](decoder/auditd_decoder.py): события станут читаемыми.
@@ -65,6 +66,7 @@
 | 5 | [macOS: unified log, Filebeat, osquery](docs/05-macos.md) | Unified log, USB, osquery, ротация логов |
 | 6 | [macOS: BI.ZONE Triage](docs/06-macos-bztriage.md) | Три launchd-агента, телеметрия по `nc` |
 | 8 | [Контейнеры: логи Podman](docs/08-containers.md) | Fluent Bit, GELF, extractor-ы, поток Containers |
+| 11 | [Collectors: агенты под управлением сервера](docs/11-collectors.md) | Один агент на Linux, macOS и Windows, настройка из Graylog |
 
 ### Дашборды
 
@@ -89,6 +91,7 @@
 | 📧 **Алерты по email** | SMTP через Mail.ru, письмо с прямой ссылкой на событие |
 | ⚡ **Быстрая реакция** | Проверка условий каждые 5 минут, уведомление в течение 1–2 минут |
 | 🖥 **Четыре источника** | Windows, Linux (РЕД ОС), macOS, контейнеры Podman |
+| 🛰 **Collectors** | Один агент на 12 хостов: настройка источников на сервере, без конфигов на машинах |
 | 📊 **Дашборды** | Семь дашбордов для доклада, шесть рабочих и три для контейнеров |
 
 ## 🗂 Структура репозитория
@@ -107,6 +110,7 @@
 │   ├── 08-containers.md               ← контейнеры: Podman → Fluent Bit → Graylog
 │   ├── 09-containers-dashboards.md    ← контейнеры: дашборды, поиски, события
 │   ├── 10-dashboards-manual.md        ← 22 дашборда руками, виджет за виджетом
+│   ├── 11-collectors.md               ← Collectors: агенты под управлением сервера
 │   ├── troubleshooting.md             ← грабли и решения
 │   └── images/                        ← скриншоты и иллюстрации к главам
 ├── decoder/                           ← декодер auditd (auditd_decoder.py, systemd-юнит)
