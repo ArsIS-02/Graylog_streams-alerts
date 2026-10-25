@@ -67,6 +67,7 @@
 | 6 | [macOS: BI.ZONE Triage](docs/06-macos-bztriage.md) | Три launchd-агента, телеметрия по `nc` |
 | 8 | [Контейнеры: логи Podman](docs/08-containers.md) | Fluent Bit, GELF, extractor-ы, поток Containers |
 | 11 | [Collectors: агенты под управлением сервера](docs/11-collectors.md) | Один агент на Linux, macOS и Windows, настройка из Graylog |
+| 12 | [Graylog + Grafana](docs/12-graylog-grafana.md) | Логи и алерты Graylog на дашбордах Grafana, аннотации; полный набор — в [grafana-homelab](https://github.com/ArsIS-02/grafana-homelab) |
 
 ### Дашборды
 
@@ -111,6 +112,7 @@
 │   ├── 09-containers-dashboards.md    ← контейнеры: дашборды, поиски, события
 │   ├── 10-dashboards-manual.md        ← 22 дашборда руками, виджет за виджетом
 │   ├── 11-collectors.md               ← Collectors: агенты под управлением сервера
+│   ├── 12-graylog-grafana.md          ← Graylog + Grafana: логи и аннотации на дашбордах
 │   ├── troubleshooting.md             ← грабли и решения
 │   └── images/                        ← скриншоты и иллюстрации к главам
 ├── decoder/                           ← декодер auditd (auditd_decoder.py, systemd-юнит)
