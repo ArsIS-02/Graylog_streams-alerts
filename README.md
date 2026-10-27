@@ -35,6 +35,9 @@
 4. **Алерты**: email-уведомления о неудачных входах, sudo, USB и других событиях.
 5. **Дашборды**: от обзора лаборатории до центра безопасности (SOC).
 
+> Раньше это руководство публиковалось и в репозитории MyHomeLaboratory. Там осталась более ранняя
+> версия (Graylog 7.1.3, без глав 10–12), и она больше не поддерживается: актуальный текст только здесь.
+
 > Картинки в главах 05–09 и в разделе «Troubleshooting» воссозданы по реальным данным
 > лаборатории (названия, счётчики, сообщения из Graylog) в стиле его интерфейса.
 
@@ -132,6 +135,7 @@
 - [osquery Documentation](https://osquery.readthedocs.io/)
 - [Sysmon (Sysinternals)](https://learn.microsoft.com/sysinternals/downloads/sysmon)
 - [Fluent Bit Documentation](https://docs.fluentbit.io/)
+- [Grafana Documentation](https://grafana.com/docs/grafana/latest/)
 
 ## 📄 Лицензия
 
