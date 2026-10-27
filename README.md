@@ -2,7 +2,7 @@
   <img src="https://img.shields.io/badge/Graylog-7.2.1-FF6B00?style=for-the-badge&logo=graylog&logoColor=white" alt="Graylog version"/>
   <img src="https://img.shields.io/badge/MongoDB-7.0.43-47A248?style=for-the-badge&logo=mongodb&logoColor=white" alt="MongoDB version"/>
   <img src="https://img.shields.io/badge/OpenSearch-2.19.5-005EB8?style=for-the-badge&logo=opensearch&logoColor=white" alt="OpenSearch version"/>
-  <img src="https://img.shields.io/badge/License-MIT-blue?style=for-the-badge" alt="License"/>
+  <img src="https://img.shields.io/badge/License-GPL%20v3-blue?style=for-the-badge" alt="License"/>
 </p>
 
 # 🛡️ Graylog: домашняя лаборатория со сбором логов, потоками и алертами
@@ -132,3 +132,9 @@
 - [osquery Documentation](https://osquery.readthedocs.io/)
 - [Sysmon (Sysinternals)](https://learn.microsoft.com/sysinternals/downloads/sysmon)
 - [Fluent Bit Documentation](https://docs.fluentbit.io/)
+
+## 📄 Лицензия
+
+[GNU GPL версии 3](LICENSE) (GPL-3.0-or-later): код можно свободно использовать, изменять и распространять; изменённая версия при распространении остаётся под GPL с открытым исходным кодом и указанием авторства. Программа поставляется «как есть», без гарантий.
+
+Copyright (C) 2026 ArsIS-02.
