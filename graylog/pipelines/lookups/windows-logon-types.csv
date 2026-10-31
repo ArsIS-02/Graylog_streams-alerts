@@ -1,0 +1,10 @@
+key,value
+2,Interactive (локальный вход)
+3,Network (сеть)
+4,Batch (пакетное задание)
+5,Service (служба)
+7,Unlock (разблокировка)
+8,NetworkCleartext (сеть, пароль открытым текстом)
+9,NewCredentials (RunAs /netonly)
+10,RemoteInteractive (RDP)
+11,CachedInteractive (кэшированные учётные данные)

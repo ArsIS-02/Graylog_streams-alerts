@@ -25,6 +25,16 @@
     "source": "rule \"homelab: пометить доверенные хосты\"\nwhen\n  has_field(\"source\")\n  AND lookup_has_value(\"homelab-trusted-hosts\", to_string($message.source))\nthen\n  set_field(\"trusted_host\", true);\nend"
   },
   {
+    "title": "homelab: windows event_name",
+    "description": "Добавляет event_name по коду события Windows из Lookup Table homelab-windows-events (4625 → Неудачная попытка входа).",
+    "source": "rule \"homelab: windows event_name\"\nwhen\n  has_field(\"winlogbeat_winlog_event_id\")\n  AND lookup_has_value(\"homelab-windows-events\", to_string($message.winlogbeat_winlog_event_id))\nthen\n  set_field(\"event_name\", lookup_value(\"homelab-windows-events\", to_string($message.winlogbeat_winlog_event_id)));\nend"
+  },
+  {
+    "title": "homelab: windows logon_type_name",
+    "description": "Добавляет logon_type_name по LogonType из Lookup Table homelab-windows-logon-types (10 → RemoteInteractive (RDP)).",
+    "source": "rule \"homelab: windows logon_type_name\"\nwhen\n  has_field(\"winlogbeat_winlog_event_data_LogonType\")\n  AND lookup_has_value(\"homelab-windows-logon-types\", to_string($message.winlogbeat_winlog_event_data_LogonType))\nthen\n  set_field(\"logon_type_name\", lookup_value(\"homelab-windows-logon-types\", to_string($message.winlogbeat_winlog_event_data_LogonType)));\nend"
+  },
+  {
     "title": "macos: обрезать слишком длинный cmdline",
     "description": "osquery иногда присылает командную строку длиннее предела OpenSearch в 32766 байт",
     "source": "rule \"macos: обрезать слишком длинный cmdline\"\nwhen\n  has_field(\"columns_cmdline\")\n  AND length(to_string($message.columns_cmdline)) > 8000\nthen\n  set_field(\"columns_cmdline\", abbreviate(to_string($message.columns_cmdline), 8000));\n  set_field(\"columns_cmdline_truncated\", true);\nend"

@@ -1,0 +1,8 @@
+// description: Добавляет logon_type_name по LogonType из Lookup Table homelab-windows-logon-types (10 → RemoteInteractive (RDP)).
+rule "homelab: windows logon_type_name"
+when
+  has_field("winlogbeat_winlog_event_data_LogonType")
+  AND lookup_has_value("homelab-windows-logon-types", to_string($message.winlogbeat_winlog_event_data_LogonType))
+then
+  set_field("logon_type_name", lookup_value("homelab-windows-logon-types", to_string($message.winlogbeat_winlog_event_data_LogonType)));
+end
