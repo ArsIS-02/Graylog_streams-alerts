@@ -80,3 +80,5 @@
 В ATT&CK Navigator: Open Existing Layer → Upload from local → `graylog-coverage.layer.json`. Слой
 помечает версию ATT&CK 20; если в вашей копии Navigator версия другая, он предложит обновить слой.
 Цвет клетки зависит от числа определений на технику.
+
+Сводный каталог всех детектов с условиями, корреляцией и матрицей «тактики × платформы» лежит в [docs/14-detections.md](../../docs/14-detections.md); он собирается скриптом из `graylog/detections/`.
