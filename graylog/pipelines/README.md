@@ -109,6 +109,30 @@ IP и не срабатывало ни разу: метрики показали
 - Правка файла списка после создания адаптера не проверялась: адаптер перечитывает файл раз в
   `check_interval` (в нашей настройке 60 секунд).
 
+## Справочники Windows: коды событий и типы входа
+
+Таблицы, которые делают алерты и дашборды читаемыми: вместо `4625` в событии появляется
+`event_name = Неудачная попытка входа`, вместо `LogonType 10` поле `logon_type_name = RemoteInteractive (RDP)`.
+
+| Таблица | Файл | Ключ → значение | Правило pipeline | Поле в сообщении |
+|---|---|---|---|---|
+| `homelab-windows-events` | [`lookups/windows-events.csv`](lookups/windows-events.csv) | EventID → название (Security, Sysmon, PowerShell, службы) | `homelab: windows event_name` | `event_name` |
+| `homelab-windows-logon-types` | [`lookups/windows-logon-types.csv`](lookups/windows-logon-types.csv) | LogonType → смысл | `homelab: windows logon_type_name` | `logon_type_name` |
+
+**Как поставить.**
+
+1. Скопировать CSV на сервер Graylog и создать таблицы: команды и запуск в начале
+   [`import-lookup-tables.js`](import-lookup-tables.js) (сначала `{dryRun: true}`).
+2. Загрузить правила: `python3 build_rules_json.py`, затем `import-rules.js` (см. «Как восстановить»).
+3. Подключить правила к pipeline потока с событиями Windows, стадией после разбора полей.
+   Исходные поля: `winlogbeat_winlog_event_id` и `winlogbeat_winlog_event_data_LogonType`.
+4. Проверка: `/api/system/lookup/tables/homelab-windows-events/query?key=4625` возвращает
+   «Неудачная попытка входа»; в поиске `event_name:"Неудачная попытка входа"`.
+
+**Ограничения.** Ключ только по коду, без учёта канала: коды Sysmon (1–25) и Security (4xxx)
+не пересекаются, но у других каналов бывают свои коды, которых в таблице нет. Для них поле не
+добавляется. Новые коды добавляются строкой в CSV, адаптер перечитывает файл раз в минуту.
+
 ## Один хост, два имени источника
 
 Поле `source` у одного и того же хоста может отличаться в зависимости от канала:

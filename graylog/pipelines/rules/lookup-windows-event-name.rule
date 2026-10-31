@@ -1,0 +1,8 @@
+// description: Добавляет event_name по коду события Windows из Lookup Table homelab-windows-events (4625 → Неудачная попытка входа).
+rule "homelab: windows event_name"
+when
+  has_field("winlogbeat_winlog_event_id")
+  AND lookup_has_value("homelab-windows-events", to_string($message.winlogbeat_winlog_event_id))
+then
+  set_field("event_name", lookup_value("homelab-windows-events", to_string($message.winlogbeat_winlog_event_id)));
+end
