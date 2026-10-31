@@ -1,0 +1,417 @@
+{
+ "name": "Graylog: покрытие алертами (черновик)",
+ "versions": {
+  "attack": "20",
+  "navigator": "5.1.0",
+  "layer": "4.5"
+ },
+ "domain": "enterprise-attack",
+ "description": "Число определений событий Graylog, привязанных к технике. Черновик соответствий, v20.0.",
+ "filters": {
+  "platforms": [
+   "Linux",
+   "macOS",
+   "Windows",
+   "Containers",
+   "Network",
+   "Identity Provider",
+   "SaaS",
+   "IaaS",
+   "Office Suite",
+   "PRE"
+  ]
+ },
+ "sorting": 0,
+ "layout": {
+  "layout": "side",
+  "aggregateFunction": "average",
+  "showID": true,
+  "showName": true,
+  "showAggregateScores": false,
+  "countUnscored": false,
+  "expandedSubtechniques": "annotated"
+ },
+ "hideDisabled": false,
+ "techniques": [
+  {
+   "techniqueID": "T1003.001",
+   "score": 1,
+   "comment": "Windows - Доступ к памяти LSASS",
+   "enabled": true,
+   "showSubtechniques": false
+  },
+  {
+   "techniqueID": "T1021.001",
+   "score": 1,
+   "comment": "Windows - Вход по RDP",
+   "enabled": true,
+   "showSubtechniques": false
+  },
+  {
+   "techniqueID": "T1021.004",
+   "score": 2,
+   "comment": "KEENETIC - Вход в админку роутера (SSH); macOS - Включение удалённого входа или Screen Sharing",
+   "enabled": true,
+   "showSubtechniques": false
+  },
+  {
+   "techniqueID": "T1021.005",
+   "score": 1,
+   "comment": "macOS - Включение удалённого входа или Screen Sharing",
+   "enabled": true,
+   "showSubtechniques": false
+  },
+  {
+   "techniqueID": "T1027.010",
+   "score": 1,
+   "comment": "Windows - PowerShell с закодированной командой",
+   "enabled": true,
+   "showSubtechniques": false
+  },
+  {
+   "techniqueID": "T1033",
+   "score": 1,
+   "comment": "LNX - Разведка (id, whoami)",
+   "enabled": true,
+   "showSubtechniques": true
+  },
+  {
+   "techniqueID": "T1052.001",
+   "score": 1,
+   "comment": "macOS - Подключён USB-накопитель",
+   "enabled": true,
+   "showSubtechniques": false
+  },
+  {
+   "techniqueID": "T1053.005",
+   "score": 1,
+   "comment": "Windows - Создание задачи через schtasks",
+   "enabled": true,
+   "showSubtechniques": false
+  },
+  {
+   "techniqueID": "T1056.002",
+   "score": 1,
+   "comment": "macOS - Фишинговый запрос пароля через osascript",
+   "enabled": true,
+   "showSubtechniques": false
+  },
+  {
+   "techniqueID": "T1059",
+   "score": 3,
+   "comment": "Windows - Офисное приложение запустило оболочку; macOS - Bi.Zone: процесс из /tmp или /Users/Shared; macOS - Запуск программы из /tmp или /Users/Shared",
+   "enabled": true,
+   "showSubtechniques": true
+  },
+  {
+   "techniqueID": "T1059.001",
+   "score": 2,
+   "comment": "Windows - PowerShell с закодированной командой; Windows - PowerShell скачивает и исполняет код",
+   "enabled": true,
+   "showSubtechniques": false
+  },
+  {
+   "techniqueID": "T1059.004",
+   "score": 3,
+   "comment": "LNX - Обратная оболочка (/dev/tcp); macOS - Bi.Zone: опасная команда в истории оболочки; macOS - Обратная оболочка (/dev/tcp, pty.spawn)",
+   "enabled": true,
+   "showSubtechniques": false
+  },
+  {
+   "techniqueID": "T1070",
+   "score": 1,
+   "comment": "LNX - Затирание следов (shred, history, truncate логов)",
+   "enabled": true,
+   "showSubtechniques": true
+  },
+  {
+   "techniqueID": "T1070.003",
+   "score": 1,
+   "comment": "LNX - Затирание следов (shred, history, truncate логов)",
+   "enabled": true,
+   "showSubtechniques": false
+  },
+  {
+   "techniqueID": "T1082",
+   "score": 1,
+   "comment": "Windows - Серия разведки (5+ команд за 5 мин)",
+   "enabled": true,
+   "showSubtechniques": true
+  },
+  {
+   "techniqueID": "T1098",
+   "score": 4,
+   "comment": "LNX - Изменение /etc/passwd, shadow, group; Windows - Изменение группы «Администраторы домена»; Windows - Изменение привилегированных групп и учёток; macOS - Создание пользователя или изменение групп",
+   "enabled": true,
+   "showSubtechniques": true
+  },
+  {
+   "techniqueID": "T1098.004",
+   "score": 2,
+   "comment": "LNX - Добавление SSH-ключа в authorized_keys; macOS - Bi.Zone: неизвестный SSH-ключ в authorized_keys",
+   "enabled": true,
+   "showSubtechniques": false
+  },
+  {
+   "techniqueID": "T1105",
+   "score": 3,
+   "comment": "LNX - Подозрительные утилиты (base64, nc, socat, scp); Windows - LOLBins (certutil, mshta, bitsadmin, regsvr32); Windows - PowerShell скачивает и исполняет код",
+   "enabled": true,
+   "showSubtechniques": true
+  },
+  {
+   "techniqueID": "T1110",
+   "score": 4,
+   "comment": "LNX - Брутфорс SSH (5+ неудачных входов за 5 мин); Windows - Подбор пароля (5+ ошибок входа 4625 за 5 мин); macOS - Bi.Zone: неудачные входы по SSH; Контейнеры: Grafana — неудачный вход (подбор пароля)",
+   "enabled": true,
+   "showSubtechniques": true
+  },
+  {
+   "techniqueID": "T1110.001",
+   "score": 1,
+   "comment": "FREEIPA - Подбор пароля (10+ PREAUTH_FAILED за 5 мин)",
+   "enabled": true,
+   "showSubtechniques": false
+  },
+  {
+   "techniqueID": "T1133",
+   "score": 1,
+   "comment": "KEENETIC - Отказы WireGuard (ежедневная сводка)",
+   "enabled": true,
+   "showSubtechniques": true
+  },
+  {
+   "techniqueID": "T1136.001",
+   "score": 4,
+   "comment": "LNX - Добавление/удаление пользователя; Windows - Создание/удаление локального пользователя (net user); macOS - Bi.Zone: новый пользователь; macOS - Создание пользователя или изменение групп",
+   "enabled": true,
+   "showSubtechniques": false
+  },
+  {
+   "techniqueID": "T1140",
+   "score": 1,
+   "comment": "LNX - Подозрительные утилиты (base64, nc, socat, scp)",
+   "enabled": true,
+   "showSubtechniques": true
+  },
+  {
+   "techniqueID": "T1200",
+   "score": 5,
+   "comment": "KEENETIC - Новое устройство в сети; macOS - Подключено Apple-устройство (iPhone/iPad/iPod); macOS - Подключено мобильное устройство (не Apple); macOS - Подключён USB-накопитель; Контейнеры: netalertx — новое устройство в сети",
+   "enabled": true,
+   "showSubtechniques": true
+  },
+  {
+   "techniqueID": "T1204.002",
+   "score": 1,
+   "comment": "Windows - Офисное приложение запустило оболочку",
+   "enabled": true,
+   "showSubtechniques": false
+  },
+  {
+   "techniqueID": "T1218",
+   "score": 1,
+   "comment": "Windows - LOLBins (certutil, mshta, bitsadmin, regsvr32)",
+   "enabled": true,
+   "showSubtechniques": true
+  },
+  {
+   "techniqueID": "T1218.005",
+   "score": 1,
+   "comment": "Windows - LOLBins (certutil, mshta, bitsadmin, regsvr32)",
+   "enabled": true,
+   "showSubtechniques": false
+  },
+  {
+   "techniqueID": "T1218.010",
+   "score": 1,
+   "comment": "Windows - LOLBins (certutil, mshta, bitsadmin, regsvr32)",
+   "enabled": true,
+   "showSubtechniques": false
+  },
+  {
+   "techniqueID": "T1222.002",
+   "score": 1,
+   "comment": "LNX - Изменение прав доступа (chmod)",
+   "enabled": true,
+   "showSubtechniques": false
+  },
+  {
+   "techniqueID": "T1489",
+   "score": 1,
+   "comment": "LNX - Остановка службы (systemctl stop)",
+   "enabled": true,
+   "showSubtechniques": true
+  },
+  {
+   "techniqueID": "T1490",
+   "score": 1,
+   "comment": "Windows - Удаление теневых копий",
+   "enabled": true,
+   "showSubtechniques": true
+  },
+  {
+   "techniqueID": "T1543.001",
+   "score": 2,
+   "comment": "macOS - Bi.Zone: новый элемент автозагрузки; macOS - Новый/изменённый plist в автозагрузке",
+   "enabled": true,
+   "showSubtechniques": false
+  },
+  {
+   "techniqueID": "T1543.002",
+   "score": 1,
+   "comment": "LNX - Закрепление через systemctl enable",
+   "enabled": true,
+   "showSubtechniques": false
+  },
+  {
+   "techniqueID": "T1543.003",
+   "score": 1,
+   "comment": "Windows - Новая служба",
+   "enabled": true,
+   "showSubtechniques": false
+  },
+  {
+   "techniqueID": "T1543.004",
+   "score": 2,
+   "comment": "macOS - Bi.Zone: новый элемент автозагрузки; macOS - Новый/изменённый plist в автозагрузке",
+   "enabled": true,
+   "showSubtechniques": false
+  },
+  {
+   "techniqueID": "T1547.001",
+   "score": 1,
+   "comment": "Windows - Автозагрузка через ключ реестра Run",
+   "enabled": true,
+   "showSubtechniques": false
+  },
+  {
+   "techniqueID": "T1547.006",
+   "score": 1,
+   "comment": "macOS - Загрузка расширения ядра",
+   "enabled": true,
+   "showSubtechniques": false
+  },
+  {
+   "techniqueID": "T1548.003",
+   "score": 6,
+   "comment": "LNX - Использование sudo; LNX - Неудачная попытка sudo; macOS - Bi.Zone: новое правило в sudoers; macOS - Выполнение команды через sudo; macOS - Изменение /etc/sudoers; macOS - Неудачная попытка sudo (неверный пароль)",
+   "enabled": true,
+   "showSubtechniques": false
+  },
+  {
+   "techniqueID": "T1548.006",
+   "score": 1,
+   "comment": "macOS - Вмешательство в TCC",
+   "enabled": true,
+   "showSubtechniques": false
+  },
+  {
+   "techniqueID": "T1553.001",
+   "score": 1,
+   "comment": "macOS - Снятие карантина с приложения",
+   "enabled": true,
+   "showSubtechniques": false
+  },
+  {
+   "techniqueID": "T1555.001",
+   "score": 1,
+   "comment": "macOS - Выгрузка паролей из Keychain",
+   "enabled": true,
+   "showSubtechniques": false
+  },
+  {
+   "techniqueID": "T1556",
+   "score": 1,
+   "comment": "LNX - Изменение sshd_config",
+   "enabled": true,
+   "showSubtechniques": true
+  },
+  {
+   "techniqueID": "T1565.001",
+   "score": 1,
+   "comment": "macOS - Bi.Zone: подозрительная запись в hosts",
+   "enabled": true,
+   "showSubtechniques": false
+  },
+  {
+   "techniqueID": "T1571",
+   "score": 1,
+   "comment": "macOS - Подозрительный процесс открыл TCP-порт",
+   "enabled": true,
+   "showSubtechniques": true
+  },
+  {
+   "techniqueID": "T1620",
+   "score": 1,
+   "comment": "LNX - Исполнение из памяти (memfd_create)",
+   "enabled": true,
+   "showSubtechniques": true
+  },
+  {
+   "techniqueID": "T1649",
+   "score": 1,
+   "comment": "FREEIPA - Выпуск сертификата в CA (Dogtag)",
+   "enabled": true,
+   "showSubtechniques": true
+  },
+  {
+   "techniqueID": "T1685",
+   "score": 2,
+   "comment": "Windows - Defender обнаружил угрозу или отключён; macOS - Отключение SIP или Gatekeeper",
+   "enabled": true,
+   "showSubtechniques": true
+  },
+  {
+   "techniqueID": "T1685.004",
+   "score": 1,
+   "comment": "LNX - Отключение аудита или удаление правил auditd",
+   "enabled": true,
+   "showSubtechniques": false
+  },
+  {
+   "techniqueID": "T1685.005",
+   "score": 1,
+   "comment": "Windows - Очистка журнала событий",
+   "enabled": true,
+   "showSubtechniques": false
+  },
+  {
+   "techniqueID": "T1685.006",
+   "score": 1,
+   "comment": "LNX - Затирание следов (shred, history, truncate логов)",
+   "enabled": true,
+   "showSubtechniques": false
+  },
+  {
+   "techniqueID": "T1686",
+   "score": 1,
+   "comment": "LNX - Изменение правил firewall (iptables, nft)",
+   "enabled": true,
+   "showSubtechniques": true
+  },
+  {
+   "techniqueID": "T1686.003",
+   "score": 1,
+   "comment": "Windows - Отключение Firewall (netsh или PS)",
+   "enabled": true,
+   "showSubtechniques": false
+  }
+ ],
+ "gradient": {
+  "colors": [
+   "#d6e9ff",
+   "#2f6fd0"
+  ],
+  "minValue": 1,
+  "maxValue": 6
+ },
+ "legendItems": [],
+ "metadata": [],
+ "links": [],
+ "showTacticRowBackground": false,
+ "tacticRowBackground": "#dddddd",
+ "selectTechniquesAcrossTactics": true,
+ "selectSubtechniquesWithParent": false,
+ "selectVisibleTechniques": false
+}
