@@ -124,8 +124,12 @@ IP и не срабатывало ни разу: метрики показали
 1. Скопировать CSV на сервер Graylog и создать таблицы: команды и запуск в начале
    [`import-lookup-tables.js`](import-lookup-tables.js) (сначала `{dryRun: true}`).
 2. Загрузить правила: `python3 build_rules_json.py`, затем `import-rules.js` (см. «Как восстановить»).
-3. Подключить правила к pipeline потока с событиями Windows, стадией после разбора полей.
-   Исходные поля: `winlogbeat_winlog_event_id` и `winlogbeat_winlog_event_data_LogonType`.
+3. Создать **отдельный** pipeline `homelab: windows enrichment` (как для `trusted hosts`: запись
+   pipeline через API заменяет его целиком), стадия 0, оба правила, и подключить его к потоку
+   `WindowsLogs` рядом с `Windows Logs`. Проверено по живым событиям 4625: поля
+   `winlogbeat_winlog_event_id` и `winlogbeat_winlog_event_data_LogonType` есть сразу, значения
+   строковые (`"4625"`, `"3"`), поэтому порядок стадий не важен. Нормализованное `win_event_id`
+   (его ставит ваш pipeline) тоже содержит код, но зависит от стадий, поэтому правила берут исходное поле.
 4. Проверка: `/api/system/lookup/tables/homelab-windows-events/query?key=4625` возвращает
    «Неудачная попытка входа»; в поиске `event_name:"Неудачная попытка входа"`.
 
