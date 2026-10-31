@@ -1,0 +1,1201 @@
+{
+ "attack_version": "20.0",
+ "definitions": [
+  {
+   "title": "FREEIPA - Выпуск сертификата в CA (Dogtag)",
+   "techniques": [
+    {
+     "id": "T1649",
+     "name": "Steal or Forge Authentication Certificates",
+     "tactics": [
+      "credential-access"
+     ]
+    }
+   ],
+   "confidence": "средняя",
+   "note": "выпуск сертификата в центре сертификации"
+  },
+  {
+   "title": "FREEIPA - Подбор пароля (10+ PREAUTH_FAILED за 5 мин)",
+   "techniques": [
+    {
+     "id": "T1110.001",
+     "name": "Password Guessing",
+     "tactics": [
+      "credential-access"
+     ]
+    }
+   ],
+   "confidence": "высокая",
+   "note": ""
+  },
+  {
+   "title": "HEALTH - Клиенты не могут связаться с KDC",
+   "techniques": [],
+   "confidence": "высокая",
+   "note": "операционное событие"
+  },
+  {
+   "title": "KEENETIC - Вход в админку роутера (SSH)",
+   "techniques": [
+    {
+     "id": "T1021.004",
+     "name": "SSH",
+     "tactics": [
+      "lateral-movement"
+     ]
+    }
+   ],
+   "confidence": "средняя",
+   "note": ""
+  },
+  {
+   "title": "KEENETIC - Новое устройство в сети",
+   "techniques": [
+    {
+     "id": "T1200",
+     "name": "Hardware Additions",
+     "tactics": [
+      "initial-access"
+     ]
+    }
+   ],
+   "confidence": "средняя",
+   "note": ""
+  },
+  {
+   "title": "KEENETIC - Отказы WireGuard (ежедневная сводка)",
+   "techniques": [
+    {
+     "id": "T1133",
+     "name": "External Remote Services",
+     "tactics": [
+      "persistence",
+      "initial-access"
+     ]
+    }
+   ],
+   "confidence": "низкая",
+   "note": "отказы VPN: возможен подбор"
+  },
+  {
+   "title": "LNX - Брутфорс SSH (5+ неудачных входов за 5 мин)",
+   "techniques": [
+    {
+     "id": "T1110",
+     "name": "Brute Force",
+     "tactics": [
+      "credential-access"
+     ]
+    }
+   ],
+   "confidence": "высокая",
+   "note": ""
+  },
+  {
+   "title": "LNX - Добавление SSH-ключа в authorized_keys",
+   "techniques": [
+    {
+     "id": "T1098.004",
+     "name": "SSH Authorized Keys",
+     "tactics": [
+      "persistence",
+      "privilege-escalation"
+     ]
+    }
+   ],
+   "confidence": "высокая",
+   "note": ""
+  },
+  {
+   "title": "LNX - Добавление/удаление пользователя",
+   "techniques": [
+    {
+     "id": "T1136.001",
+     "name": "Local Account",
+     "tactics": [
+      "persistence"
+     ]
+    }
+   ],
+   "confidence": "высокая",
+   "note": "удаление — T1531"
+  },
+  {
+   "title": "LNX - Закрепление через systemctl enable",
+   "techniques": [
+    {
+     "id": "T1543.002",
+     "name": "Systemd Service",
+     "tactics": [
+      "persistence",
+      "privilege-escalation"
+     ]
+    }
+   ],
+   "confidence": "высокая",
+   "note": ""
+  },
+  {
+   "title": "LNX - Затирание следов (shred, history, truncate логов)",
+   "techniques": [
+    {
+     "id": "T1070",
+     "name": "Indicator Removal",
+     "tactics": [
+      "stealth"
+     ]
+    },
+    {
+     "id": "T1070.003",
+     "name": "Clear Command History",
+     "tactics": [
+      "stealth"
+     ]
+    },
+    {
+     "id": "T1685.006",
+     "name": "Clear Linux or Mac System Logs",
+     "tactics": [
+      "defense-impairment"
+     ]
+    }
+   ],
+   "confidence": "высокая",
+   "note": ""
+  },
+  {
+   "title": "LNX - Изменение /etc/passwd, shadow, group",
+   "techniques": [
+    {
+     "id": "T1098",
+     "name": "Account Manipulation",
+     "tactics": [
+      "persistence",
+      "privilege-escalation"
+     ]
+    }
+   ],
+   "confidence": "средняя",
+   "note": ""
+  },
+  {
+   "title": "LNX - Изменение sshd_config",
+   "techniques": [
+    {
+     "id": "T1556",
+     "name": "Modify Authentication Process",
+     "tactics": [
+      "defense-impairment",
+      "persistence",
+      "credential-access"
+     ]
+    }
+   ],
+   "confidence": "низкая",
+   "note": "изменение настроек входа"
+  },
+  {
+   "title": "LNX - Изменение прав доступа (chmod)",
+   "techniques": [
+    {
+     "id": "T1222.002",
+     "name": "Linux and Mac Permissions",
+     "tactics": [
+      "defense-impairment"
+     ]
+    }
+   ],
+   "confidence": "высокая",
+   "note": ""
+  },
+  {
+   "title": "LNX - Изменение правил firewall (iptables, nft)",
+   "techniques": [
+    {
+     "id": "T1686",
+     "name": "Disable or Modify System Firewall",
+     "tactics": [
+      "defense-impairment"
+     ]
+    }
+   ],
+   "confidence": "высокая",
+   "note": ""
+  },
+  {
+   "title": "LNX - Исполнение из памяти (memfd_create)",
+   "techniques": [
+    {
+     "id": "T1620",
+     "name": "Reflective Code Loading",
+     "tactics": [
+      "stealth"
+     ]
+    }
+   ],
+   "confidence": "средняя",
+   "note": ""
+  },
+  {
+   "title": "LNX - Использование sudo",
+   "techniques": [
+    {
+     "id": "T1548.003",
+     "name": "Sudo and Sudo Caching",
+     "tactics": [
+      "privilege-escalation"
+     ]
+    }
+   ],
+   "confidence": "средняя",
+   "note": ""
+  },
+  {
+   "title": "LNX - Неудачная попытка sudo",
+   "techniques": [
+    {
+     "id": "T1548.003",
+     "name": "Sudo and Sudo Caching",
+     "tactics": [
+      "privilege-escalation"
+     ]
+    }
+   ],
+   "confidence": "низкая",
+   "note": ""
+  },
+  {
+   "title": "LNX - Обратная оболочка (/dev/tcp)",
+   "techniques": [
+    {
+     "id": "T1059.004",
+     "name": "Unix Shell",
+     "tactics": [
+      "execution"
+     ]
+    }
+   ],
+   "confidence": "высокая",
+   "note": ""
+  },
+  {
+   "title": "LNX - Остановка службы (systemctl stop)",
+   "techniques": [
+    {
+     "id": "T1489",
+     "name": "Service Stop",
+     "tactics": [
+      "impact"
+     ]
+    }
+   ],
+   "confidence": "высокая",
+   "note": ""
+  },
+  {
+   "title": "LNX - Отказ SELinux (AVC)",
+   "techniques": [],
+   "confidence": "высокая",
+   "note": "срабатывание защиты, не техника"
+  },
+  {
+   "title": "LNX - Отключение аудита или удаление правил auditd",
+   "techniques": [
+    {
+     "id": "T1685.004",
+     "name": "Disable or Modify Linux Audit System Log",
+     "tactics": [
+      "defense-impairment"
+     ]
+    }
+   ],
+   "confidence": "высокая",
+   "note": ""
+  },
+  {
+   "title": "LNX - Подозрительные утилиты (base64, nc, socat, scp)",
+   "techniques": [
+    {
+     "id": "T1105",
+     "name": "Ingress Tool Transfer",
+     "tactics": [
+      "command-and-control"
+     ]
+    },
+    {
+     "id": "T1140",
+     "name": "Deobfuscate/Decode Files or Information",
+     "tactics": [
+      "stealth"
+     ]
+    }
+   ],
+   "confidence": "средняя",
+   "note": ""
+  },
+  {
+   "title": "LNX - Разведка (id, whoami)",
+   "techniques": [
+    {
+     "id": "T1033",
+     "name": "System Owner/User Discovery",
+     "tactics": [
+      "discovery"
+     ]
+    }
+   ],
+   "confidence": "высокая",
+   "note": ""
+  },
+  {
+   "title": "System notification events",
+   "techniques": [],
+   "confidence": "высокая",
+   "note": "служебное событие Graylog"
+  },
+  {
+   "title": "Windows - Defender обнаружил угрозу или отключён",
+   "techniques": [
+    {
+     "id": "T1685",
+     "name": "Disable or Modify Tools",
+     "tactics": [
+      "defense-impairment"
+     ]
+    }
+   ],
+   "confidence": "средняя",
+   "note": "обнаружение угрозы само по себе — не техника"
+  },
+  {
+   "title": "Windows - LOLBins (certutil, mshta, bitsadmin, regsvr32)",
+   "techniques": [
+    {
+     "id": "T1218",
+     "name": "System Binary Proxy Execution",
+     "tactics": [
+      "stealth"
+     ]
+    },
+    {
+     "id": "T1218.005",
+     "name": "Mshta",
+     "tactics": [
+      "stealth"
+     ]
+    },
+    {
+     "id": "T1218.010",
+     "name": "Regsvr32",
+     "tactics": [
+      "stealth"
+     ]
+    },
+    {
+     "id": "T1105",
+     "name": "Ingress Tool Transfer",
+     "tactics": [
+      "command-and-control"
+     ]
+    }
+   ],
+   "confidence": "высокая",
+   "note": ""
+  },
+  {
+   "title": "Windows - PowerShell с закодированной командой",
+   "techniques": [
+    {
+     "id": "T1059.001",
+     "name": "PowerShell",
+     "tactics": [
+      "execution"
+     ]
+    },
+    {
+     "id": "T1027.010",
+     "name": "Command Obfuscation",
+     "tactics": [
+      "stealth"
+     ]
+    }
+   ],
+   "confidence": "высокая",
+   "note": ""
+  },
+  {
+   "title": "Windows - PowerShell скачивает и исполняет код",
+   "techniques": [
+    {
+     "id": "T1059.001",
+     "name": "PowerShell",
+     "tactics": [
+      "execution"
+     ]
+    },
+    {
+     "id": "T1105",
+     "name": "Ingress Tool Transfer",
+     "tactics": [
+      "command-and-control"
+     ]
+    }
+   ],
+   "confidence": "высокая",
+   "note": ""
+  },
+  {
+   "title": "Windows - Автозагрузка через ключ реестра Run",
+   "techniques": [
+    {
+     "id": "T1547.001",
+     "name": "Registry Run Keys / Startup Folder",
+     "tactics": [
+      "persistence",
+      "privilege-escalation"
+     ]
+    }
+   ],
+   "confidence": "высокая",
+   "note": ""
+  },
+  {
+   "title": "Windows - Вход по RDP",
+   "techniques": [
+    {
+     "id": "T1021.001",
+     "name": "Remote Desktop Protocol",
+     "tactics": [
+      "lateral-movement"
+     ]
+    }
+   ],
+   "confidence": "высокая",
+   "note": ""
+  },
+  {
+   "title": "Windows - Доступ к памяти LSASS",
+   "techniques": [
+    {
+     "id": "T1003.001",
+     "name": "LSASS Memory",
+     "tactics": [
+      "credential-access"
+     ]
+    }
+   ],
+   "confidence": "высокая",
+   "note": ""
+  },
+  {
+   "title": "Windows - Изменение группы «Администраторы домена»",
+   "techniques": [
+    {
+     "id": "T1098",
+     "name": "Account Manipulation",
+     "tactics": [
+      "persistence",
+      "privilege-escalation"
+     ]
+    }
+   ],
+   "confidence": "средняя",
+   "note": ""
+  },
+  {
+   "title": "Windows - Изменение привилегированных групп и учёток",
+   "techniques": [
+    {
+     "id": "T1098",
+     "name": "Account Manipulation",
+     "tactics": [
+      "persistence",
+      "privilege-escalation"
+     ]
+    }
+   ],
+   "confidence": "средняя",
+   "note": ""
+  },
+  {
+   "title": "Windows - Новая служба",
+   "techniques": [
+    {
+     "id": "T1543.003",
+     "name": "Windows Service",
+     "tactics": [
+      "persistence",
+      "privilege-escalation"
+     ]
+    }
+   ],
+   "confidence": "высокая",
+   "note": ""
+  },
+  {
+   "title": "Windows - Отключение Firewall (netsh или PS)",
+   "techniques": [
+    {
+     "id": "T1686.003",
+     "name": "Windows Host Firewall",
+     "tactics": [
+      "defense-impairment"
+     ]
+    }
+   ],
+   "confidence": "высокая",
+   "note": ""
+  },
+  {
+   "title": "Windows - Офисное приложение запустило оболочку",
+   "techniques": [
+    {
+     "id": "T1204.002",
+     "name": "Malicious File",
+     "tactics": [
+      "execution"
+     ]
+    },
+    {
+     "id": "T1059",
+     "name": "Command and Scripting Interpreter",
+     "tactics": [
+      "execution"
+     ]
+    }
+   ],
+   "confidence": "средняя",
+   "note": ""
+  },
+  {
+   "title": "Windows - Очистка журнала событий",
+   "techniques": [
+    {
+     "id": "T1685.005",
+     "name": "Clear Windows Event Logs",
+     "tactics": [
+      "defense-impairment"
+     ]
+    }
+   ],
+   "confidence": "высокая",
+   "note": ""
+  },
+  {
+   "title": "Windows - Подбор пароля (5+ ошибок входа 4625 за 5 мин)",
+   "techniques": [
+    {
+     "id": "T1110",
+     "name": "Brute Force",
+     "tactics": [
+      "credential-access"
+     ]
+    }
+   ],
+   "confidence": "высокая",
+   "note": ""
+  },
+  {
+   "title": "Windows - Серия разведки (5+ команд за 5 мин)",
+   "techniques": [
+    {
+     "id": "T1082",
+     "name": "System Information Discovery",
+     "tactics": [
+      "discovery"
+     ]
+    }
+   ],
+   "confidence": "низкая",
+   "note": "общая разведка, уточнить по командам"
+  },
+  {
+   "title": "Windows - Создание задачи через schtasks",
+   "techniques": [
+    {
+     "id": "T1053.005",
+     "name": "Scheduled Task",
+     "tactics": [
+      "execution",
+      "persistence",
+      "privilege-escalation"
+     ]
+    }
+   ],
+   "confidence": "высокая",
+   "note": ""
+  },
+  {
+   "title": "Windows - Создание/удаление локального пользователя (net user)",
+   "techniques": [
+    {
+     "id": "T1136.001",
+     "name": "Local Account",
+     "tactics": [
+      "persistence"
+     ]
+    }
+   ],
+   "confidence": "высокая",
+   "note": ""
+  },
+  {
+   "title": "Windows - Удаление теневых копий",
+   "techniques": [
+    {
+     "id": "T1490",
+     "name": "Inhibit System Recovery",
+     "tactics": [
+      "impact"
+     ]
+    }
+   ],
+   "confidence": "высокая",
+   "note": ""
+  },
+  {
+   "title": "macOS - Bi.Zone: неизвестный SSH-ключ в authorized_keys",
+   "techniques": [
+    {
+     "id": "T1098.004",
+     "name": "SSH Authorized Keys",
+     "tactics": [
+      "persistence",
+      "privilege-escalation"
+     ]
+    }
+   ],
+   "confidence": "высокая",
+   "note": ""
+  },
+  {
+   "title": "macOS - Bi.Zone: неудачные входы по SSH",
+   "techniques": [
+    {
+     "id": "T1110",
+     "name": "Brute Force",
+     "tactics": [
+      "credential-access"
+     ]
+    }
+   ],
+   "confidence": "высокая",
+   "note": ""
+  },
+  {
+   "title": "macOS - Bi.Zone: новое правило в sudoers",
+   "techniques": [
+    {
+     "id": "T1548.003",
+     "name": "Sudo and Sudo Caching",
+     "tactics": [
+      "privilege-escalation"
+     ]
+    }
+   ],
+   "confidence": "средняя",
+   "note": ""
+  },
+  {
+   "title": "macOS - Bi.Zone: новый пользователь",
+   "techniques": [
+    {
+     "id": "T1136.001",
+     "name": "Local Account",
+     "tactics": [
+      "persistence"
+     ]
+    }
+   ],
+   "confidence": "высокая",
+   "note": ""
+  },
+  {
+   "title": "macOS - Bi.Zone: новый элемент автозагрузки",
+   "techniques": [
+    {
+     "id": "T1543.004",
+     "name": "Launch Daemon",
+     "tactics": [
+      "persistence",
+      "privilege-escalation"
+     ]
+    },
+    {
+     "id": "T1543.001",
+     "name": "Launch Agent",
+     "tactics": [
+      "persistence",
+      "privilege-escalation"
+     ]
+    }
+   ],
+   "confidence": "средняя",
+   "note": "LaunchDaemon / LaunchAgent"
+  },
+  {
+   "title": "macOS - Bi.Zone: опасная команда в истории оболочки",
+   "techniques": [
+    {
+     "id": "T1059.004",
+     "name": "Unix Shell",
+     "tactics": [
+      "execution"
+     ]
+    }
+   ],
+   "confidence": "низкая",
+   "note": "в запросе разные команды (csrutil, spctl, base64)"
+  },
+  {
+   "title": "macOS - Bi.Zone: подозрительная запись в hosts",
+   "techniques": [
+    {
+     "id": "T1565.001",
+     "name": "Stored Data Manipulation",
+     "tactics": [
+      "impact"
+     ]
+    }
+   ],
+   "confidence": "низкая",
+   "note": "точного соответствия нет"
+  },
+  {
+   "title": "macOS - Bi.Zone: процесс из /tmp или /Users/Shared",
+   "techniques": [
+    {
+     "id": "T1059",
+     "name": "Command and Scripting Interpreter",
+     "tactics": [
+      "execution"
+     ]
+    }
+   ],
+   "confidence": "низкая",
+   "note": "запуск из временных каталогов"
+  },
+  {
+   "title": "macOS - Bi.Zone: смена DNS-серверов",
+   "techniques": [],
+   "confidence": "низкая",
+   "note": "точного соответствия нет"
+  },
+  {
+   "title": "macOS - Активность AirDrop",
+   "techniques": [],
+   "confidence": "низкая",
+   "note": "точного соответствия нет"
+  },
+  {
+   "title": "macOS - Включение удалённого входа или Screen Sharing",
+   "techniques": [
+    {
+     "id": "T1021.004",
+     "name": "SSH",
+     "tactics": [
+      "lateral-movement"
+     ]
+    },
+    {
+     "id": "T1021.005",
+     "name": "VNC",
+     "tactics": [
+      "lateral-movement"
+     ]
+    }
+   ],
+   "confidence": "средняя",
+   "note": ""
+  },
+  {
+   "title": "macOS - Вмешательство в TCC",
+   "techniques": [
+    {
+     "id": "T1548.006",
+     "name": "TCC Manipulation",
+     "tactics": [
+      "privilege-escalation"
+     ]
+    }
+   ],
+   "confidence": "высокая",
+   "note": ""
+  },
+  {
+   "title": "macOS - Выгрузка паролей из Keychain",
+   "techniques": [
+    {
+     "id": "T1555.001",
+     "name": "Keychain",
+     "tactics": [
+      "credential-access"
+     ]
+    }
+   ],
+   "confidence": "высокая",
+   "note": ""
+  },
+  {
+   "title": "macOS - Выполнение команды через sudo",
+   "techniques": [
+    {
+     "id": "T1548.003",
+     "name": "Sudo and Sudo Caching",
+     "tactics": [
+      "privilege-escalation"
+     ]
+    }
+   ],
+   "confidence": "средняя",
+   "note": ""
+  },
+  {
+   "title": "macOS - Загрузка расширения ядра",
+   "techniques": [
+    {
+     "id": "T1547.006",
+     "name": "Kernel Modules and Extensions",
+     "tactics": [
+      "persistence",
+      "privilege-escalation"
+     ]
+    }
+   ],
+   "confidence": "высокая",
+   "note": ""
+  },
+  {
+   "title": "macOS - Запуск программы из /tmp или /Users/Shared",
+   "techniques": [
+    {
+     "id": "T1059",
+     "name": "Command and Scripting Interpreter",
+     "tactics": [
+      "execution"
+     ]
+    }
+   ],
+   "confidence": "низкая",
+   "note": "запуск из временных каталогов"
+  },
+  {
+   "title": "macOS - Изменение /etc/sudoers",
+   "techniques": [
+    {
+     "id": "T1548.003",
+     "name": "Sudo and Sudo Caching",
+     "tactics": [
+      "privilege-escalation"
+     ]
+    }
+   ],
+   "confidence": "высокая",
+   "note": ""
+  },
+  {
+   "title": "macOS - Неудачная попытка sudo (неверный пароль)",
+   "techniques": [
+    {
+     "id": "T1548.003",
+     "name": "Sudo and Sudo Caching",
+     "tactics": [
+      "privilege-escalation"
+     ]
+    }
+   ],
+   "confidence": "низкая",
+   "note": ""
+  },
+  {
+   "title": "macOS - Новый/изменённый plist в автозагрузке",
+   "techniques": [
+    {
+     "id": "T1543.004",
+     "name": "Launch Daemon",
+     "tactics": [
+      "persistence",
+      "privilege-escalation"
+     ]
+    },
+    {
+     "id": "T1543.001",
+     "name": "Launch Agent",
+     "tactics": [
+      "persistence",
+      "privilege-escalation"
+     ]
+    }
+   ],
+   "confidence": "средняя",
+   "note": ""
+  },
+  {
+   "title": "macOS - Обратная оболочка (/dev/tcp, pty.spawn)",
+   "techniques": [
+    {
+     "id": "T1059.004",
+     "name": "Unix Shell",
+     "tactics": [
+      "execution"
+     ]
+    }
+   ],
+   "confidence": "высокая",
+   "note": ""
+  },
+  {
+   "title": "macOS - Отключение SIP или Gatekeeper",
+   "techniques": [
+    {
+     "id": "T1685",
+     "name": "Disable or Modify Tools",
+     "tactics": [
+      "defense-impairment"
+     ]
+    }
+   ],
+   "confidence": "высокая",
+   "note": ""
+  },
+  {
+   "title": "macOS - Подключено Apple-устройство (iPhone/iPad/iPod)",
+   "techniques": [
+    {
+     "id": "T1200",
+     "name": "Hardware Additions",
+     "tactics": [
+      "initial-access"
+     ]
+    }
+   ],
+   "confidence": "низкая",
+   "note": "подключение устройства"
+  },
+  {
+   "title": "macOS - Подключено мобильное устройство (не Apple)",
+   "techniques": [
+    {
+     "id": "T1200",
+     "name": "Hardware Additions",
+     "tactics": [
+      "initial-access"
+     ]
+    }
+   ],
+   "confidence": "низкая",
+   "note": "подключение устройства"
+  },
+  {
+   "title": "macOS - Подключён USB-накопитель",
+   "techniques": [
+    {
+     "id": "T1200",
+     "name": "Hardware Additions",
+     "tactics": [
+      "initial-access"
+     ]
+    },
+    {
+     "id": "T1052.001",
+     "name": "Exfiltration over USB",
+     "tactics": [
+      "exfiltration"
+     ]
+    }
+   ],
+   "confidence": "низкая",
+   "note": "подключение или вынос данных"
+  },
+  {
+   "title": "macOS - Подозрительный процесс открыл TCP-порт",
+   "techniques": [
+    {
+     "id": "T1571",
+     "name": "Non-Standard Port",
+     "tactics": [
+      "command-and-control"
+     ]
+    }
+   ],
+   "confidence": "низкая",
+   "note": ""
+  },
+  {
+   "title": "macOS - Снятие карантина с приложения",
+   "techniques": [
+    {
+     "id": "T1553.001",
+     "name": "Gatekeeper Bypass",
+     "tactics": [
+      "defense-impairment"
+     ]
+    }
+   ],
+   "confidence": "высокая",
+   "note": ""
+  },
+  {
+   "title": "macOS - Создание пользователя или изменение групп",
+   "techniques": [
+    {
+     "id": "T1136.001",
+     "name": "Local Account",
+     "tactics": [
+      "persistence"
+     ]
+    },
+    {
+     "id": "T1098",
+     "name": "Account Manipulation",
+     "tactics": [
+      "persistence",
+      "privilege-escalation"
+     ]
+    }
+   ],
+   "confidence": "средняя",
+   "note": ""
+  },
+  {
+   "title": "macOS - Фишинговый запрос пароля через osascript",
+   "techniques": [
+    {
+     "id": "T1056.002",
+     "name": "GUI Input Capture",
+     "tactics": [
+      "collection",
+      "credential-access"
+     ]
+    }
+   ],
+   "confidence": "высокая",
+   "note": ""
+  },
+  {
+   "title": "Контейнеры: Grafana — неудачный вход (подбор пароля)",
+   "techniques": [
+    {
+     "id": "T1110",
+     "name": "Brute Force",
+     "tactics": [
+      "credential-access"
+     ]
+    }
+   ],
+   "confidence": "высокая",
+   "note": ""
+  },
+  {
+   "title": "Контейнеры: Loki — ошибки приёма",
+   "techniques": [],
+   "confidence": "высокая",
+   "note": "операционное событие"
+  },
+  {
+   "title": "Контейнеры: MongoDB — ошибки",
+   "techniques": [],
+   "confidence": "высокая",
+   "note": "операционное событие"
+  },
+  {
+   "title": "Контейнеры: netalertx — всплеск объёма логов",
+   "techniques": [],
+   "confidence": "высокая",
+   "note": "операционное событие"
+  },
+  {
+   "title": "Контейнеры: netalertx — новое устройство в сети",
+   "techniques": [
+    {
+     "id": "T1200",
+     "name": "Hardware Additions",
+     "tactics": [
+      "initial-access"
+     ]
+    }
+   ],
+   "confidence": "средняя",
+   "note": ""
+  },
+  {
+   "title": "Контейнеры: promtail не доставляет логи в Loki",
+   "techniques": [],
+   "confidence": "высокая",
+   "note": "операционное событие"
+  },
+  {
+   "title": "Контейнеры: всплеск ошибок",
+   "techniques": [],
+   "confidence": "высокая",
+   "note": "операционное событие"
+  },
+  {
+   "title": "Контейнеры: нехватка памяти или падение процесса",
+   "techniques": [],
+   "confidence": "высокая",
+   "note": "операционное событие"
+  },
+  {
+   "title": "Контейнеры: ошибки прав доступа",
+   "techniques": [],
+   "confidence": "высокая",
+   "note": "операционное событие"
+  },
+  {
+   "title": "Контейнеры: перезапуски MariaDB",
+   "techniques": [],
+   "confidence": "высокая",
+   "note": "операционное событие"
+  },
+  {
+   "title": "Контейнеры: тишина — atrium",
+   "techniques": [],
+   "confidence": "высокая",
+   "note": "здоровье сбора"
+  },
+  {
+   "title": "Контейнеры: тишина — grafana",
+   "techniques": [],
+   "confidence": "высокая",
+   "note": "здоровье сбора"
+  },
+  {
+   "title": "Контейнеры: тишина — komodo_mongo_1",
+   "techniques": [],
+   "confidence": "высокая",
+   "note": "здоровье сбора"
+  },
+  {
+   "title": "Контейнеры: тишина — loki",
+   "techniques": [],
+   "confidence": "высокая",
+   "note": "здоровье сбора"
+  },
+  {
+   "title": "Контейнеры: тишина — netalertx",
+   "techniques": [],
+   "confidence": "высокая",
+   "note": "здоровье сбора"
+  },
+  {
+   "title": "Контейнеры: тишина — wazuh.dashboard",
+   "techniques": [],
+   "confidence": "высокая",
+   "note": "здоровье сбора"
+  },
+  {
+   "title": "Контейнеры: тишина — zaslon",
+   "techniques": [],
+   "confidence": "высокая",
+   "note": "здоровье сбора"
+  },
+  {
+   "title": "Контейнеры: тишина — нет логов ни от одного контейнера",
+   "techniques": [],
+   "confidence": "высокая",
+   "note": "здоровье сбора"
+  }
+ ]
+}

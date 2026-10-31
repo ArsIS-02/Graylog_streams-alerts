@@ -121,7 +121,7 @@
 ├── decoder/                           ← декодер auditd (auditd_decoder.py, systemd-юнит)
 ├── config/                            ← server.conf (SMTP), opensearch.yml
 ├── containers/                        ← Fluent Bit: Quadlet-юнит и конфиг
-├── graylog/                           ← content pack (63 алерта + 3 email-уведомления) и 18 детектов по контейнерам, 22 дашборда (`dashboards-spec.json` + `import-dashboards.js`), правила pipeline с импортёром (`pipelines/`)
+├── graylog/                           ← content pack (63 алерта + 3 email-уведомления) и 18 детектов по контейнерам, 22 дашборда (`dashboards-spec.json` + `import-dashboards.js`), правила pipeline с импортёром (`pipelines/`), карта MITRE ATT&CK для алертов (`mitre/`)
 ├── linux/                             ← rsyslog.conf.example
 ├── windows/                           ← winlogbeat.yml.example
 └── macos/                             ← Filebeat, osquery, LaunchDaemon-ы, bztriage/
