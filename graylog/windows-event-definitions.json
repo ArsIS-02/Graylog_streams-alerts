@@ -1,0 +1,1703 @@
+[
+  {
+    "title": "Windows - Вход из неизвестной сети (4624, тип 3 или 10)",
+    "description": "Сетевой вход (тип 3) или RDP (тип 10) с адреса, которого нет в справочнике homelab-subnets (поле src_zone не заполнено). Требует pipeline «homelab: windows enrichment» и обновлённую таблицу подсетей.\nMITRE ATT&CK. Тактики: Initial Access, Lateral Movement. Техники: T1078 Valid Accounts.",
+    "priority": 3,
+    "alert": true,
+    "config": {
+      "type": "aggregation-v1",
+      "query": "win_channel:Security AND win_event_id:4624 AND winlogbeat_winlog_event_data_LogonType:(3 OR 10) AND _exists_:winlogbeat_winlog_event_data_IpAddress AND NOT winlogbeat_winlog_event_data_IpAddress:(\"-\" OR \"::1\" OR \"127.0.0.1\" OR fe80* OR fd* OR fc* OR \"::ffff:127.0.0.1\") AND NOT _exists_:src_zone",
+      "query_parameters": [],
+      "filters": [],
+      "streams": [
+        "<WINDOWS_STREAM_ID>"
+      ],
+      "stream_categories": [],
+      "group_by": [],
+      "series": [],
+      "conditions": {
+        "expression": null
+      },
+      "search_within_ms": 300000,
+      "execute_every_ms": 300000,
+      "use_cron_scheduling": false,
+      "cron_expression": null,
+      "cron_timezone": null,
+      "event_limit": 100
+    },
+    "field_spec": {
+      "host": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.source}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "event_id": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.win_event_id}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "user": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.winlogbeat_winlog_event_data_TargetUserName}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "image": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.win_image}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "command_line": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.win_command_line}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "src_ip": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.winlogbeat_winlog_event_data_IpAddress}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "logon_type": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.winlogbeat_winlog_event_data_LogonType}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "mitre_tactic": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "Initial Access",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_technique": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1078 Valid Accounts",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_techniques": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1078, T1021",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      }
+    },
+    "key_spec": [
+      "host"
+    ],
+    "notification_settings": {
+      "grace_period_ms": 300000,
+      "backlog_size": 5
+    },
+    "notifications": [
+      {
+        "notification_id": "<NOTIFICATION_ID>",
+        "notification_parameters": null
+      }
+    ],
+    "storage": [
+      {
+        "type": "persist-to-streams-v1",
+        "streams": [
+          "000000000000000000000002"
+        ]
+      }
+    ],
+    "tags": [
+      "detection",
+      "windows",
+      "high"
+    ],
+    "tactics_techniques": []
+  },
+  {
+    "title": "Windows - Именованные каналы C2 (Cobalt Strike и аналоги)",
+    "description": "Sysmon 17/18: имена каналов, характерные для Cobalt Strike (msagent_*, postex_*, status_*, MSSE-*-server). Каналы нужны для связи бекона и инъекций.\nMITRE ATT&CK. Тактики: Stealth, Privilege Escalation. Техники: T1055 Process Injection.",
+    "priority": 3,
+    "alert": true,
+    "config": {
+      "type": "aggregation-v1",
+      "query": "win_channel:\"Microsoft-Windows-Sysmon/Operational\" AND win_event_id:(17 OR 18) AND winlogbeat_winlog_event_data_PipeName:/\\\\(msagent_|postex_|status_|MSSE-).*/",
+      "query_parameters": [],
+      "filters": [],
+      "streams": [
+        "<WINDOWS_STREAM_ID>"
+      ],
+      "stream_categories": [],
+      "group_by": [],
+      "series": [],
+      "conditions": {
+        "expression": null
+      },
+      "search_within_ms": 300000,
+      "execute_every_ms": 300000,
+      "use_cron_scheduling": false,
+      "cron_expression": null,
+      "cron_timezone": null,
+      "event_limit": 100
+    },
+    "field_spec": {
+      "host": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.source}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "event_id": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.win_event_id}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "user": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.win_user}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "image": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.win_image}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "command_line": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.win_command_line}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "pipe": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.winlogbeat_winlog_event_data_PipeName}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "mitre_tactic": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "Stealth",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_technique": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1055 Process Injection",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_techniques": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1055",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      }
+    },
+    "key_spec": [
+      "host"
+    ],
+    "notification_settings": {
+      "grace_period_ms": 300000,
+      "backlog_size": 5
+    },
+    "notifications": [
+      {
+        "notification_id": "<NOTIFICATION_ID>",
+        "notification_parameters": null
+      }
+    ],
+    "storage": [
+      {
+        "type": "persist-to-streams-v1",
+        "streams": [
+          "000000000000000000000002"
+        ]
+      }
+    ],
+    "tags": [
+      "detection",
+      "windows",
+      "high"
+    ],
+    "tactics_techniques": []
+  },
+  {
+    "title": "Windows - DNS-запрос к туннелям и файлообменникам",
+    "description": "Sysmon 22: запрос к ngrok, pastebin, transfer.sh, trycloudflare, duckdns, anonfiles, serveo. Через них обходят периметр и забирают данные.\nMITRE ATT&CK. Тактики: Command and Control. Техники: T1572 Protocol Tunneling.",
+    "priority": 2,
+    "alert": true,
+    "config": {
+      "type": "aggregation-v1",
+      "query": "win_channel:\"Microsoft-Windows-Sysmon/Operational\" AND win_event_id:22 AND winlogbeat_winlog_event_data_QueryName:/.*(ngrok|pastebin|transfer\\.sh|trycloudflare|duckdns|anonfiles|serveo).*/",
+      "query_parameters": [],
+      "filters": [],
+      "streams": [
+        "<WINDOWS_STREAM_ID>"
+      ],
+      "stream_categories": [],
+      "group_by": [],
+      "series": [],
+      "conditions": {
+        "expression": null
+      },
+      "search_within_ms": 300000,
+      "execute_every_ms": 300000,
+      "use_cron_scheduling": false,
+      "cron_expression": null,
+      "cron_timezone": null,
+      "event_limit": 100
+    },
+    "field_spec": {
+      "host": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.source}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "event_id": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.win_event_id}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "user": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.win_user}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "image": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.win_image}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "command_line": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.win_command_line}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "query": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.winlogbeat_winlog_event_data_QueryName}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "mitre_tactic": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "Command and Control",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_technique": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1572 Protocol Tunneling",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_techniques": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1572, T1102",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      }
+    },
+    "key_spec": [
+      "host"
+    ],
+    "notification_settings": {
+      "grace_period_ms": 300000,
+      "backlog_size": 5
+    },
+    "notifications": [
+      {
+        "notification_id": "<NOTIFICATION_ID>",
+        "notification_parameters": null
+      }
+    ],
+    "storage": [
+      {
+        "type": "persist-to-streams-v1",
+        "streams": [
+          "000000000000000000000002"
+        ]
+      }
+    ],
+    "tags": [
+      "detection",
+      "windows",
+      "medium"
+    ],
+    "tactics_techniques": []
+  },
+  {
+    "title": "Windows - wscript, cscript, mshta или regsvr32 ходит во внешнюю сеть",
+    "description": "Sysmon 3: исходящее соединение на внешний IP от wscript, cscript, mshta или regsvr32. Эти программы почти не ходят в сеть сами, поэтому соединение похоже на загрузчик или канал управления. powershell и rundll32 исключены: их легитимный сетевой трафик (GitHub, Cloudflare, Azure) даёт много шума.\nMITRE ATT&CK. Тактики: Stealth, Command and Control. Техники: T1218 System Binary Proxy Execution.",
+    "priority": 3,
+    "alert": true,
+    "config": {
+      "type": "aggregation-v1",
+      "query": "win_channel:\"Microsoft-Windows-Sysmon/Operational\" AND win_event_id:3 AND win_image:/.*\\\\(wscript|cscript|mshta|regsvr32)\\.exe/ AND winlogbeat_winlog_event_data_Initiated:true AND _exists_:winlogbeat_winlog_event_data_DestinationIp AND NOT winlogbeat_winlog_event_data_DestinationIp:(10.* OR 192.168.* OR 127.* OR 169.254.* OR fe80* OR \"::1\" OR fc* OR fd* OR /172\\.(1[6-9]|2[0-9]|3[01])\\..*/)",
+      "query_parameters": [],
+      "filters": [],
+      "streams": [
+        "<WINDOWS_STREAM_ID>"
+      ],
+      "stream_categories": [],
+      "group_by": [],
+      "series": [],
+      "conditions": {
+        "expression": null
+      },
+      "search_within_ms": 300000,
+      "execute_every_ms": 300000,
+      "use_cron_scheduling": false,
+      "cron_expression": null,
+      "cron_timezone": null,
+      "event_limit": 100
+    },
+    "field_spec": {
+      "host": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.source}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "event_id": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.win_event_id}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "user": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.win_user}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "image": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.win_image}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "command_line": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.win_command_line}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "dest_ip": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.winlogbeat_winlog_event_data_DestinationIp}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "dest_port": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.winlogbeat_winlog_event_data_DestinationPort}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "mitre_tactic": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "Stealth",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_technique": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1218 System Binary Proxy Execution",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_techniques": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1218, T1071.001",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      }
+    },
+    "key_spec": [
+      "host"
+    ],
+    "notification_settings": {
+      "grace_period_ms": 300000,
+      "backlog_size": 5
+    },
+    "notifications": [
+      {
+        "notification_id": "<NOTIFICATION_ID>",
+        "notification_parameters": null
+      }
+    ],
+    "storage": [
+      {
+        "type": "persist-to-streams-v1",
+        "streams": [
+          "000000000000000000000002"
+        ]
+      }
+    ],
+    "tags": [
+      "detection",
+      "windows",
+      "high"
+    ],
+    "tactics_techniques": []
+  },
+  {
+    "title": "Windows - Исключения или отключение защиты Defender",
+    "description": "Команда Add-/Set-MpPreference с исключениями или отключением мониторинга, либо запись в ключ Windows Defender\\Exclusions (Sysmon 13).\nMITRE ATT&CK. Тактики: Defense Impairment. Техники: T1685 Disable or Modify Tools.",
+    "priority": 3,
+    "alert": true,
+    "config": {
+      "type": "aggregation-v1",
+      "query": "(win_event_id:1 AND (message:\"Add-MpPreference\" OR message:\"Set-MpPreference\") AND message:(ExclusionPath OR ExclusionExtension OR ExclusionProcess OR DisableRealtimeMonitoring OR DisableIOAVProtection OR DisableBehaviorMonitoring)) OR (win_channel:\"Microsoft-Windows-Sysmon/Operational\" AND win_event_id:13 AND winlogbeat_winlog_event_data_TargetObject:/.*Windows Defender\\\\Exclusions.*/ AND NOT win_image:/.*\\\\(MsMpEng|MsMpEngCP)\\.exe/)",
+      "query_parameters": [],
+      "filters": [],
+      "streams": [
+        "<WINDOWS_STREAM_ID>"
+      ],
+      "stream_categories": [],
+      "group_by": [],
+      "series": [],
+      "conditions": {
+        "expression": null
+      },
+      "search_within_ms": 300000,
+      "execute_every_ms": 300000,
+      "use_cron_scheduling": false,
+      "cron_expression": null,
+      "cron_timezone": null,
+      "event_limit": 100
+    },
+    "field_spec": {
+      "host": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.source}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "event_id": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.win_event_id}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "user": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.win_user}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "image": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.win_image}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "command_line": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.win_command_line}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "mitre_tactic": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "Defense Impairment",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_technique": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1685 Disable or Modify Tools",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_techniques": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1685",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      }
+    },
+    "key_spec": [
+      "host"
+    ],
+    "notification_settings": {
+      "grace_period_ms": 300000,
+      "backlog_size": 5
+    },
+    "notifications": [
+      {
+        "notification_id": "<NOTIFICATION_ID>",
+        "notification_parameters": null
+      }
+    ],
+    "storage": [
+      {
+        "type": "persist-to-streams-v1",
+        "streams": [
+          "000000000000000000000002"
+        ]
+      }
+    ],
+    "tags": [
+      "detection",
+      "windows",
+      "high"
+    ],
+    "tactics_techniques": []
+  },
+  {
+    "title": "Windows - Закрепление через IFEO Debugger, AppInit_DLLs и Winlogon",
+    "description": "Sysmon 12/13: значения Debugger, GlobalFlag и VerifierDlls в Image File Execution Options, AppInit_DLLs, Winlogon Shell и Userinit. RunOnce и MitigationOptions не включены: их постоянно пишут Office, Edge и Defender.\nMITRE ATT&CK. Тактики: Persistence, Privilege Escalation. Техники: T1546.012 Image File Execution Options Injection.",
+    "priority": 2,
+    "alert": true,
+    "config": {
+      "type": "aggregation-v1",
+      "query": "win_channel:\"Microsoft-Windows-Sysmon/Operational\" AND win_event_id:(12 OR 13) AND winlogbeat_winlog_event_data_TargetObject:/.*(Image File Execution Options\\\\[^\\\\]+\\\\(Debugger|GlobalFlag|VerifierDlls)|\\\\AppInit_DLLs|CurrentVersion\\\\Winlogon\\\\(Userinit|Shell))/",
+      "query_parameters": [],
+      "filters": [],
+      "streams": [
+        "<WINDOWS_STREAM_ID>"
+      ],
+      "stream_categories": [],
+      "group_by": [],
+      "series": [],
+      "conditions": {
+        "expression": null
+      },
+      "search_within_ms": 300000,
+      "execute_every_ms": 300000,
+      "use_cron_scheduling": false,
+      "cron_expression": null,
+      "cron_timezone": null,
+      "event_limit": 100
+    },
+    "field_spec": {
+      "host": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.source}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "event_id": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.win_event_id}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "user": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.win_user}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "image": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.win_image}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "command_line": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.win_command_line}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "registry_key": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.winlogbeat_winlog_event_data_TargetObject}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "mitre_tactic": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "Persistence",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_technique": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1546.012 Image File Execution Options Injection",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_techniques": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1546.012, T1546.010, T1547.004",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      }
+    },
+    "key_spec": [
+      "host"
+    ],
+    "notification_settings": {
+      "grace_period_ms": 300000,
+      "backlog_size": 5
+    },
+    "notifications": [
+      {
+        "notification_id": "<NOTIFICATION_ID>",
+        "notification_parameters": null
+      }
+    ],
+    "storage": [
+      {
+        "type": "persist-to-streams-v1",
+        "streams": [
+          "000000000000000000000002"
+        ]
+      }
+    ],
+    "tags": [
+      "detection",
+      "windows",
+      "medium"
+    ],
+    "tactics_techniques": []
+  },
+  {
+    "title": "Windows - Дамп учётных данных (reg save, comsvcs, ntdsutil)",
+    "description": "Выгрузка кустов SAM/SECURITY/SYSTEM через reg save, дамп памяти через comsvcs.dll MiniDump или копирование NTDS через ntdsutil.\nMITRE ATT&CK. Тактики: Credential Access. Техники: T1003.002 Security Account Manager.",
+    "priority": 3,
+    "alert": true,
+    "config": {
+      "type": "aggregation-v1",
+      "query": "win_event_id:1 AND (message:(\"reg save hklm sam\" OR \"reg save hklm security\" OR \"reg save hklm system\" OR \"reg.exe save hklm sam\" OR \"reg.exe save hklm security\" OR \"reg.exe save hklm system\" OR \"reg save hkey_local_machine sam\" OR \"reg save hkey_local_machine security\" OR \"reg save hkey_local_machine system\") OR (message:\"comsvcs.dll\" AND message:minidump) OR (message:\"ntdsutil.exe\" AND message:(ifm OR ntds)))",
+      "query_parameters": [],
+      "filters": [],
+      "streams": [
+        "<WINDOWS_STREAM_ID>"
+      ],
+      "stream_categories": [],
+      "group_by": [],
+      "series": [],
+      "conditions": {
+        "expression": null
+      },
+      "search_within_ms": 300000,
+      "execute_every_ms": 300000,
+      "use_cron_scheduling": false,
+      "cron_expression": null,
+      "cron_timezone": null,
+      "event_limit": 100
+    },
+    "field_spec": {
+      "host": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.source}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "event_id": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.win_event_id}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "user": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.win_user}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "image": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.win_image}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "command_line": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.win_command_line}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "mitre_tactic": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "Credential Access",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_technique": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1003.002 Security Account Manager",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_techniques": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1003.002, T1003.001, T1003.003",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      }
+    },
+    "key_spec": [
+      "host"
+    ],
+    "notification_settings": {
+      "grace_period_ms": 300000,
+      "backlog_size": 5
+    },
+    "notifications": [
+      {
+        "notification_id": "<NOTIFICATION_ID>",
+        "notification_parameters": null
+      }
+    ],
+    "storage": [
+      {
+        "type": "persist-to-streams-v1",
+        "streams": [
+          "000000000000000000000002"
+        ]
+      }
+    ],
+    "tags": [
+      "detection",
+      "windows",
+      "high"
+    ],
+    "tactics_techniques": []
+  },
+  {
+    "title": "Windows - Office, wscript или mshta создал исполняемый файл",
+    "description": "Sysmon 11: Office, wscript, cscript или mshta записал exe, dll, scr, hta, js, vbs, ps1 или bat в Temp, AppData, Public, ProgramData, Downloads, PerfLogs. powershell не включён: он постоянно создаёт временные dll.\nMITRE ATT&CK. Тактики: Execution. Техники: T1204.002 Malicious File.",
+    "priority": 3,
+    "alert": true,
+    "config": {
+      "type": "aggregation-v1",
+      "query": "win_channel:\"Microsoft-Windows-Sysmon/Operational\" AND win_event_id:11 AND win_image:/.*\\\\(winword|excel|powerpnt|outlook|wscript|cscript|mshta)\\.exe/ AND win_filename:/.*\\\\(Temp|AppData|Users\\\\Public|ProgramData|Downloads|PerfLogs)\\\\.*\\.(exe|dll|scr|hta|js|jse|vbs|ps1|bat)/",
+      "query_parameters": [],
+      "filters": [],
+      "streams": [
+        "<WINDOWS_STREAM_ID>"
+      ],
+      "stream_categories": [],
+      "group_by": [],
+      "series": [],
+      "conditions": {
+        "expression": null
+      },
+      "search_within_ms": 300000,
+      "execute_every_ms": 300000,
+      "use_cron_scheduling": false,
+      "cron_expression": null,
+      "cron_timezone": null,
+      "event_limit": 100
+    },
+    "field_spec": {
+      "host": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.source}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "event_id": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.win_event_id}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "user": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.win_user}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "image": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.win_image}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "command_line": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.win_command_line}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "file": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.win_filename}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "mitre_tactic": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "Execution",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_technique": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1204.002 Malicious File",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_techniques": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1204.002, T1105",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      }
+    },
+    "key_spec": [
+      "host"
+    ],
+    "notification_settings": {
+      "grace_period_ms": 300000,
+      "backlog_size": 5
+    },
+    "notifications": [
+      {
+        "notification_id": "<NOTIFICATION_ID>",
+        "notification_parameters": null
+      }
+    ],
+    "storage": [
+      {
+        "type": "persist-to-streams-v1",
+        "streams": [
+          "000000000000000000000002"
+        ]
+      }
+    ],
+    "tags": [
+      "detection",
+      "windows",
+      "high"
+    ],
+    "tactics_techniques": []
+  },
+  {
+    "title": "Windows - Командная оболочка запущена через WMI",
+    "description": "Sysmon 1: WmiPrvSE.exe породил cmd, powershell, wscript, cscript, mshta или rundll32. Так работает удалённое выполнение через WMI (wmic /node, Impacket wmiexec).\nMITRE ATT&CK. Тактики: Execution. Техники: T1047 Windows Management Instrumentation.",
+    "priority": 3,
+    "alert": true,
+    "config": {
+      "type": "aggregation-v1",
+      "query": "win_channel:\"Microsoft-Windows-Sysmon/Operational\" AND win_event_id:1 AND winlogbeat_winlog_event_data_ParentImage:/.*\\\\[Ww]mi[Pp]rv[Ss][Ee]\\.exe/ AND win_image:/.*\\\\(cmd|powershell|pwsh|wscript|cscript|mshta|rundll32)\\.exe/",
+      "query_parameters": [],
+      "filters": [],
+      "streams": [
+        "<WINDOWS_STREAM_ID>"
+      ],
+      "stream_categories": [],
+      "group_by": [],
+      "series": [],
+      "conditions": {
+        "expression": null
+      },
+      "search_within_ms": 300000,
+      "execute_every_ms": 300000,
+      "use_cron_scheduling": false,
+      "cron_expression": null,
+      "cron_timezone": null,
+      "event_limit": 100
+    },
+    "field_spec": {
+      "host": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.source}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "event_id": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.win_event_id}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "user": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.win_user}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "image": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.win_image}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "command_line": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.win_command_line}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "mitre_tactic": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "Execution",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_technique": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1047 Windows Management Instrumentation",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_techniques": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1047",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      }
+    },
+    "key_spec": [
+      "host"
+    ],
+    "notification_settings": {
+      "grace_period_ms": 300000,
+      "backlog_size": 5
+    },
+    "notifications": [
+      {
+        "notification_id": "<NOTIFICATION_ID>",
+        "notification_parameters": null
+      }
+    ],
+    "storage": [
+      {
+        "type": "persist-to-streams-v1",
+        "streams": [
+          "000000000000000000000002"
+        ]
+      }
+    ],
+    "tags": [
+      "detection",
+      "windows",
+      "high"
+    ],
+    "tactics_techniques": []
+  },
+  {
+    "title": "Windows - Добавление в локальные администраторы (командная строка)",
+    "description": "net localgroup administrators /add или Add-LocalGroupMember. Дополняет алерт по событиям 4728/4732 для случаев, когда аудит групп отключён.\nMITRE ATT&CK. Тактики: Persistence, Privilege Escalation. Техники: T1098 Account Manipulation.",
+    "priority": 3,
+    "alert": true,
+    "config": {
+      "type": "aggregation-v1",
+      "query": "win_event_id:1 AND ((message:localgroup AND message:(administrators OR администраторы) AND message:add) OR (message:\"Add-LocalGroupMember\" AND message:(administrators OR администраторы)))",
+      "query_parameters": [],
+      "filters": [],
+      "streams": [
+        "<WINDOWS_STREAM_ID>"
+      ],
+      "stream_categories": [],
+      "group_by": [],
+      "series": [],
+      "conditions": {
+        "expression": null
+      },
+      "search_within_ms": 300000,
+      "execute_every_ms": 300000,
+      "use_cron_scheduling": false,
+      "cron_expression": null,
+      "cron_timezone": null,
+      "event_limit": 100
+    },
+    "field_spec": {
+      "host": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.source}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "event_id": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.win_event_id}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "user": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.win_user}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "image": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.win_image}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "command_line": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.win_command_line}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "mitre_tactic": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "Persistence",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_technique": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1098 Account Manipulation",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_techniques": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1098",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      }
+    },
+    "key_spec": [
+      "host"
+    ],
+    "notification_settings": {
+      "grace_period_ms": 300000,
+      "backlog_size": 5
+    },
+    "notifications": [
+      {
+        "notification_id": "<NOTIFICATION_ID>",
+        "notification_parameters": null
+      }
+    ],
+    "storage": [
+      {
+        "type": "persist-to-streams-v1",
+        "streams": [
+          "000000000000000000000002"
+        ]
+      }
+    ],
+    "tags": [
+      "detection",
+      "windows",
+      "high"
+    ],
+    "tactics_techniques": []
+  },
+  {
+    "title": "Windows - Перебор несуществующих пользователей (5+ за 10 мин)",
+    "description": "5 и более неудачных входов с одного IP за 10 минут с причиной «пользователь не существует» (SubStatus 0xc0000064): перебор имён учёток.\nMITRE ATT&CK. Тактики: Credential Access. Техники: T1110 Brute Force.",
+    "priority": 2,
+    "alert": true,
+    "config": {
+      "type": "aggregation-v1",
+      "query": "win_event_id:4625 AND winlogbeat_winlog_event_data_SubStatus:0xc0000064",
+      "query_parameters": [],
+      "filters": [],
+      "streams": [
+        "<WINDOWS_STREAM_ID>"
+      ],
+      "stream_categories": [],
+      "group_by": [
+        "winlogbeat_winlog_event_data_IpAddress"
+      ],
+      "series": [
+        {
+          "type": "count",
+          "id": "count()",
+          "field": null
+        }
+      ],
+      "conditions": {
+        "expression": {
+          "expr": ">=",
+          "left": {
+            "expr": "number-ref",
+            "ref": "count()"
+          },
+          "right": {
+            "expr": "number",
+            "value": 5
+          }
+        }
+      },
+      "search_within_ms": 600000,
+      "execute_every_ms": 300000,
+      "use_cron_scheduling": false,
+      "cron_expression": null,
+      "cron_timezone": null,
+      "event_limit": 100
+    },
+    "field_spec": {
+      "host": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.source}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "event_id": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.win_event_id}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "user": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.win_user}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "image": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.win_image}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "command_line": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.win_command_line}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "src_ip": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.winlogbeat_winlog_event_data_IpAddress}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "mitre_tactic": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "Credential Access",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_technique": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1110 Brute Force",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_techniques": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1110, T1087",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      }
+    },
+    "key_spec": [
+      "src_ip"
+    ],
+    "notification_settings": {
+      "grace_period_ms": 300000,
+      "backlog_size": 5
+    },
+    "notifications": [
+      {
+        "notification_id": "<NOTIFICATION_ID>",
+        "notification_parameters": null
+      }
+    ],
+    "storage": [
+      {
+        "type": "persist-to-streams-v1",
+        "streams": [
+          "000000000000000000000002"
+        ]
+      }
+    ],
+    "tags": [
+      "detection",
+      "windows",
+      "medium"
+    ],
+    "tactics_techniques": []
+  }
+]
