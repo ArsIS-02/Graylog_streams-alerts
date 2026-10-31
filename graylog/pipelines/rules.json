@@ -88,5 +88,15 @@
     "title": "macos: обрезать слишком длинный eventMessage",
     "description": "Значение eventMessage длиннее 32766 байт отбрасывается индексом (immense term). Обрезаем до 6000 символов — запас на UTF-8.",
     "source": "rule \"macos: обрезать слишком длинный eventMessage\"\nwhen\n  has_field(\"eventMessage\")\n  AND length(to_string($message.eventMessage)) > 6000\nthen\n  set_field(\"eventMessage\", abbreviate(to_string($message.eventMessage), 6000));\n  set_field(\"eventMessage_truncated\", true);\nend"
+  },
+  {
+    "title": "homelab: linux login src_ip",
+    "description": "auditd кладёт в addr только первый октет (192), настоящий адрес есть лишь в тексте. Достаёт IP из addr= в src_ip.",
+    "source": "rule \"homelab: linux login src_ip\"\nwhen\n  (to_string($message.audit_type) == \"USER_LOGIN\" OR to_string($message.audit_type) == \"USER_AUTH\")\n  AND regex(\"addr=([0-9a-fA-F:.]+)\", to_string($message.message)).matches == true\nthen\n  let m = regex(\"addr=([0-9a-fA-F:.]+)\", to_string($message.message));\n  set_field(\"src_ip\", to_string(m[\"0\"]));\nend"
+  },
+  {
+    "title": "homelab: linux login src_zone",
+    "description": "Добавляет src_zone (сеть адреса источника входа) по CIDR-таблице homelab-subnets. Работает после правила src_ip (следующая стадия).",
+    "source": "rule \"homelab: linux login src_zone\"\nwhen\n  has_field(\"src_ip\")\n  AND lookup_has_value(\"homelab-subnets\", to_string($message.src_ip))\nthen\n  set_field(\"src_zone\", lookup_value(\"homelab-subnets\", to_string($message.src_ip)));\nend"
   }
 ]

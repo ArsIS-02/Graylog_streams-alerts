@@ -127,3 +127,29 @@ program:sshd AND message:"Authentication failure"
 с нуля.
 
 ![Письмо с алертом для Linux](images/linux-alert-email.png)
+
+## Ещё 8 алертов по auditd
+
+Определения лежат в [graylog/linux-event-definitions.json](../graylog/linux-event-definitions.json) (в файле плейсхолдеры `<AUDITD_STREAM_ID>` и `<NOTIFICATION_ID>`, подставьте свои). Поле `audit_key` в запросах берётся из правил auditd (`kernel_modules`, `cron_persistence`, `perm_modification`, `file_deletion`). Запросы проверены на истории за 30 дней.
+
+| Алерт | Что ловит | MITRE | Приоритет |
+|---|---|---|---|
+| LNX - Запуск из /tmp, /dev/shm, /var/tmp | EXECVE из временных каталогов или интерпретатор со скриптом оттуда | T1059.004 | 3 |
+| LNX - Вход по SSH из неизвестной сети | Успешный USER_LOGIN с адреса вне таблицы `homelab-subnets` | T1078 | 3 |
+| LNX - Загрузка модуля ядра | init_module, finit_module, modprobe | T1547.006 | 2 |
+| LNX - Закрепление через cron | Запись в каталоги и файлы cron | T1053.003 | 2 |
+| LNX - Установка setuid или setgid | chmod с битами 04000 и 02000 (кроме rpm, dnf, systemd-tmpfiles) | T1548.001 | 3 |
+| LNX - Обратная оболочка (python, perl, nc, socat, mkfifo) | Типовые командные строки обратных оболочек | T1059.004 | 3 |
+| LNX - SSH-туннель (-R, -L, -D) | ssh с пробросом портов | T1572 | 2 |
+| LNX - Массовое удаление файлов (200+ за 5 мин) | Агрегация: один процесс удалил 200+ файлов | T1485 | 3 |
+
+Алерт про массовое удаление построен как агрегация (группировка по `source` и `exe`, условие `count >= 200`, окно 5 минут), остальные срабатывают на каждое событие.
+
+### Источник входа: src_ip и src_zone
+
+Декодер auditd обрезает поле `addr` у USER_LOGIN до первого октета (`192` вместо `192.168.1.3`), настоящий адрес остаётся только в тексте сообщения. Поэтому алерт про вход из неизвестной сети опирается на два правила pipeline «homelab: linux enrichment»:
+
+1. стадия 0, [правило src_ip](../graylog/pipelines/rules/lookup-linux-login-src-ip.rule): достаёт IP из `addr=` в поле `src_ip`;
+2. стадия 1, [правило src_zone](../graylog/pipelines/rules/lookup-linux-login-src-zone.rule): ищет `src_ip` в CIDR-таблице `homelab-subnets` и пишет сеть в `src_zone`.
+
+Pipeline подключается к потоку с логами auditd. Если `src_zone` пустое, адрес не входит ни в одну известную сеть, и алерт срабатывает. Подсети лаборатории описываются в `homelab-subnets.csv` (см. [главу про Lookup-таблицы](13-lookup-tables.md)).

@@ -1,0 +1,8 @@
+// description: Добавляет src_zone (сеть адреса источника входа) по CIDR-таблице homelab-subnets. Работает после правила src_ip (следующая стадия).
+rule "homelab: linux login src_zone"
+when
+  has_field("src_ip")
+  AND lookup_has_value("homelab-subnets", to_string($message.src_ip))
+then
+  set_field("src_zone", lookup_value("homelab-subnets", to_string($message.src_ip)));
+end
