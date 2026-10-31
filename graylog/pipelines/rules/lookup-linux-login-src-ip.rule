@@ -1,0 +1,9 @@
+// description: auditd кладёт в addr только первый октет (192), настоящий адрес есть лишь в тексте. Достаёт IP из addr= в src_ip.
+rule "homelab: linux login src_ip"
+when
+  (to_string($message.audit_type) == "USER_LOGIN" OR to_string($message.audit_type) == "USER_AUTH")
+  AND regex("addr=([0-9a-fA-F:.]+)", to_string($message.message)).matches == true
+then
+  let m = regex("addr=([0-9a-fA-F:.]+)", to_string($message.message));
+  set_field("src_ip", to_string(m["0"]));
+end
