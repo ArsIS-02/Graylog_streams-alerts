@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1060 580" width="1060" height="580" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif">
+<title>Как логи проходят через Graylog</title>
+<desc>Источники логов отправляют события в Graylog, где они проходят потоки, обогащение и детекты, а затем попадают в уведомления и на дашборды.</desc>
+<defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#ff6b00"/></marker></defs>
+<rect width="1060" height="580" rx="14" fill="#ffffff"/>
+<text x="20" y="34" font-size="12" fill="#6b7280" font-weight="700" text-anchor="start">ИСТОЧНИКИ</text>
+<text x="380" y="34" font-size="12" fill="#6b7280" font-weight="700" text-anchor="start">GRAYLOG</text>
+<text x="850" y="34" font-size="12" fill="#6b7280" font-weight="700" text-anchor="start">РЕЗУЛЬТАТ</text>
+<rect x="20" y="52" width="290" height="64" rx="10" fill="#f9fafb" stroke="#d1d5db"/>
+<text x="36" y="79" font-size="15" fill="#1f2937" font-weight="700" text-anchor="start">Windows</text>
+<text x="36" y="100" font-size="12" fill="#6b7280" font-weight="400" text-anchor="start">Sysmon, Security · Winlogbeat</text>
+<line x1="310" y1="84.0" x2="368" y2="84.0" stroke="#ff6b00" stroke-width="2" marker-end="url(#ar)"/>
+<rect x="20" y="130" width="290" height="64" rx="10" fill="#f9fafb" stroke="#d1d5db"/>
+<text x="36" y="157" font-size="15" fill="#1f2937" font-weight="700" text-anchor="start">Linux (RED OS)</text>
+<text x="36" y="178" font-size="12" fill="#6b7280" font-weight="400" text-anchor="start">auditd · rsyslog и декодер</text>
+<line x1="310" y1="162.0" x2="368" y2="162.0" stroke="#ff6b00" stroke-width="2" marker-end="url(#ar)"/>
+<rect x="20" y="208" width="290" height="64" rx="10" fill="#f9fafb" stroke="#d1d5db"/>
+<text x="36" y="235" font-size="15" fill="#1f2937" font-weight="700" text-anchor="start">macOS</text>
+<text x="36" y="256" font-size="12" fill="#6b7280" font-weight="400" text-anchor="start">unified log, osquery · Filebeat, Collectors</text>
+<line x1="310" y1="240.0" x2="368" y2="240.0" stroke="#ff6b00" stroke-width="2" marker-end="url(#ar)"/>
+<rect x="20" y="286" width="290" height="64" rx="10" fill="#f9fafb" stroke="#d1d5db"/>
+<text x="36" y="313" font-size="15" fill="#1f2937" font-weight="700" text-anchor="start">Keenetic</text>
+<text x="36" y="334" font-size="12" fill="#6b7280" font-weight="400" text-anchor="start">syslog роутера</text>
+<line x1="310" y1="318.0" x2="368" y2="318.0" stroke="#ff6b00" stroke-width="2" marker-end="url(#ar)"/>
+<rect x="20" y="364" width="290" height="64" rx="10" fill="#f9fafb" stroke="#d1d5db"/>
+<text x="36" y="391" font-size="15" fill="#1f2937" font-weight="700" text-anchor="start">FreeIPA</text>
+<text x="36" y="412" font-size="12" fill="#6b7280" font-weight="400" text-anchor="start">аудит и Kerberos · rsyslog</text>
+<line x1="310" y1="396.0" x2="368" y2="396.0" stroke="#ff6b00" stroke-width="2" marker-end="url(#ar)"/>
+<rect x="20" y="442" width="290" height="64" rx="10" fill="#f9fafb" stroke="#d1d5db"/>
+<text x="36" y="469" font-size="15" fill="#1f2937" font-weight="700" text-anchor="start">Контейнеры</text>
+<text x="36" y="490" font-size="12" fill="#6b7280" font-weight="400" text-anchor="start">Podman · Fluent Bit, GELF</text>
+<line x1="310" y1="474.0" x2="368" y2="474.0" stroke="#ff6b00" stroke-width="2" marker-end="url(#ar)"/>
+<rect x="372" y="52" width="420" height="500" rx="14" fill="#fff7ed" stroke="#ff6b00" stroke-width="2"/>
+<rect x="392" y="72" width="380" height="80" rx="10" fill="#ffffff" stroke="#d1d5db"/>
+<circle cx="418" cy="100" r="13" fill="#ff6b00"/>
+<text x="418" y="105" font-size="13" fill="#ffffff" font-weight="700" text-anchor="middle">1</text>
+<text x="442" y="104" font-size="15" fill="#1f2937" font-weight="700" text-anchor="start">Inputs и декодер</text>
+<text x="442" y="124" font-size="12" fill="#6b7280" font-weight="400" text-anchor="start">Beats, Syslog UDP, GELF; декодер auditd читаемо</text>
+<text x="442" y="140" font-size="12" fill="#6b7280" font-weight="400" text-anchor="start">раскрывает hex-поля</text>
+<line x1="582" y1="154" x2="582" y2="172" stroke="#ff6b00" stroke-width="2" marker-end="url(#ar)"/>
+<rect x="392" y="174" width="380" height="80" rx="10" fill="#ffffff" stroke="#d1d5db"/>
+<circle cx="418" cy="202" r="13" fill="#ff6b00"/>
+<text x="418" y="207" font-size="13" fill="#ffffff" font-weight="700" text-anchor="middle">2</text>
+<text x="442" y="206" font-size="15" fill="#1f2937" font-weight="700" text-anchor="start">Потоки</text>
+<text x="442" y="226" font-size="12" fill="#6b7280" font-weight="400" text-anchor="start">логи раскладываются по смыслу: Windows, Linux,</text>
+<text x="442" y="242" font-size="12" fill="#6b7280" font-weight="400" text-anchor="start">macOS, Keenetic, контейнеры</text>
+<line x1="582" y1="256" x2="582" y2="274" stroke="#ff6b00" stroke-width="2" marker-end="url(#ar)"/>
+<rect x="392" y="276" width="380" height="80" rx="10" fill="#ffffff" stroke="#d1d5db"/>
+<circle cx="418" cy="304" r="13" fill="#ff6b00"/>
+<text x="418" y="309" font-size="13" fill="#ffffff" font-weight="700" text-anchor="middle">3</text>
+<text x="442" y="308" font-size="15" fill="#1f2937" font-weight="700" text-anchor="start">Pipeline и Lookup Tables</text>
+<text x="442" y="328" font-size="12" fill="#6b7280" font-weight="400" text-anchor="start">добавляют понятные поля: роль хоста, сеть, тип</text>
+<text x="442" y="344" font-size="12" fill="#6b7280" font-weight="400" text-anchor="start">события</text>
+<line x1="582" y1="358" x2="582" y2="376" stroke="#ff6b00" stroke-width="2" marker-end="url(#ar)"/>
+<rect x="392" y="378" width="380" height="80" rx="10" fill="#ffffff" stroke="#d1d5db"/>
+<circle cx="418" cy="406" r="13" fill="#ff6b00"/>
+<text x="418" y="411" font-size="13" fill="#ffffff" font-weight="700" text-anchor="middle">4</text>
+<text x="442" y="410" font-size="15" fill="#1f2937" font-weight="700" text-anchor="start">Детекты (Event Definitions)</text>
+<text x="442" y="430" font-size="12" fill="#6b7280" font-weight="400" text-anchor="start">запрос, порог и корреляция, тактика и техника</text>
+<text x="442" y="446" font-size="12" fill="#6b7280" font-weight="400" text-anchor="start">MITRE ATT&amp;CK</text>
+<rect x="392" y="500" width="380" height="36" rx="8" fill="#ffffff" stroke="#d1d5db" stroke-dasharray="4 3"/>
+<text x="582" y="523" font-size="12" fill="#6b7280" font-weight="400" text-anchor="middle">хранение: OpenSearch (логи) · MongoDB (настройки)</text>
+<rect x="850" y="368.0" width="190" height="100" rx="10" fill="#f9fafb" stroke="#d1d5db"/>
+<text x="866" y="398.0" font-size="15" fill="#1f2937" font-weight="700" text-anchor="start">Уведомления</text>
+<text x="866" y="420.0" font-size="12" fill="#6b7280" font-weight="400" text-anchor="start">письмо на почту</text>
+<text x="866" y="437.0" font-size="12" fill="#6b7280" font-weight="400" text-anchor="start">со ссылкой на событие</text>
+<line x1="792" y1="418.0" x2="846" y2="418.0" stroke="#ff6b00" stroke-width="2" marker-end="url(#ar)"/>
+<rect x="850" y="164.0" width="190" height="100" rx="10" fill="#f9fafb" stroke="#d1d5db"/>
+<text x="866" y="194.0" font-size="15" fill="#1f2937" font-weight="700" text-anchor="start">Дашборды</text>
+<text x="866" y="216.0" font-size="12" fill="#6b7280" font-weight="400" text-anchor="start">Graylog и Grafana:</text>
+<text x="866" y="233.0" font-size="12" fill="#6b7280" font-weight="400" text-anchor="start">картина по детектам</text>
+<line x1="792" y1="214.0" x2="846" y2="214.0" stroke="#ff6b00" stroke-width="2" marker-end="url(#ar)"/>
+</svg>
