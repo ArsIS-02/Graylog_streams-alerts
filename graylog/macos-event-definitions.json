@@ -1,0 +1,1454 @@
+[
+  {
+    "title": "macOS - Установка или удаление профиля конфигурации",
+    "description": "Запуск profiles с install, remove, -I или -R. Профили конфигурации ставят прокси, сертификаты и VPN, отключают защиту. Штатные `profiles list` и `profiles status` не попадают.\nMITRE ATT&CK. Тактики: Defense Impairment. Техники: T1685 Disable or Modify Tools.",
+    "priority": 3,
+    "alert": true,
+    "config": {
+      "type": "aggregation-v1",
+      "query": "name:es_process_events AND columns_cmdline:/(.*[ \\/])?profiles( .*)? (install|remove|-I|-R)( .*)?/",
+      "query_parameters": [],
+      "filters": [],
+      "streams": [
+        "<MACOS_STREAM_ID>"
+      ],
+      "stream_categories": [],
+      "group_by": [],
+      "series": [],
+      "conditions": {
+        "expression": null
+      },
+      "search_within_ms": 300000,
+      "execute_every_ms": 300000,
+      "use_cron_scheduling": false,
+      "cron_expression": null,
+      "cron_timezone": null,
+      "event_limit": 100
+    },
+    "field_spec": {
+      "cmdline": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.columns_cmdline}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "host": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.source}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "path": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.columns_path}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "user": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.columns_username}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "mitre_tactic": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "Defense Impairment",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_technique": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1685 Disable or Modify Tools",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_techniques": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1685, T1553.004",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      }
+    },
+    "key_spec": [
+      "host"
+    ],
+    "notification_settings": {
+      "grace_period_ms": 300000,
+      "backlog_size": 5
+    },
+    "notifications": [
+      {
+        "notification_id": "<NOTIFICATION_ID>",
+        "notification_parameters": null
+      }
+    ],
+    "storage": [
+      {
+        "type": "persist-to-streams-v1",
+        "streams": [
+          "000000000000000000000002"
+        ]
+      }
+    ],
+    "tags": [
+      "detection",
+      "macos",
+      "high"
+    ]
+  },
+  {
+    "title": "macOS - Добавление корневого сертификата",
+    "description": "security add-trusted-cert, trust-settings-import или add-certificates: сертификат становится доверенным в системе. Так подготавливают перехват TLS.\nMITRE ATT&CK. Тактики: Stealth. Техники: T1553.004 Install Root Certificate.",
+    "priority": 2,
+    "alert": true,
+    "config": {
+      "type": "aggregation-v1",
+      "query": "name:es_process_events AND columns_cmdline:/.*(add-trusted-cert|trust-settings-import|add-certificates).*/",
+      "query_parameters": [],
+      "filters": [],
+      "streams": [
+        "<MACOS_STREAM_ID>"
+      ],
+      "stream_categories": [],
+      "group_by": [],
+      "series": [],
+      "conditions": {
+        "expression": null
+      },
+      "search_within_ms": 300000,
+      "execute_every_ms": 300000,
+      "use_cron_scheduling": false,
+      "cron_expression": null,
+      "cron_timezone": null,
+      "event_limit": 100
+    },
+    "field_spec": {
+      "cmdline": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.columns_cmdline}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "host": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.source}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "path": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.columns_path}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "user": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.columns_username}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "mitre_tactic": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "Stealth",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_technique": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1553.004 Install Root Certificate",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_techniques": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1553.004",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      }
+    },
+    "key_spec": [
+      "host"
+    ],
+    "notification_settings": {
+      "grace_period_ms": 300000,
+      "backlog_size": 5
+    },
+    "notifications": [
+      {
+        "notification_id": "<NOTIFICATION_ID>",
+        "notification_parameters": null
+      }
+    ],
+    "storage": [
+      {
+        "type": "persist-to-streams-v1",
+        "streams": [
+          "000000000000000000000002"
+        ]
+      }
+    ],
+    "tags": [
+      "detection",
+      "macos",
+      "medium"
+    ]
+  },
+  {
+    "title": "macOS - Элемент входа через sfltool или osascript",
+    "description": "Добавление Login Items командами sfltool или osascript (System Events, login item). Закрепление без plist; дополняет алерт на LaunchAgents.\nMITRE ATT&CK. Тактики: Persistence. Техники: T1547.015 Login Items.",
+    "priority": 2,
+    "alert": true,
+    "config": {
+      "type": "aggregation-v1",
+      "query": "name:es_process_events AND columns_cmdline:/.*(sfltool|osascript.*login item|System Events.*login item).*/",
+      "query_parameters": [],
+      "filters": [],
+      "streams": [
+        "<MACOS_STREAM_ID>"
+      ],
+      "stream_categories": [],
+      "group_by": [],
+      "series": [],
+      "conditions": {
+        "expression": null
+      },
+      "search_within_ms": 300000,
+      "execute_every_ms": 300000,
+      "use_cron_scheduling": false,
+      "cron_expression": null,
+      "cron_timezone": null,
+      "event_limit": 100
+    },
+    "field_spec": {
+      "cmdline": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.columns_cmdline}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "host": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.source}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "path": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.columns_path}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "user": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.columns_username}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "mitre_tactic": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "Persistence",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_technique": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1547.015 Login Items",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_techniques": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1547.015",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      }
+    },
+    "key_spec": [
+      "host"
+    ],
+    "notification_settings": {
+      "grace_period_ms": 300000,
+      "backlog_size": 5
+    },
+    "notifications": [
+      {
+        "notification_id": "<NOTIFICATION_ID>",
+        "notification_parameters": null
+      }
+    ],
+    "storage": [
+      {
+        "type": "persist-to-streams-v1",
+        "streams": [
+          "000000000000000000000002"
+        ]
+      }
+    ],
+    "tags": [
+      "detection",
+      "macos",
+      "medium"
+    ]
+  },
+  {
+    "title": "macOS - Отключение межсетевого экрана (socketfilterfw, pfctl)",
+    "description": "socketfilterfw с --set… off либо pfctl с ключами -d, -F, -f, -e. Включение режима stealth (on) не срабатывает.\nMITRE ATT&CK. Тактики: Defense Impairment. Техники: T1686 Disable or Modify System Firewall.",
+    "priority": 3,
+    "alert": true,
+    "config": {
+      "type": "aggregation-v1",
+      "query": "name:es_process_events AND (columns_cmdline:/.*socketfilterfw --set(globalstate|stealthmode|blockall|allowsigned|allowsignedapp) off.*/ OR columns_cmdline:/(.*[ \\/])?pfctl( .*)? -(d|F|f|e)( .*)?/)",
+      "query_parameters": [],
+      "filters": [],
+      "streams": [
+        "<MACOS_STREAM_ID>"
+      ],
+      "stream_categories": [],
+      "group_by": [],
+      "series": [],
+      "conditions": {
+        "expression": null
+      },
+      "search_within_ms": 300000,
+      "execute_every_ms": 300000,
+      "use_cron_scheduling": false,
+      "cron_expression": null,
+      "cron_timezone": null,
+      "event_limit": 100
+    },
+    "field_spec": {
+      "cmdline": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.columns_cmdline}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "host": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.source}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "path": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.columns_path}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "user": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.columns_username}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "mitre_tactic": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "Defense Impairment",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_technique": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1686 Disable or Modify System Firewall",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_techniques": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1686",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      }
+    },
+    "key_spec": [
+      "host"
+    ],
+    "notification_settings": {
+      "grace_period_ms": 300000,
+      "backlog_size": 5
+    },
+    "notifications": [
+      {
+        "notification_id": "<NOTIFICATION_ID>",
+        "notification_parameters": null
+      }
+    ],
+    "storage": [
+      {
+        "type": "persist-to-streams-v1",
+        "streams": [
+          "000000000000000000000002"
+        ]
+      }
+    ],
+    "tags": [
+      "detection",
+      "macos",
+      "high"
+    ]
+  },
+  {
+    "title": "macOS - Загрузка launchd-задания (load, bootstrap, submit)",
+    "description": "launchctl load, bootstrap или submit для заданий вне исключений (Apple, hostdeck, Graylog, Elastic, beszel, Homebrew, homelab, logatlas). Так запускают закреплённые задания.\nMITRE ATT&CK. Тактики: Execution. Техники: T1569.001 Launchctl.",
+    "priority": 2,
+    "alert": true,
+    "config": {
+      "type": "aggregation-v1",
+      "query": "name:es_process_events AND columns_cmdline:/.*launchctl (load|bootstrap|submit).*/ AND NOT columns_cmdline:/.*(com\\.apple\\.|hostdeck|org\\.graylog|co\\.elastic|beszel|homebrew|com\\.homelab|logatlas).*/",
+      "query_parameters": [],
+      "filters": [],
+      "streams": [
+        "<MACOS_STREAM_ID>"
+      ],
+      "stream_categories": [],
+      "group_by": [],
+      "series": [],
+      "conditions": {
+        "expression": null
+      },
+      "search_within_ms": 300000,
+      "execute_every_ms": 300000,
+      "use_cron_scheduling": false,
+      "cron_expression": null,
+      "cron_timezone": null,
+      "event_limit": 100
+    },
+    "field_spec": {
+      "cmdline": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.columns_cmdline}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "host": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.source}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "path": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.columns_path}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "user": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.columns_username}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "mitre_tactic": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "Execution",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_technique": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1569.001 Launchctl",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_techniques": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1569.001, T1543.004",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      }
+    },
+    "key_spec": [
+      "host"
+    ],
+    "notification_settings": {
+      "grace_period_ms": 300000,
+      "backlog_size": 5
+    },
+    "notifications": [
+      {
+        "notification_id": "<NOTIFICATION_ID>",
+        "notification_parameters": null
+      }
+    ],
+    "storage": [
+      {
+        "type": "persist-to-streams-v1",
+        "streams": [
+          "000000000000000000000002"
+        ]
+      }
+    ],
+    "tags": [
+      "detection",
+      "macos",
+      "medium"
+    ]
+  },
+  {
+    "title": "macOS - Скачивание и запуск (curl | sh)",
+    "description": "curl или wget с конвейером в sh, bash, zsh либо bash -c \"$(curl …)\". Типичный способ запустить загруженный скрипт без файла.\nMITRE ATT&CK. Тактики: Execution. Техники: T1059.004 Unix Shell.",
+    "priority": 3,
+    "alert": true,
+    "config": {
+      "type": "aggregation-v1",
+      "query": "name:es_process_events AND (columns_cmdline:/.*(curl|wget).*\\| *(sudo )?(ba|z|da)?sh( .*)?/ OR columns_cmdline:/.*sh -c [\\\\\"]*\\$\\((curl|wget) .*/)",
+      "query_parameters": [],
+      "filters": [],
+      "streams": [
+        "<MACOS_STREAM_ID>"
+      ],
+      "stream_categories": [],
+      "group_by": [],
+      "series": [],
+      "conditions": {
+        "expression": null
+      },
+      "search_within_ms": 300000,
+      "execute_every_ms": 300000,
+      "use_cron_scheduling": false,
+      "cron_expression": null,
+      "cron_timezone": null,
+      "event_limit": 100
+    },
+    "field_spec": {
+      "cmdline": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.columns_cmdline}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "host": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.source}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "path": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.columns_path}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "user": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.columns_username}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "mitre_tactic": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "Execution",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_technique": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1059.004 Unix Shell",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_techniques": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1059.004, T1105",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      }
+    },
+    "key_spec": [
+      "host"
+    ],
+    "notification_settings": {
+      "grace_period_ms": 300000,
+      "backlog_size": 5
+    },
+    "notifications": [
+      {
+        "notification_id": "<NOTIFICATION_ID>",
+        "notification_parameters": null
+      }
+    ],
+    "storage": [
+      {
+        "type": "persist-to-streams-v1",
+        "streams": [
+          "000000000000000000000002"
+        ]
+      }
+    ],
+    "tags": [
+      "detection",
+      "macos",
+      "high"
+    ]
+  },
+  {
+    "title": "macOS - Копирование данных браузера",
+    "description": "sqlite3, cp, cat, strings, tar, zip или python, работающие с Login Data, Cookies.binarycookies, key4.db, logins.json, Local State. Видны только команды, чтение файлов самим процессом не видно.\nMITRE ATT&CK. Тактики: Credential Access. Техники: T1555.003 Credentials from Web Browsers.",
+    "priority": 3,
+    "alert": true,
+    "config": {
+      "type": "aggregation-v1",
+      "query": "name:es_process_events AND columns_cmdline:/.*(sqlite3|cp|cat|strings|python3?|tar|zip) .*(Login Data|Cookies\\.binarycookies|key4\\.db|logins\\.json|Local State).*/",
+      "query_parameters": [],
+      "filters": [],
+      "streams": [
+        "<MACOS_STREAM_ID>"
+      ],
+      "stream_categories": [],
+      "group_by": [],
+      "series": [],
+      "conditions": {
+        "expression": null
+      },
+      "search_within_ms": 300000,
+      "execute_every_ms": 300000,
+      "use_cron_scheduling": false,
+      "cron_expression": null,
+      "cron_timezone": null,
+      "event_limit": 100
+    },
+    "field_spec": {
+      "cmdline": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.columns_cmdline}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "host": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.source}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "path": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.columns_path}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "user": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.columns_username}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "mitre_tactic": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "Credential Access",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_technique": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1555.003 Credentials from Web Browsers",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_techniques": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1555.003",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      }
+    },
+    "key_spec": [
+      "host"
+    ],
+    "notification_settings": {
+      "grace_period_ms": 300000,
+      "backlog_size": 5
+    },
+    "notifications": [
+      {
+        "notification_id": "<NOTIFICATION_ID>",
+        "notification_parameters": null
+      }
+    ],
+    "storage": [
+      {
+        "type": "persist-to-streams-v1",
+        "streams": [
+          "000000000000000000000002"
+        ]
+      }
+    ],
+    "tags": [
+      "detection",
+      "macos",
+      "high"
+    ]
+  },
+  {
+    "title": "macOS - Очистка журналов",
+    "description": "log erase, log config, rm в /var/log или diagnostics, killall syslogd, truncate логов. Так заметают следы.\nMITRE ATT&CK. Тактики: Stealth. Техники: T1070.002 Clear Linux or Mac System Logs.",
+    "priority": 3,
+    "alert": true,
+    "config": {
+      "type": "aggregation-v1",
+      "query": "name:es_process_events AND columns_cmdline:/.*(log erase|log config|rm .*(\\/var\\/log|diagnostics)|killall syslogd|truncate .*\\/var\\/log).*/",
+      "query_parameters": [],
+      "filters": [],
+      "streams": [
+        "<MACOS_STREAM_ID>"
+      ],
+      "stream_categories": [],
+      "group_by": [],
+      "series": [],
+      "conditions": {
+        "expression": null
+      },
+      "search_within_ms": 300000,
+      "execute_every_ms": 300000,
+      "use_cron_scheduling": false,
+      "cron_expression": null,
+      "cron_timezone": null,
+      "event_limit": 100
+    },
+    "field_spec": {
+      "cmdline": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.columns_cmdline}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "host": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.source}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "path": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.columns_path}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "user": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.columns_username}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "mitre_tactic": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "Stealth",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_technique": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1070.002 Clear Linux or Mac System Logs",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_techniques": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1070, T1070.002",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      }
+    },
+    "key_spec": [
+      "host"
+    ],
+    "notification_settings": {
+      "grace_period_ms": 300000,
+      "backlog_size": 5
+    },
+    "notifications": [
+      {
+        "notification_id": "<NOTIFICATION_ID>",
+        "notification_parameters": null
+      }
+    ],
+    "storage": [
+      {
+        "type": "persist-to-streams-v1",
+        "streams": [
+          "000000000000000000000002"
+        ]
+      }
+    ],
+    "tags": [
+      "detection",
+      "macos",
+      "high"
+    ]
+  },
+  {
+    "title": "macOS - Передача данных наружу (scp, rsync, nc, socat)",
+    "description": "scp или rsync на user@host с точкой в имени, а также nc, ncat, socat без -l, если адрес не из частных сетей и не в monitoring.test.\nMITRE ATT&CK. Тактики: Exfiltration. Техники: T1048 Exfiltration Over Alternative Protocol.",
+    "priority": 2,
+    "alert": true,
+    "config": {
+      "type": "aggregation-v1",
+      "query": "name:es_process_events AND ((columns_cmdline:/(.*[ \\/])?(scp|rsync)( .*)? [^ ]*@[^ ]*[.][^ ]*:.*/) OR (columns_cmdline:/(.*[ \\/])?(nc|ncat|socat)( .*)?/ AND NOT columns_cmdline:/.* -l .*/)) AND NOT columns_cmdline:/.*(--server|192\\.168\\.|10\\.|172\\.(1[6-9]|2[0-9]|3[01])\\.|localhost|127\\.0\\.0\\.1|monitoring\\.test).*/",
+      "query_parameters": [],
+      "filters": [],
+      "streams": [
+        "<MACOS_STREAM_ID>"
+      ],
+      "stream_categories": [],
+      "group_by": [],
+      "series": [],
+      "conditions": {
+        "expression": null
+      },
+      "search_within_ms": 300000,
+      "execute_every_ms": 300000,
+      "use_cron_scheduling": false,
+      "cron_expression": null,
+      "cron_timezone": null,
+      "event_limit": 100
+    },
+    "field_spec": {
+      "cmdline": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.columns_cmdline}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "host": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.source}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "path": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.columns_path}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "user": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.columns_username}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "mitre_tactic": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "Exfiltration",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_technique": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1048 Exfiltration Over Alternative Protocol",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_techniques": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1048",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      }
+    },
+    "key_spec": [
+      "host"
+    ],
+    "notification_settings": {
+      "grace_period_ms": 300000,
+      "backlog_size": 5
+    },
+    "notifications": [
+      {
+        "notification_id": "<NOTIFICATION_ID>",
+        "notification_parameters": null
+      }
+    ],
+    "storage": [
+      {
+        "type": "persist-to-streams-v1",
+        "streams": [
+          "000000000000000000000002"
+        ]
+      }
+    ],
+    "tags": [
+      "detection",
+      "macos",
+      "medium"
+    ]
+  },
+  {
+    "title": "macOS - Подмена библиотек (DYLD_INSERT_LIBRARIES)",
+    "description": "DYLD_INSERT_LIBRARIES в окружении или командной строке процесса: внедрение динамической библиотеки.\nMITRE ATT&CK. Тактики: Persistence. Техники: T1574.006 Dynamic Linker Hijacking.",
+    "priority": 3,
+    "alert": true,
+    "config": {
+      "type": "aggregation-v1",
+      "query": "name:es_process_events AND (columns_env:/.*DYLD_INSERT_LIBRARIES.*/ OR columns_cmdline:/.*DYLD_INSERT_LIBRARIES.*/)",
+      "query_parameters": [],
+      "filters": [],
+      "streams": [
+        "<MACOS_STREAM_ID>"
+      ],
+      "stream_categories": [],
+      "group_by": [],
+      "series": [],
+      "conditions": {
+        "expression": null
+      },
+      "search_within_ms": 300000,
+      "execute_every_ms": 300000,
+      "use_cron_scheduling": false,
+      "cron_expression": null,
+      "cron_timezone": null,
+      "event_limit": 100
+    },
+    "field_spec": {
+      "cmdline": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.columns_cmdline}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "host": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.source}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "path": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.columns_path}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "user": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.columns_username}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "mitre_tactic": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "Persistence",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_technique": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1574.006 Dynamic Linker Hijacking",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_techniques": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1574.006",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      }
+    },
+    "key_spec": [
+      "host"
+    ],
+    "notification_settings": {
+      "grace_period_ms": 300000,
+      "backlog_size": 5
+    },
+    "notifications": [
+      {
+        "notification_id": "<NOTIFICATION_ID>",
+        "notification_parameters": null
+      }
+    ],
+    "storage": [
+      {
+        "type": "persist-to-streams-v1",
+        "streams": [
+          "000000000000000000000002"
+        ]
+      }
+    ],
+    "tags": [
+      "detection",
+      "macos",
+      "high"
+    ]
+  },
+  {
+    "title": "macOS - Изменение базы авторизации (authorizationdb)",
+    "description": "security authorizationdb: правка прав на системные действия. Позволяет выполнять привилегированные операции без пароля.\nMITRE ATT&CK. Тактики: Privilege Escalation. Техники: T1548 Abuse Elevation Control Mechanism.",
+    "priority": 3,
+    "alert": true,
+    "config": {
+      "type": "aggregation-v1",
+      "query": "name:es_process_events AND columns_cmdline:/.*authorizationdb.*/",
+      "query_parameters": [],
+      "filters": [],
+      "streams": [
+        "<MACOS_STREAM_ID>"
+      ],
+      "stream_categories": [],
+      "group_by": [],
+      "series": [],
+      "conditions": {
+        "expression": null
+      },
+      "search_within_ms": 300000,
+      "execute_every_ms": 300000,
+      "use_cron_scheduling": false,
+      "cron_expression": null,
+      "cron_timezone": null,
+      "event_limit": 100
+    },
+    "field_spec": {
+      "cmdline": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.columns_cmdline}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "host": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.source}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "path": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.columns_path}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "user": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.columns_username}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "mitre_tactic": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "Privilege Escalation",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_technique": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1548 Abuse Elevation Control Mechanism",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_techniques": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1548",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      }
+    },
+    "key_spec": [
+      "host"
+    ],
+    "notification_settings": {
+      "grace_period_ms": 300000,
+      "backlog_size": 5
+    },
+    "notifications": [
+      {
+        "notification_id": "<NOTIFICATION_ID>",
+        "notification_parameters": null
+      }
+    ],
+    "storage": [
+      {
+        "type": "persist-to-streams-v1",
+        "streams": [
+          "000000000000000000000002"
+        ]
+      }
+    ],
+    "tags": [
+      "detection",
+      "macos",
+      "high"
+    ]
+  }
+]
