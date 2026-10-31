@@ -153,3 +153,19 @@ program:sshd AND message:"Authentication failure"
 2. стадия 1, [правило src_zone](../graylog/pipelines/rules/lookup-linux-login-src-zone.rule): ищет `src_ip` в CIDR-таблице `homelab-subnets` и пишет сеть в `src_zone`.
 
 Pipeline подключается к потоку с логами auditd. Если `src_zone` пустое, адрес не входит ни в одну известную сеть, и алерт срабатывает. Подсети лаборатории описываются в `homelab-subnets.csv` (см. [главу про Lookup-таблицы](13-lookup-tables.md)).
+
+### Ещё 6 алертов: корреляция, выгрузка данных, контейнеры
+
+Определения лежат в том же файле [linux-event-definitions.json](../graylog/linux-event-definitions.json). Запросы проверены на истории за 30 дней.
+
+| Алерт | Что ловит | Приоритет | За 30 дней |
+|---|---|---|---|
+| Подбор пароля и успешный вход по SSH | на хосте за 15 минут 6 и более событий `USER_LOGIN` sshd, среди них и неудачные, и успешные (`count >= 6` и `card(res) >= 2`) | 3 | 1 |
+| Вход по SSH ночью (00:00-06:00) | `Accepted` от sshd в ночные часы; запуск по расписанию, подгони часы под себя | 2 | 1 |
+| Архивация данных пользователем | tar, zip и аналоги (ключ `Data_Compressed`), без gzip и pigz | 1 | 6 |
+| Передача файлов наружу | scp, sftp, rsync из терминала (`tty` не `(none)`) | 2 | 18 |
+| Изменение сетевых настроек и /etc/hosts | ключ `network_modifications`, кроме NetworkManager и рантайма контейнеров | 1 | 4 |
+| Привилегированный контейнер или docker.sock | `docker` или `podman` с `--privileged` или `docker.sock` в аргументах | 3 | 0 |
+
+> ⚠️ Правило про привилегированные контейнеры за месяц не сработало ни разу, проверить формат аргументов на живом запуске `docker run --privileged` стоит самому. Алертов про PAM, `/etc/ld.so.preload`, профили оболочки (`/etc/profile.d`, `.bashrc`) и чтение ключей и конфигов (`id_rsa`, `.kube/config`) пока нет: в auditd нет правил-наблюдателей на эти пути и событий в логах тоже. Добавь в auditd `-w /etc/pam.d -p wa -k pam_config`, `-w /etc/ld.so.preload -p wa -k ld_preload`, `-w /etc/profile.d -p wa -k shell_profile`, затем правила по этим ключам заводятся так же, как остальные.
+

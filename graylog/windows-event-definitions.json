@@ -1699,5 +1699,251 @@
       "medium"
     ],
     "tactics_techniques": []
+  },
+  {
+    "title": "Windows - Подбор пароля и успешный вход с одного IP (4625 и 4624)",
+    "description": "С одного адреса за 15 минут 5 и более сетевых или RDP-входов, среди которых есть и неудачные (4625), и успешные (4624). Так выглядит подбор пароля, закончившийся успехом.\nMITRE ATT&CK. Тактики: Credential Access. Техники: T1110 Brute Force.",
+    "priority": 3,
+    "alert": true,
+    "config": {
+      "type": "aggregation-v1",
+      "query": "winlogbeat_event_code:(4624 OR 4625) AND winlogbeat_winlog_event_data_LogonType:(3 OR 10) AND _exists_:winlogbeat_winlog_event_data_IpAddress AND NOT winlogbeat_winlog_event_data_IpAddress:(\"-\" OR \"::1\" OR \"127.0.0.1\" OR \"::ffff:127.0.0.1\")",
+      "query_parameters": [],
+      "filters": [],
+      "streams": [
+        "<WINDOWS_STREAM_ID>"
+      ],
+      "stream_categories": [],
+      "group_by": [
+        "winlogbeat_winlog_event_data_IpAddress"
+      ],
+      "series": [
+        {
+          "type": "count",
+          "id": "count-",
+          "field": null
+        },
+        {
+          "type": "card",
+          "id": "card-winlogbeat_event_code",
+          "field": "winlogbeat_event_code"
+        }
+      ],
+      "conditions": {
+        "expression": {
+          "expr": "&&",
+          "left": {
+            "expr": ">=",
+            "left": {
+              "expr": "number-ref",
+              "ref": "count-"
+            },
+            "right": {
+              "expr": "number",
+              "value": 5
+            }
+          },
+          "right": {
+            "expr": ">=",
+            "left": {
+              "expr": "number-ref",
+              "ref": "card-winlogbeat_event_code"
+            },
+            "right": {
+              "expr": "number",
+              "value": 2
+            }
+          }
+        }
+      },
+      "search_within_ms": 900000,
+      "execute_every_ms": 300000,
+      "use_cron_scheduling": false,
+      "cron_expression": null,
+      "cron_timezone": null,
+      "event_limit": 100
+    },
+    "field_spec": {
+      "src_ip": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.winlogbeat_winlog_event_data_IpAddress}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "mitre_tactic": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "Credential Access",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_technique": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1110 Brute Force",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_techniques": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1110, T1078",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      }
+    },
+    "key_spec": [
+      "src_ip"
+    ],
+    "notification_settings": {
+      "grace_period_ms": 300000,
+      "backlog_size": 5
+    },
+    "notifications": [
+      {
+        "notification_id": "<NOTIFICATION_ID>",
+        "notification_parameters": null
+      }
+    ],
+    "storage": [
+      {
+        "type": "persist-to-streams-v1",
+        "streams": [
+          "000000000000000000000002"
+        ]
+      }
+    ],
+    "tags": [
+      "detection",
+      "windows",
+      "high"
+    ]
+  },
+  {
+    "title": "Windows - Вход по сети или RDP ночью (00:00-06:00)",
+    "description": "Успешный сетевой вход или вход по RDP под обычной (не машинной) учёткой ночью, с 00:00 до 06:00 по Екатеринбургу. Правило проверяется только в ночные часы.\nMITRE ATT&CK. Тактики: Initial Access. Техники: T1078 Valid Accounts.",
+    "priority": 2,
+    "alert": true,
+    "config": {
+      "type": "aggregation-v1",
+      "query": "winlogbeat_event_code:4624 AND winlogbeat_winlog_event_data_LogonType:(3 OR 10) AND NOT winlogbeat_winlog_event_data_TargetUserName:/.*[$]/ AND NOT winlogbeat_winlog_event_data_IpAddress:(\"-\" OR \"::1\" OR \"127.0.0.1\")",
+      "query_parameters": [],
+      "filters": [],
+      "streams": [
+        "<WINDOWS_STREAM_ID>"
+      ],
+      "stream_categories": [],
+      "group_by": [],
+      "series": [],
+      "conditions": {
+        "expression": null
+      },
+      "search_within_ms": 300000,
+      "execute_every_ms": 300000,
+      "use_cron_scheduling": true,
+      "cron_expression": "0 0/5 0-5 * * ?",
+      "cron_timezone": "Asia/Yekaterinburg",
+      "event_limit": 100
+    },
+    "field_spec": {
+      "host": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.source}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "event": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.message}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "mitre_tactic": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "Initial Access",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_technique": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1078 Valid Accounts",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_techniques": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1078, T1021.001",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      }
+    },
+    "key_spec": [
+      "host"
+    ],
+    "notification_settings": {
+      "grace_period_ms": 3600000,
+      "backlog_size": 5
+    },
+    "notifications": [
+      {
+        "notification_id": "<NOTIFICATION_ID>",
+        "notification_parameters": null
+      }
+    ],
+    "storage": [
+      {
+        "type": "persist-to-streams-v1",
+        "streams": [
+          "000000000000000000000002"
+        ]
+      }
+    ],
+    "tags": [
+      "detection",
+      "windows",
+      "medium"
+    ]
   }
 ]

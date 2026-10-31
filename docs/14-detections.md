@@ -1,18 +1,18 @@
 # Каталог детектов Graylog
 
-> Все правила (event definitions) лаборатории в одном месте: какой лог проверяется, по какому условию, как коррелируются события, к какой тактике и технике MITRE ATT&CK относятся. Всего **123** правил, из них **103** привязаны к технике ATT&CK v20 (82 разных техник). Остальные описывают здоровье сервисов и тишину в логах: атак они не ловят.
+> Все правила (event definitions) лаборатории в одном месте: какой лог проверяется, по какому условию, как коррелируются события, к какой тактике и технике MITRE ATT&CK относятся. Всего **135** правил, из них **111** привязаны к технике ATT&CK v20 (85 разных техник). Остальные описывают здоровье сервисов и тишину в логах: атак они не ловят.
 
 Страница собирается скриптом из выгрузки Graylog и руками не правится: [как обновить](#как-обновить-каталог). Запросы очищены: IP, MAC, отпечатки ключей и белые списки заменены на `<IP>`, `<MAC>`, `<белый список>`. Готовые определения для импорта лежат в `graylog/*-event-definitions.json`, соответствие техникам подробно описано в [graylog/mitre](../graylog/mitre/README.md).
 
 ## Содержание
 
 - [Покрытие: тактики × платформы](#покрытие-тактики--платформы)
-- [Windows](#windows) — 29
-- [Linux](#linux) — 26
+- [Windows](#windows) — 31
+- [Linux](#linux) — 32
 - [macOS (osquery и unified log)](#macos-osquery-и-unified-log) — 30
 - [macOS (BI.ZONE Triage)](#macos-bizone-triage) — 9
 - [Keenetic](#keenetic) — 8
-- [FreeIPA и здоровье сервисов](#freeipa-и-здоровье-сервисов) — 3
+- [FreeIPA и здоровье сервисов](#freeipa-и-здоровье-сервисов) — 7
 - [Контейнеры](#контейнеры) — 18
 - [Как читать таблицы](#как-читать-таблицы)
 - [Как обновить каталог](#как-обновить-каталог)
@@ -24,25 +24,25 @@
 | Тактика | Windows | Linux | macOS | Keenetic | FreeIPA | Контейнеры | Всего |
 |---|---|---|---|---|---|---|---|
 | Reconnaissance (Разведка) |  |  |  | 1 |  |  | **1** |
-| Initial Access (Первоначальный доступ) | 1 | 1 | 3 | 1 |  | 1 | **7** |
+| Initial Access (Первоначальный доступ) | 2 | 2 | 3 | 1 |  | 1 | **9** |
 | Execution (Выполнение) | 6 | 3 | 6 |  |  |  | **15** |
 | Persistence (Закрепление) | 7 | 6 | 8 | 1 |  |  | **22** |
-| Privilege Escalation (Повышение привилегий) |  | 3 | 6 |  |  |  | **9** |
+| Privilege Escalation (Повышение привилегий) |  | 4 | 6 |  |  |  | **10** |
 | Stealth (Скрытность) | 3 | 2 | 2 |  |  |  | **7** |
 | Defense Impairment (Подавление защиты) | 4 | 4 | 4 | 1 |  |  | **13** |
-| Credential Access (Доступ к учётным данным) | 4 | 1 | 3 | 3 | 2 | 1 | **14** |
+| Credential Access (Доступ к учётным данным) | 5 | 2 | 3 | 3 | 2 | 1 | **16** |
 | Discovery (Исследование среды) | 1 | 1 |  |  |  |  | **2** |
 | Lateral Movement (Перемещение) | 1 |  | 1 | 1 |  |  | **3** |
-| Collection (Сбор данных) |  |  | 1 |  |  |  | **1** |
+| Collection (Сбор данных) |  | 1 | 1 |  |  |  | **2** |
 | Command and Control (управление, C2) | 1 | 2 | 1 |  |  |  | **4** |
-| Exfiltration (Вывод данных) |  |  | 1 |  |  |  | **1** |
-| Impact (Воздействие) | 1 | 2 | 1 |  |  |  | **4** |
-| Без техники (служебные) |  | 1 | 2 |  | 1 | 16 | **20** |
-| **Всего** | **29** | **26** | **39** | **8** | **3** | **18** | **123** |
+| Exfiltration (Вывод данных) |  | 1 | 1 |  |  |  | **2** |
+| Impact (Воздействие) | 1 | 3 | 1 |  |  |  | **5** |
+| Без техники (служебные) |  | 1 | 2 |  | 5 | 16 | **24** |
+| **Всего** | **31** | **32** | **39** | **8** | **7** | **18** | **135** |
 
 ## Windows
 
-Sysmon, Security, PowerShell, Defender; поток WindowsLogs. Правил: 29. Сортировка: сначала высокий приоритет.
+Sysmon, Security, PowerShell, Defender; поток WindowsLogs. Правил: 31. Сортировка: сначала высокий приоритет.
 
 | Правило | Приоритет | Источник логов | Что проверяет | Корреляция | Тактика | Техника |
 |---|---|---|---|---|---|---|
@@ -64,11 +64,13 @@ Sysmon, Security, PowerShell, Defender; поток WindowsLogs. Правил: 29
 | Офисное приложение запустило оболочку | высокий | WindowsLogs<br>EventID 1 | Word/Excel/Outlook/PowerPoint запустили cmd, powershell, wscript, cscript или mshta. Характерно для вредоносных макросов. | каждое событие | Execution | `T1204.002` Malicious File<br>`T1059` |
 | Очистка журнала событий | высокий | WindowsLogs<br>EventID 1102, 104 | Журнал Security (1102) или System (104) очищен. Почти всегда признак заметания следов. | каждое событие | Defense Impairment | `T1685.005` Clear Windows Event Logs |
 | Подбор пароля (5+ ошибок входа 4625 за 5 мин) | высокий | WindowsLogs<br>EventID 4625 | 5 и более неудачных входов (Event ID 4625) на одном хосте за 5 минут. Возможен брутфорс, в том числе учётной записи администратора. | число событий ≥ 5 за 5 мин, группировка по source | Credential Access | `T1110` Brute Force |
+| Подбор пароля и успешный вход с одного IP (4625 и 4624) | высокий | WindowsLogs<br>EventID 4624, 4625 | С одного адреса за 15 минут 5 и более сетевых или RDP-входов, среди которых есть и неудачные (4625), и успешные (4624). Так выглядит подбор пароля, закончившийся успехом. | число событий ≥ 5 за 15 мин, группировка по IpAddress | Credential Access | `T1110` Brute Force<br>`T1078` |
 | Создание/удаление локального пользователя (net user) | высокий | WindowsLogs<br>EventID 1 | Создан или удалён локальный пользователь командой net user /add или /delete (Sysmon Event 1). | каждое событие | Persistence | `T1136.001` Local Account |
 | Удаление теневых копий | высокий | WindowsLogs<br>EventID 1 | Удаление теневых копий или отключение восстановления (vssadmin, wmic shadowcopy, bcdedit). Типичный шаг шифровальщика. | каждое событие | Impact | `T1490` Inhibit System Recovery |
 | DNS-запрос к туннелям и файлообменникам | средний | WindowsLogs<br>канал Microsoft-Windows-Sysmon/Operational, EventID 22 | Sysmon 22: запрос к ngrok, pastebin, transfer.sh, trycloudflare, duckdns, anonfiles, serveo. Через них обходят периметр и забирают данные. | каждое событие | Command and Control | `T1572` Protocol Tunneling<br>`T1102` |
 | LOLBins (certutil, mshta, bitsadmin, regsvr32) | средний | WindowsLogs<br>EventID 1 | Системные утилиты в роли загрузчика: certutil -urlcache, mshta, bitsadmin, regsvr32 /i:http (Squiblydoo). | каждое событие | Stealth | `T1218` System Binary Proxy Execution<br>`T1218.005`, `T1218.010`, `T1105` |
 | Автозагрузка через ключ реестра Run | средний | WindowsLogs<br>EventID 13 | Запись в ключ CurrentVersion\Run (Sysmon 13) не известным приложением. Классический способ закрепления. | каждое событие | Persistence | `T1547.001` Registry Run Keys / Startup Folder |
+| Вход по сети или RDP ночью (00:00-06:00) | средний | WindowsLogs<br>EventID 4624 | Успешный сетевой вход или вход по RDP под обычной (не машинной) учёткой ночью, с 00:00 до 06:00 по Екатеринбургу. Правило проверяется только в ночные часы. | каждое событие; повтор не чаще раза в 1 ч | Initial Access | `T1078` Valid Accounts<br>`T1021.001` |
 | Закрепление через IFEO Debugger, AppInit_DLLs и Winlogon | средний | WindowsLogs<br>канал Microsoft-Windows-Sysmon/Operational, EventID 12, 13 | Sysmon 12/13: значения Debugger, GlobalFlag и VerifierDlls в Image File Execution Options, AppInit_DLLs, Winlogon Shell и Userinit. RunOnce и MitigationOptions не включены: их постоянно… | каждое событие | Persistence | `T1546.012` Image File Execution Options Injection<br>`T1546.010`, `T1547.004` |
 | Новая служба | средний | WindowsLogs<br>EventID 7045, 4697 | Установлена новая служба (7045, 4697), кроме драйверов Kaspersky. Частый способ закрепления. | каждое событие | Persistence | `T1543.003` Windows Service |
 | Перебор несуществующих пользователей (5+ за 10 мин) | средний | WindowsLogs<br>EventID 4625 | 5 и более неудачных входов с одного IP за 10 минут с причиной «пользователь не существует» (SubStatus 0xc0000064): перебор имён учёток. | число событий ≥ 5 за 10 мин, группировка по IpAddress | Credential Access | `T1110` Brute Force<br>`T1087` |
@@ -186,6 +188,12 @@ win_event_id:(1102 OR 104)
 winlogbeat_event_code:4625 AND winlogbeat_event_outcome:failure
 ```
 
+**Windows - Подбор пароля и успешный вход с одного IP (4625 и 4624)**
+
+```
+winlogbeat_event_code:(4624 OR 4625) AND winlogbeat_winlog_event_data_LogonType:(3 OR 10) AND _exists_:winlogbeat_winlog_event_data_IpAddress AND NOT winlogbeat_winlog_event_data_IpAddress:("-" OR "::1" OR "127.0.0.1" OR "::ffff:127.0.0.1")
+```
+
 **Windows - Создание/удаление локального пользователя (net user)**
 
 ```
@@ -214,6 +222,12 @@ win_event_id:1 AND message:("urlcache" OR "mshta.exe" OR "bitsadmin" OR "scrobj.
 
 ```
 win_event_id:13 AND message:"CurrentVersion\\Run" AND NOT win_image:("C:\\Program Files\\Yandex\\YandexBrowser\\Application\\browser.exe" OR "C:\\Program Files\\CCleaner\\CCleaner64.exe" OR "C:\\ProgramData\\Wargaming.net\\GameCenter\\wgc.exe" OR "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe")
+```
+
+**Windows - Вход по сети или RDP ночью (00:00-06:00)**
+
+```
+winlogbeat_event_code:4624 AND winlogbeat_winlog_event_data_LogonType:(3 OR 10) AND NOT winlogbeat_winlog_event_data_TargetUserName:/.*[$]/ AND NOT winlogbeat_winlog_event_data_IpAddress:("-" OR "::1" OR "127.0.0.1")
 ```
 
 **Windows - Закрепление через IFEO Debugger, AppInit_DLLs и Winlogon**
@@ -256,7 +270,7 @@ win_event_id:1 AND message:("whoami.exe" OR "nltest.exe" OR "net.exe" OR "net1.e
 
 ## Linux
 
-auditd на RED OS; поток RedOS auditd Logs. Правил: 26. Сортировка: сначала высокий приоритет.
+auditd на RED OS; поток RedOS auditd Logs. Правил: 32. Сортировка: сначала высокий приоритет.
 
 | Правило | Приоритет | Источник логов | Что проверяет | Корреляция | Тактика | Техника |
 |---|---|---|---|---|---|---|
@@ -272,8 +286,11 @@ auditd на RED OS; поток RedOS auditd Logs. Правил: 26. Сортир
 | Обратная оболочка (/dev/tcp) | высокий | RedOS auditd Logs<br>auditd EXECVE | В командной строке использован /dev/tcp — типичный приём reverse shell в bash. | каждое событие | Execution | `T1059.004` Unix Shell |
 | Обратная оболочка (python, perl, nc, socat, mkfifo) | высокий | RedOS auditd Logs<br>auditd PROCTITLE | Командная строка с типовыми обратными оболочками: python -c с socket, perl -e с socket, nc -e, mkfifo, socat с exec:, bash -i с перенаправлением. Дополняет алерт на /dev/tcp. | каждое событие | Execution | `T1059.004` Unix Shell<br>`T1571` |
 | Отключение аудита или удаление правил auditd | высокий | RedOS auditd Logs<br>auditd CONFIG_CHANGE | Удалено правило auditd или аудит отключён (audit_enabled=0). Атакующий может ослеплять мониторинг. | каждое событие | Defense Impairment | `T1685.004` Disable or Modify Linux Audit System Log |
+| Подбор пароля и успешный вход по SSH (6+ событий за 15 мин) | высокий | RedOS auditd Logs<br>auditd USER_LOGIN | На одном хосте за 15 минут 6 и более событий входа по SSH, среди которых есть и неудачные, и успешные. Похоже на подбор пароля, закончившийся входом. | число событий ≥ 6 за 15 мин, группировка по source | Credential Access | `T1110` Brute Force<br>`T1078` |
+| Привилегированный контейнер или docker.sock | высокий | RedOS auditd Logs<br>auditd EXECVE | Запуск docker или podman с флагом --privileged или с монтированием docker.sock. Это путь к root на хосте. | каждое событие | Privilege Escalation | `T1611` Escape to Host<br>`T1610` |
 | Установка setuid или setgid | высокий | RedOS auditd Logs<br>auditd SYSCALL, ключ perm_modification | chmod, fchmod, fchmodat с битом setuid (04000) или setgid (02000). Исключены systemd-tmpfiles, rpm и dnf: их установки штатно выставляют такие права. | каждое событие | Privilege Escalation | `T1548.001` Setuid and Setgid |
 | SSH-туннель (-R, -L, -D) | средний | RedOS auditd Logs<br>auditd PROCTITLE | Запуск ssh с пробросом портов (-R, -L, -D). Так выводят внутренние сервисы наружу или строят прокси. | каждое событие | Command and Control | `T1572` Protocol Tunneling<br>`T1090` |
+| Вход по SSH ночью (00:00-06:00) | средний | RedOS auditd Logs | Успешный вход по SSH ночью (с 00:00 до 06:00 по Екатеринбургу). Правило проверяется только в ночные часы. Часы подгоните под свой распорядок. | каждое событие; повтор не чаще раза в 1 ч | Initial Access | `T1078` Valid Accounts<br>`T1021.004` |
 | Загрузка модуля ядра | средний | RedOS auditd Logs<br>auditd SYSCALL, ключ kernel_modules, kernel_modules_config | Загрузка или смена конфигурации модулей ядра (init_module, finit_module, modprobe). Вредоносные модули (руткиты) загружаются так же; штатные загрузки драйверов (udev) тоже попадают сюда,… | каждое событие | Persistence | `T1547.006` Kernel Modules and Extensions |
 | Закрепление через cron | средний | RedOS auditd Logs<br>auditd SYSCALL, ключ cron_persistence | Запись в каталоги и файлы cron (crontab, /etc/cron.*, /var/spool/cron). | каждое событие | Persistence | `T1053.003` Cron |
 | Закрепление через systemctl enable | средний | RedOS auditd Logs<br>auditd EXECVE | Служба добавлена в автозапуск командой systemctl enable. Проверьте, что это ожидаемая служба. | каждое событие | Persistence | `T1543.002` Systemd Service |
@@ -281,8 +298,11 @@ auditd на RED OS; поток RedOS auditd Logs. Правил: 26. Сортир
 | Исполнение из памяти (memfd_create) | средний | RedOS auditd Logs<br>auditd SYSCALL, ключ anon_file_create | Создан анонимный файл в памяти (memfd_create). Так работают fileless-загрузчики; легитимно — некоторые AppImage. | каждое событие | Stealth | `T1620` Reflective Code Loading |
 | Неудачная попытка sudo | средний | RedOS auditd Logs | Неудачная аутентификация sudo: неверный пароль или отказ PAM/SSSD. Возможен подбор пароля или ошибка пользователя. | число событий > 0 за 5 мин, группировка по source | Privilege Escalation | `T1548.003` Sudo and Sudo Caching |
 | Остановка службы (systemctl stop) | средний | RedOS auditd Logs<br>auditd EXECVE | Остановка системной службы через systemctl stop. Имя службы: аргумент a2 в исходных сообщениях. | число событий > 0 за 5 мин, группировка по source | Impact | `T1489` Service Stop |
+| Передача файлов наружу (scp, sftp, rsync) из терминала | средний | RedOS auditd Logs<br>auditd SYSCALL | Пользователь запустил scp, sftp или rsync в интерактивной сессии. Служебные запуски без терминала не учитываются. | каждое событие | Exfiltration | `T1048` Exfiltration Over Alternative Protocol |
 | Подозрительные утилиты (base64, nc, socat, scp) | средний | RedOS auditd Logs<br>auditd SYSCALL, ключ susp_activity | Запуск утилит, часто используемых для передачи и кодирования данных: base64, nc, socat, scp. | каждое событие | Command and Control | `T1105` Ingress Tool Transfer<br>`T1140` |
+| Архивация данных пользователем (tar, zip, 7z) | низкий | RedOS auditd Logs<br>auditd SYSCALL, ключ Data_Compressed | Пользователь запустил архиватор (tar, zip и аналоги). Частая подготовка к выгрузке данных. gzip и pigz исключены, их запускают logrotate и системные задачи. | каждое событие | Collection | `T1560.001` Archive via Utility |
 | Изменение правил firewall (iptables, nft) | низкий | RedOS auditd Logs<br>auditd SYSCALL, ключ sbin_susp | Запуск iptables/nft. Обычно Docker или firewalld, но так же отключают защиту. | каждое событие | Defense Impairment | `T1686` Disable or Modify System Firewall |
+| Изменение сетевых настроек и /etc/hosts | низкий | RedOS auditd Logs<br>auditd SYSCALL, ключ network_modifications | Правка сетевых файлов (hosts, resolv.conf и аналогов) не NetworkManager и не рантаймом контейнеров. Так подменяют DNS или перенаправляют трафик. | каждое событие | Impact | `T1565.001` Stored Data Manipulation |
 | Использование sudo | низкий | RedOS auditd Logs<br>auditd EXECVE | Выполнение команды через sudo (кроме служебного пользователя). Команда собирается из аргументов a0 a1 a2 a3 в исходных сообщениях. | число событий > 0 за 5 мин, группировка по source | Privilege Escalation | `T1548.003` Sudo and Sudo Caching |
 | Отказ SELinux (AVC) | низкий | RedOS auditd Logs<br>auditd AVC | SELinux запретил действие процессу. Может указывать на попытку обхода политики или на ошибку настройки. | каждое событие | — | — |
 | Разведка (id, whoami) | низкий | RedOS auditd Logs<br>auditd SYSCALL, ключ recon | Запуск команд разведки системы. Сами по себе безобидны, важны в связке с другими событиями. | каждое событие | Discovery | `T1033` System Owner/User Discovery |
@@ -361,6 +381,18 @@ audit_type:PROCTITLE AND proctitle:/.*(python[0-9.]* -c .*socket|perl -e .*socke
 audit_type:CONFIG_CHANGE AND (op:remove_rule OR message:"audit_enabled=0")
 ```
 
+**LNX - Подбор пароля и успешный вход по SSH (6+ событий за 15 мин)**
+
+```
+audit_type:USER_LOGIN AND exe:"/usr/libexec/openssh/sshd-session"
+```
+
+**LNX - Привилегированный контейнер или docker.sock**
+
+```
+audit_type:EXECVE AND a0:(docker OR podman) AND message:(privileged OR "docker.sock")
+```
+
 **LNX - Установка setuid или setgid**
 
 ```
@@ -371,6 +403,12 @@ audit_type:SYSCALL AND key:perm_modification AND ((syscall:(53 OR 268) AND a2:/[
 
 ```
 audit_type:PROCTITLE AND proctitle:/(.*[ \/])?ssh( .*)? -[RLD] ?[^ ]+.*/
+```
+
+**LNX - Вход по SSH ночью (00:00-06:00)**
+
+```
+message:"sshd" AND message:"Accepted"
 ```
 
 **LNX - Загрузка модуля ядра**
@@ -415,16 +453,34 @@ message:"sudo" AND (message:"authentication failure" OR message:"incorrect passw
 audit_type:EXECVE AND a0:"systemctl" AND a1:"stop"
 ```
 
+**LNX - Передача файлов наружу (scp, sftp, rsync) из терминала**
+
+```
+audit_type:SYSCALL AND exe:("/usr/bin/scp" OR "/usr/bin/sftp" OR "/usr/bin/rsync") AND NOT auid:4294967295 AND NOT tty:"(none)"
+```
+
 **LNX - Подозрительные утилиты (base64, nc, socat, scp)**
 
 ```
 key:susp_activity AND audit_type:SYSCALL AND NOT exe:("/usr/bin/netstat" OR "/usr/bin/curl" OR "/usr/bin/ssh")
 ```
 
+**LNX - Архивация данных пользователем (tar, zip, 7z)**
+
+```
+key:Data_Compressed AND audit_type:SYSCALL AND NOT exe:("/usr/bin/gzip" OR "/usr/bin/pigz") AND NOT auid:4294967295
+```
+
 **LNX - Изменение правил firewall (iptables, nft)**
 
 ```
 key:sbin_susp AND audit_type:SYSCALL
+```
+
+**LNX - Изменение сетевых настроек и /etc/hosts**
+
+```
+key:network_modifications AND audit_type:SYSCALL AND NOT exe:("/usr/sbin/NetworkManager" OR "/runc" OR "/usr/bin/runc")
 ```
 
 **LNX - Использование sudo**
@@ -811,13 +867,17 @@ kn_event_type:Wireguard_Failed
 
 ## FreeIPA и здоровье сервисов
 
-аудит FreeIPA и служебные проверки. Правил: 3. Сортировка: сначала высокий приоритет.
+аудит FreeIPA и служебные проверки. Правил: 7. Сортировка: сначала высокий приоритет.
 
 | Правило | Приоритет | Источник логов | Что проверяет | Корреляция | Тактика | Техника |
 |---|---|---|---|---|---|---|
 | Подбор пароля (10+ PREAUTH_FAILED за 5 мин) | высокий | FreeIPA Logs | Серия отказов предварительной аутентификации Kerberos на контроллере домена. Возможен подбор пароля доменной учётной записи (password spray). | число событий ≥ 10 за 5 мин, группировка по source | Credential Access | `T1110.001` Password Guessing |
 | Клиенты не могут связаться с KDC | высокий | RedOS auditd Logs | На хостах auditd/sssd сообщает «Cannot contact any KDC for realm». Признак того, что контроллер домена FreeIPA упал или недоступен по сети. | каждое событие | — | — |
 | Выпуск сертификата в CA (Dogtag) | средний | FreeIPA Logs<br>приложение freeipa_389_audit | Запрос на выпуск сертификата через CA FreeIPA (Dogtag). Выпуски должны происходить только при добавлении новых сервисов или хостов. Внезапный массовый выпуск — повод проверить. | каждое событие | Credential Access | `T1649` Steal or Forge Authentication Certificates |
+| Тишина: FreeIPA (3 часа) | средний | FreeIPA Logs | За 3 часа не пришло ни одного сообщения от FreeIPA. Сервер или доставка логов остановились. | число событий < 1 за 3 ч; повтор не чаще раза в 1 сут | — | — |
+| Тишина: Keenetic не шлёт логи (час) | средний | Syslog Logs | За последний час от роутера не пришло ни одного сообщения. Роутер или связь с Graylog отвалились. | число событий < 1 за 1 ч; повтор не чаще раза в 1 сут | — | — |
+| Тишина: auditd на redos-server (час) | средний | RedOS auditd Logs | За последний час от redos-server не пришло ни одного события auditd. Служба или доставка логов остановились. | число событий < 1 за 1 ч; повтор не чаще раза в 1 сут | — | — |
+| Тишина: macOS (сутки) | низкий | MacOS Logs | За сутки не пришло ни одного сообщения от Mac-хостов. Агент сбора остановился или все Mac выключены. | число событий < 1 за 1 сут; повтор не чаще раза в 1 сут | — | — |
 
 <details><summary>Запросы Graylog (очищенные)</summary>
 
@@ -837,6 +897,30 @@ message:"Cannot contact any KDC"
 
 ```
 application_name:freeipa_389_audit AND message:cert--005frequest
+```
+
+**HEALTH - Тишина: FreeIPA (3 часа)**
+
+```
+*
+```
+
+**HEALTH - Тишина: Keenetic не шлёт логи (час)**
+
+```
+*
+```
+
+**HEALTH - Тишина: auditd на redos-server (час)**
+
+```
+source:redos-server
+```
+
+**HEALTH - Тишина: macOS (сутки)**
+
+```
+*
 ```
 
 </details>

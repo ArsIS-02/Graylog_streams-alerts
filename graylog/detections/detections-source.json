@@ -71,6 +71,102 @@
    "techniques": null
   },
   {
+   "title": "HEALTH - Тишина: FreeIPA (3 часа)",
+   "priority": 2,
+   "streams": [
+    "FreeIPA Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Linux"
+   ],
+   "state": "ENABLED",
+   "description": "За 3 часа не пришло ни одного сообщения от FreeIPA. Сервер или доставка логов остановились.",
+   "query": "*",
+   "group_by": [],
+   "condition": {
+    "op": "<",
+    "value": 1
+   },
+   "aggregated": true,
+   "window_min": 180.0,
+   "grace_min": 1440.0,
+   "tactic": null,
+   "technique": null,
+   "techniques": null
+  },
+  {
+   "title": "HEALTH - Тишина: Keenetic не шлёт логи (час)",
+   "priority": 2,
+   "streams": [
+    "Syslog Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Linux"
+   ],
+   "state": "ENABLED",
+   "description": "За последний час от роутера не пришло ни одного сообщения. Роутер или связь с Graylog отвалились.",
+   "query": "*",
+   "group_by": [],
+   "condition": {
+    "op": "<",
+    "value": 1
+   },
+   "aggregated": true,
+   "window_min": 60.0,
+   "grace_min": 1440.0,
+   "tactic": null,
+   "technique": null,
+   "techniques": null
+  },
+  {
+   "title": "HEALTH - Тишина: auditd на redos-server (час)",
+   "priority": 2,
+   "streams": [
+    "RedOS auditd Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Linux"
+   ],
+   "state": "ENABLED",
+   "description": "За последний час от redos-server не пришло ни одного события auditd. Служба или доставка логов остановились.",
+   "query": "source:redos-server",
+   "group_by": [],
+   "condition": {
+    "op": "<",
+    "value": 1
+   },
+   "aggregated": true,
+   "window_min": 60.0,
+   "grace_min": 1440.0,
+   "tactic": null,
+   "technique": null,
+   "techniques": null
+  },
+  {
+   "title": "HEALTH - Тишина: macOS (сутки)",
+   "priority": 1,
+   "streams": [
+    "MacOS Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Linux"
+   ],
+   "state": "ENABLED",
+   "description": "За сутки не пришло ни одного сообщения от Mac-хостов. Агент сбора остановился или все Mac выключены.",
+   "query": "*",
+   "group_by": [],
+   "condition": {
+    "op": "<",
+    "value": 1
+   },
+   "aggregated": true,
+   "window_min": 1440.0,
+   "grace_min": 1440.0,
+   "tactic": null,
+   "technique": null,
+   "techniques": null
+  },
+  {
    "title": "KEENETIC - ARP-конфликт на новом адресе",
    "priority": 2,
    "streams": [
@@ -265,6 +361,27 @@
    "techniques": "T1572, T1090"
   },
   {
+   "title": "LNX - Архивация данных пользователем (tar, zip, 7z)",
+   "priority": 1,
+   "streams": [
+    "RedOS auditd Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Linux"
+   ],
+   "state": "ENABLED",
+   "description": "Пользователь запустил архиватор (tar, zip и аналоги). Частая подготовка к выгрузке данных. gzip и pigz исключены, их запускают logrotate и системные задачи.",
+   "query": "key:Data_Compressed AND audit_type:SYSCALL AND NOT exe:(\"/usr/bin/gzip\" OR \"/usr/bin/pigz\") AND NOT auid:4294967295",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 5.0,
+   "tactic": "Collection",
+   "technique": "T1560.001 Archive via Utility",
+   "techniques": "T1560.001"
+  },
+  {
    "title": "LNX - Брутфорс SSH (5+ неудачных входов за 5 мин)",
    "priority": 3,
    "streams": [
@@ -307,6 +424,27 @@
    "aggregated": false,
    "window_min": 5.0,
    "grace_min": 5.0,
+   "tactic": "Initial Access",
+   "technique": "T1078 Valid Accounts",
+   "techniques": "T1078, T1021.004"
+  },
+  {
+   "title": "LNX - Вход по SSH ночью (00:00-06:00)",
+   "priority": 2,
+   "streams": [
+    "RedOS auditd Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Linux"
+   ],
+   "state": "ENABLED",
+   "description": "Успешный вход по SSH ночью (с 00:00 до 06:00 по Екатеринбургу). Правило проверяется только в ночные часы. Часы подгоните под свой распорядок.",
+   "query": "message:\"sshd\" AND message:\"Accepted\"",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 60.0,
    "tactic": "Initial Access",
    "technique": "T1078 Valid Accounts",
    "techniques": "T1078, T1021.004"
@@ -558,6 +696,27 @@
    "techniques": "T1686"
   },
   {
+   "title": "LNX - Изменение сетевых настроек и /etc/hosts",
+   "priority": 1,
+   "streams": [
+    "RedOS auditd Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Linux"
+   ],
+   "state": "ENABLED",
+   "description": "Правка сетевых файлов (hosts, resolv.conf и аналогов) не NetworkManager и не рантаймом контейнеров. Так подменяют DNS или перенаправляют трафик.",
+   "query": "key:network_modifications AND audit_type:SYSCALL AND NOT exe:(\"/usr/sbin/NetworkManager\" OR \"/runc\" OR \"/usr/bin/runc\")",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 5.0,
+   "tactic": "Impact",
+   "technique": "T1565.001 Stored Data Manipulation",
+   "techniques": "T1565.001"
+  },
+  {
    "title": "LNX - Исполнение из памяти (memfd_create)",
    "priority": 2,
    "streams": [
@@ -768,6 +927,53 @@
    "techniques": "T1685.004"
   },
   {
+   "title": "LNX - Передача файлов наружу (scp, sftp, rsync) из терминала",
+   "priority": 2,
+   "streams": [
+    "RedOS auditd Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Linux"
+   ],
+   "state": "ENABLED",
+   "description": "Пользователь запустил scp, sftp или rsync в интерактивной сессии. Служебные запуски без терминала не учитываются.",
+   "query": "audit_type:SYSCALL AND exe:(\"/usr/bin/scp\" OR \"/usr/bin/sftp\" OR \"/usr/bin/rsync\") AND NOT auid:4294967295 AND NOT tty:\"(none)\"",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 5.0,
+   "tactic": "Exfiltration",
+   "technique": "T1048 Exfiltration Over Alternative Protocol",
+   "techniques": "T1048"
+  },
+  {
+   "title": "LNX - Подбор пароля и успешный вход по SSH (6+ событий за 15 мин)",
+   "priority": 3,
+   "streams": [
+    "RedOS auditd Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Linux"
+   ],
+   "state": "ENABLED",
+   "description": "На одном хосте за 15 минут 6 и более событий входа по SSH, среди которых есть и неудачные, и успешные. Похоже на подбор пароля, закончившийся входом.",
+   "query": "audit_type:USER_LOGIN AND exe:\"/usr/libexec/openssh/sshd-session\"",
+   "group_by": [
+    "source"
+   ],
+   "condition": {
+    "op": ">=",
+    "value": 6
+   },
+   "aggregated": true,
+   "window_min": 15.0,
+   "grace_min": 5.0,
+   "tactic": "Credential Access",
+   "technique": "T1110 Brute Force",
+   "techniques": "T1110, T1078"
+  },
+  {
    "title": "LNX - Подозрительные утилиты (base64, nc, socat, scp)",
    "priority": 2,
    "streams": [
@@ -787,6 +993,27 @@
    "tactic": "Command and Control",
    "technique": "T1105 Ingress Tool Transfer",
    "techniques": "T1105, T1140"
+  },
+  {
+   "title": "LNX - Привилегированный контейнер или docker.sock",
+   "priority": 3,
+   "streams": [
+    "RedOS auditd Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Linux"
+   ],
+   "state": "ENABLED",
+   "description": "Запуск docker или podman с флагом --privileged или с монтированием docker.sock. Это путь к root на хосте.",
+   "query": "audit_type:EXECVE AND a0:(docker OR podman) AND message:(privileged OR \"docker.sock\")",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 5.0,
+   "tactic": "Privilege Escalation",
+   "technique": "T1611 Escape to Host",
+   "techniques": "T1611, T1610"
   },
   {
    "title": "LNX - Разведка (id, whoami)",
@@ -1039,6 +1266,27 @@
    "tactic": "Lateral Movement",
    "technique": "T1021.001 Remote Desktop Protocol",
    "techniques": "T1021.001"
+  },
+  {
+   "title": "Windows - Вход по сети или RDP ночью (00:00-06:00)",
+   "priority": 2,
+   "streams": [
+    "WindowsLogs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Windows"
+   ],
+   "state": "ENABLED",
+   "description": "Успешный сетевой вход или вход по RDP под обычной (не машинной) учёткой ночью, с 00:00 до 06:00 по Екатеринбургу. Правило проверяется только в ночные часы.",
+   "query": "winlogbeat_event_code:4624 AND winlogbeat_winlog_event_data_LogonType:(3 OR 10) AND NOT winlogbeat_winlog_event_data_TargetUserName:/.*[$]/ AND NOT winlogbeat_winlog_event_data_IpAddress:(\"-\" OR \"::1\" OR \"127.0.0.1\")",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 60.0,
+   "tactic": "Initial Access",
+   "technique": "T1078 Valid Accounts",
+   "techniques": "T1078, T1021.001"
   },
   {
    "title": "Windows - Дамп учётных данных (reg save, comsvcs, ntdsutil)",
@@ -1364,6 +1612,32 @@
    "tactic": "Credential Access",
    "technique": "T1110 Brute Force",
    "techniques": "T1110"
+  },
+  {
+   "title": "Windows - Подбор пароля и успешный вход с одного IP (4625 и 4624)",
+   "priority": 3,
+   "streams": [
+    "WindowsLogs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Windows"
+   ],
+   "state": "ENABLED",
+   "description": "С одного адреса за 15 минут 5 и более сетевых или RDP-входов, среди которых есть и неудачные (4625), и успешные (4624). Так выглядит подбор пароля, закончившийся успехом.",
+   "query": "winlogbeat_event_code:(4624 OR 4625) AND winlogbeat_winlog_event_data_LogonType:(3 OR 10) AND _exists_:winlogbeat_winlog_event_data_IpAddress AND NOT winlogbeat_winlog_event_data_IpAddress:(\"-\" OR \"::1\" OR \"127.0.0.1\" OR \"::ffff:127.0.0.1\")",
+   "group_by": [
+    "winlogbeat_winlog_event_data_IpAddress"
+   ],
+   "condition": {
+    "op": ">=",
+    "value": 5
+   },
+   "aggregated": true,
+   "window_min": 15.0,
+   "grace_min": 5.0,
+   "tactic": "Credential Access",
+   "technique": "T1110 Brute Force",
+   "techniques": "T1110, T1078"
   },
   {
    "title": "Windows - Серия разведки (5+ команд за 5 мин)",
