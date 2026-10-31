@@ -119,6 +119,54 @@
    "techniques": null
   },
   {
+   "title": "HEALTH - Тишина: MacBook-Pro не шлёт логи (3 часа)",
+   "priority": 1,
+   "streams": [
+    "MacOS Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Linux"
+   ],
+   "state": "ENABLED",
+   "description": "За 3 часа от MacBook-Pro не пришло ни одного сообщения. Ноутбук мог уснуть или выключиться, поэтому приоритет низкий.",
+   "query": "source:macbook-pro",
+   "group_by": [],
+   "condition": {
+    "op": "<",
+    "value": 1
+   },
+   "aggregated": true,
+   "window_min": 180.0,
+   "grace_min": 1440.0,
+   "tactic": null,
+   "technique": null,
+   "techniques": null
+  },
+  {
+   "title": "HEALTH - Тишина: MacMiniM2 не шлёт логи (час)",
+   "priority": 2,
+   "streams": [
+    "MacOS Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Linux"
+   ],
+   "state": "ENABLED",
+   "description": "За последний час от MacMiniM2 не пришло ни одного сообщения. Агент сбора остановился, Mac выключен или пропала сеть.",
+   "query": "source:macminim2",
+   "group_by": [],
+   "condition": {
+    "op": "<",
+    "value": 1
+   },
+   "aggregated": true,
+   "window_min": 60.0,
+   "grace_min": 1440.0,
+   "tactic": null,
+   "technique": null,
+   "techniques": null
+  },
+  {
    "title": "HEALTH - Тишина: auditd на redos-server (час)",
    "priority": 2,
    "streams": [
@@ -1918,6 +1966,27 @@
    "techniques": null
   },
   {
+   "title": "macOS - JXA-скрипт через osascript",
+   "priority": 2,
+   "streams": [
+    "MacOS Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert MacOS"
+   ],
+   "state": "ENABLED",
+   "description": "Запуск osascript с JavaScript (JXA). Такие скрипты используют для сбора данных и запуска команд. Исключены инвентаризация Wi-Fi через CoreWLAN и подбор приложения для файла (NSWorkspace).",
+   "query": "log_type:macos_osquery AND name:suspicious_processes AND columns_cmdline:/.*osascript.*-l[ ]JavaScript.*/ AND NOT columns_cmdline:(/.*CoreWLAN.*/ OR /.*URLForApplicationT.*/)",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 60.0,
+   "tactic": "Execution",
+   "technique": "T1059.002 AppleScript",
+   "techniques": "T1059.002"
+  },
+  {
    "title": "macOS - Активность AirDrop",
    "priority": 2,
    "streams": [
@@ -2094,6 +2163,27 @@
    "tactic": "Persistence",
    "technique": "T1547.006 Kernel Modules and Extensions",
    "techniques": "T1547.006"
+  },
+  {
+   "title": "macOS - Запись экрана на MacBook (replayd)",
+   "priority": 1,
+   "streams": [
+    "MacOS Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert MacOS"
+   ],
+   "state": "ENABLED",
+   "description": "Служба replayd начала сессию захвата экрана на MacBook. Mac mini исключён: на нём захват экрана идёт при твоей удалённой работе.",
+   "query": "log_type:macos_unified AND macos_processImagePath:\"/usr/libexec/replayd\" AND macos_eventMessage:/.*createAndStartStream.*/ AND NOT source:macminim2",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 60.0,
+   "tactic": "Collection",
+   "technique": "T1113 Screen Capture",
+   "techniques": "T1113"
   },
   {
    "title": "macOS - Запуск программы из /tmp или /Users/Shared",
@@ -2298,6 +2388,33 @@
    "tactic": "Defense Impairment",
    "technique": "T1686 Disable or Modify System Firewall",
    "techniques": "T1686"
+  },
+  {
+   "title": "macOS - Открытая Wi-Fi сеть в сохранённых (сводка раз в сутки)",
+   "priority": 1,
+   "streams": [
+    "MacOS Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert MacOS"
+   ],
+   "state": "ENABLED",
+   "description": "В сохранённых сетях есть открытая Wi-Fi сеть без шифрования. Через такую сеть трафик можно перехватить. Сводка раз в сутки, повтор не чаще раза в неделю.",
+   "query": "log_type:macos_osquery AND name:wifi_history AND columns_security_type:Open",
+   "group_by": [
+    "source",
+    "columns_network_name"
+   ],
+   "condition": {
+    "op": ">=",
+    "value": 1
+   },
+   "aggregated": true,
+   "window_min": 1440.0,
+   "grace_min": 10080.0,
+   "tactic": "Credential Access",
+   "technique": "T1557 Adversary-in-the-Middle",
+   "techniques": "T1557"
   },
   {
    "title": "macOS - Очистка журналов",

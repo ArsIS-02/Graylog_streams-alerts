@@ -1,6 +1,6 @@
 # Каталог детектов Graylog
 
-> Все правила (event definitions) лаборатории в одном месте: какой лог проверяется, по какому условию, как коррелируются события, к какой тактике и технике MITRE ATT&CK относятся. Всего **135** правил, из них **111** привязаны к технике ATT&CK v20 (85 разных техник). Остальные описывают здоровье сервисов и тишину в логах: атак они не ловят.
+> Все правила (event definitions) лаборатории в одном месте: какой лог проверяется, по какому условию, как коррелируются события, к какой тактике и технике MITRE ATT&CK относятся. Всего **140** правил, из них **114** привязаны к технике ATT&CK v20 (88 разных техник). Остальные описывают здоровье сервисов и тишину в логах: атак они не ловят.
 
 Страница собирается скриптом из выгрузки Graylog и руками не правится: [как обновить](#как-обновить-каталог). Запросы очищены: IP, MAC, отпечатки ключей и белые списки заменены на `<IP>`, `<MAC>`, `<белый список>`. Готовые определения для импорта лежат в `graylog/*-event-definitions.json`, соответствие техникам подробно описано в [graylog/mitre](../graylog/mitre/README.md).
 
@@ -9,10 +9,10 @@
 - [Покрытие: тактики × платформы](#покрытие-тактики--платформы)
 - [Windows](#windows) — 31
 - [Linux](#linux) — 32
-- [macOS (osquery и unified log)](#macos-osquery-и-unified-log) — 30
+- [macOS (osquery и unified log)](#macos-osquery-и-unified-log) — 33
 - [macOS (BI.ZONE Triage)](#macos-bizone-triage) — 9
 - [Keenetic](#keenetic) — 8
-- [FreeIPA и здоровье сервисов](#freeipa-и-здоровье-сервисов) — 7
+- [FreeIPA и здоровье сервисов](#freeipa-и-здоровье-сервисов) — 9
 - [Контейнеры](#контейнеры) — 18
 - [Как читать таблицы](#как-читать-таблицы)
 - [Как обновить каталог](#как-обновить-каталог)
@@ -25,20 +25,20 @@
 |---|---|---|---|---|---|---|---|
 | Reconnaissance (Разведка) |  |  |  | 1 |  |  | **1** |
 | Initial Access (Первоначальный доступ) | 2 | 2 | 3 | 1 |  | 1 | **9** |
-| Execution (Выполнение) | 6 | 3 | 6 |  |  |  | **15** |
+| Execution (Выполнение) | 6 | 3 | 7 |  |  |  | **16** |
 | Persistence (Закрепление) | 7 | 6 | 8 | 1 |  |  | **22** |
 | Privilege Escalation (Повышение привилегий) |  | 4 | 6 |  |  |  | **10** |
 | Stealth (Скрытность) | 3 | 2 | 2 |  |  |  | **7** |
 | Defense Impairment (Подавление защиты) | 4 | 4 | 4 | 1 |  |  | **13** |
-| Credential Access (Доступ к учётным данным) | 5 | 2 | 3 | 3 | 2 | 1 | **16** |
+| Credential Access (Доступ к учётным данным) | 5 | 2 | 4 | 3 | 2 | 1 | **17** |
 | Discovery (Исследование среды) | 1 | 1 |  |  |  |  | **2** |
 | Lateral Movement (Перемещение) | 1 |  | 1 | 1 |  |  | **3** |
-| Collection (Сбор данных) |  | 1 | 1 |  |  |  | **2** |
+| Collection (Сбор данных) |  | 1 | 2 |  |  |  | **3** |
 | Command and Control (управление, C2) | 1 | 2 | 1 |  |  |  | **4** |
 | Exfiltration (Вывод данных) |  | 1 | 1 |  |  |  | **2** |
 | Impact (Воздействие) | 1 | 3 | 1 |  |  |  | **5** |
-| Без техники (служебные) |  | 1 | 2 |  | 5 | 16 | **24** |
-| **Всего** | **31** | **32** | **39** | **8** | **7** | **18** | **135** |
+| Без техники (служебные) |  | 1 | 2 |  | 7 | 16 | **26** |
+| **Всего** | **31** | **32** | **42** | **8** | **9** | **18** | **140** |
 
 ## Windows
 
@@ -505,7 +505,7 @@ key:recon AND audit_type:SYSCALL AND NOT exe:(<белый список>)
 
 ## macOS (osquery и unified log)
 
-osquery Endpoint Security и unified log; поток MacOS Logs. Правил: 30. Сортировка: сначала высокий приоритет.
+osquery Endpoint Security и unified log; поток MacOS Logs. Правил: 33. Сортировка: сначала высокий приоритет.
 
 | Правило | Приоритет | Источник логов | Что проверяет | Корреляция | Тактика | Техника |
 |---|---|---|---|---|---|---|
@@ -525,6 +525,7 @@ osquery Endpoint Security и unified log; поток MacOS Logs. Правил: 3
 | Скачивание и запуск (curl \| sh) | высокий | MacOS Logs<br>osquery es_process_events | curl или wget с конвейером в sh, bash, zsh либо bash -c "$(curl …)". Типичный способ запустить загруженный скрипт без файла. | каждое событие | Execution | `T1059.004` Unix Shell<br>`T1105` |
 | Установка или удаление профиля конфигурации | высокий | MacOS Logs<br>osquery es_process_events | Запуск profiles с install, remove, -I или -R. Профили конфигурации ставят прокси, сертификаты и VPN, отключают защиту. Штатные `profiles list` и `profiles status` не попадают. | каждое событие | Defense Impairment | `T1685` Disable or Modify Tools<br>`T1553.004` |
 | Фишинговый запрос пароля через osascript | высокий | MacOS Logs<br>osquery es_process_events | osascript показывает диалог со скрытым вводом — так вредоносы выманивают пароль пользователя. | каждое событие | Collection | `T1056.002` GUI Input Capture |
+| JXA-скрипт через osascript | средний | MacOS Logs | Запуск osascript с JavaScript (JXA). Такие скрипты используют для сбора данных и запуска команд. Исключены инвентаризация Wi-Fi через CoreWLAN и подбор приложения для файла (NSWorkspace). | каждое событие; повтор не чаще раза в 1 ч | Execution | `T1059.002` AppleScript |
 | Активность AirDrop | средний | MacOS Logs<br>журнал macos_unified | Передача или приём через AirDrop (sharingd). Возможна утечка данных. | число событий ≥ 1 за 5 мин, группировка по source | — | — |
 | Включение удалённого входа или Screen Sharing | средний | MacOS Logs<br>osquery es_process_events | systemsetup -setremotelogin, kickstart ARD или setremoteappleevents — открытие удалённого доступа к Маку. | каждое событие | Lateral Movement | `T1021.004` SSH<br>`T1021.005` |
 | Добавление корневого сертификата | средний | MacOS Logs<br>osquery es_process_events | security add-trusted-cert, trust-settings-import или add-certificates: сертификат становится доверенным в системе. Так подготавливают перехват TLS. | каждое событие | Stealth | `T1553.004` Install Root Certificate |
@@ -538,6 +539,8 @@ osquery Endpoint Security и unified log; поток MacOS Logs. Правил: 3
 | Создание пользователя или изменение групп | средний | MacOS Logs<br>osquery es_process_events | dscl, sysadminctl или dseditgroup создают пользователя или меняют членство в группах (в т.ч. admin). | каждое событие | Persistence | `T1136.001` Local Account<br>`T1098` |
 | Элемент входа через sfltool или osascript | средний | MacOS Logs<br>osquery es_process_events | Добавление Login Items командами sfltool или osascript (System Events, login item). Закрепление без plist; дополняет алерт на LaunchAgents. | каждое событие | Persistence | `T1547.015` Login Items |
 | Выполнение команды через sudo | низкий | MacOS Logs<br>osquery sudo_commands | Выполнение команды с повышенными привилегиями через sudo (не от root). | число событий > 0 за 5 мин, группировка по source | Privilege Escalation | `T1548.003` Sudo and Sudo Caching |
+| Запись экрана на MacBook (replayd) | низкий | MacOS Logs<br>журнал macos_unified | Служба replayd начала сессию захвата экрана на MacBook. Mac mini исключён: на нём захват экрана идёт при твоей удалённой работе. | каждое событие; повтор не чаще раза в 1 ч | Collection | `T1113` Screen Capture |
+| Открытая Wi-Fi сеть в сохранённых (сводка раз в сутки) | низкий | MacOS Logs | В сохранённых сетях есть открытая Wi-Fi сеть без шифрования. Через такую сеть трафик можно перехватить. Сводка раз в сутки, повтор не чаще раза в неделю. | число событий ≥ 1 за 1 сут, группировка по source, columns_network_name; повтор не чаще раза в 7 сут | Credential Access | `T1557` Adversary-in-the-Middle |
 | Снятие карантина с приложения | низкий | MacOS Logs<br>osquery es_process_events | С файла снят атрибут com.apple.quarantine — Gatekeeper не проверит приложение при запуске. | каждое событие | Defense Impairment | `T1553.001` Gatekeeper Bypass |
 
 <details><summary>Запросы Graylog (очищенные)</summary>
@@ -638,6 +641,12 @@ name:es_process_events AND columns_cmdline:/(.*[ \/])?profiles( .*)? (install|re
 name:es_process_events AND message:"osascript" AND message:("display dialog" OR "hidden answer")
 ```
 
+**macOS - JXA-скрипт через osascript**
+
+```
+log_type:macos_osquery AND name:suspicious_processes AND columns_cmdline:/.*osascript.*-l[ ]JavaScript.*/ AND NOT columns_cmdline:(/.*CoreWLAN.*/ OR /.*URLForApplicationT.*/)
+```
+
 **macOS - Активность AirDrop**
 
 ```
@@ -714,6 +723,18 @@ name:es_process_events AND columns_cmdline:/.*(sfltool|osascript.*login item|Sys
 
 ```
 name:sudo_commands AND -columns_uid:0
+```
+
+**macOS - Запись экрана на MacBook (replayd)**
+
+```
+log_type:macos_unified AND macos_processImagePath:"/usr/libexec/replayd" AND macos_eventMessage:/.*createAndStartStream.*/ AND NOT source:macminim2
+```
+
+**macOS - Открытая Wi-Fi сеть в сохранённых (сводка раз в сутки)**
+
+```
+log_type:macos_osquery AND name:wifi_history AND columns_security_type:Open
 ```
 
 **macOS - Снятие карантина с приложения**
@@ -867,7 +888,7 @@ kn_event_type:Wireguard_Failed
 
 ## FreeIPA и здоровье сервисов
 
-аудит FreeIPA и служебные проверки. Правил: 7. Сортировка: сначала высокий приоритет.
+аудит FreeIPA и служебные проверки. Правил: 9. Сортировка: сначала высокий приоритет.
 
 | Правило | Приоритет | Источник логов | Что проверяет | Корреляция | Тактика | Техника |
 |---|---|---|---|---|---|---|
@@ -876,7 +897,9 @@ kn_event_type:Wireguard_Failed
 | Выпуск сертификата в CA (Dogtag) | средний | FreeIPA Logs<br>приложение freeipa_389_audit | Запрос на выпуск сертификата через CA FreeIPA (Dogtag). Выпуски должны происходить только при добавлении новых сервисов или хостов. Внезапный массовый выпуск — повод проверить. | каждое событие | Credential Access | `T1649` Steal or Forge Authentication Certificates |
 | Тишина: FreeIPA (3 часа) | средний | FreeIPA Logs | За 3 часа не пришло ни одного сообщения от FreeIPA. Сервер или доставка логов остановились. | число событий < 1 за 3 ч; повтор не чаще раза в 1 сут | — | — |
 | Тишина: Keenetic не шлёт логи (час) | средний | Syslog Logs | За последний час от роутера не пришло ни одного сообщения. Роутер или связь с Graylog отвалились. | число событий < 1 за 1 ч; повтор не чаще раза в 1 сут | — | — |
+| Тишина: MacMiniM2 не шлёт логи (час) | средний | MacOS Logs | За последний час от MacMiniM2 не пришло ни одного сообщения. Агент сбора остановился, Mac выключен или пропала сеть. | число событий < 1 за 1 ч; повтор не чаще раза в 1 сут | — | — |
 | Тишина: auditd на redos-server (час) | средний | RedOS auditd Logs | За последний час от redos-server не пришло ни одного события auditd. Служба или доставка логов остановились. | число событий < 1 за 1 ч; повтор не чаще раза в 1 сут | — | — |
+| Тишина: MacBook-Pro не шлёт логи (3 часа) | низкий | MacOS Logs | За 3 часа от MacBook-Pro не пришло ни одного сообщения. Ноутбук мог уснуть или выключиться, поэтому приоритет низкий. | число событий < 1 за 3 ч; повтор не чаще раза в 1 сут | — | — |
 | Тишина: macOS (сутки) | низкий | MacOS Logs | За сутки не пришло ни одного сообщения от Mac-хостов. Агент сбора остановился или все Mac выключены. | число событий < 1 за 1 сут; повтор не чаще раза в 1 сут | — | — |
 
 <details><summary>Запросы Graylog (очищенные)</summary>
@@ -911,10 +934,22 @@ application_name:freeipa_389_audit AND message:cert--005frequest
 *
 ```
 
+**HEALTH - Тишина: MacMiniM2 не шлёт логи (час)**
+
+```
+source:macminim2
+```
+
 **HEALTH - Тишина: auditd на redos-server (час)**
 
 ```
 source:redos-server
+```
+
+**HEALTH - Тишина: MacBook-Pro не шлёт логи (3 часа)**
+
+```
+source:macbook-pro
 ```
 
 **HEALTH - Тишина: macOS (сутки)**
