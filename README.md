@@ -84,7 +84,7 @@
 
 | Глава | О чём |
 |---|---|
-| [Troubleshooting](docs/troubleshooting.md) | 22 грабли: ротация логов, дубли, лимит полей, extractor-ы, Fluent Bit, OpenSearch (память, автозапуск), Collectors |
+| [Troubleshooting](docs/troubleshooting.md) | 23 грабли: ротация логов, дубли, лимит полей, extractor-ы, Fluent Bit, OpenSearch (память, автозапуск), Collectors |
 
 ## ✨ Что внутри
 

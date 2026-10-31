@@ -20,6 +20,11 @@
     "source": "rule \"containers: normalize fields\"\nwhen\n  has_field(\"CONTAINER_NAME\")\nthen\n  set_field(\"container_name\", to_string($message.CONTAINER_NAME));\n  set_field(\"image_name\", to_string($message.IMAGE_NAME));\n  set_field(\"container_id\", to_string($message.CONTAINER_ID));\nend"
   },
   {
+    "title": "homelab: пометить доверенные хосты",
+    "description": "Ставит trusted_host=true, если source есть в Lookup Table homelab-trusted-hosts. Выполнять после правила, которое подставляет имя хоста в source.",
+    "source": "rule \"homelab: пометить доверенные хосты\"\nwhen\n  has_field(\"source\")\n  AND lookup_has_value(\"homelab-trusted-hosts\", to_string($message.source))\nthen\n  set_field(\"trusted_host\", true);\nend"
+  },
+  {
     "title": "macos: обрезать слишком длинный cmdline",
     "description": "osquery иногда присылает командную строку длиннее предела OpenSearch в 32766 байт",
     "source": "rule \"macos: обрезать слишком длинный cmdline\"\nwhen\n  has_field(\"columns_cmdline\")\n  AND length(to_string($message.columns_cmdline)) > 8000\nthen\n  set_field(\"columns_cmdline\", abbreviate(to_string($message.columns_cmdline), 8000));\n  set_field(\"columns_cmdline_truncated\", true);\nend"
