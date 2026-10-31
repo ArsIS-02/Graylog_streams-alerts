@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 930" width="800" height="930" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif">
+<title>Схема лаборатории: клиенты, сервер Graylog, OpenSearch и MongoDB</title>
+<defs><marker id="m" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#e11d1d"/></marker></defs>
+<rect width="800" height="930" fill="#ffffff"/>
+<rect x="70" y="282" width="262" height="296" fill="#474747"/>
+<text x="80" y="568" font-size="12" fill="#fff">Windows-клиенты</text>
+<rect x="352" y="282" width="262" height="296" fill="#474747"/>
+<text x="362" y="568" font-size="12" fill="#fff">Linux-клиенты</text>
+<rect x="345.0" y="10" width="110" height="46" fill="#fff" stroke="#111" stroke-width="1.5"/>
+<text x="400" y="38.0" font-size="13" text-anchor="middle" fill="#111">Интернет</text>
+<rect x="330.0" y="100" width="140" height="46" fill="#fff" stroke="#111" stroke-width="1.5"/>
+<text x="400" y="128.0" font-size="13" text-anchor="middle" fill="#111">Маршрутизатор</text>
+<rect x="350.0" y="190" width="100" height="46" fill="#fff" stroke="#111" stroke-width="1.5"/>
+<text x="400" y="218.0" font-size="13" text-anchor="middle" fill="#111">Свитч</text>
+<path d="M400,56 L400,98" fill="none" stroke="#e11d1d" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#m)"/>
+<path d="M400,146 L400,188" fill="none" stroke="#e11d1d" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#m)"/>
+<rect x="90.0" y="312" width="120" height="46" fill="#fff" stroke="#111" stroke-width="1.5"/>
+<text x="150" y="340.0" font-size="13" text-anchor="middle" fill="#111">W11-Desktop</text>
+<rect x="237.0" y="312" width="70" height="46" fill="#fff" stroke="#111" stroke-width="1.5"/>
+<text x="272" y="340.0" font-size="13" text-anchor="middle" fill="#111">DC</text>
+<rect x="160.0" y="402" width="100" height="46" fill="#fff" stroke="#111" stroke-width="1.5"/>
+<text x="210" y="430.0" font-size="13" text-anchor="middle" fill="#111">Sysmon</text>
+<rect x="150.0" y="484" width="120" height="46" fill="#fff" stroke="#111" stroke-width="1.5"/>
+<text x="210" y="512.0" font-size="13" text-anchor="middle" fill="#111">Winlogbeat</text>
+<rect x="372.0" y="312" width="120" height="46" fill="#fff" stroke="#111" stroke-width="1.5"/>
+<text x="432" y="340.0" font-size="13" text-anchor="middle" fill="#111">Raspberry Pi</text>
+<rect x="501.0" y="312" width="110" height="46" fill="#fff" stroke="#111" stroke-width="1.5"/>
+<text x="556" y="340.0" font-size="13" text-anchor="middle" fill="#111">RedOS x86</text>
+<rect x="444.0" y="402" width="100" height="46" fill="#fff" stroke="#111" stroke-width="1.5"/>
+<text x="494" y="430.0" font-size="13" text-anchor="middle" fill="#111">auditd</text>
+<rect x="444.0" y="484" width="100" height="46" fill="#fff" stroke="#111" stroke-width="1.5"/>
+<text x="494" y="512.0" font-size="13" text-anchor="middle" fill="#111">Rsyslog</text>
+<rect x="640.0" y="430" width="120" height="46" fill="#fff" stroke="#111" stroke-width="1.5"/>
+<text x="700" y="458.0" font-size="13" text-anchor="middle" fill="#111">Администратор</text>
+<path d="M400,236 C400,268 150,258 150,310" fill="none" stroke="#e11d1d" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#m)"/>
+<path d="M400,236 C400,268 272,258 272,310" fill="none" stroke="#e11d1d" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#m)"/>
+<path d="M400,236 C400,268 432,258 432,310" fill="none" stroke="#e11d1d" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#m)"/>
+<path d="M400,236 C400,268 556,258 556,310" fill="none" stroke="#e11d1d" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#m)"/>
+<path d="M350,213 L16,213 L16,722 L148,722" fill="none" stroke="#e11d1d" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#m)"/>
+<path d="M150,358 C150,384 210,376 210,400" fill="none" stroke="#e11d1d" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#m)"/>
+<path d="M272,358 C272,384 210,376 210,400" fill="none" stroke="#e11d1d" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#m)"/>
+<path d="M432,358 C432,384 494,376 494,400" fill="none" stroke="#e11d1d" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#m)"/>
+<path d="M556,358 C556,384 494,376 494,400" fill="none" stroke="#e11d1d" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#m)"/>
+<path d="M210,448 L210,482" fill="none" stroke="#e11d1d" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#m)"/>
+<path d="M494,448 L494,482" fill="none" stroke="#e11d1d" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#m)"/>
+<rect x="30" y="652" width="740" height="262" fill="#474747"/>
+<text x="400.0" y="668" font-size="12" text-anchor="middle" fill="#fff">Сервер RedOS</text>
+<rect x="150.0" y="678" width="570" height="56" fill="#fff" stroke="#111" stroke-width="1.5"/>
+<text x="435" y="711.0" font-size="13" text-anchor="middle" fill="#111">Graylog Server</text>
+<path d="M210,530 L210,676" fill="none" stroke="#e11d1d" stroke-width="2.2" stroke-linejoin="round" stroke-dasharray="2 5" stroke-linecap="round" marker-end="url(#m)"/>
+<rect x="152.0" y="596.0" width="116" height="44" fill="#575757"/>
+<text x="210" y="613.0" font-size="12" text-anchor="middle" fill="#fff">Отправка логов</text>
+<text x="210" y="631.0" font-size="12" text-anchor="middle" fill="#fff">TCP</text>
+<path d="M494,530 L494,676" fill="none" stroke="#e11d1d" stroke-width="2.2" stroke-linejoin="round" stroke-dasharray="2 5" stroke-linecap="round" marker-end="url(#m)"/>
+<rect x="436.0" y="596.0" width="116" height="44" fill="#575757"/>
+<text x="494" y="613.0" font-size="12" text-anchor="middle" fill="#fff">Отправка логов</text>
+<text x="494" y="631.0" font-size="12" text-anchor="middle" fill="#fff">UDP</text>
+<path d="M700,476 L700,676" fill="none" stroke="#e11d1d" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#m)"/>
+<rect x="645.5" y="548.0" width="109" height="44" fill="#575757"/>
+<text x="700" y="565.0" font-size="12" text-anchor="middle" fill="#fff">Веб-интерфейс</text>
+<text x="700" y="583.0" font-size="12" text-anchor="middle" fill="#fff">HTTP</text>
+<rect x="175.0" y="822" width="170" height="56" fill="#fff" stroke="#111" stroke-width="1.5"/>
+<text x="260" y="855.0" font-size="13" text-anchor="middle" fill="#111">OpenSearch</text>
+<rect x="505.0" y="822" width="170" height="56" fill="#fff" stroke="#111" stroke-width="1.5"/>
+<text x="590" y="855.0" font-size="13" text-anchor="middle" fill="#111">MongoDB</text>
+<path d="M260,734 L260,820" fill="none" stroke="#e11d1d" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#m)"/>
+<rect x="184.5" y="755.0" width="151" height="44" fill="#575757"/>
+<text x="260" y="772.0" font-size="12" text-anchor="middle" fill="#fff">Хранит данные логов</text>
+<text x="260" y="790.0" font-size="12" text-anchor="middle" fill="#fff">и выполняет поиск</text>
+<path d="M590,734 L590,820" fill="none" stroke="#e11d1d" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#m)"/>
+<rect x="514.5" y="755.0" width="151" height="44" fill="#575757"/>
+<text x="590" y="772.0" font-size="12" text-anchor="middle" fill="#fff">Хранит конфигурацию</text>
+<text x="590" y="790.0" font-size="12" text-anchor="middle" fill="#fff">и метаданные</text>
+</svg>
