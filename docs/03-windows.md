@@ -135,3 +135,35 @@ winlogbeat_event_code:4625 AND winlogbeat_event_outcome:failure
 
 > Не ищи события по русскому тексту в `message` — используй точные
 > `event_code` и `outcome`. Это быстрее и без ложных срабатываний.
+
+## Ещё 11 алертов по Sysmon и Security
+
+Кроме базовых алертов в Graylog добавлен набор из 11 определений, которые смотрят в Sysmon (события 1, 3, 11,
+12, 13, 17, 18, 22) и Security (4624, 4625). Спецификация лежит в
+[`graylog/windows-event-definitions.json`](../graylog/windows-event-definitions.json): вместо `<WINDOWS_STREAM_ID>`
+подставляется id потока `WindowsLogs`, вместо `<NOTIFICATION_ID>` — id email-уведомления. Скрипт импорта такой же, как
+для [контейнерных правил](09-containers-dashboards.md#импорт-правил) (`POST /api/events/definitions?schedule=true`,
+существующие названия пропускаются). Поля MITRE (`mitre_*`) записаны в определения сразу.
+
+| Алерт | Что ловит | Приоритет |
+|---|---|---|
+| Вход из неизвестной сети (4624, тип 3 или 10) | сетевой вход или RDP с адреса вне справочника `homelab-subnets` (нужен `src_zone`, см. [главу 13](13-lookup-tables.md)) | 3 |
+| Именованные каналы C2 | каналы `msagent_*`, `postex_*`, `status_*`, `MSSE-*` (Cobalt Strike и аналоги) | 3 |
+| DNS-запрос к туннелям и файлообменникам | ngrok, pastebin, transfer.sh, trycloudflare, duckdns, anonfiles, serveo | 2 |
+| wscript, cscript, mshta или regsvr32 ходит во внешнюю сеть | Sysmon 3 на внешний IP | 3 |
+| Исключения или отключение защиты Defender | `Add-/Set-MpPreference`, ключ `Windows Defender\Exclusions` | 3 |
+| Закрепление через IFEO Debugger, AppInit_DLLs и Winlogon | Sysmon 12/13 | 2 |
+| Дамп учётных данных | `reg save` для SAM/SECURITY/SYSTEM, `comsvcs.dll MiniDump`, `ntdsutil` | 3 |
+| Office, wscript или mshta создал исполняемый файл | Sysmon 11 в Temp, AppData, Public, ProgramData | 3 |
+| Командная оболочка запущена через WMI | родитель `WmiPrvSE.exe` | 3 |
+| Добавление в локальные администраторы | `net localgroup administrators /add`, `Add-LocalGroupMember` | 3 |
+| Перебор несуществующих пользователей | 5+ событий 4625 с `SubStatus 0xc0000064` с одного IP за 10 минут | 2 |
+
+**Как проверялись запросы.** Поля Sysmon (`win_image`, `ParentImage`, `PipeName`, `TargetObject`, `win_filename`,
+`win_command_line`) в индексе хранятся как keyword: ищется точное значение с учётом регистра, поиск по слову из
+пути не работает. Поэтому в запросах используются регулярные выражения (`win_image:/.*\\(mshta|wscript)\.exe/`),
+а по командной строке — поиск в `message`. Каждый запрос перед созданием прогнали по `WindowsLogs` за 30 дней:
+слишком шумные варианты сузили. Например, для `powershell` и `rundll32` соединения с GitHub, Cloudflare и Azure давали
+около одного срабатывания в день, а запись `RunOnce` постоянно делают Office, Edge и Defender, поэтому их в алертах нет.
+Сейчас за 30 дней срабатываний нет, кроме алерта на неизвестную сеть (до подключения pipeline поле `src_zone` не
+заполнялось) и перебора несуществующих пользователей (6 событий).
