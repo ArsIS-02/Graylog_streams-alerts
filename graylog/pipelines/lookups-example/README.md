@@ -50,12 +50,12 @@ end
 
 Список таблиц (фильтр «пример»):
 
-![Список таблиц](../img/lookup-tables-list.png)
+![Список таблиц](../../../docs/images/13-lookup-tables-list.png)
 
 Адаптеры: каждый указывает на свой CSV-файл на сервере Graylog:
 
-![Адаптеры CSV](../img/lookup-adapter.png)
+![Адаптеры CSV](../../../docs/images/13-lookup-adapter.png)
 
 Страница таблицы `example-subnets`: кэш, адаптер (`CIDR lookup: yes`) и проверка поиска. Ключ `192.0.2.77` попадает в сеть `192.0.2.0/24` и возвращает «домашняя сеть»:
 
-![Проверка поиска](../img/lookup-query.png)
+![Проверка поиска](../../../docs/images/13-lookup-query.png)
