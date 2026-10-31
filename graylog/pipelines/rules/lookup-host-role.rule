@@ -1,0 +1,8 @@
+// description: Добавляет host_role (роль хоста) по source из Lookup Table homelab-host-roles.
+rule "homelab: host_role"
+when
+  has_field("source")
+  AND lookup_has_value("homelab-host-roles", to_string($message.source))
+then
+  set_field("host_role", lookup_value("homelab-host-roles", to_string($message.source)));
+end

@@ -1,0 +1,8 @@
+// description: Добавляет host_os (ОС хоста) по source из Lookup Table homelab-host-os.
+rule "homelab: host_os"
+when
+  has_field("source")
+  AND lookup_has_value("homelab-host-os", to_string($message.source))
+then
+  set_field("host_os", lookup_value("homelab-host-os", to_string($message.source)));
+end
