@@ -84,7 +84,7 @@
 
 | Глава | О чём |
 |---|---|
-| [Troubleshooting](docs/troubleshooting.md) | 17 граблей: ротация логов, дубли, лимит полей, extractor-ы, Fluent Bit |
+| [Troubleshooting](docs/troubleshooting.md) | 22 грабли: ротация логов, дубли, лимит полей, extractor-ы, Fluent Bit, OpenSearch (память, автозапуск), Collectors |
 
 ## ✨ Что внутри
 
@@ -121,7 +121,7 @@
 ├── decoder/                           ← декодер auditd (auditd_decoder.py, systemd-юнит)
 ├── config/                            ← server.conf (SMTP), opensearch.yml
 ├── containers/                        ← Fluent Bit: Quadlet-юнит и конфиг
-├── graylog/                           ← content pack (63 алерта + 3 email-уведомления) и 18 детектов по контейнерам, 22 дашборда (`dashboards-spec.json` + `import-dashboards.js`)
+├── graylog/                           ← content pack (63 алерта + 3 email-уведомления) и 18 детектов по контейнерам, 22 дашборда (`dashboards-spec.json` + `import-dashboards.js`), правила pipeline с импортёром (`pipelines/`)
 ├── linux/                             ← rsyslog.conf.example
 ├── windows/                           ← winlogbeat.yml.example
 └── macos/                             ← Filebeat, osquery, LaunchDaemon-ы, bztriage/

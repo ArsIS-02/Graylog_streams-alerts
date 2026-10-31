@@ -1,0 +1,9 @@
+// description: osquery иногда присылает командную строку длиннее предела OpenSearch в 32766 байт
+rule "macos: обрезать слишком длинный cmdline"
+when
+  has_field("columns_cmdline")
+  AND length(to_string($message.columns_cmdline)) > 8000
+then
+  set_field("columns_cmdline", abbreviate(to_string($message.columns_cmdline), 8000));
+  set_field("columns_cmdline_truncated", true);
+end

@@ -1,0 +1,9 @@
+// description: Значение eventMessage длиннее 32766 байт отбрасывается индексом (immense term). Обрезаем до 6000 символов — запас на UTF-8.
+rule "macos: обрезать слишком длинный eventMessage"
+when
+  has_field("eventMessage")
+  AND length(to_string($message.eventMessage)) > 6000
+then
+  set_field("eventMessage", abbreviate(to_string($message.eventMessage), 6000));
+  set_field("eventMessage_truncated", true);
+end

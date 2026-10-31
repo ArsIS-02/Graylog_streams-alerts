@@ -1,0 +1,7 @@
+// description: Подставляет короткое имя хоста из host_hostname в поле source (Linux, Windows)
+rule "collectors: hostname as source"
+when
+  has_field("host_hostname")
+then
+  set_field("source", regex_replace("^([^.]+).*$", to_string($message.host_hostname), "$1", true));
+end
