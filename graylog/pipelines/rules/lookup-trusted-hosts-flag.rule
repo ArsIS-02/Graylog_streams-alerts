@@ -1,0 +1,8 @@
+// description: Ставит trusted_host=true, если source есть в Lookup Table homelab-trusted-hosts. Выполнять после правила, которое подставляет имя хоста в source.
+rule "homelab: пометить доверенные хосты"
+when
+  has_field("source")
+  AND lookup_has_value("homelab-trusted-hosts", to_string($message.source))
+then
+  set_field("trusted_host", true);
+end
