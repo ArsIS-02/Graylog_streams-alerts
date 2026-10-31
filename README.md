@@ -90,7 +90,7 @@
 1. Импортируй [content pack](graylog/content-pack-homelab-alerts.json) (потоки, уведомления и первая партия алертов).
 2. Остальные определения лежат отдельными файлами по платформам: [Windows](graylog/windows-event-definitions.json),
    [Linux](graylog/linux-event-definitions.json), [macOS](graylog/macos-event-definitions.json),
-   [Keenetic](graylog/keenetic-event-definitions.json), [контейнеры](graylog/container-event-definitions.json).
+   [Keenetic](graylog/keenetic-event-definitions.json), [контейнеры](graylog/container-event-definitions.json), [здоровье пайплайна](graylog/health-event-definitions.json).
 3. Замени плейсхолдеры (`<…_STREAM_ID>`, `<NOTIFICATION_ID>`) и белые списки, см. [ниже](#-что-адаптировать-под-себя).
 4. Привяжи тактики и техники скриптом [`graylog/mitre/import-mitre.js`](graylog/mitre/README.md).
 
@@ -199,7 +199,7 @@ Graylog_streams-alerts/
 │   └── images/                        ← скриншоты и иллюстрации
 ├── graylog/
 │   ├── content-pack-homelab-alerts.json
-│   ├── {windows,linux,macos,keenetic,container}-event-definitions.json
+│   ├── {windows,linux,macos,keenetic,container,health}-event-definitions.json
 │   ├── backup-definitions.js          ← резервная копия определений
 │   ├── dashboards-spec.json, import-dashboards.js
 │   ├── pipelines/                     ← правила, CSV-справочники, импортёры, пример
