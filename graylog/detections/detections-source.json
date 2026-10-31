@@ -1,0 +1,2759 @@
+{
+ "generated": "2026-10-31",
+ "source": "Graylog 7.2.1",
+ "definitions": [
+  {
+   "title": "FREEIPA - Выпуск сертификата в CA (Dogtag)",
+   "priority": 2,
+   "streams": [
+    "FreeIPA Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Linux"
+   ],
+   "state": "ENABLED",
+   "description": "Запрос на выпуск сертификата через CA FreeIPA (Dogtag). Выпуски должны происходить только при добавлении новых сервисов или хостов. Внезапный массовый выпуск — повод проверить.",
+   "query": "application_name:freeipa_389_audit AND message:cert--005frequest",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 5.0,
+   "tactic": "Credential Access",
+   "technique": "T1649 Steal or Forge Authentication Certificates",
+   "techniques": "T1649"
+  },
+  {
+   "title": "FREEIPA - Подбор пароля (10+ PREAUTH_FAILED за 5 мин)",
+   "priority": 3,
+   "streams": [
+    "FreeIPA Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Linux"
+   ],
+   "state": "ENABLED",
+   "description": "Серия отказов предварительной аутентификации Kerberos на контроллере домена. Возможен подбор пароля доменной учётной записи (password spray).",
+   "query": "message:PREAUTH_FAILED",
+   "group_by": [
+    "source"
+   ],
+   "condition": {
+    "op": ">=",
+    "value": 10
+   },
+   "aggregated": true,
+   "window_min": 5.0,
+   "grace_min": 5.0,
+   "tactic": "Credential Access",
+   "technique": "T1110.001 Password Guessing",
+   "techniques": "T1110.001"
+  },
+  {
+   "title": "HEALTH - Клиенты не могут связаться с KDC",
+   "priority": 3,
+   "streams": [
+    "RedOS auditd Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Linux"
+   ],
+   "state": "ENABLED",
+   "description": "На хостах auditd/sssd сообщает «Cannot contact any KDC for realm». Признак того, что контроллер домена FreeIPA упал или недоступен по сети.",
+   "query": "message:\"Cannot contact any KDC\"",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 5.0,
+   "tactic": null,
+   "technique": null,
+   "techniques": null
+  },
+  {
+   "title": "KEENETIC - ARP-конфликт на новом адресе",
+   "priority": 2,
+   "streams": [
+    "Syslog Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Linux"
+   ],
+   "state": "ENABLED",
+   "description": "Конфликт ARP (два MAC на одном IP) на адресе, которого нет среди постоянных пар. Исключены <IP>, .54, .118, .38, .117, .146, .145: у них за месяц десятки тысяч конфликтов из-за двух интерфейсов одного устройства. Новый конфликт, особенно на адресе роутера, может быть подменой ARP.",
+   "query": "kn_event_type:ARP_Conflict AND NOT kn_conflict_ip:(<белый список>)",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 5.0,
+   "tactic": "Credential Access",
+   "technique": "T1557.002 ARP Cache Poisoning",
+   "techniques": "T1557.002"
+  },
+  {
+   "title": "KEENETIC - Блокировка адреса за попытки входа в веб-интерфейс",
+   "priority": 2,
+   "streams": [
+    "Syslog Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Linux"
+   ],
+   "state": "ENABLED",
+   "description": "Роутер заблокировал удалённый адрес за подбор или сканирование веб-интерфейса (Netfilter Lockout, ban remote host). Адреса из интернета означают, что веб-интерфейс доступен снаружи.",
+   "query": "source:\"<роутер>\" AND message:\"Lockout\" AND message:\"ban remote host\"",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 5.0,
+   "tactic": "Credential Access",
+   "technique": "T1110 Brute Force",
+   "techniques": "T1110"
+  },
+  {
+   "title": "KEENETIC - Вход в админку роутера (SSH)",
+   "priority": 3,
+   "streams": [
+    "Syslog Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Linux"
+   ],
+   "state": "ENABLED",
+   "description": "SSH-подключение к роутеру Keenetic с адреса вне белого списка (сервер мониторинга и рабочие хосты).",
+   "query": "kn_event_type:(SSH_Connection OR SSH_Success) AND NOT kn_src_ip:(<белый список>)",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 5.0,
+   "tactic": "Lateral Movement",
+   "technique": "T1021.004 SSH",
+   "techniques": "T1021.004"
+  },
+  {
+   "title": "KEENETIC - Новое устройство в сети",
+   "priority": 2,
+   "streams": [
+    "Syslog Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Linux"
+   ],
+   "state": "ENABLED",
+   "description": "DHCP выдал адрес устройству, MAC которого отсутствует в белом списке. Возможно подключение нового клиента.",
+   "query": "kn_event_type:DHCP_Request AND NOT kn_mac:(<белый список MAC>)",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 10080.0,
+   "tactic": "Initial Access",
+   "technique": "T1200 Hardware Additions",
+   "techniques": "T1200"
+  },
+  {
+   "title": "KEENETIC - Отказ во входе на роутер",
+   "priority": 3,
+   "streams": [
+    "Syslog Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Linux"
+   ],
+   "state": "ENABLED",
+   "description": "Отказ в доступе к роутеру (Auth_Denied).",
+   "query": "kn_event_type:Auth_Denied",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 5.0,
+   "tactic": "Credential Access",
+   "technique": "T1110 Brute Force",
+   "techniques": "T1110"
+  },
+  {
+   "title": "KEENETIC - Отказы WireGuard (ежедневная сводка)",
+   "priority": 1,
+   "streams": [
+    "Syslog Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Daily Digest"
+   ],
+   "state": "ENABLED",
+   "description": "Количество неудачных WireGuard-handshake за прошедшие сутки. Высокое число (сотни или тысячи) может означать подбор ключа или сканирование извне. Проверяется раз в сутки, одно письмо в день.",
+   "query": "kn_event_type:Wireguard_Failed",
+   "group_by": [
+    "source"
+   ],
+   "condition": {
+    "op": ">=",
+    "value": 1
+   },
+   "aggregated": true,
+   "window_min": 1440.0,
+   "grace_min": 5.0,
+   "tactic": "Persistence",
+   "technique": "T1133 External Remote Services",
+   "techniques": "T1133"
+  },
+  {
+   "title": "KEENETIC - Сканирование веб-интерфейса из интернета",
+   "priority": 2,
+   "streams": [
+    "Syslog Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Linux"
+   ],
+   "state": "ENABLED",
+   "description": "Запросы к веб-интерфейсу роутера несуществующих или служебных файлов (.env, readme.html и т. п.): типичное сканирование уязвимостей.",
+   "query": "source:\"<роутер>\" AND message:\"Core::Scgi::Session\" AND (message:\"unsupported file path\" OR message:\"not found\")",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 5.0,
+   "tactic": "Reconnaissance",
+   "technique": "T1595.002 Vulnerability Scanning",
+   "techniques": "T1595.002, T1190"
+  },
+  {
+   "title": "KEENETIC - Сохранена конфигурация роутера",
+   "priority": 2,
+   "streams": [
+    "Syslog Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Linux"
+   ],
+   "state": "ENABLED",
+   "description": "Конфигурация роутера сохранена (StartupConfig: configuration saved). Событие редкое: сверьте, что это ваша правка.",
+   "query": "source:\"<роутер>\" AND message:\"StartupConfig\" AND message:\"configuration saved\"",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 5.0,
+   "tactic": "Defense Impairment",
+   "technique": "T1686 Disable or Modify System Firewall",
+   "techniques": "T1686"
+  },
+  {
+   "title": "LNX - SSH-туннель (-R, -L, -D)",
+   "priority": 2,
+   "streams": [
+    "RedOS auditd Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Linux"
+   ],
+   "state": "ENABLED",
+   "description": "Запуск ssh с пробросом портов (-R, -L, -D). Так выводят внутренние сервисы наружу или строят прокси.",
+   "query": "audit_type:PROCTITLE AND proctitle:/(.*[ \\/])?ssh( .*)? -[RLD] ?[^ ]+.*/",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 5.0,
+   "tactic": "Command and Control",
+   "technique": "T1572 Protocol Tunneling",
+   "techniques": "T1572, T1090"
+  },
+  {
+   "title": "LNX - Брутфорс SSH (5+ неудачных входов за 5 мин)",
+   "priority": 3,
+   "streams": [
+    "RedOS auditd Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Linux"
+   ],
+   "state": "ENABLED",
+   "description": "5 и более неудачных SSH-аутентификаций на одном хосте за 5 минут. Возможен подбор пароля.",
+   "query": "(message:\"sshd-session\" AND message:\"Authentication failure\") OR (message:\"sshd\" AND message:\"Failed password\")",
+   "group_by": [
+    "source"
+   ],
+   "condition": {
+    "op": ">=",
+    "value": 5
+   },
+   "aggregated": true,
+   "window_min": 5.0,
+   "grace_min": 5.0,
+   "tactic": "Credential Access",
+   "technique": "T1110 Brute Force",
+   "techniques": "T1110"
+  },
+  {
+   "title": "LNX - Вход по SSH из неизвестной сети",
+   "priority": 3,
+   "streams": [
+    "RedOS auditd Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Linux"
+   ],
+   "state": "ENABLED",
+   "description": "Успешный вход по SSH (USER_LOGIN) с адреса вне справочника homelab-subnets (поле src_zone не заполнено). Требует pipeline «homelab: linux enrichment»: он достаёт IP из addr= и ищет сеть в таблице подсетей.",
+   "query": "audit_type:USER_LOGIN AND res:success* AND _exists_:src_ip AND NOT _exists_:src_zone AND NOT src_ip:(\"::1\" OR fe80* OR fd* OR fc*)",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 5.0,
+   "tactic": "Initial Access",
+   "technique": "T1078 Valid Accounts",
+   "techniques": "T1078, T1021.004"
+  },
+  {
+   "title": "LNX - Добавление SSH-ключа в authorized_keys",
+   "priority": 3,
+   "streams": [
+    "RedOS auditd Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Linux"
+   ],
+   "state": "ENABLED",
+   "description": "Запись в файл authorized_keys. Возможно добавление SSH-ключа для постоянного доступа. Проверьте, кто изменил файл и легитимен ли ключ.",
+   "query": "message:\"authorized_keys\" AND (message:\"CREATE\" OR message:\"write\")",
+   "group_by": [
+    "source"
+   ],
+   "condition": {
+    "op": ">",
+    "value": 0
+   },
+   "aggregated": true,
+   "window_min": 5.0,
+   "grace_min": 5.0,
+   "tactic": "Persistence",
+   "technique": "T1098.004 SSH Authorized Keys",
+   "techniques": "T1098.004"
+  },
+  {
+   "title": "LNX - Добавление/удаление пользователя",
+   "priority": 3,
+   "streams": [
+    "RedOS auditd Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Linux"
+   ],
+   "state": "ENABLED",
+   "description": "На хосте успешно добавлен или удалён локальный пользователь. В исходных сообщениях: учётка и инициатор (auid).",
+   "query": "(audit_type:ADD_USER OR audit_type:DEL_USER) AND res:success*",
+   "group_by": [
+    "source"
+   ],
+   "condition": {
+    "op": ">",
+    "value": 0
+   },
+   "aggregated": true,
+   "window_min": 5.0,
+   "grace_min": 5.0,
+   "tactic": "Persistence",
+   "technique": "T1136.001 Local Account",
+   "techniques": "T1136.001"
+  },
+  {
+   "title": "LNX - Загрузка модуля ядра",
+   "priority": 2,
+   "streams": [
+    "RedOS auditd Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Linux"
+   ],
+   "state": "ENABLED",
+   "description": "Загрузка или смена конфигурации модулей ядра (init_module, finit_module, modprobe). Вредоносные модули (руткиты) загружаются так же; штатные загрузки драйверов (udev) тоже попадают сюда, их немного.",
+   "query": "audit_type:SYSCALL AND key:(kernel_modules OR kernel_modules_config)",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 5.0,
+   "tactic": "Persistence",
+   "technique": "T1547.006 Kernel Modules and Extensions",
+   "techniques": "T1547.006"
+  },
+  {
+   "title": "LNX - Закрепление через cron",
+   "priority": 2,
+   "streams": [
+    "RedOS auditd Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Linux"
+   ],
+   "state": "ENABLED",
+   "description": "Запись в каталоги и файлы cron (crontab, /etc/cron.*, /var/spool/cron).",
+   "query": "audit_type:SYSCALL AND key:cron_persistence",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 5.0,
+   "tactic": "Persistence",
+   "technique": "T1053.003 Cron",
+   "techniques": "T1053.003"
+  },
+  {
+   "title": "LNX - Закрепление через systemctl enable",
+   "priority": 2,
+   "streams": [
+    "RedOS auditd Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Linux"
+   ],
+   "state": "ENABLED",
+   "description": "Служба добавлена в автозапуск командой systemctl enable. Проверьте, что это ожидаемая служба.",
+   "query": "audit_type:EXECVE AND a0:(\"systemctl\" OR \"/usr/bin/systemctl\") AND message:\"enable\"",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 5.0,
+   "tactic": "Persistence",
+   "technique": "T1543.002 Systemd Service",
+   "techniques": "T1543.002"
+  },
+  {
+   "title": "LNX - Запуск из /tmp, /dev/shm, /var/tmp",
+   "priority": 3,
+   "streams": [
+    "RedOS auditd Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Linux"
+   ],
+   "state": "ENABLED",
+   "description": "EXECVE: программа запущена из /tmp, /dev/shm или /var/tmp, либо интерпретатор (sh, bash, dash, python, perl) исполняет оттуда скрипт. Скрипты Wazuh `execute-*.sh` исключены. Так обычно стартуют загруженные эксплойты и майнеры.",
+   "query": "audit_type:EXECVE AND (a0:/\\/(tmp|dev\\/shm|var\\/tmp)\\/.*/ OR (a0:/(.*\\/)?(sh|bash|dash|python3?|perl)/ AND a1:/\\/(tmp|dev\\/shm|var\\/tmp)\\/.*/ AND NOT a1:/\\/tmp\\/execute-.*\\.sh/))",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 5.0,
+   "tactic": "Execution",
+   "technique": "T1059.004 Unix Shell",
+   "techniques": "T1059.004, T1036"
+  },
+  {
+   "title": "LNX - Затирание следов (shred, history, truncate логов)",
+   "priority": 3,
+   "streams": [
+    "RedOS auditd Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Linux"
+   ],
+   "state": "ENABLED",
+   "description": "Уничтожение файлов через shred, работа с .bash_history или обрезка логов в /var/log. Типичное заметание следов после атаки.",
+   "query": "audit_type:EXECVE AND (a0:(\"shred\" OR \"/usr/bin/shred\") OR message:\".bash_history\" OR (a0:(\"truncate\" OR \"/usr/bin/truncate\") AND message:\"/var/log\"))",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 5.0,
+   "tactic": "Stealth",
+   "technique": "T1070 Indicator Removal",
+   "techniques": "T1070, T1070.003, T1685.006"
+  },
+  {
+   "title": "LNX - Изменение /etc/passwd, shadow, group",
+   "priority": 3,
+   "streams": [
+    "RedOS auditd Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Linux"
+   ],
+   "state": "ENABLED",
+   "description": "Запись или смена атрибутов файлов учётных записей (/etc/passwd, /etc/shadow, /etc/group, /etc/security/opasswd) вне штатных служб. Возможно создание скрытой учётки или смена пароля.",
+   "query": "key:(etcpasswd OR etcgroup OR opasswd) AND audit_type:SYSCALL AND NOT exe:(\"/usr/sbin/unix_chkpwd\" OR \"/usr/lib/systemd/systemd-userwork\" OR \"/var/ossec/bin/wazuh-modulesd\" OR \"/var/ossec/bin/wazuh-syscheckd\" OR \"/usr/libexec/accounts-daemon\") AND NOT auid:4294967295",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 5.0,
+   "tactic": "Persistence",
+   "technique": "T1098 Account Manipulation",
+   "techniques": "T1098"
+  },
+  {
+   "title": "LNX - Изменение sshd_config",
+   "priority": 3,
+   "streams": [
+    "RedOS auditd Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Linux"
+   ],
+   "state": "ENABLED",
+   "description": "Изменение конфигурации SSH-сервера. Возможны включение входа root, паролей или подмена AuthorizedKeysFile.",
+   "query": "key:sshd AND audit_type:SYSCALL AND NOT exe:(\"/var/ossec/bin/wazuh-syscheckd\" OR \"/usr/sbin/sshd\")",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 5.0,
+   "tactic": "Defense Impairment",
+   "technique": "T1556 Modify Authentication Process",
+   "techniques": "T1556"
+  },
+  {
+   "title": "LNX - Изменение прав доступа (chmod)",
+   "priority": 2,
+   "streams": [
+    "RedOS auditd Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Linux"
+   ],
+   "state": "ENABLED",
+   "description": "Изменение прав доступа через chmod (кроме uid 1001). В исходных сообщениях: режим, файл и пользователь.",
+   "query": "audit_type:SYSCALL AND comm:chmod AND success:yes AND -uid:\"1001\"",
+   "group_by": [
+    "source"
+   ],
+   "condition": {
+    "op": ">",
+    "value": 0
+   },
+   "aggregated": true,
+   "window_min": 5.0,
+   "grace_min": 5.0,
+   "tactic": "Defense Impairment",
+   "technique": "T1222.002 Linux and Mac Permissions",
+   "techniques": "T1222.002"
+  },
+  {
+   "title": "LNX - Изменение правил firewall (iptables, nft)",
+   "priority": 1,
+   "streams": [
+    "RedOS auditd Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Linux"
+   ],
+   "state": "ENABLED",
+   "description": "Запуск iptables/nft. Обычно Docker или firewalld, но так же отключают защиту.",
+   "query": "key:sbin_susp AND audit_type:SYSCALL",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 5.0,
+   "tactic": "Defense Impairment",
+   "technique": "T1686 Disable or Modify System Firewall",
+   "techniques": "T1686"
+  },
+  {
+   "title": "LNX - Исполнение из памяти (memfd_create)",
+   "priority": 2,
+   "streams": [
+    "RedOS auditd Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Linux"
+   ],
+   "state": "ENABLED",
+   "description": "Создан анонимный файл в памяти (memfd_create). Так работают fileless-загрузчики; легитимно — некоторые AppImage.",
+   "query": "key:anon_file_create AND audit_type:SYSCALL AND NOT exe:(<белый список>) AND NOT outline",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 5.0,
+   "tactic": "Stealth",
+   "technique": "T1620 Reflective Code Loading",
+   "techniques": "T1620"
+  },
+  {
+   "title": "LNX - Использование sudo",
+   "priority": 1,
+   "streams": [
+    "RedOS auditd Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Linux"
+   ],
+   "state": "ENABLED",
+   "description": "Выполнение команды через sudo (кроме служебного пользователя). Команда собирается из аргументов a0 a1 a2 a3 в исходных сообщениях.",
+   "query": "audit_type:EXECVE AND a0:\"sudo\" AND NOT uid:<служебный> AND NOT a2=\"<служебный агент>\"",
+   "group_by": [
+    "source"
+   ],
+   "condition": {
+    "op": ">",
+    "value": 0
+   },
+   "aggregated": true,
+   "window_min": 5.0,
+   "grace_min": 5.0,
+   "tactic": "Privilege Escalation",
+   "technique": "T1548.003 Sudo and Sudo Caching",
+   "techniques": "T1548.003"
+  },
+  {
+   "title": "LNX - Массовое удаление файлов (200+ за 5 мин)",
+   "priority": 3,
+   "streams": [
+    "RedOS auditd Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Linux"
+   ],
+   "state": "ENABLED",
+   "description": "Один процесс удалил 200 и более файлов за 5 минут (обычный максимум в лаборатории около 30). Так выглядит затирание данных или шифровальщик.",
+   "query": "audit_type:SYSCALL AND key:file_deletion",
+   "group_by": [
+    "source",
+    "exe"
+   ],
+   "condition": {
+    "op": ">=",
+    "value": 200
+   },
+   "aggregated": true,
+   "window_min": 5.0,
+   "grace_min": 5.0,
+   "tactic": "Impact",
+   "technique": "T1485 Data Destruction",
+   "techniques": "T1485, T1070.004"
+  },
+  {
+   "title": "LNX - Неудачная попытка sudo",
+   "priority": 2,
+   "streams": [
+    "RedOS auditd Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Linux"
+   ],
+   "state": "ENABLED",
+   "description": "Неудачная аутентификация sudo: неверный пароль или отказ PAM/SSSD. Возможен подбор пароля или ошибка пользователя.",
+   "query": "message:\"sudo\" AND (message:\"authentication failure\" OR message:\"incorrect password\" OR (message:\"pam_sss\" AND message:\"failure\"))",
+   "group_by": [
+    "source"
+   ],
+   "condition": {
+    "op": ">",
+    "value": 0
+   },
+   "aggregated": true,
+   "window_min": 5.0,
+   "grace_min": 5.0,
+   "tactic": "Privilege Escalation",
+   "technique": "T1548.003 Sudo and Sudo Caching",
+   "techniques": "T1548.003"
+  },
+  {
+   "title": "LNX - Обратная оболочка (/dev/tcp)",
+   "priority": 3,
+   "streams": [
+    "RedOS auditd Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Linux"
+   ],
+   "state": "ENABLED",
+   "description": "В командной строке использован /dev/tcp — типичный приём reverse shell в bash.",
+   "query": "audit_type:EXECVE AND message:\"/dev/tcp\"",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 5.0,
+   "tactic": "Execution",
+   "technique": "T1059.004 Unix Shell",
+   "techniques": "T1059.004"
+  },
+  {
+   "title": "LNX - Обратная оболочка (python, perl, nc, socat, mkfifo)",
+   "priority": 3,
+   "streams": [
+    "RedOS auditd Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Linux"
+   ],
+   "state": "ENABLED",
+   "description": "Командная строка с типовыми обратными оболочками: python -c с socket, perl -e с socket, nc -e, mkfifo, socat с exec:, bash -i с перенаправлением. Дополняет алерт на /dev/tcp.",
+   "query": "audit_type:PROCTITLE AND proctitle:/.*(python[0-9.]* -c .*socket|perl -e .*socket|nc(at)? .* -e |mkfifo |socat .*exec:|bash -i .*>&).*/",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 5.0,
+   "tactic": "Execution",
+   "technique": "T1059.004 Unix Shell",
+   "techniques": "T1059.004, T1571"
+  },
+  {
+   "title": "LNX - Остановка службы (systemctl stop)",
+   "priority": 2,
+   "streams": [
+    "RedOS auditd Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Linux"
+   ],
+   "state": "ENABLED",
+   "description": "Остановка системной службы через systemctl stop. Имя службы: аргумент a2 в исходных сообщениях.",
+   "query": "audit_type:EXECVE AND a0:\"systemctl\" AND a1:\"stop\"",
+   "group_by": [
+    "source"
+   ],
+   "condition": {
+    "op": ">",
+    "value": 0
+   },
+   "aggregated": true,
+   "window_min": 5.0,
+   "grace_min": 5.0,
+   "tactic": "Impact",
+   "technique": "T1489 Service Stop",
+   "techniques": "T1489"
+  },
+  {
+   "title": "LNX - Отказ SELinux (AVC)",
+   "priority": 1,
+   "streams": [
+    "RedOS auditd Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Linux"
+   ],
+   "state": "ENABLED",
+   "description": "SELinux запретил действие процессу. Может указывать на попытку обхода политики или на ошибку настройки.",
+   "query": "audit_type:AVC AND NOT comm:(<исключения>)",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 5.0,
+   "tactic": null,
+   "technique": null,
+   "techniques": null
+  },
+  {
+   "title": "LNX - Отключение аудита или удаление правил auditd",
+   "priority": 3,
+   "streams": [
+    "RedOS auditd Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Linux"
+   ],
+   "state": "ENABLED",
+   "description": "Удалено правило auditd или аудит отключён (audit_enabled=0). Атакующий может ослеплять мониторинг.",
+   "query": "audit_type:CONFIG_CHANGE AND (op:remove_rule OR message:\"audit_enabled=0\")",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 5.0,
+   "tactic": "Defense Impairment",
+   "technique": "T1685.004 Disable or Modify Linux Audit System Log",
+   "techniques": "T1685.004"
+  },
+  {
+   "title": "LNX - Подозрительные утилиты (base64, nc, socat, scp)",
+   "priority": 2,
+   "streams": [
+    "RedOS auditd Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Linux"
+   ],
+   "state": "ENABLED",
+   "description": "Запуск утилит, часто используемых для передачи и кодирования данных: base64, nc, socat, scp.",
+   "query": "key:susp_activity AND audit_type:SYSCALL AND NOT exe:(\"/usr/bin/netstat\" OR \"/usr/bin/curl\" OR \"/usr/bin/ssh\")",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 5.0,
+   "tactic": "Command and Control",
+   "technique": "T1105 Ingress Tool Transfer",
+   "techniques": "T1105, T1140"
+  },
+  {
+   "title": "LNX - Разведка (id, whoami)",
+   "priority": 1,
+   "streams": [
+    "RedOS auditd Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Linux"
+   ],
+   "state": "ENABLED",
+   "description": "Запуск команд разведки системы. Сами по себе безобидны, важны в связке с другими событиями.",
+   "query": "key:recon AND audit_type:SYSCALL AND NOT exe:(<белый список>)",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 5.0,
+   "tactic": "Discovery",
+   "technique": "T1033 System Owner/User Discovery",
+   "techniques": "T1033"
+  },
+  {
+   "title": "LNX - Установка setuid или setgid",
+   "priority": 3,
+   "streams": [
+    "RedOS auditd Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Linux"
+   ],
+   "state": "ENABLED",
+   "description": "chmod, fchmod, fchmodat с битом setuid (04000) или setgid (02000). Исключены systemd-tmpfiles, rpm и dnf: их установки штатно выставляют такие права.",
+   "query": "audit_type:SYSCALL AND key:perm_modification AND ((syscall:(53 OR 268) AND a2:/[4-9a-f][0-9a-f]{2}/) OR (syscall:(52 OR 90 OR 91) AND a1:/[4-9a-f][0-9a-f]{2}/)) AND NOT exe:(\"/usr/bin/systemd-tmpfiles\" OR \"/usr/bin/rpm\" OR \"/usr/bin/dnf\" OR \"/usr/bin/dnf5\")",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 5.0,
+   "tactic": "Privilege Escalation",
+   "technique": "T1548.001 Setuid and Setgid",
+   "techniques": "T1548.001"
+  },
+  {
+   "title": "Windows - DNS-запрос к туннелям и файлообменникам",
+   "priority": 2,
+   "streams": [
+    "WindowsLogs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Windows"
+   ],
+   "state": "ENABLED",
+   "description": "Sysmon 22: запрос к ngrok, pastebin, transfer.sh, trycloudflare, duckdns, anonfiles, serveo. Через них обходят периметр и забирают данные.",
+   "query": "win_channel:\"Microsoft-Windows-Sysmon/Operational\" AND win_event_id:22 AND winlogbeat_winlog_event_data_QueryName:/.*(ngrok|pastebin|transfer\\.sh|trycloudflare|duckdns|anonfiles|serveo).*/",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 5.0,
+   "tactic": "Command and Control",
+   "technique": "T1572 Protocol Tunneling",
+   "techniques": "T1572, T1102"
+  },
+  {
+   "title": "Windows - Defender обнаружил угрозу или отключён",
+   "priority": 3,
+   "streams": [
+    "WindowsLogs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Windows"
+   ],
+   "state": "ENABLED",
+   "description": "Defender обнаружил или обезвредил угрозу (1116, 1117) либо защита в реальном времени отключена (5001, 5010, 5012).",
+   "query": "win_event_id:(1116 OR 1117 OR 5001 OR 5010 OR 5012)",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 5.0,
+   "tactic": "Defense Impairment",
+   "technique": "T1685 Disable or Modify Tools",
+   "techniques": "T1685"
+  },
+  {
+   "title": "Windows - LOLBins (certutil, mshta, bitsadmin, regsvr32)",
+   "priority": 2,
+   "streams": [
+    "WindowsLogs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Windows"
+   ],
+   "state": "ENABLED",
+   "description": "Системные утилиты в роли загрузчика: certutil -urlcache, mshta, bitsadmin, regsvr32 /i:http (Squiblydoo).",
+   "query": "win_event_id:1 AND message:(\"urlcache\" OR \"mshta.exe\" OR \"bitsadmin\" OR \"scrobj.dll\" OR \"/i:http\")",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 5.0,
+   "tactic": "Stealth",
+   "technique": "T1218 System Binary Proxy Execution",
+   "techniques": "T1218, T1218.005, T1218.010, T1105"
+  },
+  {
+   "title": "Windows - Office, wscript или mshta создал исполняемый файл",
+   "priority": 3,
+   "streams": [
+    "WindowsLogs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Windows"
+   ],
+   "state": "ENABLED",
+   "description": "Sysmon 11: Office, wscript, cscript или mshta записал exe, dll, scr, hta, js, vbs, ps1 или bat в Temp, AppData, Public, ProgramData, Downloads, PerfLogs. powershell не включён: он постоянно создаёт временные dll.",
+   "query": "win_channel:\"Microsoft-Windows-Sysmon/Operational\" AND win_event_id:11 AND win_image:/.*\\\\(winword|excel|powerpnt|outlook|wscript|cscript|mshta)\\.exe/ AND win_filename:/.*\\\\(Temp|AppData|Users\\\\Public|ProgramData|Downloads|PerfLogs)\\\\.*\\.(exe|dll|scr|hta|js|jse|vbs|ps1|bat)/",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 5.0,
+   "tactic": "Execution",
+   "technique": "T1204.002 Malicious File",
+   "techniques": "T1204.002, T1105"
+  },
+  {
+   "title": "Windows - PowerShell с закодированной командой",
+   "priority": 3,
+   "streams": [
+    "WindowsLogs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Windows"
+   ],
+   "state": "ENABLED",
+   "description": "PowerShell запущен с -EncodedCommand или декодирует Base64. Так прячут вредоносные скрипты.",
+   "query": "win_event_id:1 AND win_image:(\"C:\\\\Windows\\\\System32\\\\WindowsPowerShell\\\\v1.0\\\\powershell.exe\" OR \"C:\\\\Program Files\\\\PowerShell\\\\7\\\\pwsh.exe\") AND message:(\"-enc\" OR \"-encodedcommand\" OR \"-ec\" OR \"frombase64string\") AND NOT winlogbeat_winlog_event_data_ParentImage:\"C:\\\\Program Files\\\\LogAtlas\\\\python\\\\pythonw.exe\"",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 5.0,
+   "tactic": "Execution",
+   "technique": "T1059.001 PowerShell",
+   "techniques": "T1059.001, T1027.010"
+  },
+  {
+   "title": "Windows - PowerShell скачивает и исполняет код",
+   "priority": 3,
+   "streams": [
+    "WindowsLogs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Windows"
+   ],
+   "state": "ENABLED",
+   "description": "Script Block Logging (4104): DownloadString, Net.WebClient, Invoke-WebRequest или IEX. Типичный загрузчик.",
+   "query": "win_event_id:4104 AND message:(\"DownloadString\" OR \"DownloadFile\" OR \"Invoke-Expression\" OR \"IEX\" OR \"Net.WebClient\" OR \"Invoke-WebRequest\")",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 5.0,
+   "tactic": "Execution",
+   "technique": "T1059.001 PowerShell",
+   "techniques": "T1059.001, T1105"
+  },
+  {
+   "title": "Windows - wscript, cscript, mshta или regsvr32 ходит во внешнюю сеть",
+   "priority": 3,
+   "streams": [
+    "WindowsLogs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Windows"
+   ],
+   "state": "ENABLED",
+   "description": "Sysmon 3: исходящее соединение на внешний IP от wscript, cscript, mshta или regsvr32. Эти программы почти не ходят в сеть сами, поэтому соединение похоже на загрузчик или канал управления. powershell и rundll32 исключены: их легитимный сетевой трафик (GitHub, Cloudflare, Azure) даёт много шума.",
+   "query": "win_channel:\"Microsoft-Windows-Sysmon/Operational\" AND win_event_id:3 AND win_image:/.*\\\\(wscript|cscript|mshta|regsvr32)\\.exe/ AND winlogbeat_winlog_event_data_Initiated:true AND _exists_:winlogbeat_winlog_event_data_DestinationIp AND NOT winlogbeat_winlog_event_data_DestinationIp:(10.* OR 192.168.* OR 127.* OR 169.254.* OR fe80* OR \"::1\" OR fc* OR fd* OR /172\\.(1[6-9]|2[0-9]|3[01])\\..*/)",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 5.0,
+   "tactic": "Stealth",
+   "technique": "T1218 System Binary Proxy Execution",
+   "techniques": "T1218, T1071.001"
+  },
+  {
+   "title": "Windows - Автозагрузка через ключ реестра Run",
+   "priority": 2,
+   "streams": [
+    "WindowsLogs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Windows"
+   ],
+   "state": "ENABLED",
+   "description": "Запись в ключ CurrentVersion\\Run (Sysmon 13) не известным приложением. Классический способ закрепления.",
+   "query": "win_event_id:13 AND message:\"CurrentVersion\\\\Run\" AND NOT win_image:(\"C:\\\\Program Files\\\\Yandex\\\\YandexBrowser\\\\Application\\\\browser.exe\" OR \"C:\\\\Program Files\\\\CCleaner\\\\CCleaner64.exe\" OR \"C:\\\\ProgramData\\\\Wargaming.net\\\\GameCenter\\\\wgc.exe\" OR \"C:\\\\Program Files (x86)\\\\Microsoft\\\\Edge\\\\Application\\\\msedge.exe\")",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 5.0,
+   "tactic": "Persistence",
+   "technique": "T1547.001 Registry Run Keys / Startup Folder",
+   "techniques": "T1547.001"
+  },
+  {
+   "title": "Windows - Вход из неизвестной сети (4624, тип 3 или 10)",
+   "priority": 3,
+   "streams": [
+    "WindowsLogs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Windows"
+   ],
+   "state": "ENABLED",
+   "description": "Сетевой вход (тип 3) или RDP (тип 10) с адреса, которого нет в справочнике homelab-subnets (поле src_zone не заполнено). Требует pipeline «homelab: windows enrichment» и обновлённую таблицу подсетей.",
+   "query": "win_channel:Security AND win_event_id:4624 AND winlogbeat_winlog_event_data_LogonType:(3 OR 10) AND _exists_:winlogbeat_winlog_event_data_IpAddress AND NOT winlogbeat_winlog_event_data_IpAddress:(<белый список>) AND NOT _exists_:src_zone",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 5.0,
+   "tactic": "Initial Access",
+   "technique": "T1078 Valid Accounts",
+   "techniques": "T1078, T1021"
+  },
+  {
+   "title": "Windows - Вход по RDP",
+   "priority": 1,
+   "streams": [
+    "WindowsLogs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Windows"
+   ],
+   "state": "ENABLED",
+   "description": "Успешный интерактивный вход по RDP (4624, LogonType 10).",
+   "query": "win_event_id:4624 AND winlogbeat_winlog_event_data_LogonType:10",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 5.0,
+   "tactic": "Lateral Movement",
+   "technique": "T1021.001 Remote Desktop Protocol",
+   "techniques": "T1021.001"
+  },
+  {
+   "title": "Windows - Дамп учётных данных (reg save, comsvcs, ntdsutil)",
+   "priority": 3,
+   "streams": [
+    "WindowsLogs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Windows"
+   ],
+   "state": "ENABLED",
+   "description": "Выгрузка кустов SAM/SECURITY/SYSTEM через reg save, дамп памяти через comsvcs.dll MiniDump или копирование NTDS через ntdsutil.",
+   "query": "win_event_id:1 AND (message:(\"reg save hklm sam\" OR \"reg save hklm security\" OR \"reg save hklm system\" OR \"reg.exe save hklm sam\" OR \"reg.exe save hklm security\" OR \"reg.exe save hklm system\" OR \"reg save hkey_local_machine sam\" OR \"reg save hkey_local_machine security\" OR \"reg save hkey_local_machine system\") OR (message:\"comsvcs.dll\" AND message:minidump) OR (message:\"ntdsutil.exe\" AND message:(ifm OR ntds)))",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 5.0,
+   "tactic": "Credential Access",
+   "technique": "T1003.002 Security Account Manager",
+   "techniques": "T1003.002, T1003.001, T1003.003"
+  },
+  {
+   "title": "Windows - Добавление в локальные администраторы (командная строка)",
+   "priority": 3,
+   "streams": [
+    "WindowsLogs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Windows"
+   ],
+   "state": "ENABLED",
+   "description": "net localgroup administrators /add или Add-LocalGroupMember. Дополняет алерт по событиям 4728/4732 для случаев, когда аудит групп отключён.",
+   "query": "win_event_id:1 AND ((message:localgroup AND message:(administrators OR администраторы) AND message:add) OR (message:\"Add-LocalGroupMember\" AND message:(administrators OR администраторы)))",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 5.0,
+   "tactic": "Persistence",
+   "technique": "T1098 Account Manipulation",
+   "techniques": "T1098"
+  },
+  {
+   "title": "Windows - Доступ к памяти LSASS",
+   "priority": 3,
+   "streams": [
+    "WindowsLogs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Windows"
+   ],
+   "state": "ENABLED",
+   "description": "Процесс открыл память lsass.exe (Sysmon 10). Типичный признак кражи учётных данных (mimikatz, procdump).",
+   "query": "win_event_id:10 AND message:\"lsass.exe\" AND NOT winlogbeat_winlog_event_data_SourceImage:(\"C:\\\\WINDOWS\\\\system32\\\\svchost.exe\" OR \"C:\\\\Windows\\\\InfraxAgent.exe\" OR \"C:\\\\WINDOWS\\\\system32\\\\wbem\\\\wmiprvse.exe\" OR \"C:\\\\WINDOWS\\\\system32\\\\tasklist.exe\" OR \"C:\\\\Program Files\\\\Zabbix Agent\\\\zabbix_agentd.exe\" OR \"C:\\\\Program Files (x86)\\\\ossec-agent\\\\wazuh-agent.exe\" OR \"C:\\\\Program Files\\\\CCleaner\\\\CCleaner64.exe\" OR \"C:\\\\Program Files (x86)\\\\Microsoft\\\\EdgeUpdate\\\\MicrosoftEdgeUpdate.exe\") AND NOT message:\"Kaspersky Lab\" AND NOT message:(<белый список>) AND NOT winlogbeat_winlog_event_data_GrantedAccess:(0x1000 OR 0x1400 OR 0x100000 OR 0x101000)",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 5.0,
+   "tactic": "Credential Access",
+   "technique": "T1003.001 LSASS Memory",
+   "techniques": "T1003.001"
+  },
+  {
+   "title": "Windows - Закрепление через IFEO Debugger, AppInit_DLLs и Winlogon",
+   "priority": 2,
+   "streams": [
+    "WindowsLogs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Windows"
+   ],
+   "state": "ENABLED",
+   "description": "Sysmon 12/13: значения Debugger, GlobalFlag и VerifierDlls в Image File Execution Options, AppInit_DLLs, Winlogon Shell и Userinit. RunOnce и MitigationOptions не включены: их постоянно пишут Office, Edge и Defender.",
+   "query": "win_channel:\"Microsoft-Windows-Sysmon/Operational\" AND win_event_id:(12 OR 13) AND winlogbeat_winlog_event_data_TargetObject:/.*(Image File Execution Options\\\\[^\\\\]+\\\\(Debugger|GlobalFlag|VerifierDlls)|\\\\AppInit_DLLs|CurrentVersion\\\\Winlogon\\\\(Userinit|Shell))/",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 5.0,
+   "tactic": "Persistence",
+   "technique": "T1546.012 Image File Execution Options Injection",
+   "techniques": "T1546.012, T1546.010, T1547.004"
+  },
+  {
+   "title": "Windows - Изменение группы «Администраторы домена»",
+   "priority": 3,
+   "streams": [
+    "WindowsLogs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Windows"
+   ],
+   "state": "ENABLED",
+   "description": "Добавление или удаление учётной записи в группе «Администраторы домена» (net group). Критично: высшие привилегии в домене.",
+   "query": "message:\"net group\" AND message:(\"/add\" OR \"/delete\") AND message:\"Администраторы домена\"",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 5.0,
+   "tactic": "Persistence",
+   "technique": "T1098 Account Manipulation",
+   "techniques": "T1098"
+  },
+  {
+   "title": "Windows - Изменение привилегированных групп и учёток",
+   "priority": 3,
+   "streams": [
+    "WindowsLogs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Windows"
+   ],
+   "state": "ENABLED",
+   "description": "Создание/удаление учётки (4720, 4726), сброс пароля (4724), добавление в привилегированную группу (4728, 4732, 4756) или блокировка (4740). Требует включённого аудита управления учётными записями.",
+   "query": "win_event_id:(4720 OR 4726 OR 4728 OR 4732 OR 4756 OR 4740 OR 4724)",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 5.0,
+   "tactic": "Persistence",
+   "technique": "T1098 Account Manipulation",
+   "techniques": "T1098"
+  },
+  {
+   "title": "Windows - Именованные каналы C2 (Cobalt Strike и аналоги)",
+   "priority": 3,
+   "streams": [
+    "WindowsLogs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Windows"
+   ],
+   "state": "ENABLED",
+   "description": "Sysmon 17/18: имена каналов, характерные для Cobalt Strike (msagent_*, postex_*, status_*, MSSE-*-server). Каналы нужны для связи бекона и инъекций.",
+   "query": "win_channel:\"Microsoft-Windows-Sysmon/Operational\" AND win_event_id:(17 OR 18) AND winlogbeat_winlog_event_data_PipeName:/\\\\(msagent_|postex_|status_|MSSE-).*/",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 5.0,
+   "tactic": "Stealth",
+   "technique": "T1055 Process Injection",
+   "techniques": "T1055"
+  },
+  {
+   "title": "Windows - Исключения или отключение защиты Defender",
+   "priority": 3,
+   "streams": [
+    "WindowsLogs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Windows"
+   ],
+   "state": "ENABLED",
+   "description": "Команда Add-/Set-MpPreference с исключениями или отключением мониторинга, либо запись в ключ Windows Defender\\Exclusions (Sysmon 13).",
+   "query": "(win_event_id:1 AND (message:\"Add-MpPreference\" OR message:\"Set-MpPreference\") AND message:(ExclusionPath OR ExclusionExtension OR ExclusionProcess OR DisableRealtimeMonitoring OR DisableIOAVProtection OR DisableBehaviorMonitoring)) OR (win_channel:\"Microsoft-Windows-Sysmon/Operational\" AND win_event_id:13 AND winlogbeat_winlog_event_data_TargetObject:/.*Windows Defender\\\\Exclusions.*/ AND NOT win_image:/.*\\\\(MsMpEng|MsMpEngCP)\\.exe/)",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 5.0,
+   "tactic": "Defense Impairment",
+   "technique": "T1685 Disable or Modify Tools",
+   "techniques": "T1685"
+  },
+  {
+   "title": "Windows - Командная оболочка запущена через WMI",
+   "priority": 3,
+   "streams": [
+    "WindowsLogs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Windows"
+   ],
+   "state": "ENABLED",
+   "description": "Sysmon 1: WmiPrvSE.exe породил cmd, powershell, wscript, cscript, mshta или rundll32. Так работает удалённое выполнение через WMI (wmic /node, Impacket wmiexec).",
+   "query": "win_channel:\"Microsoft-Windows-Sysmon/Operational\" AND win_event_id:1 AND winlogbeat_winlog_event_data_ParentImage:/.*\\\\[Ww]mi[Pp]rv[Ss][Ee]\\.exe/ AND win_image:/.*\\\\(cmd|powershell|pwsh|wscript|cscript|mshta|rundll32)\\.exe/",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 5.0,
+   "tactic": "Execution",
+   "technique": "T1047 Windows Management Instrumentation",
+   "techniques": "T1047"
+  },
+  {
+   "title": "Windows - Новая служба",
+   "priority": 2,
+   "streams": [
+    "WindowsLogs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Windows"
+   ],
+   "state": "ENABLED",
+   "description": "Установлена новая служба (7045, 4697), кроме драйверов Kaspersky. Частый способ закрепления.",
+   "query": "win_event_id:(7045 OR 4697) AND NOT winlogbeat_winlog_event_data_ServiceName:Kaspersky*",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 5.0,
+   "tactic": "Persistence",
+   "technique": "T1543.003 Windows Service",
+   "techniques": "T1543.003"
+  },
+  {
+   "title": "Windows - Отключение Firewall (netsh или PS)",
+   "priority": 3,
+   "streams": [
+    "WindowsLogs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Windows"
+   ],
+   "state": "ENABLED",
+   "description": "Запуск «netsh advfirewall … disable» или PowerShell «Disable-NetFirewall…». Атакующий отключает брандмауэр, чтобы открыть сетевые соединения.",
+   "query": "win_event_id:1 AND ((message:\"netsh\" AND message:\"firewall\" AND message:(\"disable\" OR \"off\")) OR message:\"Disable-NetFirewall\")",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 5.0,
+   "tactic": "Defense Impairment",
+   "technique": "T1686.003 Windows Host Firewall",
+   "techniques": "T1686.003"
+  },
+  {
+   "title": "Windows - Офисное приложение запустило оболочку",
+   "priority": 3,
+   "streams": [
+    "WindowsLogs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Windows"
+   ],
+   "state": "ENABLED",
+   "description": "Word/Excel/Outlook/PowerPoint запустили cmd, powershell, wscript, cscript или mshta. Характерно для вредоносных макросов.",
+   "query": "win_event_id:1 AND message:(\"WINWORD.EXE\" OR \"EXCEL.EXE\" OR \"OUTLOOK.EXE\" OR \"POWERPNT.EXE\") AND win_image:(\"C:\\\\Windows\\\\System32\\\\cmd.exe\" OR \"C:\\\\Windows\\\\System32\\\\WindowsPowerShell\\\\v1.0\\\\powershell.exe\" OR \"C:\\\\Windows\\\\System32\\\\wscript.exe\" OR \"C:\\\\Windows\\\\System32\\\\cscript.exe\" OR \"C:\\\\Windows\\\\System32\\\\mshta.exe\")",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 5.0,
+   "tactic": "Execution",
+   "technique": "T1204.002 Malicious File",
+   "techniques": "T1204.002, T1059"
+  },
+  {
+   "title": "Windows - Очистка журнала событий",
+   "priority": 3,
+   "streams": [
+    "WindowsLogs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Windows"
+   ],
+   "state": "ENABLED",
+   "description": "Журнал Security (1102) или System (104) очищен. Почти всегда признак заметания следов.",
+   "query": "win_event_id:(1102 OR 104)",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 5.0,
+   "tactic": "Defense Impairment",
+   "technique": "T1685.005 Clear Windows Event Logs",
+   "techniques": "T1685.005"
+  },
+  {
+   "title": "Windows - Перебор несуществующих пользователей (5+ за 10 мин)",
+   "priority": 2,
+   "streams": [
+    "WindowsLogs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Windows"
+   ],
+   "state": "ENABLED",
+   "description": "5 и более неудачных входов с одного IP за 10 минут с причиной «пользователь не существует» (SubStatus 0xc0000064): перебор имён учёток.",
+   "query": "win_event_id:4625 AND winlogbeat_winlog_event_data_SubStatus:0xc0000064",
+   "group_by": [
+    "winlogbeat_winlog_event_data_IpAddress"
+   ],
+   "condition": {
+    "op": ">=",
+    "value": 5
+   },
+   "aggregated": true,
+   "window_min": 10.0,
+   "grace_min": 5.0,
+   "tactic": "Credential Access",
+   "technique": "T1110 Brute Force",
+   "techniques": "T1110, T1087"
+  },
+  {
+   "title": "Windows - Подбор пароля (5+ ошибок входа 4625 за 5 мин)",
+   "priority": 3,
+   "streams": [
+    "WindowsLogs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Windows"
+   ],
+   "state": "ENABLED",
+   "description": "5 и более неудачных входов (Event ID 4625) на одном хосте за 5 минут. Возможен брутфорс, в том числе учётной записи администратора.",
+   "query": "winlogbeat_event_code:4625 AND winlogbeat_event_outcome:failure",
+   "group_by": [
+    "source"
+   ],
+   "condition": {
+    "op": ">=",
+    "value": 5
+   },
+   "aggregated": true,
+   "window_min": 5.0,
+   "grace_min": 5.0,
+   "tactic": "Credential Access",
+   "technique": "T1110 Brute Force",
+   "techniques": "T1110"
+  },
+  {
+   "title": "Windows - Серия разведки (5+ команд за 5 мин)",
+   "priority": 1,
+   "streams": [
+    "WindowsLogs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Windows"
+   ],
+   "state": "ENABLED",
+   "description": "5 и более запусков net, whoami, nltest, systeminfo, quser, arp на одном хосте за 5 минут — типичная разведка после проникновения.",
+   "query": "win_event_id:1 AND message:(\"whoami.exe\" OR \"nltest.exe\" OR \"net.exe\" OR \"net1.exe\" OR \"systeminfo.exe\" OR \"quser.exe\" OR \"arp.exe\")",
+   "group_by": [
+    "source"
+   ],
+   "condition": {
+    "op": ">=",
+    "value": 5
+   },
+   "aggregated": true,
+   "window_min": 5.0,
+   "grace_min": 5.0,
+   "tactic": "Discovery",
+   "technique": "T1082 System Information Discovery",
+   "techniques": "T1082"
+  },
+  {
+   "title": "Windows - Создание задачи через schtasks",
+   "priority": 2,
+   "streams": [
+    "WindowsLogs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Windows"
+   ],
+   "state": "ENABLED",
+   "description": "Запланированная задача создана командой schtasks /create. Частый способ закрепления и запуска.",
+   "query": "win_event_id:1 AND message:\"schtasks\" AND message:\"/create\"",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 5.0,
+   "tactic": "Execution",
+   "technique": "T1053.005 Scheduled Task",
+   "techniques": "T1053.005"
+  },
+  {
+   "title": "Windows - Создание/удаление локального пользователя (net user)",
+   "priority": 3,
+   "streams": [
+    "WindowsLogs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Windows"
+   ],
+   "state": "ENABLED",
+   "description": "Создан или удалён локальный пользователь командой net user /add или /delete (Sysmon Event 1).",
+   "query": "winlogbeat_winlog_event_id:1 AND message:\"net user\" AND (message:\"/add\" OR message:\"/delete\")",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 5.0,
+   "tactic": "Persistence",
+   "technique": "T1136.001 Local Account",
+   "techniques": "T1136.001"
+  },
+  {
+   "title": "Windows - Удаление теневых копий",
+   "priority": 3,
+   "streams": [
+    "WindowsLogs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Windows"
+   ],
+   "state": "ENABLED",
+   "description": "Удаление теневых копий или отключение восстановления (vssadmin, wmic shadowcopy, bcdedit). Типичный шаг шифровальщика.",
+   "query": "win_event_id:1 AND ((message:\"vssadmin\" AND message:\"delete\") OR (message:\"shadowcopy\" AND message:\"delete\") OR (message:\"bcdedit\" AND message:\"recoveryenabled\"))",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 5.0,
+   "tactic": "Impact",
+   "technique": "T1490 Inhibit System Recovery",
+   "techniques": "T1490"
+  },
+  {
+   "title": "macOS - Bi.Zone: неизвестный SSH-ключ в authorized_keys",
+   "priority": 3,
+   "streams": [
+    "BiZone_macOS"
+   ],
+   "notifications": [
+    "Mail.ru Alert MacOS"
+   ],
+   "state": "ENABLED",
+   "description": "В authorized_keys появился ключ, отпечатка которого нет в белом списке (подставь отпечатки своих ключей). Возможен бэкдор-доступ по SSH.",
+   "query": "mac_bz_event_type:SSHKeyInfo AND NOT auth_key_fingerprint:(<белый список>)",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 10080.0,
+   "tactic": "Persistence",
+   "technique": "T1098.004 SSH Authorized Keys",
+   "techniques": "T1098.004"
+  },
+  {
+   "title": "macOS - Bi.Zone: неудачные входы по SSH",
+   "priority": 1,
+   "streams": [
+    "BiZone_macOS"
+   ],
+   "notifications": [
+    "Mail.ru Alert MacOS"
+   ],
+   "state": "ENABLED",
+   "description": "В журнале sshd есть ошибки аутентификации (по снимку Bi.Zone). Повтор не чаще раза в сутки на хост.",
+   "query": "mac_bz_event_type:LogonHistoryFailure",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 1440.0,
+   "tactic": "Credential Access",
+   "technique": "T1110 Brute Force",
+   "techniques": "T1110"
+  },
+  {
+   "title": "macOS - Bi.Zone: новое правило в sudoers",
+   "priority": 3,
+   "streams": [
+    "BiZone_macOS"
+   ],
+   "notifications": [
+    "Mail.ru Alert MacOS"
+   ],
+   "state": "ENABLED",
+   "description": "В sudoers появилось правило не из белого списка (root, %admin и свои служебные правила). Возможна эскалация привилегий.",
+   "query": "mac_bz_event_type:SudoersInfo AND NOT sudoers_rule:(\"%admin ALL = (ALL) ALL\" OR \"root ALL = (ALL) ALL\" OR \"example-user ALL=(root) NOPASSWD: /usr/local/bin/example.sh\")",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 10080.0,
+   "tactic": "Privilege Escalation",
+   "technique": "T1548.003 Sudo and Sudo Caching",
+   "techniques": "T1548.003"
+  },
+  {
+   "title": "macOS - Bi.Zone: новый пользователь",
+   "priority": 3,
+   "streams": [
+    "BiZone_macOS"
+   ],
+   "notifications": [
+    "Mail.ru Alert MacOS"
+   ],
+   "state": "ENABLED",
+   "description": "В системе появился пользователь с uid ≥ 500, которого нет в белом списке (подставь своих пользователей).",
+   "query": "mac_bz_event_type:UserInfo AND usr_tgt_id:>=500 AND NOT mac_bz_user:(\"example-user\" OR \"nobody\")",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 10080.0,
+   "tactic": "Persistence",
+   "technique": "T1136.001 Local Account",
+   "techniques": "T1136.001"
+  },
+  {
+   "title": "macOS - Bi.Zone: новый элемент автозагрузки",
+   "priority": 2,
+   "streams": [
+    "BiZone_macOS"
+   ],
+   "notifications": [
+    "Mail.ru Alert MacOS"
+   ],
+   "state": "ENABLED",
+   "description": "LaunchAgent/LaunchDaemon или другой элемент автозагрузки создан менее суток назад (кроме служб com.homelab.bzt-*). Классический способ закрепления.",
+   "query": "mac_bz_event_type:AsepInfo AND asep_file_age:<86400 AND NOT asep_file_path:\\/Library\\/LaunchDaemons\\/com.homelab.bzt*",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 10080.0,
+   "tactic": "Persistence",
+   "technique": "T1543.004 Launch Daemon",
+   "techniques": "T1543.004, T1543.001"
+  },
+  {
+   "title": "macOS - Bi.Zone: опасная команда в истории оболочки",
+   "priority": 2,
+   "streams": [
+    "BiZone_macOS"
+   ],
+   "notifications": [
+    "Mail.ru Alert MacOS"
+   ],
+   "state": "ENABLED",
+   "description": "В истории zsh/bash появилась новая опасная команда: curl | sh, base64 -d, nc -l, csrutil/spctl disable, dump-keychain, dscl -create, /dev/tcp, снятие карантина, launchctl load. Команды из белого списка исключены — подставь свои.",
+   "query": "mac_bz_event_type:ConsoleCommandInfo AND ((message:\"csrutil\" AND message:\"disable\") OR (message:\"spctl\" AND message:\"disable\") OR (message:\"base64\" AND message:(\"-d\" OR \"--decode\" OR \"-D\")) OR (message:\"curl\" AND message:(\"sh\" OR \"bash\")) OR (message:\"nc\" AND message:\"-l\") OR message:\"ncat\" OR message:\"dump-keychain\" OR message:\"find-generic-password\" OR (message:\"dscl\" AND message:\"-create\") OR message:\"/dev/tcp\" OR (message:\"xattr\" AND message:\"quarantine\") OR (message:\"launchctl\" AND message:(\"load\" OR \"bootstrap\"))) AND NOT cmdline:(\"curl -fsSL http://server.example.domain:8484/setup/host.sh | sudo bash\" OR \"nc -l 9999 > /tmp/test.out\" OR \"openssl base64 -d -A < /tmp/example.b64 > /tmp/example.bundle\")",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 43200.0,
+   "tactic": "Execution",
+   "technique": "T1059.004 Unix Shell",
+   "techniques": "T1059.004"
+  },
+  {
+   "title": "macOS - Bi.Zone: подозрительная запись в hosts",
+   "priority": 3,
+   "streams": [
+    "BiZone_macOS"
+   ],
+   "notifications": [
+    "Mail.ru Alert MacOS"
+   ],
+   "state": "ENABLED",
+   "description": "В /etc/hosts появилась запись не из белого списка. Так перенаправляют обновления, антивирус или банк на чужой адрес.",
+   "query": "mac_bz_event_type:NetworkHostsFileInfo AND inventory_task_name:\"LineInFileFound - Hosts Inventory\" AND NOT file_match:(<белый список>)",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 10080.0,
+   "tactic": "Impact",
+   "technique": "T1565.001 Stored Data Manipulation",
+   "techniques": "T1565.001"
+  },
+  {
+   "title": "macOS - Bi.Zone: процесс из /tmp или /Users/Shared",
+   "priority": 3,
+   "streams": [
+    "BiZone_macOS"
+   ],
+   "notifications": [
+    "Mail.ru Alert MacOS"
+   ],
+   "state": "ENABLED",
+   "description": "Работает процесс, исполняемый файл которого лежит во временном или общем каталоге (кроме Bi.Zone Triage). Типично для загрузчиков.",
+   "query": "mac_bz_event_type:ProcessInfo AND proc_file_path:(\\/tmp\\/* OR \\/private\\/tmp\\/* OR \\/Users\\/Shared\\/* OR \\/private\\/var\\/tmp\\/*) AND NOT proc_file_path:(\\/tmp\\/bzt.* OR \\/private\\/tmp\\/bzt.* OR \\/tmp\\/bz_triage_tmp_* OR \\/private\\/tmp\\/bz_triage_tmp_*)",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 10080.0,
+   "tactic": "Execution",
+   "technique": "T1059 Command and Scripting Interpreter",
+   "techniques": "T1059"
+  },
+  {
+   "title": "macOS - Bi.Zone: смена DNS-серверов",
+   "priority": 3,
+   "streams": [
+    "BiZone_macOS"
+   ],
+   "notifications": [
+    "Mail.ru Alert MacOS"
+   ],
+   "state": "ENABLED",
+   "description": "В resolv.conf появился DNS-сервер не из белого списка. Возможна подмена DNS (перехват трафика, фишинг).",
+   "query": "inventory_task_name:\"LineInFileFound - Resolv Inventory\" AND file_match:nameserver* AND NOT file_match:(<белый список>)",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 10080.0,
+   "tactic": null,
+   "technique": null,
+   "techniques": null
+  },
+  {
+   "title": "macOS - Активность AirDrop",
+   "priority": 2,
+   "streams": [
+    "MacOS Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert MacOS"
+   ],
+   "state": "ENABLED",
+   "description": "Передача или приём через AirDrop (sharingd). Возможна утечка данных.",
+   "query": "log_type:macos_unified AND processImagePath:\"/usr/libexec/sharingd\" AND (eventMessage:\"Creating new AirDrop connection\" OR eventMessage:\"SDAirDropReceiveService.transfers ADD\" OR eventMessage:\"Received ASK request\")",
+   "group_by": [
+    "source"
+   ],
+   "condition": {
+    "op": ">=",
+    "value": 1
+   },
+   "aggregated": true,
+   "window_min": 5.0,
+   "grace_min": 5.0,
+   "tactic": null,
+   "technique": null,
+   "techniques": null
+  },
+  {
+   "title": "macOS - Включение удалённого входа или Screen Sharing",
+   "priority": 2,
+   "streams": [
+    "MacOS Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert MacOS"
+   ],
+   "state": "ENABLED",
+   "description": "systemsetup -setremotelogin, kickstart ARD или setremoteappleevents — открытие удалённого доступа к Маку.",
+   "query": "name:es_process_events AND message:(\"setremotelogin\" OR \"kickstart\" OR \"setremoteappleevents\")",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 5.0,
+   "tactic": "Lateral Movement",
+   "technique": "T1021.004 SSH",
+   "techniques": "T1021.004, T1021.005"
+  },
+  {
+   "title": "macOS - Вмешательство в TCC",
+   "priority": 3,
+   "streams": [
+    "MacOS Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert MacOS"
+   ],
+   "state": "ENABLED",
+   "description": "Сброс разрешений приватности (tccutil) или прямой доступ к базе TCC.db.",
+   "query": "name:es_process_events AND message:(\"tccutil\" OR \"TCC.db\")",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 5.0,
+   "tactic": "Privilege Escalation",
+   "technique": "T1548.006 TCC Manipulation",
+   "techniques": "T1548.006"
+  },
+  {
+   "title": "macOS - Выгрузка паролей из Keychain",
+   "priority": 3,
+   "streams": [
+    "MacOS Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert MacOS"
+   ],
+   "state": "ENABLED",
+   "description": "Команда security читает пароли из Keychain (dump-keychain, find-generic-password, find-internet-password). Типично для стилеров.",
+   "query": "name:es_process_events AND message:(\"dump-keychain\" OR \"find-generic-password\" OR \"find-internet-password\" OR \"export-keychain\")",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 5.0,
+   "tactic": "Credential Access",
+   "technique": "T1555.001 Keychain",
+   "techniques": "T1555.001"
+  },
+  {
+   "title": "macOS - Выполнение команды через sudo",
+   "priority": 1,
+   "streams": [
+    "MacOS Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert MacOS"
+   ],
+   "state": "ENABLED",
+   "description": "Выполнение команды с повышенными привилегиями через sudo (не от root).",
+   "query": "name:sudo_commands AND -columns_uid:0",
+   "group_by": [
+    "source"
+   ],
+   "condition": {
+    "op": ">",
+    "value": 0
+   },
+   "aggregated": true,
+   "window_min": 5.0,
+   "grace_min": 5.0,
+   "tactic": "Privilege Escalation",
+   "technique": "T1548.003 Sudo and Sudo Caching",
+   "techniques": "T1548.003"
+  },
+  {
+   "title": "macOS - Добавление корневого сертификата",
+   "priority": 2,
+   "streams": [
+    "MacOS Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert MacOS"
+   ],
+   "state": "ENABLED",
+   "description": "security add-trusted-cert, trust-settings-import или add-certificates: сертификат становится доверенным в системе. Так подготавливают перехват TLS.",
+   "query": "name:es_process_events AND columns_cmdline:/.*(add-trusted-cert|trust-settings-import|add-certificates).*/",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 5.0,
+   "tactic": "Stealth",
+   "technique": "T1553.004 Install Root Certificate",
+   "techniques": "T1553.004"
+  },
+  {
+   "title": "macOS - Загрузка launchd-задания (load, bootstrap, submit)",
+   "priority": 2,
+   "streams": [
+    "MacOS Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert MacOS"
+   ],
+   "state": "ENABLED",
+   "description": "launchctl load, bootstrap или submit для заданий вне исключений (Apple, hostdeck, Graylog, Elastic, beszel, Homebrew, homelab, logatlas). Так запускают закреплённые задания.",
+   "query": "name:es_process_events AND columns_cmdline:/.*launchctl (load|bootstrap|submit).*/ AND NOT columns_cmdline:/.*(com\\.apple\\.|hostdeck|org\\.graylog|co\\.elastic|beszel|homebrew|com\\.homelab|logatlas).*/",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 5.0,
+   "tactic": "Execution",
+   "technique": "T1569.001 Launchctl",
+   "techniques": "T1569.001, T1543.004"
+  },
+  {
+   "title": "macOS - Загрузка расширения ядра",
+   "priority": 2,
+   "streams": [
+    "MacOS Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert MacOS"
+   ],
+   "state": "ENABLED",
+   "description": "Загрузка kext через kextload или kmutil load.",
+   "query": "name:es_process_events AND (message:\"kextload\" OR (columns_path:\"/usr/bin/kmutil\" AND message:\"load\"))",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 5.0,
+   "tactic": "Persistence",
+   "technique": "T1547.006 Kernel Modules and Extensions",
+   "techniques": "T1547.006"
+  },
+  {
+   "title": "macOS - Запуск программы из /tmp или /Users/Shared",
+   "priority": 2,
+   "streams": [
+    "MacOS Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert MacOS"
+   ],
+   "state": "ENABLED",
+   "description": "Исполняемый файл запущен из временного или общего каталога (кроме Bi.Zone Triage). Типично для загрузчиков.",
+   "query": "name:es_process_events AND columns_path:(\\/tmp\\/* OR \\/private\\/tmp\\/* OR \\/Users\\/Shared\\/* OR \\/private\\/var\\/tmp\\/*) AND NOT columns_path:(\\/private\\/tmp\\/bzt.* OR \\/private\\/tmp\\/bz_triage_tmp_*)",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 5.0,
+   "tactic": "Execution",
+   "technique": "T1059 Command and Scripting Interpreter",
+   "techniques": "T1059"
+  },
+  {
+   "title": "macOS - Изменение /etc/sudoers",
+   "priority": 3,
+   "streams": [
+    "MacOS Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert MacOS"
+   ],
+   "state": "ENABLED",
+   "description": "Изменён файл /etc/sudoers, задающий права суперпользователя. Возможна эскалация привилегий.",
+   "query": "name:file_events AND columns_category:sudoers AND (action:added OR columns_action:(MOVED_TO OR ROOT_CHANGED OR ATTRIBUTES_MODIFIED OR UPDATED))",
+   "group_by": [
+    "source"
+   ],
+   "condition": {
+    "op": ">",
+    "value": 0
+   },
+   "aggregated": true,
+   "window_min": 5.0,
+   "grace_min": 5.0,
+   "tactic": "Privilege Escalation",
+   "technique": "T1548.003 Sudo and Sudo Caching",
+   "techniques": "T1548.003"
+  },
+  {
+   "title": "macOS - Изменение базы авторизации (authorizationdb)",
+   "priority": 3,
+   "streams": [
+    "MacOS Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert MacOS"
+   ],
+   "state": "ENABLED",
+   "description": "security authorizationdb: правка прав на системные действия. Позволяет выполнять привилегированные операции без пароля.",
+   "query": "name:es_process_events AND columns_cmdline:/.*authorizationdb.*/",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 5.0,
+   "tactic": "Privilege Escalation",
+   "technique": "T1548 Abuse Elevation Control Mechanism",
+   "techniques": "T1548"
+  },
+  {
+   "title": "macOS - Копирование данных браузера",
+   "priority": 3,
+   "streams": [
+    "MacOS Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert MacOS"
+   ],
+   "state": "ENABLED",
+   "description": "sqlite3, cp, cat, strings, tar, zip или python, работающие с Login Data, Cookies.binarycookies, key4.db, logins.json, Local State. Видны только команды, чтение файлов самим процессом не видно.",
+   "query": "name:es_process_events AND columns_cmdline:/.*(sqlite3|cp|cat|strings|python3?|tar|zip) .*(Login Data|Cookies\\.binarycookies|key4\\.db|logins\\.json|Local State).*/",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 5.0,
+   "tactic": "Credential Access",
+   "technique": "T1555.003 Credentials from Web Browsers",
+   "techniques": "T1555.003"
+  },
+  {
+   "title": "macOS - Неудачная попытка sudo (неверный пароль)",
+   "priority": 2,
+   "streams": [
+    "MacOS Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert MacOS"
+   ],
+   "state": "ENABLED",
+   "description": "При выполнении sudo введён неверный пароль. Возможен подбор пароля.",
+   "query": "log_type:macos_unified AND processImagePath:\"/usr/bin/sudo\" AND message:\"incorrect password\"",
+   "group_by": [
+    "source"
+   ],
+   "condition": {
+    "op": ">",
+    "value": 0
+   },
+   "aggregated": true,
+   "window_min": 5.0,
+   "grace_min": 5.0,
+   "tactic": "Privilege Escalation",
+   "technique": "T1548.003 Sudo and Sudo Caching",
+   "techniques": "T1548.003"
+  },
+  {
+   "title": "macOS - Новый/изменённый plist в автозагрузке",
+   "priority": 3,
+   "streams": [
+    "MacOS Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert MacOS"
+   ],
+   "state": "ENABLED",
+   "description": "Создан, изменён или удалён plist в LaunchDaemons/LaunchAgents (кроме com.apple.*). Типичный способ закрепления (persistence).",
+   "query": "name:file_events AND (columns_action:CREATED OR columns_action:UPDATED OR columns_action:DELETED) AND (columns_category:launch_agents OR columns_category:launch_daemons) AND -columns_target_path:\"com.apple*\"",
+   "group_by": [
+    "source"
+   ],
+   "condition": {
+    "op": ">",
+    "value": 0
+   },
+   "aggregated": true,
+   "window_min": 5.0,
+   "grace_min": 5.0,
+   "tactic": "Persistence",
+   "technique": "T1543.004 Launch Daemon",
+   "techniques": "T1543.004, T1543.001"
+  },
+  {
+   "title": "macOS - Обратная оболочка (/dev/tcp, pty.spawn)",
+   "priority": 3,
+   "streams": [
+    "MacOS Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert MacOS"
+   ],
+   "state": "ENABLED",
+   "description": "В командной строке /dev/tcp, pty.spawn или socket.socket — признаки reverse shell.",
+   "query": "name:es_process_events AND message:(\"/dev/tcp\" OR \"pty.spawn\" OR \"socket.socket\") AND NOT message:\"/dev/tcp/<IP>\"",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 5.0,
+   "tactic": "Execution",
+   "technique": "T1059.004 Unix Shell",
+   "techniques": "T1059.004"
+  },
+  {
+   "title": "macOS - Отключение SIP или Gatekeeper",
+   "priority": 3,
+   "streams": [
+    "MacOS Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert MacOS"
+   ],
+   "state": "ENABLED",
+   "description": "Попытка отключить SIP (csrutil disable) или Gatekeeper (spctl --master-disable). Резко снижает защищённость системы.",
+   "query": "name:es_process_events AND ((message:\"spctl\" AND message:(\"master-disable\" OR \"global-disable\")) OR (message:\"csrutil\" AND message:\"disable\"))",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 5.0,
+   "tactic": "Defense Impairment",
+   "technique": "T1685 Disable or Modify Tools",
+   "techniques": "T1685"
+  },
+  {
+   "title": "macOS - Отключение межсетевого экрана (socketfilterfw, pfctl)",
+   "priority": 3,
+   "streams": [
+    "MacOS Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert MacOS"
+   ],
+   "state": "ENABLED",
+   "description": "socketfilterfw с --set… off либо pfctl с ключами -d, -F, -f, -e. Включение режима stealth (on) не срабатывает.",
+   "query": "name:es_process_events AND (columns_cmdline:/.*socketfilterfw --set(globalstate|stealthmode|blockall|allowsigned|allowsignedapp) off.*/ OR columns_cmdline:/(.*[ \\/])?pfctl( .*)? -(d|F|f|e)( .*)?/)",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 5.0,
+   "tactic": "Defense Impairment",
+   "technique": "T1686 Disable or Modify System Firewall",
+   "techniques": "T1686"
+  },
+  {
+   "title": "macOS - Очистка журналов",
+   "priority": 3,
+   "streams": [
+    "MacOS Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert MacOS"
+   ],
+   "state": "ENABLED",
+   "description": "log erase, log config, rm в /var/log или diagnostics, killall syslogd, truncate логов. Так заметают следы.",
+   "query": "name:es_process_events AND columns_cmdline:/.*(log erase|log config|rm .*(\\/var\\/log|diagnostics)|killall syslogd|truncate .*\\/var\\/log).*/",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 5.0,
+   "tactic": "Stealth",
+   "technique": "T1070.002 Clear Linux or Mac System Logs",
+   "techniques": "T1070, T1070.002"
+  },
+  {
+   "title": "macOS - Передача данных наружу (scp, rsync, nc, socat)",
+   "priority": 2,
+   "streams": [
+    "MacOS Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert MacOS"
+   ],
+   "state": "ENABLED",
+   "description": "scp или rsync на user@host с точкой в имени, а также nc, ncat, socat без -l, если адрес не из частных сетей и не в monitoring.test.",
+   "query": "name:es_process_events AND ((columns_cmdline:/(.*[ \\/])?(scp|rsync)( .*)? [^ ]*@[^ ]*[.][^ ]*:.*/) OR (columns_cmdline:/(.*[ \\/])?(nc|ncat|socat)( .*)?/ AND NOT columns_cmdline:/.* -l .*/)) AND NOT columns_cmdline:/.*(--server|192\\.168\\.|10\\.|172\\.(1[6-9]|2[0-9]|3[01])\\.|localhost|127\\.0\\.0\\.1|monitoring\\.test).*/",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 5.0,
+   "tactic": "Exfiltration",
+   "technique": "T1048 Exfiltration Over Alternative Protocol",
+   "techniques": "T1048"
+  },
+  {
+   "title": "macOS - Подключено Apple-устройство (iPhone/iPad/iPod)",
+   "priority": 2,
+   "streams": [
+    "MacOS Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert MacOS"
+   ],
+   "state": "ENABLED",
+   "description": "По USB подключено и распознано Apple-устройство (wifi.log, hostNotificationUSBDeviceInserted).",
+   "query": "log_type:macos_wifi_usb AND message:(hostNotificationUSBDeviceInserted AND (iPad OR iPhone OR iPod))",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 5.0,
+   "tactic": "Initial Access",
+   "technique": "T1200 Hardware Additions",
+   "techniques": "T1200"
+  },
+  {
+   "title": "macOS - Подключено мобильное устройство (не Apple)",
+   "priority": 3,
+   "streams": [
+    "MacOS Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert MacOS"
+   ],
+   "state": "ENABLED",
+   "description": "По USB подключено мобильное устройство не Apple (isApple N). Возможна попытка первоначального доступа.",
+   "query": "log_type:macos_wifi_usb AND message:(hostNotificationUSBDeviceInserted AND \"isApple N\")",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 5.0,
+   "tactic": "Initial Access",
+   "technique": "T1200 Hardware Additions",
+   "techniques": "T1200"
+  },
+  {
+   "title": "macOS - Подключён USB-накопитель",
+   "priority": 2,
+   "streams": [
+    "MacOS Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert MacOS"
+   ],
+   "state": "ENABLED",
+   "description": "Ядро распознало USB-накопитель (IOUSBMassStorageDriver): флешку или внешний диск.",
+   "query": "log_type:macos_unified AND processImagePath:\\/kernel AND senderImagePath:\"\\/System\\/Library\\/Extensions\\/IOUSBMassStorageDriver.kext\\/Contents\\/MacOS\\/IOUSBMassStorageDriver\"",
+   "group_by": [
+    "source"
+   ],
+   "condition": {
+    "op": ">",
+    "value": 0
+   },
+   "aggregated": true,
+   "window_min": 5.0,
+   "grace_min": 5.0,
+   "tactic": "Initial Access",
+   "technique": "T1200 Hardware Additions",
+   "techniques": "T1200, T1052.001"
+  },
+  {
+   "title": "macOS - Подмена библиотек (DYLD_INSERT_LIBRARIES)",
+   "priority": 3,
+   "streams": [
+    "MacOS Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert MacOS"
+   ],
+   "state": "ENABLED",
+   "description": "DYLD_INSERT_LIBRARIES в окружении или командной строке процесса: внедрение динамической библиотеки.",
+   "query": "name:es_process_events AND (columns_env:/.*DYLD_INSERT_LIBRARIES.*/ OR columns_cmdline:/.*DYLD_INSERT_LIBRARIES.*/)",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 5.0,
+   "tactic": "Persistence",
+   "technique": "T1574.006 Dynamic Linker Hijacking",
+   "techniques": "T1574.006"
+  },
+  {
+   "title": "macOS - Подозрительный процесс открыл TCP-порт",
+   "priority": 3,
+   "streams": [
+    "MacOS Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert MacOS"
+   ],
+   "state": "ENABLED",
+   "description": "nc/ncat/python/bash/sh начал слушать нестандартный порт. Возможен бэкдор или reverse shell.",
+   "query": "name:listening_ports AND (columns_name:(nc OR ncat OR netcat OR python OR python3 OR bash OR sh) AND NOT columns_port:(22 OR 80 OR 443 OR 4000)) AND action:added",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 5.0,
+   "tactic": "Command and Control",
+   "technique": "T1571 Non-Standard Port",
+   "techniques": "T1571"
+  },
+  {
+   "title": "macOS - Скачивание и запуск (curl | sh)",
+   "priority": 3,
+   "streams": [
+    "MacOS Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert MacOS"
+   ],
+   "state": "ENABLED",
+   "description": "curl или wget с конвейером в sh, bash, zsh либо bash -c \"$(curl …)\". Типичный способ запустить загруженный скрипт без файла.",
+   "query": "name:es_process_events AND (columns_cmdline:/.*(curl|wget).*\\| *(sudo )?(ba|z|da)?sh( .*)?/ OR columns_cmdline:/.*sh -c [\\\\\"]*\\$\\((curl|wget) .*/)",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 5.0,
+   "tactic": "Execution",
+   "technique": "T1059.004 Unix Shell",
+   "techniques": "T1059.004, T1105"
+  },
+  {
+   "title": "macOS - Снятие карантина с приложения",
+   "priority": 1,
+   "streams": [
+    "MacOS Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert MacOS"
+   ],
+   "state": "ENABLED",
+   "description": "С файла снят атрибут com.apple.quarantine — Gatekeeper не проверит приложение при запуске.",
+   "query": "name:es_process_events AND columns_path:\"/usr/bin/xattr\" AND message:\"com.apple.quarantine\"",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 5.0,
+   "tactic": "Defense Impairment",
+   "technique": "T1553.001 Gatekeeper Bypass",
+   "techniques": "T1553.001"
+  },
+  {
+   "title": "macOS - Создание пользователя или изменение групп",
+   "priority": 2,
+   "streams": [
+    "MacOS Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert MacOS"
+   ],
+   "state": "ENABLED",
+   "description": "dscl, sysadminctl или dseditgroup создают пользователя или меняют членство в группах (в т.ч. admin).",
+   "query": "name:es_process_events AND columns_path:(\"/usr/bin/dscl\" OR \"/usr/sbin/sysadminctl\" OR \"/usr/sbin/dseditgroup\") AND message:(\"-create\" OR \"-append\" OR \"-addUser\" OR \"-edit\")",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 5.0,
+   "tactic": "Persistence",
+   "technique": "T1136.001 Local Account",
+   "techniques": "T1136.001, T1098"
+  },
+  {
+   "title": "macOS - Установка или удаление профиля конфигурации",
+   "priority": 3,
+   "streams": [
+    "MacOS Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert MacOS"
+   ],
+   "state": "ENABLED",
+   "description": "Запуск profiles с install, remove, -I или -R. Профили конфигурации ставят прокси, сертификаты и VPN, отключают защиту. Штатные `profiles list` и `profiles status` не попадают.",
+   "query": "name:es_process_events AND columns_cmdline:/(.*[ \\/])?profiles( .*)? (install|remove|-I|-R)( .*)?/",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 5.0,
+   "tactic": "Defense Impairment",
+   "technique": "T1685 Disable or Modify Tools",
+   "techniques": "T1685, T1553.004"
+  },
+  {
+   "title": "macOS - Фишинговый запрос пароля через osascript",
+   "priority": 3,
+   "streams": [
+    "MacOS Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert MacOS"
+   ],
+   "state": "ENABLED",
+   "description": "osascript показывает диалог со скрытым вводом — так вредоносы выманивают пароль пользователя.",
+   "query": "name:es_process_events AND message:\"osascript\" AND message:(\"display dialog\" OR \"hidden answer\")",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 5.0,
+   "tactic": "Collection",
+   "technique": "T1056.002 GUI Input Capture",
+   "techniques": "T1056.002"
+  },
+  {
+   "title": "macOS - Элемент входа через sfltool или osascript",
+   "priority": 2,
+   "streams": [
+    "MacOS Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert MacOS"
+   ],
+   "state": "ENABLED",
+   "description": "Добавление Login Items командами sfltool или osascript (System Events, login item). Закрепление без plist; дополняет алерт на LaunchAgents.",
+   "query": "name:es_process_events AND columns_cmdline:/.*(sfltool|osascript.*login item|System Events.*login item).*/",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 5.0,
+   "tactic": "Persistence",
+   "technique": "T1547.015 Login Items",
+   "techniques": "T1547.015"
+  },
+  {
+   "title": "Контейнеры: Grafana — неудачный вход (подбор пароля)",
+   "priority": 3,
+   "streams": [
+    "Containers"
+   ],
+   "notifications": [
+    "Mail.ru Alert Linux"
+   ],
+   "state": "ENABLED",
+   "description": "Больше 5 неудачных входов в Grafana за 5 минут.",
+   "query": "container_name:grafana AND (message:\"Invalid username or password\" OR message:\"Failed to authenticate\" OR message:\"login attempt failed\")",
+   "group_by": [
+    "container_name"
+   ],
+   "condition": {
+    "op": ">",
+    "value": 5
+   },
+   "aggregated": true,
+   "window_min": 5.0,
+   "grace_min": 60.0,
+   "tactic": "Credential Access",
+   "technique": "T1110 Brute Force",
+   "techniques": "T1110"
+  },
+  {
+   "title": "Контейнеры: Loki — ошибки приёма",
+   "priority": 2,
+   "streams": [
+    "Containers"
+   ],
+   "notifications": [
+    "Mail.ru Alert Linux"
+   ],
+   "state": "ENABLED",
+   "description": "Loki пишет level=error (например, write operation failed).",
+   "query": "container_name:loki AND loglevel:error",
+   "group_by": [
+    "container_name"
+   ],
+   "condition": {
+    "op": ">",
+    "value": 0
+   },
+   "aggregated": true,
+   "window_min": 15.0,
+   "grace_min": 60.0,
+   "tactic": null,
+   "technique": null,
+   "techniques": null
+  },
+  {
+   "title": "Контейнеры: MongoDB — ошибки",
+   "priority": 2,
+   "streams": [
+    "Containers"
+   ],
+   "notifications": [
+    "Mail.ru Alert Linux"
+   ],
+   "state": "ENABLED",
+   "description": "Сообщение уровня E (ошибка) в логе MongoDB (komodo_mongo_1).",
+   "query": "container_name:komodo_mongo_1 AND log_s:E",
+   "group_by": [
+    "container_name"
+   ],
+   "condition": {
+    "op": ">",
+    "value": 0
+   },
+   "aggregated": true,
+   "window_min": 10.0,
+   "grace_min": 60.0,
+   "tactic": null,
+   "technique": null,
+   "techniques": null
+  },
+  {
+   "title": "Контейнеры: netalertx — всплеск объёма логов",
+   "priority": 1,
+   "streams": [
+    "Containers"
+   ],
+   "notifications": [
+    "Mail.ru Alert Linux"
+   ],
+   "state": "ENABLED",
+   "description": "Больше чем втрое выше обычного: более 4500 сообщений netalertx за 15 минут (норма около 1500).",
+   "query": "container_name:netalertx",
+   "group_by": [
+    "container_name"
+   ],
+   "condition": {
+    "op": ">",
+    "value": 4500
+   },
+   "aggregated": true,
+   "window_min": 15.0,
+   "grace_min": 60.0,
+   "tactic": null,
+   "technique": null,
+   "techniques": null
+  },
+  {
+   "title": "Контейнеры: netalertx — новое устройство в сети",
+   "priority": 2,
+   "streams": [
+    "Containers"
+   ],
+   "notifications": [
+    "Mail.ru Alert Linux"
+   ],
+   "state": "ENABLED",
+   "description": "Скан netalertx нашёл новые устройства (New Devices больше нуля).",
+   "query": "container_name:netalertx AND message:\"Scan Stats\" AND message:\"New Devices\" AND NOT message:\"New Devices 0\"",
+   "group_by": [
+    "container_name"
+   ],
+   "condition": {
+    "op": ">",
+    "value": 0
+   },
+   "aggregated": true,
+   "window_min": 5.0,
+   "grace_min": 60.0,
+   "tactic": "Initial Access",
+   "technique": "T1200 Hardware Additions",
+   "techniques": "T1200"
+  },
+  {
+   "title": "Контейнеры: promtail не доставляет логи в Loki",
+   "priority": 2,
+   "streams": [
+    "Containers"
+   ],
+   "notifications": [
+    "Mail.ru Alert Linux"
+   ],
+   "state": "ENABLED",
+   "description": "Больше 15 ошибок «context deadline exceeded» за 10 минут на одном хосте — promtail не может записать в Loki.",
+   "query": "message:\"context deadline exceeded\" AND container_name:promtail",
+   "group_by": [
+    "source"
+   ],
+   "condition": {
+    "op": ">",
+    "value": 15
+   },
+   "aggregated": true,
+   "window_min": 10.0,
+   "grace_min": 60.0,
+   "tactic": null,
+   "technique": null,
+   "techniques": null
+  },
+  {
+   "title": "Контейнеры: всплеск ошибок",
+   "priority": 2,
+   "streams": [
+    "Containers"
+   ],
+   "notifications": [
+    "Mail.ru Alert Linux"
+   ],
+   "state": "ENABLED",
+   "description": "Больше 10 реальных ошибок за 5 минут в одном контейнере: loglevel error/warn/fatal (loki/promtail) или ключевые слова error/fatal/panic/exception/traceback в message. Исключены cadvisor, fluent-bit и promtail (штатный инфраструктурный шум).",
+   "query": "(loglevel:(error OR warn OR fatal) OR message:(error OR fatal OR panic OR exception OR traceback)) AND _exists_:container_name AND NOT container_name:(cadvisor OR fluent-bit OR promtail)",
+   "group_by": [
+    "container_name"
+   ],
+   "condition": {
+    "op": ">",
+    "value": 10
+   },
+   "aggregated": true,
+   "window_min": 5.0,
+   "grace_min": 0.0,
+   "tactic": null,
+   "technique": null,
+   "techniques": null
+  },
+  {
+   "title": "Контейнеры: нехватка памяти или падение процесса",
+   "priority": 3,
+   "streams": [
+    "Containers"
+   ],
+   "notifications": [
+    "Mail.ru Alert Linux"
+   ],
+   "state": "ENABLED",
+   "description": "В логах контейнера OOM, Killed process, segfault или core dumped.",
+   "query": "message:(\"out of memory\" OR OOM OR \"Killed process\" OR segfault OR \"core dumped\") AND _exists_:container_name",
+   "group_by": [
+    "container_name"
+   ],
+   "condition": {
+    "op": ">",
+    "value": 0
+   },
+   "aggregated": true,
+   "window_min": 5.0,
+   "grace_min": 60.0,
+   "tactic": null,
+   "technique": null,
+   "techniques": null
+  },
+  {
+   "title": "Контейнеры: ошибки прав доступа",
+   "priority": 2,
+   "streams": [
+    "Containers"
+   ],
+   "notifications": [
+    "Mail.ru Alert Linux"
+   ],
+   "state": "ENABLED",
+   "description": "Больше 50 сообщений «Operation not permitted» за 10 минут в одном контейнере.",
+   "query": "message:\"Operation not permitted\" AND _exists_:container_name",
+   "group_by": [
+    "container_name"
+   ],
+   "condition": {
+    "op": ">",
+    "value": 50
+   },
+   "aggregated": true,
+   "window_min": 10.0,
+   "grace_min": 0.0,
+   "tactic": null,
+   "technique": null,
+   "techniques": null
+  },
+  {
+   "title": "Контейнеры: перезапуски MariaDB",
+   "priority": 3,
+   "streams": [
+    "Containers"
+   ],
+   "notifications": [
+    "Mail.ru Alert Linux"
+   ],
+   "state": "ENABLED",
+   "description": "Больше 2 запусков entrypoint MariaDB (контейнер observiumdb) за 15 минут — цикл перезапусков БД Observium.",
+   "query": "container_name:observiumdb AND message:\"Entrypoint script\"",
+   "group_by": [
+    "container_name"
+   ],
+   "condition": {
+    "op": ">",
+    "value": 2
+   },
+   "aggregated": true,
+   "window_min": 15.0,
+   "grace_min": 0.0,
+   "tactic": null,
+   "technique": null,
+   "techniques": null
+  },
+  {
+   "title": "Контейнеры: тишина — atrium",
+   "priority": 3,
+   "streams": [
+    "Containers"
+   ],
+   "notifications": [
+    "Mail.ru Alert Linux"
+   ],
+   "state": "ENABLED",
+   "description": "Контейнер atrium не прислал ни одного сообщения за 15 минут — остановлен или завис.",
+   "query": "container_name:\"atrium\"",
+   "group_by": [],
+   "condition": {
+    "op": "<",
+    "value": 1
+   },
+   "aggregated": true,
+   "window_min": 60.0,
+   "grace_min": 1440.0,
+   "tactic": null,
+   "technique": null,
+   "techniques": null
+  },
+  {
+   "title": "Контейнеры: тишина — grafana",
+   "priority": 3,
+   "streams": [
+    "Containers"
+   ],
+   "notifications": [
+    "Mail.ru Alert Linux"
+   ],
+   "state": "ENABLED",
+   "description": "Контейнер grafana не прислал ни одного сообщения за 15 минут — остановлен или завис.",
+   "query": "container_name:\"grafana\"",
+   "group_by": [],
+   "condition": {
+    "op": "<",
+    "value": 1
+   },
+   "aggregated": true,
+   "window_min": 60.0,
+   "grace_min": 1440.0,
+   "tactic": null,
+   "technique": null,
+   "techniques": null
+  },
+  {
+   "title": "Контейнеры: тишина — komodo_mongo_1",
+   "priority": 3,
+   "streams": [
+    "Containers"
+   ],
+   "notifications": [
+    "Mail.ru Alert Linux"
+   ],
+   "state": "ENABLED",
+   "description": "Контейнер komodo_mongo_1 не прислал ни одного сообщения за 15 минут — остановлен или завис.",
+   "query": "container_name:\"komodo_mongo_1\"",
+   "group_by": [],
+   "condition": {
+    "op": "<",
+    "value": 1
+   },
+   "aggregated": true,
+   "window_min": 60.0,
+   "grace_min": 1440.0,
+   "tactic": null,
+   "technique": null,
+   "techniques": null
+  },
+  {
+   "title": "Контейнеры: тишина — loki",
+   "priority": 3,
+   "streams": [
+    "Containers"
+   ],
+   "notifications": [
+    "Mail.ru Alert Linux"
+   ],
+   "state": "ENABLED",
+   "description": "Контейнер loki не прислал ни одного сообщения за 15 минут — остановлен или завис.",
+   "query": "container_name:\"loki\"",
+   "group_by": [],
+   "condition": {
+    "op": "<",
+    "value": 1
+   },
+   "aggregated": true,
+   "window_min": 60.0,
+   "grace_min": 1440.0,
+   "tactic": null,
+   "technique": null,
+   "techniques": null
+  },
+  {
+   "title": "Контейнеры: тишина — netalertx",
+   "priority": 3,
+   "streams": [
+    "Containers"
+   ],
+   "notifications": [
+    "Mail.ru Alert Linux"
+   ],
+   "state": "ENABLED",
+   "description": "Контейнер netalertx не прислал ни одного сообщения за 15 минут — остановлен или завис.",
+   "query": "container_name:\"netalertx\"",
+   "group_by": [],
+   "condition": {
+    "op": "<",
+    "value": 1
+   },
+   "aggregated": true,
+   "window_min": 60.0,
+   "grace_min": 1440.0,
+   "tactic": null,
+   "technique": null,
+   "techniques": null
+  },
+  {
+   "title": "Контейнеры: тишина — wazuh.dashboard",
+   "priority": 3,
+   "streams": [
+    "Containers"
+   ],
+   "notifications": [
+    "Mail.ru Alert Linux"
+   ],
+   "state": "ENABLED",
+   "description": "Контейнер wazuh.dashboard не прислал ни одного сообщения за 15 минут — остановлен или завис.",
+   "query": "container_name:\"wazuh.dashboard\"",
+   "group_by": [],
+   "condition": {
+    "op": "<",
+    "value": 1
+   },
+   "aggregated": true,
+   "window_min": 60.0,
+   "grace_min": 1440.0,
+   "tactic": null,
+   "technique": null,
+   "techniques": null
+  },
+  {
+   "title": "Контейнеры: тишина — zaslon",
+   "priority": 3,
+   "streams": [
+    "Containers"
+   ],
+   "notifications": [
+    "Mail.ru Alert Linux"
+   ],
+   "state": "ENABLED",
+   "description": "Контейнер zaslon не прислал ни одного сообщения за 15 минут — остановлен или завис.",
+   "query": "container_name:\"zaslon\"",
+   "group_by": [],
+   "condition": {
+    "op": "<",
+    "value": 1
+   },
+   "aggregated": true,
+   "window_min": 15.0,
+   "grace_min": 60.0,
+   "tactic": null,
+   "technique": null,
+   "techniques": null
+  },
+  {
+   "title": "Контейнеры: тишина — нет логов ни от одного контейнера",
+   "priority": 3,
+   "streams": [
+    "Containers"
+   ],
+   "notifications": [
+    "Mail.ru Alert Linux"
+   ],
+   "state": "ENABLED",
+   "description": "Поток Containers не получил ни одного сообщения за 10 минут — упал input «Podman Logs», Graylog или все хосты разом.",
+   "query": "*",
+   "group_by": [],
+   "condition": {
+    "op": "<",
+    "value": 1
+   },
+   "aggregated": true,
+   "window_min": 10.0,
+   "grace_min": 60.0,
+   "tactic": null,
+   "technique": null,
+   "techniques": null
+  }
+ ]
+}

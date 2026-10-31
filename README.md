@@ -19,6 +19,7 @@
   - [Основа: установка, потоки, алерты](#основа-установка-потоки-алерты)
   - [Источники логов: Windows, Linux, macOS, контейнеры](#источники-логов-windows-linux-macos-контейнеры)
   - [Обогащение: Lookup Tables](#обогащение-lookup-tables)
+  - [Каталог детектов](#каталог-детектов)
   - [Дашборды](#дашборды)
   - [Разбор проблем](#разбор-проблем)
 - [Что внутри](#-что-внутри)
@@ -79,6 +80,12 @@
 |---|---|---|
 | 13 | [Lookup Tables: обогащение событий справочниками](docs/13-lookup-tables.md) | Коды Windows, роли хостов, подсети, уровни syslog; адаптеры CSV, правила pipeline, импорт, пример на вымышленных данных |
 
+### Каталог детектов
+
+| # | Глава | О чём |
+|---|---|---|
+| 14 | [Каталог детектов Graylog](docs/14-detections.md) | Все правила в таблицах: источник логов, условие и корреляция, тактика и техника MITRE ATT&CK, матрица покрытия; страница собирается скриптом из выгрузки Graylog |
+
 ### Дашборды
 
 | # | Глава | О чём |
@@ -125,12 +132,13 @@
 │   ├── 11-collectors.md               ← Collectors: агенты под управлением сервера
 │   ├── 12-graylog-grafana.md          ← Graylog + Grafana: логи и аннотации на дашбордах
 │   ├── 13-lookup-tables.md            ← Lookup Tables: справочники и обогащение событий
+│   ├── 14-detections.md               ← каталог детектов: таблицы, корреляция, MITRE, матрица покрытия
 │   ├── troubleshooting.md             ← грабли и решения
 │   └── images/                        ← скриншоты и иллюстрации к главам
 ├── decoder/                           ← декодер auditd (auditd_decoder.py, systemd-юнит)
 ├── config/                            ← server.conf (SMTP), opensearch.yml
 ├── containers/                        ← Fluent Bit: Quadlet-юнит и конфиг
-├── graylog/                           ← content pack (63 алерта + 3 email-уведомления) и 18 детектов по контейнерам, 22 дашборда (`dashboards-spec.json` + `import-dashboards.js`), правила pipeline с импортёром (`pipelines/`), карта MITRE ATT&CK для алертов (`mitre/`)
+├── graylog/                           ← content pack (63 алерта + 3 email-уведомления) и 18 детектов по контейнерам, 22 дашборда (`dashboards-spec.json` + `import-dashboards.js`), правила pipeline с импортёром (`pipelines/`), карта MITRE ATT&CK для алертов (`mitre/`), генератор каталога детектов (`detections/`)
 ├── linux/                             ← rsyslog.conf.example
 ├── windows/                           ← winlogbeat.yml.example
 └── macos/                             ← Filebeat, osquery, LaunchDaemon-ы, bztriage/
