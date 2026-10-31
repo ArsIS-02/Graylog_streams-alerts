@@ -121,6 +121,10 @@ Regex extractor, условие `changing ownership`, regex:
 и `IMAGE_NAME` в `image_name`. Поле `IMAGE_NAME` в journal Podman не приходит, поэтому
 `image_name` остаётся пустым: для таблиц используем `container_name` и `source`.
 
+Со временем в pipeline добавились другие правила: разбор logfmt, теги, а во второй стадии
+`containers: log_new_expiration в строку`. Актуальный состав и тексты правил:
+[graylog/pipelines](../graylog/pipelines/README.md).
+
 ![Extractor-ы на input «Podman Logs»](images/containers-extractors.png)
 *Extractor-ы на input «Podman Logs» (воссоздано по реальным данным лаборатории).*
 

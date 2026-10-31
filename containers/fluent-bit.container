@@ -5,6 +5,8 @@ After=network-online.target
 
 [Container]
 # Мультиархитектурный образ: amd64 и arm64 берутся автоматически
+# Чтобы версия не менялась сама при перезагрузке, зафиксируй тег (например :5.1.4)
+# и убери AutoUpdate=registry ниже (см. docs/troubleshooting.md, п. 21).
 Image=ghcr.io/fluent/fluent-bit:latest
 ContainerName=fluent-bit
 Network=host

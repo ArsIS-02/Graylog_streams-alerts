@@ -263,6 +263,24 @@ curl -s http://<graylog>:9000/api/     # какая версия реально 
 **Решение:** зафиксировать тип в Graylog (System → Indices → набор → Field types →
 `level` = String) и ротировать индекс. Так же сделано для `macos_event_time`.
 
+**Вариант, когда тип фиксировать нельзя.** Caddy пишет `log_new_expiration` то числом
+(время в секундах), то строкой с датой, и числовой тип нужен для остальных документов.
+Тогда строковые значения выносят в соседнее поле правилом pipeline, а числовые оставляют:
+
+```
+rule "containers: log_new_expiration в строку"
+when
+  has_field("log_new_expiration")
+  AND NOT to_bool(regex("^[0-9]+$", to_string($message.log_new_expiration)).matches)
+then
+  set_field("log_new_expiration_text", to_string($message.log_new_expiration));
+  remove_single_field("log_new_expiration");
+end
+```
+
+Правило лежит в [graylog/pipelines](../graylog/pipelines/README.md) и подключается к pipeline
+`Container logs` второй стадией.
+
 ![Баннер о неудачных попытках индексации в Graylog](images/ts-index-failures.png)
 *Баннер о неудачных попытках индексации в Graylog (воссоздано по реальным данным лаборатории).*
 
@@ -357,3 +375,195 @@ sudo systemctl daemon-reload && sudo systemctl restart fluent-bit
 **Решение:** `(?<chownpath>...)`. Имя группы становится именем поля в Graylog.
 Тип extractor-а `key_value` в Graylog 7.2 API не существует (ошибка `No enum constant
 KEY_VALUE`): для `key=value` используем regex-extractor-ы на отдельные поля.
+
+---
+
+## 18. OpenSearch упал: `OutOfMemoryError: Java heap space`
+
+**Симптом:** в Graylog не работают поиск и дашборды (`Failed to obtain results`), в System →
+Overview «Opensearch cluster is not available», API `/api/system/indexer/cluster/health`
+отвечает 500, а `/api/system/indexer/overview` 503. Алерты при этом не приходят: Graylog не
+может сообщить о собственной проблеме. `systemctl status opensearch` показывает `failed`, в
+журнале:
+
+```
+java.lang.OutOfMemoryError: Java heap space
+fatal error in thread [opensearch[...][search][T#1]], exiting
+```
+
+Строка `Unable to create data: File exists` рядом ни на что не влияет: OpenSearch не смог
+сохранить дамп памяти.
+
+**Причина:** кучи в 4 ГиБ (`-Xms4g -Xmx4g`) не хватило под тяжёлые запросы при непрерывной
+индексации. Процесс завершился, а автоперезапуска у штатного юнита нет.
+
+**Решение:** поднять кучу и включить автоперезапуск. Куча не больше половины оперативной
+памяти и не выше примерно 31 ГиБ, остальное нужно Graylog и файловому кэшу (на нём держится
+скорость поиска). На хосте с 31 ГиБ поставили 8 ГиБ:
+
+```bash
+sudo sed -i -E 's/^-Xm([sx])4g/-Xm\18g/' /etc/opensearch/jvm.options
+
+sudo mkdir -p /etc/systemd/system/opensearch.service.d
+sudo tee /etc/systemd/system/opensearch.service.d/restart.conf <<'EOT'
+[Service]
+Restart=on-failure
+RestartSec=30
+TimeoutStartSec=300
+EOT
+sudo systemctl daemon-reload && sudo systemctl restart opensearch
+```
+
+Проверка: `ps -o args= -C java | tr ' ' '\n' | grep -E '^-Xm[sx]'`. Процессов Java два (второй, скорее
+всего, сам Graylog со своей кучей, у нас 2 ГиБ), поэтому строк с `-Xm` две пары. Кластер после запуска на
+минуту-две остаётся красным, пока восстанавливается последний шард.
+
+Перезапуск занимает минуту-две, и в это время Graylog не индексирует.
+
+---
+
+## 19. OpenSearch не поднимается после перезагрузки хоста
+
+**Симптом:** после перезагрузки Graylog запускается, а OpenSearch нет, пока его не запустить
+вручную. Данные OpenSearch лежат на отдельном диске (`path.data: /mnt/nvme/opensearch` в
+`/etc/opensearch/opensearch.yml`).
+
+**Причина (по времени событий; журнал той загрузки к моменту разбора уже вычистился):** у штатного
+юнита нет порядка запуска относительно диска. Диск появляется в системе на 9-й секунде загрузки
+и монтируется примерно на 20-й, а OpenSearch может стартовать раньше. Каталога данных ещё нет,
+процесс падает, и без `Restart=` служба остаётся лежать. Сеть ни при чём: `network-online.target`
+готова на 8-й секунде.
+
+**Решение:** привязать службу к точке монтирования и к сети:
+
+```bash
+sudo tee /etc/systemd/system/opensearch.service.d/boot.conf <<'EOT'
+[Unit]
+After=network-online.target
+Wants=network-online.target
+RequiresMountsFor=/mnt/nvme/opensearch
+EOT
+sudo systemctl daemon-reload
+systemctl show opensearch -p After -p Requires | tr ' ' '\n' | grep -E 'mnt|network'
+```
+
+В выводе должны быть `mnt-nvme.mount` и `network-online.target`. Если диск не смонтируется,
+OpenSearch теперь не стартует вовсе, а не пытается создать данные на корневой файловой системе.
+Это правильное поведение. Для диска в `fstab` оставьте `nofail`, чтобы хост всё же загрузился.
+
+Проверка по-настоящему возможна только перезагрузкой: после неё
+`systemctl status opensearch --no-pager | head -5` и `curl -s localhost:9200/_cluster/health?pretty`.
+
+---
+
+## 20. `Document contains at least one immense term` в ошибках индексации
+
+**Симптом:** растёт счётчик failed indexing attempts (System → Overview → Indexer failures),
+в тексте ошибки `immense term in field="eventMessage"` (или `columns_cmdline`) и «longer than
+the max length 32766».
+
+**Причина:** значение поля с типом keyword не может быть длиннее 32766 байт. Бывает у `eventMessage`
+в unified log macOS и у командной строки osquery (`columns_cmdline`): иногда приходят целые
+простыни. Такой документ индекс отбрасывает целиком.
+
+**Решение:** обрезать значение правилом pipeline до отправки в индекс. Предел с запасом на
+UTF-8 (до 4 байт на символ): 6000 символов для `eventMessage` и 8000 для `columns_cmdline`.
+Правило оставляет пометку `eventMessage_truncated=true`, чтобы обрезанные сообщения можно было найти:
+
+```
+rule "macos: обрезать слишком длинный eventMessage"
+when
+  has_field("eventMessage")
+  AND length(to_string($message.eventMessage)) > 6000
+then
+  set_field("eventMessage", abbreviate(to_string($message.eventMessage), 6000));
+  set_field("eventMessage_truncated", true);
+end
+```
+
+Оба правила и порядок подключения лежат в [graylog/pipelines](../graylog/pipelines/README.md).
+Правило ставят в **последнюю** стадию pipeline, после правил, которые это поле создают или меняют.
+
+Счётчик ошибок сам не обнуляется. Старые записи хранятся в коллекции `index_failures` MongoDB (она
+ограничена по размеру, поэтому со временем старые вытесняются новыми).
+
+---
+
+## 21. Fluent Bit работает, но контейнерных логов в Graylog нет
+
+**Симптом:** `systemctl status fluent-bit` показывает `active (running)`, `podman logs fluent-bit`
+не содержит ошибок, а свежих записей с `container_name` в Graylog нет. Соединения с портом
+GELF нет: `sudo ss -tn | grep 12202` пусто. Это не значит, что с сетью что-то не так:
+GELF TCP открывает соединение, только когда есть что отправить.
+
+**Диагностика по шагам:**
+
+```bash
+# 1. Какой каталог журнала есть на хосте и в нём ли данные
+ls -d /run/log/journal/*/ /var/log/journal/*/ 2>&1
+# 2. Есть ли в журнале записи контейнеров
+sudo journalctl -F CONTAINER_NAME | head
+# 3. Сквозная проверка одной тестовой записью
+printf 'MESSAGE=fluent-bit test\nCONTAINER_NAME=fbtest\n' | logger --journald
+sleep 15; sudo ss -tn | grep 12202
+```
+
+Через 15 секунд должно появиться соединение, а в Graylog `container_name:fbtest` найдёт запись.
+Если нашло, канал рабочий. Тогда контейнеры просто редко пишут в журнал (это нормально для
+менеджеров вроде portainer), а сам Fluent Bit ни при чём.
+
+**Причины, которые встречались:**
+
+1. **`Path` смотрит в `/run/log/journal`, а журнал постоянный.** Шаг 1 показывает: каталог
+   `/run/log/journal/*/` пуст или отсутствует, а в `/var/log/journal/*/` лежат файлы. См.
+   п. 15: `Path` и том нужно поменять на `/var/log/journal`.
+2. **Fluent Bit перебирает накопленный журнал с сохранённого курсора.** После перезагрузки или
+   долгого простоя он читает весь журнал с места, где остановился: процессор загружен, соединения
+   нет, `journal.db` обновляется. Журнал размером в несколько гигабайт на слабом хосте
+   (aarch64) разбирают очень долго. Если старые данные не нужны, сбросить курсор (при
+   `Read_From_Tail On` чтение начнётся с конца журнала):
+
+   ```bash
+   sudo systemctl stop fluent-bit
+   sudo rm /var/lib/fluent-bit/journal.db
+   sudo systemctl start fluent-bit
+   ```
+
+   Записи за пропущенный период Fluent Bit уже не отправит.
+
+**Фиксируйте тег образа.** В Quadlet стоит `Image=...:latest` и `AutoUpdate=registry`, а при
+загрузке хоста в журнале видно `image pull ... fluent-bit:latest`. Версия может смениться без
+вашего ведома. В нашем случае обновление образа совпало по времени с перезагрузкой, причиной
+сбоя оно не оказалось, но неожиданные смены версии лучше убрать: `Image=ghcr.io/fluent/fluent-bit:5.1.4`
+и без `AutoUpdate=registry`, обновлять вручную.
+
+---
+
+## 22. Логи контейнеров идут через Collectors без `container_name`, алерты «тишина» срабатывают
+
+**Симптом:** правила вида «Контейнеры: тишина — grafana» срабатывают, хотя логи контейнера в
+Graylog есть. Поиск `process_name:conmon` в потоке Collectors показывает сообщения этого контейнера,
+а в поле `container_name` у них пусто.
+
+**Причина:** источник `journald` («System Journal») в флоте Collectors один на все хосты и собирает
+записи журнала от приоритета info. Вывод контейнера Podman попадает в журнал от процесса
+`conmon` без поля `CONTAINER_NAME`. Такие сообщения не попадают в поток **Containers**, а
+правила «тишина» считают сообщения именно там по `container_name`. Если Fluent Bit на хосте
+молчит, правила срабатывают, хотя через Collectors логи продолжают идти.
+
+Если на хосте работают и Fluent Bit, и Collectors, логи контейнера приходят дважды: размеченные
+(Containers) и без имени (Collectors).
+
+**Что делать:**
+
+- Основные правила по контейнерам строят только на потоке Containers по `container_name`, как
+  сделано в главе 9. Тишина по такому правилу означает, что Fluent Bit перестал доставлять логи
+  (см. п. 21), а не что контейнер
+  молчит.
+- Источник «System Journal» нельзя выключить целиком: пропадёт весь системный журнал. Исключить
+  процесс предикатом источника мы не пробовали (а на macOS подобная правка предиката тихо
+  остановила сбор, см. главу 11).
+- Дубли можно отбрасывать правилом pipeline `Collector logs` по `process_name == "conmon"`, но
+  только если Fluent Bit работает на **всех** хостах флота. Иначе на хостах без него контейнерные
+  логи пропадут совсем. В лаборатории это правило не включено: дубли не мешают, только занимают
+  место.

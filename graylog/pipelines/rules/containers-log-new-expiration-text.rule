@@ -1,0 +1,9 @@
+// description: Поле log_new_expiration в индексе имеет тип long, а Caddy шлёт дату строкой — документ отбрасывается. Строковое значение выносим в log_new_expiration_text.
+rule "containers: log_new_expiration в строку"
+when
+  has_field("log_new_expiration")
+  AND NOT to_bool(regex("^[0-9]+$", to_string($message.log_new_expiration)).matches)
+then
+  set_field("log_new_expiration_text", to_string($message.log_new_expiration));
+  remove_single_field("log_new_expiration");
+end

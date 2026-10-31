@@ -1,0 +1,9 @@
+// description: Имя контейнера, образ и ID в отдельные поля
+rule "containers: normalize fields"
+when
+  has_field("CONTAINER_NAME")
+then
+  set_field("container_name", to_string($message.CONTAINER_NAME));
+  set_field("image_name", to_string($message.IMAGE_NAME));
+  set_field("container_id", to_string($message.CONTAINER_ID));
+end

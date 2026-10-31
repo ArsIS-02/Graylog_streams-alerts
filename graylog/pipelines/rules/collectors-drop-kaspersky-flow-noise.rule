@@ -1,0 +1,11 @@
+// description: Отбрасывает шум сетевого расширения Касперского с macOS (NetworkExtension flow write errors)
+rule "collectors: drop kaspersky flow noise"
+when
+  to_string($message.process_name) == "com.kaspersky.kav.sysext"
+  AND (
+    contains(to_string($message.message), "Failed to write flow Data")
+    OR contains(to_string($message.message), "flow is closed for writes")
+  )
+then
+  drop_message();
+end

@@ -1,0 +1,32 @@
+[
+  {
+    "title": "collectors: drop kaspersky flow noise",
+    "description": "Отбрасывает шум сетевого расширения Касперского с macOS (NetworkExtension flow write errors)",
+    "source": "rule \"collectors: drop kaspersky flow noise\"\nwhen\n  to_string($message.process_name) == \"com.kaspersky.kav.sysext\"\n  AND (\n    contains(to_string($message.message), \"Failed to write flow Data\")\n    OR contains(to_string($message.message), \"flow is closed for writes\")\n  )\nthen\n  drop_message();\nend"
+  },
+  {
+    "title": "collectors: hostname as source",
+    "description": "Подставляет короткое имя хоста из host_hostname в поле source (Linux, Windows)",
+    "source": "rule \"collectors: hostname as source\"\nwhen\n  has_field(\"host_hostname\")\nthen\n  set_field(\"source\", regex_replace(\"^([^.]+).*$\", to_string($message.host_hostname), \"$1\", true));\nend"
+  },
+  {
+    "title": "containers: log_new_expiration в строку",
+    "description": "Поле log_new_expiration в индексе имеет тип long, а Caddy шлёт дату строкой — документ отбрасывается. Строковое значение выносим в log_new_expiration_text.",
+    "source": "rule \"containers: log_new_expiration в строку\"\nwhen\n  has_field(\"log_new_expiration\")\n  AND NOT to_bool(regex(\"^[0-9]+$\", to_string($message.log_new_expiration)).matches)\nthen\n  set_field(\"log_new_expiration_text\", to_string($message.log_new_expiration));\n  remove_single_field(\"log_new_expiration\");\nend"
+  },
+  {
+    "title": "containers: normalize fields",
+    "description": "Имя контейнера, образ и ID в отдельные поля",
+    "source": "rule \"containers: normalize fields\"\nwhen\n  has_field(\"CONTAINER_NAME\")\nthen\n  set_field(\"container_name\", to_string($message.CONTAINER_NAME));\n  set_field(\"image_name\", to_string($message.IMAGE_NAME));\n  set_field(\"container_id\", to_string($message.CONTAINER_ID));\nend"
+  },
+  {
+    "title": "macos: обрезать слишком длинный cmdline",
+    "description": "osquery иногда присылает командную строку длиннее предела OpenSearch в 32766 байт",
+    "source": "rule \"macos: обрезать слишком длинный cmdline\"\nwhen\n  has_field(\"columns_cmdline\")\n  AND length(to_string($message.columns_cmdline)) > 8000\nthen\n  set_field(\"columns_cmdline\", abbreviate(to_string($message.columns_cmdline), 8000));\n  set_field(\"columns_cmdline_truncated\", true);\nend"
+  },
+  {
+    "title": "macos: обрезать слишком длинный eventMessage",
+    "description": "Значение eventMessage длиннее 32766 байт отбрасывается индексом (immense term). Обрезаем до 6000 символов — запас на UTF-8.",
+    "source": "rule \"macos: обрезать слишком длинный eventMessage\"\nwhen\n  has_field(\"eventMessage\")\n  AND length(to_string($message.eventMessage)) > 6000\nthen\n  set_field(\"eventMessage\", abbreviate(to_string($message.eventMessage), 6000));\n  set_field(\"eventMessage_truncated\", true);\nend"
+  }
+]
