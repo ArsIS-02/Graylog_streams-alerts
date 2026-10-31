@@ -117,3 +117,25 @@ BI.ZONE Triage (процессы, сеть, autoruns, baseline). О нём — �
 - `log_type: macos_unified AND message: "kernel panic"` — паника ядра;
 - `log_type: macos_wifi_usb AND message: "USBDeviceInserted"` — новое USB-устройство;
 - отсутствие логов от хоста за интервал — признак, что Mac выключен или потерял связь.
+
+### Ещё 11 алертов по процессам (osquery Endpoint Security)
+
+Определения лежат в [graylog/macos-event-definitions.json](../graylog/macos-event-definitions.json) (плейсхолдеры `<MACOS_STREAM_ID>` и `<NOTIFICATION_ID>` замените своими). Все запросы смотрят события `es_process_events` и поле командной строки `columns_cmdline`, а не общий `message`: в `message` лежит вся запись целиком, и совпадения ловятся на посторонних полях. Проверка на истории за 30 дней дала ноль срабатываний, кроме добавления корневого сертификата (2 раза, собственные команды) и scp на хост без точки в имени, который исключён условием.
+
+| Алерт | Что ловит | MITRE | Приоритет |
+|---|---|---|---|
+| Установка или удаление профиля конфигурации | `profiles install`, `remove`, `-I`, `-R` | T1685 | 3 |
+| Добавление корневого сертификата | `security add-trusted-cert`, `trust-settings-import` | T1553.004 | 2 |
+| Элемент входа через sfltool или osascript | Login Items без plist | T1547.015 | 2 |
+| Отключение межсетевого экрана | `socketfilterfw --set… off`, `pfctl -d/-F/-f/-e` | T1686 | 3 |
+| Загрузка launchd-задания | `launchctl load/bootstrap/submit`, кроме Apple и своих служб | T1569.001 | 2 |
+| Скачивание и запуск (curl \| sh) | `curl … \| sh`, `bash -c "$(curl …)"` | T1059.004 | 3 |
+| Копирование данных браузера | `sqlite3`, `cp`, `tar` и др. с Login Data, Cookies, key4.db | T1555.003 | 3 |
+| Очистка журналов | `log erase`, `rm` в /var/log, `killall syslogd` | T1070.002 | 3 |
+| Передача данных наружу | `scp`, `rsync`, `nc`, `socat` на адрес вне частных сетей | T1048 | 2 |
+| Подмена библиотек | `DYLD_INSERT_LIBRARIES` | T1574.006 | 3 |
+| Изменение базы авторизации | `security authorizationdb` | T1548 | 3 |
+
+Что не вошло. Разведка (`system_profiler`, `sw_vers`, `dscl . list`): за месяц около 126 тысяч событий от служебных скриптов под root, надёжного отсечения нет. Неудачный вход на экране блокировки: в unified log не нашлось подходящих событий.
+
+Ограничения. Алерт про данные браузера видит только команды, чтение файлов самим процессом не видно. Запросы на `columns_env` работают, если osquery отдаёт переменные окружения процесса.
