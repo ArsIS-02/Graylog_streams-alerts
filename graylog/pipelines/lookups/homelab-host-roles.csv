@@ -1,0 +1,8 @@
+key,value
+router-01,Домашний маршрутизатор
+server-01,Сервер: Graylog, обратный прокси
+server-01.example.test,Сервер: Graylog, обратный прокси
+nas-01,Файловое хранилище
+nas-01.example.test,Файловое хранилище
+laptop-01,Ноутбук администратора
+dc-01.example.local,Контроллер домена Windows

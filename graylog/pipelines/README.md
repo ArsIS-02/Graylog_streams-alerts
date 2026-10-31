@@ -137,6 +137,49 @@ IP и не срабатывало ни разу: метрики показали
 не пересекаются, но у других каналов бывают свои коды, которых в таблице нет. Для них поле не
 добавляется. Новые коды добавляются строкой в CSV, адаптер перечитывает файл раз в минуту.
 
+## Справочники для всех потоков
+
+Данные собраны по живому Graylog (7 дней): какие `source` есть в каждом потоке, какие `level`,
+`facility`, `type`, `kn_event_type`, `Status`/`SubStatus` встречаются. Все таблицы создаёт один скрипт
+[`import-lookup-tables.js`](import-lookup-tables.js), CSV лежат в [`lookups/`](lookups/).
+
+| Таблица | Ключ → значение | Правило (поле в сообщении) | Куда подключать |
+|---|---|---|---|
+| `homelab-windows-events` | EventID → название | `homelab: windows event_name` (`event_name`) | `WindowsLogs` |
+| `homelab-windows-logon-types` | LogonType → смысл | `homelab: windows logon_type_name` (`logon_type_name`) | `WindowsLogs` |
+| `homelab-windows-status` | Status/SubStatus → причина отказа | `homelab: windows fail_reason` (`fail_reason`, для 4625) | `WindowsLogs` |
+| `homelab-ip-names` | IP → имя хоста | `homelab: windows src_host` (`src_host`) | `WindowsLogs` |
+| `homelab-subnets` | IP → сеть (поиск по CIDR) | `homelab: windows src_zone` (`src_zone`) | `WindowsLogs` |
+| `homelab-host-roles` | `source` → роль хоста | `homelab: host_role` (`host_role`) | все потоки с хостами |
+| `homelab-host-os` | `source` → ОС | `homelab: host_os` (`host_os`) | все потоки с хостами |
+| `homelab-syslog-severity` | `level` 0–7 → emergency … debug | `homelab: level_name` (`level_name`) | `FreeIPA Logs`, `Syslog Logs`, `Containers` |
+| `homelab-auditd-types` | `type` → описание записи | `homelab: auditd type_name` (`type_name`) | `RedOS auditd Logs` |
+| `homelab-keenetic-events` | `kn_event_type` → название | `homelab: keenetic kn_event_name` (`kn_event_name`) | `Syslog Logs` |
+| `homelab-collector-agents` | `agent_id` → имя хоста | `collectors: source from agent_id` | **не подключено** (см. ниже) |
+
+**Три отдельных pipeline**, чтобы не трогать существующие (запись pipeline через API заменяет его
+целиком и стирает стадии):
+
+1. `homelab: windows enrichment`, стадия 0, правила `windows event_name`, `logon_type_name`,
+   `fail_reason`, `src_host`, `src_zone`; поток `WindowsLogs`.
+2. `homelab: host info`, **стадия 2** (имя хоста в `source` для Collectors ставится в стадии 1),
+   правила `host_role` и `host_os`; потоки `Collectors`, `MacOS Logs`, `BiZone_macOS`, `Containers`,
+   `FreeIPA Logs`, `RedOS auditd Logs`, `Syslog Logs`, `WindowsLogs`.
+3. `homelab: syslog enrichment`, стадия 0, правила `level_name`, `auditd type_name`,
+   `keenetic kn_event_name`; потоки `FreeIPA Logs`, `Syslog Logs`, `Containers`, `RedOS auditd Logs`.
+   Правила не мешают друг другу: каждое срабатывает только при своём поле.
+
+**Что в данных.**
+
+- В `Collectors` 11 агентов, их `agent_id` → имя лежат в `homelab-collector-agents.csv`. Таблицу и
+  правило `collectors: source from agent_id` можно использовать вместо отдельных правил
+  `collectors: source <имя Мака>`, но сейчас они не подключены: замена потребует убрать старые правила.
+- `Containers` присылает `source` с доменом (`server-01.example.test`), поэтому в таблицах хостов
+  есть оба варианта имени.
+- `facility` в `FreeIPA Logs` и `Syslog Logs` уже текстовый (`system daemon`, `user-level`), для него
+  таблица не нужна. `level` числовой, для него `homelab-syslog-severity`.
+- `homelab-subnets` использует поиск по CIDR (`cidr_lookup`), диапазоны в нём не пересекаются.
+
 ## Один хост, два имени источника
 
 Поле `source` у одного и того же хоста может отличаться в зависимости от канала:

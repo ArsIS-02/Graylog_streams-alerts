@@ -1,0 +1,8 @@
+// description: НЕ ПОДКЛЮЧЕНО. Ставит source по agent_id из Lookup Table homelab-collector-agents; заменяет отдельные правила «collectors: source <имя Мака>».
+rule "collectors: source from agent_id"
+when
+  has_field("agent_id")
+  AND lookup_has_value("homelab-collector-agents", to_string($message.agent_id))
+then
+  set_field("source", lookup_value("homelab-collector-agents", to_string($message.agent_id)));
+end

@@ -1,0 +1,8 @@
+// description: Добавляет level_name (emergency … debug) по числовому level из Lookup Table homelab-syslog-severity.
+rule "homelab: level_name"
+when
+  has_field("level")
+  AND lookup_has_value("homelab-syslog-severity", to_string($message.level))
+then
+  set_field("level_name", lookup_value("homelab-syslog-severity", to_string($message.level)));
+end

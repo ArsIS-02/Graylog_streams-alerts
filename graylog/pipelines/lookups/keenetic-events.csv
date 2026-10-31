@@ -1,0 +1,6 @@
+key,value
+ARP_Conflict,Конфликт ARP: два устройства с одним IP
+Wireguard_Failed,WireGuard: ошибка подключения
+Wireguard_Success,WireGuard: подключение установлено
+DHCP_Request,DHCP: запрос адреса
+WiFi_Disconnect,Wi-Fi: клиент отключился

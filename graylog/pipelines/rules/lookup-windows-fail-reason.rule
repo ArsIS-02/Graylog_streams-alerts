@@ -1,0 +1,14 @@
+// description: Для 4625 добавляет fail_reason: причина отказа по SubStatus, если его нет в таблице, то по Status (Lookup Table homelab-windows-status).
+rule "homelab: windows fail_reason"
+when
+  to_string($message.winlogbeat_winlog_event_id) == "4625"
+then
+  set_field(
+    "fail_reason",
+    lookup_value(
+      "homelab-windows-status",
+      to_string($message.winlogbeat_winlog_event_data_SubStatus),
+      lookup_value("homelab-windows-status", to_string($message.winlogbeat_winlog_event_data_Status), "неизвестная причина")
+    )
+  );
+end

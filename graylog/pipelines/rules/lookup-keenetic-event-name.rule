@@ -1,0 +1,8 @@
+// description: Добавляет kn_event_name (русское название события Keenetic) по kn_event_type из Lookup Table homelab-keenetic-events.
+rule "homelab: keenetic kn_event_name"
+when
+  has_field("kn_event_type")
+  AND lookup_has_value("homelab-keenetic-events", to_string($message.kn_event_type))
+then
+  set_field("kn_event_name", lookup_value("homelab-keenetic-events", to_string($message.kn_event_type)));
+end

@@ -1,0 +1,8 @@
+key,value
+router-01,RouterOS
+server-01,Linux
+server-01.example.test,Linux
+nas-01,Linux
+nas-01.example.test,Linux
+laptop-01,macOS
+dc-01.example.local,Windows Server

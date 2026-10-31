@@ -1,0 +1,8 @@
+// description: Добавляет type_name по типу записи auditd (поле type) из Lookup Table homelab-auditd-types.
+rule "homelab: auditd type_name"
+when
+  has_field("type")
+  AND lookup_has_value("homelab-auditd-types", to_string($message.type))
+then
+  set_field("type_name", lookup_value("homelab-auditd-types", to_string($message.type)));
+end

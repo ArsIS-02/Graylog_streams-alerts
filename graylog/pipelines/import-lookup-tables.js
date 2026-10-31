@@ -5,7 +5,7 @@
  *
  * 1) Положите CSV на сервер Graylog (файлы лежат в lookups/):
  *      sudo install -d -m 750 -o root -g graylog /etc/graylog/server/lookups
- *      sudo cp windows-events.csv windows-logon-types.csv /etc/graylog/server/lookups/
+ *      sudo cp lookups/*.csv /etc/graylog/server/lookups/    # из каталога graylog/pipelines
  *      sudo chown root:graylog /etc/graylog/server/lookups/*.csv && sudo chmod 640 /etc/graylog/server/lookups/*.csv
  *
  * 2) Откройте Graylog в браузере (залогиньтесь), F12 → Console, вставьте файл целиком, затем:
@@ -23,6 +23,25 @@ const LOOKUP_TABLES = [
   {name: 'homelab-windows-logon-types', file: 'windows-logon-types.csv',
    title: 'homelab: типы входа Windows',
    description: 'LogonType → смысл (2 Interactive, 3 Network, 10 RDP и т. д.)'},
+  {name: 'homelab-windows-status', file: 'windows-status.csv',
+   title: 'homelab: причины отказа входа Windows',
+   description: 'Status / SubStatus из 4625 (0xc000006d …) → причина'},
+  {name: 'homelab-host-roles', file: 'homelab-host-roles.csv',
+   title: 'homelab: роли хостов', description: 'source (короткое и полное имя) → роль хоста'},
+  {name: 'homelab-host-os', file: 'homelab-host-os.csv',
+   title: 'homelab: ОС хостов', description: 'source (короткое и полное имя) → ОС'},
+  {name: 'homelab-ip-names', file: 'homelab-ip-names.csv',
+   title: 'homelab: IP → имя хоста', description: 'IP-адреса устройств лаборатории → имя'},
+  {name: 'homelab-subnets', file: 'homelab-subnets.csv', cidr: true,
+   title: 'homelab: подсети', description: 'IP → сеть (домашняя, loopback, частные), поиск по CIDR'},
+  {name: 'homelab-syslog-severity', file: 'syslog-severity.csv',
+   title: 'homelab: уровни syslog', description: 'level 0–7 → emergency … debug'},
+  {name: 'homelab-auditd-types', file: 'auditd-types.csv',
+   title: 'homelab: типы записей auditd', description: 'type → описание записи'},
+  {name: 'homelab-keenetic-events', file: 'keenetic-events.csv',
+   title: 'homelab: события Keenetic', description: 'kn_event_type → русское название'},
+  {name: 'homelab-collector-agents', file: 'homelab-collector-agents.csv',
+   title: 'homelab: агенты Collectors', description: 'agent_id → имя хоста'},
 ];
 
 async function importLookupTables(opts = {}) {
@@ -56,7 +75,7 @@ async function importLookupTables(opts = {}) {
       name: t.name + '-csv', title: t.title + ' (CSV)', description: 'Файл ' + dir + '/' + t.file,
       config: {type: 'csvfile', path: dir + '/' + t.file, separator: ',', quotechar: '"',
                key_column: 'key', value_column: 'value', check_interval: 60,
-               case_insensitive_lookup: true, cidr_lookup: false, multi_value_lookup: false}}));
+               case_insensitive_lookup: true, cidr_lookup: !!t.cidr, multi_value_lookup: false}}));
     await ensure('таблица', '/api/system/lookup/tables', 'lookup_tables', t.name, () => ({
       name: t.name, title: t.title, description: t.description,
       cache_id: cache.id, data_adapter_id: adapter.id,
