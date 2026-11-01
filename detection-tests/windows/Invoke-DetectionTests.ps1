@@ -392,10 +392,31 @@ function Add-Cleanup([scriptblock]$Block) { [void]$script:Cleanups.Add($Block) }
 
 function Invoke-Native {
     param([string]$Exe, [string[]]$Arguments)
-    # net.exe может задавать вопрос (Y/N): отвечаем Y, чтобы скрипт не завис в ожидании ввода
-    if ($Exe -like 'net*') { $o = 'Y' | & $Exe @Arguments 2>&1 } else { $o = & $Exe @Arguments 2>&1 }
-    $script:LastExit = $LASTEXITCODE
+    $script:LastError = $null
+    try {
+        # net.exe может задавать вопрос (Y/N): отвечаем Y, чтобы скрипт не завис в ожидании ввода
+        if ($Exe -like 'net*') { $o = 'Y' | & $Exe @Arguments 2>&1 } else { $o = & $Exe @Arguments 2>&1 }
+        $script:LastExit = $LASTEXITCODE
+    } catch {
+        # запуск не удался (например, программу заблокировала защита)
+        $script:LastExit = -1
+        $script:LastError = $_.Exception.Message
+        $o = $null
+    }
     return $o
+}
+
+# Имитация: cmd /c rem <фраза>. Каждая фраза запускается отдельно, потому что защита может блокировать часть из них.
+function Invoke-Sim {
+    param([string[]]$Phrases)
+    $ok = 0; $blocked = 0
+    foreach ($ph in $Phrases) {
+        $null = Invoke-Native cmd.exe @('/c', "rem $ph")
+        if ($script:LastExit -eq -1) { $blocked++; Write-Warn "Запуск заблокирован защитой: rem $ph" } else { $ok++ }
+        Start-Sleep -Milliseconds 500
+    }
+    if ($ok -eq 0) { throw "BLOCKED: защита заблокировала все команды; смотрите событие Defender (1116/1117) и алерт «Defender обнаружил угрозу»" }
+    if ($blocked -gt 0) { Write-Warn "Заблокировано команд: $blocked из $($ok + $blocked); остальные выполнены" }
 }
 
 function New-DtPassword {
@@ -548,9 +569,9 @@ function Test-WIN16 {
     $null = Invoke-Native powershell.exe @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', $f)
 }
 
-function Test-WIN17 { $null = Invoke-Native cmd.exe @('/c', 'rem certutil -urlcache mshta.exe bitsadmin scrobj.dll') }
+function Test-WIN17 { Invoke-Sim @('certutil -urlcache', 'mshta.exe', 'bitsadmin /transfer', 'scrobj.dll') }
 
-function Test-WIN18 { $null = Invoke-Native cmd.exe @('/c', 'rem reg save hklm sam C:\Windows\Temp\dt.sav') }
+function Test-WIN18 { Invoke-Sim @('reg save hklm sam', 'reg save hklm security', 'reg save hklm system') }
 
 function Test-WIN19 {
     $null = Invoke-Native whoami.exe @()
@@ -739,7 +760,8 @@ try {
                 Write-Ok "Выполнено. Ожидаются алерты: $($t.rules -join '; ')"
             } catch {
                 $msg = "$_"
-                if ($msg -like 'SKIP:*') { $row.status = 'пропущено'; $row.note = $msg.Substring(5).Trim(); Write-Warn "Пропущено: $($row.note)" }
+                if ($msg -like 'BLOCKED:*') { $row.status = 'заблокировано защитой'; $row.note = $msg.Substring(8).Trim(); Write-Warn "Заблокировано защитой: $($row.note)" }
+                elseif ($msg -like 'SKIP:*') { $row.status = 'пропущено'; $row.note = $msg.Substring(5).Trim(); Write-Warn "Пропущено: $($row.note)" }
                 else { $row.status = 'ошибка'; $row.note = $msg; Write-Err "Ошибка: $msg" }
             }
             Start-Sleep -Seconds $PauseSec
