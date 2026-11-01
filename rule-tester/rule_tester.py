@@ -25,12 +25,14 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import graylog_api as G  # noqa: E402
+from version import NAME, VERSION  # noqa: E402
 import lucene as L  # noqa: E402
 
 HERE = Path(__file__).resolve().parent
 CATALOG = HERE.parent / "graylog" / "detections" / "detections-source.json"
 DATA = Path(os.environ.get("RT_DATA") or HERE)  # в контейнере: том с историей и собранными образцами
-MANUAL = HERE / "samples" / "manual.json"
+MANUAL = HERE / "samples" / "manual.json"            # в репозитории (git)
+VOL_MANUAL = DATA / "samples" / "manual.json"        # правки из интерфейса (том контейнера)
 HARVESTED = DATA / "samples" / "harvested.json"
 REPORTS = DATA / "reports"
 NUMERIC_DEFAULT = {"win_event_id"}
@@ -40,7 +42,7 @@ PLACEHOLDER = re.compile(r"<[^<>]*[А-Яа-яЁё][^<>]*>")
 # ---------------------------------------------------------------- правила
 
 def platform_of(title):
-    return re.split(r"\s*[-:]\s", title, 1)[0].strip()
+    return re.split(r"\s*[-:]\s", title, maxsplit=1)[0].strip()
 
 
 def cond_of(c):
@@ -98,8 +100,9 @@ def load_live_rules(gl):
 def filter_rules(rules, args):
     sel = rules
     if getattr(args, "rule", None):
-        subs = [s.strip().lower() for r in args.rule for s in r.split(",") if s.strip()]
-        sel = [r for r in sel if any(s in r["title"].lower() for s in subs)]
+        exact = [r[1:] for r in args.rule if r.startswith("=")]
+        subs = [s.strip().lower() for r in args.rule if not r.startswith("=") for s in r.split(",") if s.strip()]
+        sel = [r for r in sel if r["title"] in exact or any(s in r["title"].lower() for s in subs)]
     if getattr(args, "platform", None):
         p = args.platform.lower()
         sel = [r for r in sel if platform_of(r["title"]).lower().startswith(p)]
@@ -119,8 +122,20 @@ def load_json(path, default):
         return default
 
 
+def load_manual():
+    """Ручные образцы: из репозитория и с тома; у каждого образца помечено происхождение."""
+    out = {}
+    for origin, path in (("репозиторий", MANUAL), ("том", VOL_MANUAL)):
+        for key, v in load_json(path, {}).items():
+            e = out.setdefault(key, {"positive": [], "negative": []})
+            for kind in ("positive", "negative"):
+                for it in v.get(kind, []):
+                    e[kind].append(dict(it, origin=origin))
+    return out
+
+
 def build_samples(rules, variants=3, use_manual=True, use_harvest=True):
-    manual = load_json(MANUAL, {}) if use_manual else {}
+    manual = load_manual() if use_manual else {}
     harv = load_json(HARVESTED, {}) if use_harvest else {}
     out, report = [], {}
     for r in rules:
@@ -152,7 +167,8 @@ def build_samples(rules, variants=3, use_manual=True, use_harvest=True):
             expect = "match" if kind == "P" else "no_match"
             agree = L.evaluate(node, doc) == (kind == "P")
             out.append({"id": sid(title, kind, counters[kind]), "rule": title, "expect": expect, "doc": doc,
-                        "why": it.get("why", ""), "src": src, "offline_ok": agree, "numeric": rng})
+                        "why": it.get("why", ""), "src": src, "offline_ok": agree, "numeric": rng,
+                        "origin": it.get("origin", "авто" if src == "auto" else "")})
         report[title] = {"warns": sorted(set(warns)), "lint": lint, "problems": problems,
                          "pos": len(pos), "neg": len(neg)}
     return out, report
@@ -442,12 +458,21 @@ def numeric_fields(args):
     return NUMERIC_DEFAULT | set(x for x in (args.numeric or "").split(",") if x)
 
 
-def write_report(run, kind, rows, summary):
+OKS = ("ПРОШЛО", "СОБЫТИЕ ЕСТЬ")
+
+
+def stats_of(rows):
+    return {"total": len(rows), "passed": sum(r["status"] in OKS for r in rows),
+            "skipped": sum(r["status"] == "ПРОПУЩЕНО" for r in rows),
+            "failed": sum(r["status"] not in OKS and r["status"] != "ПРОПУЩЕНО" for r in rows)}
+
+
+def write_report(run, kind, rows, summary, meta=None):
     REPORTS.mkdir(parents=True, exist_ok=True)
-    (REPORTS / ("%s-%s.json" % (run, kind))).write_text(
-        json.dumps({"run": run, "kind": kind, "summary": summary, "rows": rows}, ensure_ascii=False, indent=1),
-        encoding="utf-8")
-    md = ["# Проверка правил Graylog (%s), запуск %s" % (kind, run), "", "Итог: " + summary, "",
+    data = {"run": run, "kind": kind, "version": VERSION, "created": datetime.now().isoformat(timespec="seconds"),
+            "summary": summary, "stats": stats_of(rows), "meta": meta or {}, "rows": rows}
+    (REPORTS / ("%s-%s.json" % (run, kind))).write_text(json.dumps(data, ensure_ascii=False, indent=1), encoding="utf-8")
+    md = ["# %s %s: проверка правил (%s), запуск %s" % (NAME, VERSION, kind, run), "", "Итог: " + summary, "",
           "| Правило | Результат | Подробности |", "|---|---|---|"]
     for r in rows:
         md.append("| %s | %s | %s |" % (r["rule"].replace("|", "/"), r["status"], r["detail"].replace("|", "/")))
@@ -488,19 +513,28 @@ def cmd_run_queries(args):
     for r in rules:
         ss = per.get(r["title"])
         if not ss:
-            rows.append({"rule": r["title"], "status": "ПРОПУЩЕНО", "detail": rep.get(r["title"], {}).get("error", "нет образцов")})
+            rp = rep.get(r["title"], {})
+            why = ("заглушка в запросе каталога: %s (запускайте с источником Graylog)" % rp["placeholder"]) if rp.get("placeholder") \
+                else rp.get("error", "нет образцов")
+            rows.append({"rule": r["title"], "status": "ПРОПУЩЕНО", "detail": why, "query": r["query"],
+                         "platform": platform_of(r["title"]), "priority": r.get("priority"), "samples": []})
+            log("  %-9s %s" % ("ПРОПУЩЕНО", r["title"][:90]))
             continue
         ids = " OR ".join(s["id"] for s in ss)
         q = "rt_run:%s AND rt_sample:(%s) AND (%s)" % (run, ids, r["query"])
         try:
             _, msgs = gl.search_messages(q, sids, minutes=10, limit=len(ss) + 5, fields=["rt_sample"])
         except G.ApiError as e:
-            rows.append({"rule": r["title"], "status": "ОШИБКА ЗАПРОСА", "detail": str(e)[:300]})
+            rows.append({"rule": r["title"], "status": "ОШИБКА ЗАПРОСА", "detail": str(e)[:300], "query": r["query"],
+                         "platform": platform_of(r["title"]), "priority": r.get("priority"), "samples": []})
+            log("  %-9s %s" % ("ОШИБКА ЗАПРОСА", r["title"][:90]))
             bad += 1
             continue
         found = {m.get("rt_sample") for m in msgs}
         miss = [s for s in ss if s["expect"] == "match" and s["id"] not in found]
         false = [s for s in ss if s["expect"] == "no_match" and s["id"] in found]
+        sam = [{"id": s["id"], "expect": s["expect"], "src": s["src"], "origin": s.get("origin", ""), "why": s["why"],
+                "found": s["id"] in found, "ok": (s["id"] in found) == (s["expect"] == "match"), "doc": s["doc"]} for s in ss]
         details = []
         for s in miss:
             details.append("не найдено [%s] %s" % (s["src"], s["why"][:60]))
@@ -512,15 +546,18 @@ def cmd_run_queries(args):
         if miss or false:
             bad += 1
             hint = diagnose(gl, run, miss[0], sids) if miss else ""
-            rows.append({"rule": r["title"], "status": "ПРОВАЛ", "detail": "; ".join(details) + hint})
+            rows.append({"rule": r["title"], "status": "ПРОВАЛ", "detail": "; ".join(details) + hint, "query": r["query"],
+                         "platform": platform_of(r["title"]), "priority": r.get("priority"), "samples": sam})
         else:
             rows.append({"rule": r["title"], "status": "ПРОШЛО",
                          "detail": "найдено %d из %d положительных, отрицательных не найдено: %d" % (
                              sum(s["expect"] == "match" for s in ss), sum(s["expect"] == "match" for s in ss),
-                             sum(s["expect"] == "no_match" for s in ss))})
+                             sum(s["expect"] == "no_match" for s in ss)), "query": r["query"],
+                         "platform": platform_of(r["title"]), "priority": r.get("priority"), "samples": sam})
         log("  %-9s %s" % (rows[-1]["status"], r["title"][:90]))
     summary = "правил %d, прошло %d, провалов %d" % (len(rows), sum(r["status"] == "ПРОШЛО" for r in rows), bad)
-    path = write_report(run, "queries", rows, summary)
+    path = write_report(run, "queries", rows, summary, {"platform": getattr(args, "platform", None) or "",
+                                                       "rule": ",".join(args.rule or []), "source": src})
     log("\n" + summary + "\nОтчёт: " + str(path))
     return 1 if bad else 0
 
@@ -637,7 +674,12 @@ def cmd_run_e2e(args):
             rows.append({"rule": r["title"], "status": "НЕТ СОБЫТИЯ", "detail":
                          "за %d с события не было: проверьте, что поток принял сообщение, и период тишины/интервал запуска" % args.wait})
     summary = "правил %d, событий получено %d, без события %d" % (len(rows), len(seen), bad)
-    path = write_report(run, "e2e", rows, summary)
+    byt = {r["title"]: r for r in rules}
+    for row in rows:
+        r = byt.get(row["rule"], {})
+        row.update(query=r.get("query", ""), platform=platform_of(row["rule"]), priority=r.get("priority"), samples=[])
+    path = write_report(run, "e2e", rows, summary, {"platform": getattr(args, "platform", None) or "",
+                                                    "rule": ",".join(args.rule or []), "source": "Graylog"})
     for r in rows:
         log("  %-13s %s" % (r["status"], r["rule"][:90]))
     log("\n" + summary + "\nОтчёт: " + str(path))
@@ -660,6 +702,7 @@ def main(argv=None):
     ap.add_argument("--platform", help="префикс платформы: Windows, LNX, macOS, FREEIPA, HEALTH …")
     ap.add_argument("--variants", type=int, default=3, help="сколько положительных вариантов на правило")
     ap.add_argument("--numeric", help="поля, которые отправлять числом (через запятую), по умолчанию win_event_id")
+    ap.add_argument("--version", action="version", version="%s %s" % (NAME, VERSION))
     sub = ap.add_subparsers(dest="cmd", required=True)
     sub.add_parser("list")
     p = sub.add_parser("selftest")
