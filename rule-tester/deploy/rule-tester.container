@@ -1,0 +1,22 @@
+# Quadlet: положите в ~/.config/containers/systemd/ (rootless) или /etc/containers/systemd/,
+# затем: systemctl --user daemon-reload && systemctl --user start rule-tester
+[Unit]
+Description=Проверка правил Graylog (rule-tester)
+After=network-online.target
+
+[Container]
+Image=localhost/rule-tester:latest
+ContainerName=rule-tester
+EnvironmentFile=%h/rule-tester/rule-tester.env
+PublishPort=127.0.0.1:8085:8080
+Volume=rule-tester-data:/data:Z
+ReadOnly=true
+Tmpfs=/tmp
+DropCapability=ALL
+NoNewPrivileges=true
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=default.target

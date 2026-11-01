@@ -150,6 +150,7 @@
 | 13 | [Lookup Tables: обогащение событий справочниками](docs/13-lookup-tables.md) | Коды Windows, роли хостов, подсети, уровни syslog; адаптеры CSV, правила pipeline, импорт, пример на вымышленных данных |
 | 14 | [Каталог детектов Graylog](docs/14-detections.md) | Все правила в таблицах: источник логов, условие и корреляция, тактика и техника MITRE ATT&CK, матрица покрытия; страница собирается скриптом из выгрузки Graylog |
 | 15 | [Проверка детектов](docs/15-detection-tests.md) | Безопасные сценарии для Windows, Linux, macOS и FreeIPA: создают события, похожие на атаки, и показывают, какие алерты должны прийти; отчёт для сверки в Graylog |
+| 16 | [Проверка правил без хостов](docs/16-rule-tester.md) | Сообщения отправляются на сервер Graylog (GELF): проверка запросов всех правил в тестовом потоке и полного пути до события; веб-интерфейс в контейнере Podman |
 
 ### Дашборды
 
@@ -190,6 +191,7 @@
 | Pipeline и справочники | [`graylog/pipelines/`](graylog/pipelines/) | Правила, CSV-справочники, импортёры, пример на вымышленных данных |
 | MITRE ATT&CK | [`graylog/mitre/`](graylog/mitre/) | Соответствие техникам, поля в событиях, слой Navigator, страница с матрицей |
 | Каталог детектов | [`graylog/detections/`](graylog/detections/) | Выгрузка из Graylog, генератор страницы и таблица CSV |
+| Проверка правил без хостов | [`rule-tester/`](rule-tester/) | Отправка образцов в Graylog по GELF, проверка запросов и событий, веб-интерфейс и контейнер Podman |
 | Проверка детектов | [`detection-tests/`](detection-tests/) | Раннеры для Windows, Linux, macOS и FreeIPA: 103 безопасные проверки, покрывающие 146 правил |
 | Дашборды | [`graylog/dashboards-spec.json`](graylog/dashboards-spec.json), [`import-dashboards.js`](graylog/import-dashboards.js) | Спецификация и импорт дашбордов |
 | Агенты на хостах | [`windows/`](windows/), [`linux/`](linux/), [`macos/`](macos/), [`containers/`](containers/) | Конфиги Winlogbeat, rsyslog, Filebeat, osquery, Fluent Bit |
@@ -217,6 +219,7 @@ Graylog_streams-alerts/
 │   ├── 12-graylog-grafana.md          ← Graylog + Grafana: логи и аннотации
 │   ├── 13-lookup-tables.md            ← Lookup Tables: справочники и обогащение
 │   ├── 14-detections.md               ← каталог детектов (собирается скриптом)
+│   ├── 16-rule-tester.md              ← проверка правил без хостов
 │   ├── 15-detection-tests.md          ← проверка детектов (собирается скриптом)
 │   ├── troubleshooting.md             ← грабли и решения
 │   └── images/                        ← скриншоты и иллюстрации
@@ -228,6 +231,7 @@ Graylog_streams-alerts/
 │   ├── pipelines/                     ← правила, CSV-справочники, импортёры, пример
 │   ├── mitre/                         ← техники ATT&CK: соответствия, поля, слой Navigator
 │   └── detections/                    ← выгрузка, генератор и CSV каталога детектов
+├── rule-tester/                       ← проверка правил по GELF, веб-интерфейс, контейнер
 ├── detection-tests/                   ← проверки детектов: раннеры под ОС и FreeIPA, сборщик
 ├── decoder/                           ← декодер auditd (auditd_decoder.py, systemd-юнит)
 ├── config/                            ← server.conf (SMTP), opensearch.yml

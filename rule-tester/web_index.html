@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Проверка правил Graylog</title>
+<style>
+:root{--bg:#f6f7f9;--card:#fff;--tx:#1b1f24;--mut:#667085;--ln:#e3e6eb;--ac:#2f6fed;--ok:#1a7f4b;--bad:#c62828;--warn:#b26a00}
+@media (prefers-color-scheme:dark){:root{--bg:#14171c;--card:#1d2127;--tx:#e6e9ee;--mut:#98a2b3;--ln:#2f353e;--ac:#6b9bff;--ok:#4cc38a;--bad:#ff7b72;--warn:#e3a008}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:14px/1.45 system-ui,sans-serif}
+header{display:flex;gap:16px;align-items:center;padding:12px 16px;border-bottom:1px solid var(--ln);background:var(--card);flex-wrap:wrap}
+h1{font-size:16px;margin:0}nav{display:flex;gap:4px;flex-wrap:wrap}
+nav button,.btn{border:1px solid var(--ln);background:var(--card);color:var(--tx);padding:6px 12px;border-radius:6px;cursor:pointer;font:inherit}
+nav button.on{background:var(--ac);color:#fff;border-color:var(--ac)}.btn.pri{background:var(--ac);color:#fff;border-color:var(--ac)}.btn.dng{background:var(--bad);color:#fff;border-color:var(--bad)}
+.btn:disabled{opacity:.5;cursor:default}
+main{padding:16px;max-width:1200px;margin:0 auto}.card{background:var(--card);border:1px solid var(--ln);border-radius:8px;padding:14px;margin-bottom:14px}
+table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--ln);vertical-align:top}th{color:var(--mut);font-weight:600;font-size:12px}
+.mut{color:var(--mut)}.ok{color:var(--ok)}.bad{color:var(--bad)}.warn{color:var(--warn)}
+input,select{font:inherit;padding:6px 8px;border:1px solid var(--ln);border-radius:6px;background:var(--card);color:var(--tx)}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:8px}
+pre{background:var(--bg);border:1px solid var(--ln);border-radius:6px;padding:10px;overflow:auto;max-height:420px;white-space:pre-wrap;word-break:break-word;margin:0}
+code{font-family:ui-monospace,monospace;font-size:12px;word-break:break-all}
+.tag{display:inline-block;padding:1px 7px;border-radius:10px;border:1px solid var(--ln);font-size:12px;margin:0 4px 2px 0}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;padding:16px}.modal.on{display:flex}
+.modal .box{background:var(--card);border-radius:10px;padding:18px;max-width:480px;width:100%;border:1px solid var(--ln)}
+.modal .act{display:flex;gap:8px;justify-content:flex-end;margin-top:14px}
+#login{max-width:340px;margin:12vh auto}
+@media(max-width:700px){td.hide,th.hide{display:none}}
+</style>
+</head>
+<body>
+<div id="login" class="card" hidden>
+  <h1>Проверка правил Graylog</h1>
+  <p class="mut">Введите пароль интерфейса.</p>
+  <div class="row"><input id="pw" type="password" placeholder="Пароль" style="flex:1"><button class="btn pri" id="pwgo">Войти</button></div>
+  <div id="pwerr" class="bad"></div>
+</div>
+<div id="app" hidden>
+<header><h1>Проверка правил Graylog</h1>
+<nav><button data-t="rules" class="on">Правила</button><button data-t="run">Запуск</button><button data-t="res">Результаты</button></nav>
+<span id="envinfo" class="mut"></span></header>
+<main>
+  <section id="t-rules">
+    <div class="card"><div class="row">
+      <select id="fplat"><option value="">Все платформы</option></select>
+      <input id="fq" placeholder="Поиск по названию или запросу" style="flex:1;min-width:200px">
+      <label><input type="checkbox" id="fflag"> только с замечаниями</label>
+      <button class="btn" id="rrefresh">Обновить из Graylog</button></div>
+      <div id="rinfo" class="mut"></div></div>
+    <div class="card" style="overflow:auto"><table id="rtab"><thead><tr><th>Правило</th><th class="hide">Приор.</th><th class="hide">Тип</th><th>Образцы +/−</th><th>Замечания</th></tr></thead><tbody></tbody></table></div>
+  </section>
+  <section id="t-run" hidden>
+    <div class="card"><div class="row">
+      <select id="rmode">
+        <option value="queries">Запросы в тестовом потоке (без алертов)</option>
+        <option value="e2e">До алерта (настоящие события и письма)</option>
+        <option value="doctor">Проверка доступа и входа GELF</option>
+        <option value="selftest">Офлайн-самопроверка запросов</option>
+        <option value="harvest">Сбор настоящих сообщений для образцов</option></select>
+      <select id="rplat"><option value="">Все платформы</option></select>
+      <input id="rrule" placeholder="Часть названия правила (необязательно)" style="flex:1;min-width:220px">
+      <button class="btn pri" id="rgo">Запустить</button></div>
+      <div class="mut">Режим «до алерта» создаёт настоящие события и отправляет уведомления; для него обязательно выбрать платформу или правило.</div></div>
+    <div class="card"><div class="row"><b id="jtitle">Запусков ещё не было</b><span id="jstat" class="mut"></span></div><pre id="jlog"></pre></div>
+  </section>
+  <section id="t-res" hidden>
+    <div class="card" style="overflow:auto"><b>Отчёты</b><table id="reptab"><thead><tr><th>Запуск</th><th>Вид</th><th>Итог</th><th></th></tr></thead><tbody></tbody></table></div>
+    <div class="card" id="repview" hidden><b id="reptitle"></b><div class="row"><select id="repf"><option value="">Все</option><option value="bad">Только проблемы</option></select></div><div style="overflow:auto"><table id="repdet"><thead><tr><th>Правило</th><th>Результат</th><th>Подробности</th></tr></thead><tbody></tbody></table></div></div>
+    <div class="card" style="overflow:auto"><b>История запусков</b><table id="histtab"><thead><tr><th>Начало</th><th>Режим</th><th>Кто</th><th>Статус</th></tr></thead><tbody></tbody></table></div>
+  </section>
+</main></div>
+<div class="modal" id="modal"><div class="box"><b id="mt"></b><p id="mb"></p><div class="act"><button class="btn" id="mno">Отмена</button><button class="btn pri" id="myes">Подтвердить</button></div></div></div>
+<script>
+const $=s=>document.querySelector(s);
+const el=(t,txt,cls)=>{const e=document.createElement(t);if(txt!==undefined)e.textContent=txt;if(cls)e.className=cls;return e};
+async function api(path,body){const r=await fetch(path,body===undefined?{}:{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  if(r.status===401){showLogin();throw new Error('auth')}const d=await r.json();if(!r.ok)throw new Error(d.error||r.status);return d}
+function ask(title,text,danger){return new Promise(res=>{$('#mt').textContent=title;$('#mb').textContent=text;$('#myes').className='btn '+(danger?'dng':'pri');
+  $('#modal').classList.add('on');const done=v=>{$('#modal').classList.remove('on');res(v)};$('#myes').onclick=()=>done(true);$('#mno').onclick=()=>done(false)})}
+function note(text){return ask('Сообщение',text,false)}
+function showLogin(){$('#app').hidden=true;$('#login').hidden=false}
+$('#pwgo').onclick=async()=>{try{await api('/api/login',{password:$('#pw').value});$('#login').hidden=true;init()}catch(e){$('#pwerr').textContent=e.message}};
+$('#pw').onkeydown=e=>{if(e.key==='Enter')$('#pwgo').click()};
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x===b));
+  ['rules','run','res'].forEach(t=>$('#t-'+t).hidden=t!==b.dataset.t);if(b.dataset.t==='res')loadRes();if(b.dataset.t==='run')pollJob()});
+let RULES=[];
+async function loadRules(force){const d=await api('/api/rules'+(force?'?refresh=1':''));RULES=d.rules;
+  $('#rinfo').textContent='Источник: '+d.source+'. Правил: '+d.rules.length+'. Получено: '+d.fetched+(d.note?'. '+d.note:'');
+  const plats=[...new Set(d.rules.map(r=>r.platform))].sort();
+  for(const id of ['#fplat','#rplat']){const s=$(id),cur=s.value;s.length=1;plats.forEach(p=>{const o=el('option',p);o.value=p;s.append(o)});s.value=cur}
+  drawRules()}
+function drawRules(){const tb=$('#rtab tbody');tb.textContent='';const q=$('#fq').value.toLowerCase(),p=$('#fplat').value,f=$('#fflag').checked;
+  RULES.filter(r=>(!p||r.platform===p)&&(!f||r.flags.length)&&(!q||(r.title+' '+r.query).toLowerCase().includes(q))).forEach(r=>{
+    const tr=el('tr'),td=el('td');td.append(el('div',r.title));const c=el('code',r.query.length>240?r.query.slice(0,240)+'…':r.query);c.className='mut';td.append(c);
+    tr.append(td,el('td',r.priority,'hide'),el('td',r.kind,'hide'),el('td',r.pos+' / '+r.neg));
+    const fl=el('td');r.flags.forEach(x=>fl.append(el('span',x,'tag warn')));tr.append(fl);tb.append(tr)})}
+['#fq','#fplat','#fflag'].forEach(s=>$(s).oninput=drawRules);$('#rrefresh').onclick=()=>loadRules(true).catch(e=>note(e.message));
+$('#rgo').onclick=async()=>{const mode=$('#rmode').value,platform=$('#rplat').value,rule=$('#rrule').value.trim();let confirm=false;
+  if(mode==='e2e'){if(!platform&&!rule){return note('Для режима «до алерта» выберите платформу или введите часть названия правила.')}
+    if(!await ask('Создать настоящие алерты?','Сообщения пойдут в боевые потоки, сработают события и уведомления по почте. Продолжить?',true))return;confirm=true}
+  try{await api('/api/run',{mode,platform,rule,confirm});pollJob()}catch(e){note(e.message)}};
+let timer=null;
+async function pollJob(){clearTimeout(timer);const d=await api('/api/job');const j=d.job;if(!j){return}
+  $('#jtitle').textContent='Запуск '+j.id+': '+j.mode+(j.platform?' / '+j.platform:'')+(j.rule?' / '+j.rule:'');
+  const st=$('#jstat');st.textContent=j.status;st.className=j.status==='успешно'?'ok':j.status==='идёт'?'mut':'bad';
+  const pre=$('#jlog');const bottom=pre.scrollTop+pre.clientHeight>=pre.scrollHeight-20;pre.textContent=j.log||'';if(bottom)pre.scrollTop=pre.scrollHeight;
+  if(j.status==='идёт')timer=setTimeout(pollJob,2000)}
+async function loadRes(){const d=await api('/api/history');
+  const rt=$('#reptab tbody');rt.textContent='';d.reports.forEach(r=>{const tr=el('tr');tr.append(el('td',r.run),el('td',r.kind),el('td',r.summary));
+    const b=el('button','Открыть','btn');b.onclick=()=>openRep(r.file);const td=el('td');td.append(b);tr.append(td);rt.append(tr)});
+  const ht=$('#histtab tbody');ht.textContent='';d.history.forEach(h=>{const tr=el('tr');tr.append(el('td',h.started),el('td',h.mode+(h.platform?' / '+h.platform:'')),el('td',h.who),
+    el('td',h.status,h.status==='успешно'?'ok':'bad'));ht.append(tr)})}
+let REP=null;
+async function openRep(f){REP=await api('/api/report?file='+encodeURIComponent(f));$('#repview').hidden=false;$('#reptitle').textContent='Отчёт '+REP.run+' ('+REP.kind+'): '+REP.summary;drawRep()}
+function drawRep(){const tb=$('#repdet tbody');tb.textContent='';const onlyBad=$('#repf').value==='bad';
+  REP.rows.filter(r=>!onlyBad||!['ПРОШЛО','СОБЫТИЕ ЕСТЬ'].includes(r.status)).forEach(r=>{const tr=el('tr');
+    tr.append(el('td',r.rule),el('td',r.status,['ПРОШЛО','СОБЫТИЕ ЕСТЬ'].includes(r.status)?'ok':r.status==='ПРОПУЩЕНО'?'warn':'bad'),el('td',r.detail));tb.append(tr)})}
+$('#repf').onchange=()=>REP&&drawRep();
+async function init(){try{const s=await api('/api/status');$('#app').hidden=false;
+  const miss=Object.entries(s.env).filter(([k,v])=>!v).map(([k])=>k);
+  $('#envinfo').textContent=miss.length?'Не заданы: '+miss.join(', '):'Настройки на месте'+(s.schedule?'. Расписание: '+s.schedule:'');
+  await loadRules(false)}catch(e){if(e.message!=='auth')note(e.message)}}
+init();
+</script>
+</body>
+</html>
