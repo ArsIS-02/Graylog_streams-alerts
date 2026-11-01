@@ -9,8 +9,9 @@
 # 🛡️ Graylog как домашний SIEM: сбор логов, обогащение и детекты
 
 > Руководство и готовые файлы для домашней лаборатории: ставим Graylog, собираем логи с Windows, Linux,
-> macOS, роутера Keenetic, FreeIPA и контейнеров, обогащаем события справочниками и ловим подозрительную
-> активность правилами с привязкой к MITRE ATT&CK. Всё проверено на реальной лаборатории.
+> macOS, роутера Keenetic, FreeIPA и контейнеров, обогащаем события справочниками, ловим подозрительную
+> активность правилами с привязкой к MITRE ATT&CK и **автоматически проверяем сами правила**, не запуская
+> ничего на хостах. Всё проверено на реальной лаборатории.
 
 ## 📑 Оглавление
 
@@ -18,6 +19,7 @@
 - [Как это работает](#-как-это-работает)
 - [Что получится](#-что-получится)
 - [Как выглядят письма](#-как-выглядят-письма)
+- [Проверка правил: GraylogRuleTester](#-проверка-правил-graylogruletester)
 - [Быстрый старт](#-быстрый-старт)
 - [Главы](#-главы)
 - [Покрытие детектов](#-покрытие-детектов)
@@ -37,6 +39,8 @@
 3. **Обогащение.** Справочники (Lookup Tables) и правила pipeline превращают сырые коды в понятные поля.
 4. **Детекты.** Алерты с порогами и корреляцией, у каждого тактика и техника MITRE ATT&CK.
 5. **Видимость.** Email-уведомления со ссылкой на событие, дашборды и каталог детектов в таблицах.
+6. **Проверка.** Все правила проверяются автоматически: образцы сообщений отправляются прямо на сервер
+   Graylog, а инструмент смотрит, находят ли их запросы и приходят ли алерты ([GraylogRuleTester](#-проверка-правил-graylogruletester)).
 
 > Раньше это руководство публиковалось и в репозитории MyHomeLaboratory. Там осталась более ранняя
 > версия (Graylog 7.1.3, без глав 10–14), и она больше не поддерживается: актуальный текст только здесь.
@@ -58,6 +62,9 @@
 5. **Детекты** (event definitions) проверяют условия каждые пять минут: на каждое событие или с порогом и
    группировкой. В каждом записаны тактика и техника ATT&CK.
 6. **Результат.** Письмо со ссылкой на событие и дашборды Graylog и Grafana.
+7. **Контроль.** [GraylogRuleTester](docs/16-rule-tester.md) отправляет на сервер образцы по GELF и проверяет, что
+   каждое правило срабатывает на своё и молчит на чужое; это нужно, чтобы правило не «замолчало» после правки
+   запроса, обновления Graylog или смены пайплайна.
 
 ## ✨ Что получится
 
@@ -70,7 +77,8 @@
 | 🔎 **Обогащение** | Lookup Tables и pipeline добавляют роли хостов, сети, названия событий, адрес источника входа | [глава 13](docs/13-lookup-tables.md), [`graylog/pipelines/`](graylog/pipelines/) |
 | 🚨 **Детекты** | Алерты по Windows, Linux, macOS, Keenetic, FreeIPA и контейнерам: приоритеты, пороги, корреляция | [глава 14](docs/14-detections.md) |
 | 🧭 **MITRE ATT&CK** | Каждый детект привязан к тактике и технике v20; слой для Navigator и матрица покрытия | [`graylog/mitre/`](graylog/mitre/) |
-| 📧 **Уведомления** | SMTP через Mail.ru, письмо с прямой ссылкой на событие; проверка раз в 5 минут, письмо за 1–2 минуты | [глава 2](docs/02-streams-alerts.md) |
+| 📧 **Уведомления** | SMTP через Mail.ru, отдельное письмо для каждой платформы (Windows, Linux, macOS, контейнеры, FreeIPA, Keenetic) с прямой ссылкой на событие; проверка раз в 5 минут, письмо за 1–2 минуты | [глава 2](docs/02-streams-alerts.md) |
+| 🧪 **Проверка правил** | GraylogRuleTester: образцы по GELF на сервер Graylog, проверка запросов и полного пути до события, веб-интерфейс в контейнере Podman | [глава 16](docs/16-rule-tester.md), [`rule-tester/`](rule-tester/) |
 | 📊 **Дашборды** | Дашборды для доклада и рабочие, отдельные для контейнеров; импорт одним скриптом | [главы 7, 9, 10](#-главы) |
 
 ## 📬 Как выглядят письма
@@ -88,9 +96,35 @@
   </tr>
   <tr>
     <td align="center"><b>🔐 FreeIPA</b><br><img src="docs/images/mail-freeipa.png" alt="Письмо FreeIPA-алерта" width="440"/></td>
-    <td></td>
+    <td align="center"><b>📡 Keenetic</b><br><img src="docs/images/mail-keenetic.png" alt="Письмо алерта по роутеру Keenetic" width="440"/></td>
   </tr>
 </table>
+
+## 🧪 Проверка правил: GraylogRuleTester
+
+Правил много (сейчас 218), запросы сложные: регулярки, исключения, группировка. Опечатка или лишний символ делает правило
+«молчащим», а узнаёшь об этом, когда пропускаешь настоящую атаку. **GraylogRuleTester** (версия 0.1) проверяет все
+правила автоматически, **без запуска чего-либо на хостах**: образцы сообщений отправляются на сервер Graylog по GELF HTTP.
+
+<p align="center">
+  <img src="docs/images/16-home.png" alt="Сводка GraylogRuleTester" width="820"/>
+</p>
+
+- **Два режима.** «Запросы в тестовом потоке» (отдельный поток «Rule Tester», алертов и писем нет) и «До алерта»
+  (боевой путь: поток, правило, событие, письмо; только с подтверждением).
+- **Образцы** строятся из самих запросов правил, плюс ручные (на томе контейнера и в git) и настоящие обезличенные.
+- **Разбор провалов:** какое поле пропало или изменилось, какой символ в регулярке Lucene понят иначе. Так
+  нашлась реальная ошибка: `&` и `>` в регулярках правил про обратную оболочку.
+- **Веб-интерфейс** в контейнере Podman: сводка, правила, запуск, результаты со сравнением прогонов, покрытие
+  MITRE ATT&CK, качество запросов, настройки, журнал; светлая и тёмная тема, роли администратор и наблюдатель.
+- **Консоль:** те же проверки командой `rule_tester.py`, код возврата 1 при провалах.
+
+```bash
+git clone https://github.com/ArsIS-02/Graylog_streams-alerts.git && cd Graylog_streams-alerts
+bash rule-tester/deploy/install.sh        # первый запуск создаёт ~/rule-tester/rule-tester.env, заполните и запустите снова
+```
+
+Подробности, скриншоты всех страниц и разбор типичных ошибок: [глава 16](docs/16-rule-tester.md).
 
 ## 🚀 Быстрый старт
 
@@ -110,9 +144,11 @@
 1. Импортируй [content pack](graylog/content-pack-homelab-alerts.json) (потоки, уведомления и первая партия алертов).
 2. Остальные определения лежат отдельными файлами по платформам: [Windows](graylog/windows-event-definitions.json),
    [Linux](graylog/linux-event-definitions.json), [macOS](graylog/macos-event-definitions.json),
-   [Keenetic](graylog/keenetic-event-definitions.json), [контейнеры](graylog/container-event-definitions.json), [здоровье пайплайна](graylog/health-event-definitions.json).
+   [Keenetic](graylog/keenetic-event-definitions.json), [FreeIPA](graylog/freeipa-event-definitions.json),
+   [контейнеры](graylog/container-event-definitions.json), [здоровье пайплайна](graylog/health-event-definitions.json).
 3. Замени плейсхолдеры (`<…_STREAM_ID>`, `<NOTIFICATION_ID>`) и белые списки, см. [ниже](#-что-адаптировать-под-себя).
 4. Привяжи тактики и техники скриптом [`graylog/mitre/import-mitre.js`](graylog/mitre/README.md).
+5. Проверь, что правила работают, через [GraylogRuleTester](docs/16-rule-tester.md).
 
 **Только обогащение**
 
@@ -150,7 +186,7 @@
 | 13 | [Lookup Tables: обогащение событий справочниками](docs/13-lookup-tables.md) | Коды Windows, роли хостов, подсети, уровни syslog; адаптеры CSV, правила pipeline, импорт, пример на вымышленных данных |
 | 14 | [Каталог детектов Graylog](docs/14-detections.md) | Все правила в таблицах: источник логов, условие и корреляция, тактика и техника MITRE ATT&CK, матрица покрытия; страница собирается скриптом из выгрузки Graylog |
 | 15 | [Проверка детектов](docs/15-detection-tests.md) | Безопасные сценарии для Windows, Linux, macOS и FreeIPA: создают события, похожие на атаки, и показывают, какие алерты должны прийти; отчёт для сверки в Graylog |
-| 16 | [GraylogRuleTester: проверка правил без хостов](docs/16-rule-tester.md) | Сообщения отправляются на сервер Graylog (GELF): проверка запросов всех правил в тестовом потоке и полного пути до события; веб-интерфейс в контейнере Podman, покрытие MITRE, сравнение запусков, роли |
+| 16 | [GraylogRuleTester: проверка правил без хостов](docs/16-rule-tester.md) | Образцы сообщений отправляются на сервер Graylog (GELF): проверка запросов всех правил в тестовом потоке и полного пути до события; веб-интерфейс в контейнере Podman, покрытие MITRE, сравнение запусков, роли, установка за Caddy |
 
 ### Дашборды
 
@@ -169,8 +205,10 @@
 
 ## 🎯 Покрытие детектов
 
-Детекты сгруппированы по платформам. Точные числа и условия лежат в [каталоге](docs/14-detections.md), там же матрица
-«тактики × платформы»: она показывает, где покрытие плотное, а где пока пусто.
+Всего 218 правил: Windows 59, macOS 59, Linux 50, контейнеры 18, FreeIPA 16, Keenetic 9 и 7 служебных проверок
+здоровья сбора. Точные условия лежат в [каталоге](docs/14-detections.md), там же матрица «тактики × платформы»: она
+показывает, где покрытие плотное, а где пока пусто. Покрытие по техникам MITRE ATT&CK и правила, у которых нет
+ручных образцов, видны в [GraylogRuleTester](docs/16-rule-tester.md) на странице «Покрытие».
 
 | Платформа | Откуда логи | Что ловят правила (примеры) |
 |---|---|---|
@@ -178,7 +216,7 @@
 | Linux | auditd на РЕД ОС | запуск из `/tmp`, обратные оболочки, setuid, ядерные модули, cron, SSH-туннели, массовое удаление |
 | macOS | osquery, unified log, BI.ZONE Triage | TCC, Keychain, профили конфигурации, сертификаты, `curl \| sh`, отключение защиты |
 | Keenetic | syslog роутера | вход по SSH, новое устройство, сканирование и блокировки веб-интерфейса, ARP-конфликты |
-| FreeIPA | аудит 389-ds, Kerberos | подбор пароля, выпуск сертификата в CA |
+| FreeIPA | аудит 389-ds, Kerberos, httpd | подбор пароля, выпуск сертификата в CA, изменения через API, Kerberos, LDAP, веб-вход |
 | Контейнеры | Podman через Fluent Bit | тишина сервиса, всплески ошибок, нехватка памяти, перезапуски |
 
 ## 🧰 Готовые файлы
@@ -186,12 +224,12 @@
 | Что | Где | Зачем |
 |---|---|---|
 | Content pack | [`graylog/content-pack-homelab-alerts.json`](graylog/content-pack-homelab-alerts.json) | Потоки, уведомления и первая партия алертов одним импортом |
-| Определения алертов | [`graylog/*-event-definitions.json`](graylog/) | Windows, Linux, macOS, Keenetic, контейнеры отдельными файлами, с плейсхолдерами |
+| Определения алертов | [`graylog/*-event-definitions.json`](graylog/) | Windows, Linux, macOS, Keenetic, FreeIPA, контейнеры и здоровье сбора отдельными файлами, с плейсхолдерами |
 | Резервная копия | [`graylog/backup-definitions.js`](graylog/backup-definitions.js) | Скрипт для консоли браузера: сохраняет определения событий в один JSON (только чтение) |
 | Pipeline и справочники | [`graylog/pipelines/`](graylog/pipelines/) | Правила, CSV-справочники, импортёры, пример на вымышленных данных |
 | MITRE ATT&CK | [`graylog/mitre/`](graylog/mitre/) | Соответствие техникам, поля в событиях, слой Navigator, страница с матрицей |
 | Каталог детектов | [`graylog/detections/`](graylog/detections/) | Выгрузка из Graylog, генератор страницы и таблица CSV |
-| GraylogRuleTester | [`rule-tester/`](rule-tester/) | Отправка образцов в Graylog по GELF, проверка запросов и событий, веб-интерфейс и контейнер Podman, версия 0.1 |
+| GraylogRuleTester | [`rule-tester/`](rule-tester/) | Проверка всех правил: образцы по GELF в Graylog, проверка запросов и событий, веб-интерфейс (Podman), консоль, заглушка Graylog для самопроверки; версия 0.1 |
 | Проверка детектов | [`detection-tests/`](detection-tests/) | Раннеры для Windows, Linux, macOS и FreeIPA: 103 безопасные проверки, покрывающие 146 правил |
 | Дашборды | [`graylog/dashboards-spec.json`](graylog/dashboards-spec.json), [`import-dashboards.js`](graylog/import-dashboards.js) | Спецификация и импорт дашбордов |
 | Агенты на хостах | [`windows/`](windows/), [`linux/`](linux/), [`macos/`](macos/), [`containers/`](containers/) | Конфиги Winlogbeat, rsyslog, Filebeat, osquery, Fluent Bit |
@@ -219,19 +257,24 @@ Graylog_streams-alerts/
 │   ├── 12-graylog-grafana.md          ← Graylog + Grafana: логи и аннотации
 │   ├── 13-lookup-tables.md            ← Lookup Tables: справочники и обогащение
 │   ├── 14-detections.md               ← каталог детектов (собирается скриптом)
-│   ├── 16-rule-tester.md              ← проверка правил без хостов
-│   ├── 15-detection-tests.md          ← проверка детектов (собирается скриптом)
+│   ├── 15-detection-tests.md          ← проверка детектов на хостах (собирается скриптом)
+│   ├── 16-rule-tester.md              ← GraylogRuleTester: проверка правил без хостов
 │   ├── troubleshooting.md             ← грабли и решения
 │   └── images/                        ← скриншоты и иллюстрации
 ├── graylog/
 │   ├── content-pack-homelab-alerts.json
-│   ├── {windows,linux,macos,keenetic,container,health}-event-definitions.json
+│   ├── {windows,linux,macos,keenetic,freeipa,container,health}-event-definitions.json
 │   ├── backup-definitions.js          ← резервная копия определений
 │   ├── dashboards-spec.json, import-dashboards.js
 │   ├── pipelines/                     ← правила, CSV-справочники, импортёры, пример
 │   ├── mitre/                         ← техники ATT&CK: соответствия, поля, слой Navigator
 │   └── detections/                    ← выгрузка, генератор и CSV каталога детектов
-├── rule-tester/                       ← проверка правил по GELF, веб-интерфейс, контейнер
+├── rule-tester/                       ← GraylogRuleTester: проверка правил по GELF
+│   ├── rule_tester.py, lucene.py      ← консоль, разбор запросов и сборка образцов
+│   ├── web.py, web_index.html         ← веб-интерфейс, роли, расписание, журнал
+│   ├── insights.py, mock_graylog.py   ← покрытие и качество; заглушка Graylog
+│   ├── samples/                       ← ручные образцы (git)
+│   └── Containerfile, deploy/         ← контейнер Podman, quadlet, install.sh
 ├── detection-tests/                   ← проверки детектов: раннеры под ОС и FreeIPA, сборщик
 ├── decoder/                           ← декодер auditd (auditd_decoder.py, systemd-юнит)
 ├── config/                            ← server.conf (SMTP), opensearch.yml
@@ -252,6 +295,12 @@ Graylog_streams-alerts/
   отражают мою сеть. Подсети описаны в CSV, сам справочник `homelab-subnets` замени на свой.
 - **Имена потоков и pipeline.** Названия вроде `RedOS auditd Logs`, `Syslog Logs`, `homelab: windows enrichment`
   используются в правилах и описаниях, переименуй везде одинаково.
+- **Уведомления.** Письма платформ (`Mail.ru Alert Linux`, `…Windows`, `…MacOS`, `…Containers`, `…FreeIPA`, `…Keenetic`)
+  это копии одного шаблона с разными эмодзи и полями исходных сообщений. Адрес отправителя, получатель и ссылки на
+  Graylog в них замени на свои.
+- **Проверка правил.** В GraylogRuleTester пропиши адрес Graylog, токен (только чтение) и вход GELF HTTP; свободный
+  порт входа выбери сам (у меня 12203). Правила с заглушками из каталога проверяются по запросам из Graylog, где
+  заглушки заменены твоими списками.
 - **Обогащение раньше детектов.** Алерты про вход из неизвестной сети и про новые адреса опираются на поля
   `src_ip` и `src_zone`, которые добавляют pipeline: без них эти правила не сработают.
 
