@@ -559,5 +559,82 @@
       "keenetic",
       "medium"
     ]
+  },
+  {
+    "title": "KEENETIC - Обрыв PPPoE-соединения с провайдером",
+    "description": "Роутер потерял PPPoE-соединение с провайдером (pppd: Connection terminated или Modem hangup). Интернет пропал или роутер переподключился.",
+    "priority": 1,
+    "alert": true,
+    "config": {
+      "type": "aggregation-v1",
+      "query": "process:pppd* AND message:(\"Connection terminated\" OR \"Modem hangup\")",
+      "query_parameters": [],
+      "filters": [],
+      "streams": [
+        "<SYSLOG_STREAM_ID>"
+      ],
+      "stream_categories": [],
+      "group_by": [],
+      "series": [],
+      "conditions": {
+        "expression": null
+      },
+      "search_within_ms": 300000,
+      "execute_every_ms": 300000,
+      "use_cron_scheduling": false,
+      "cron_expression": null,
+      "cron_timezone": null,
+      "event_limit": 100
+    },
+    "field_spec": {
+      "host": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.source}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "event": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.message}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      }
+    },
+    "key_spec": [
+      "host"
+    ],
+    "notification_settings": {
+      "grace_period_ms": 3600000,
+      "backlog_size": 5
+    },
+    "notifications": [
+      {
+        "notification_id": "<NOTIFICATION_ID>",
+        "notification_parameters": null
+      }
+    ],
+    "storage": [
+      {
+        "type": "persist-to-streams-v1",
+        "streams": [
+          "000000000000000000000002"
+        ]
+      }
+    ],
+    "tags": [
+      "detection",
+      "keenetic",
+      "low"
+    ]
   }
 ]

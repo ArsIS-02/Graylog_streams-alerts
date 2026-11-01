@@ -24,6 +24,48 @@
    "techniques": "T1649"
   },
   {
+   "title": "FREEIPA - Изменение пользователей, групп и правил через API",
+   "priority": 2,
+   "streams": [
+    "FreeIPA Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Linux"
+   ],
+   "state": "ENABLED",
+   "description": "Администратор FreeIPA изменил пользователей, группы, правила HBAC или sudo, роли, пароли или хосты через API. В журнале записаны только такие вызовы, чтения (show, find) не учитываются. Неожиданное изменение означает правку каталога не вами.",
+   "query": "application_name:freeipa_httpd_error AND message:\"ipa: INFO\" AND message:(user_add OR user_del OR user_mod OR user_disable OR group_add OR group_del OR group_mod OR group_add_member OR group_remove_member OR hbacrule_add OR hbacrule_mod OR hbacrule_del OR hbacrule_add_user OR hbacrule_add_host OR sudorule_add OR sudorule_mod OR sudorule_del OR sudorule_add_user OR sudorule_add_option OR passwd OR role_add_member OR privilege_add_member OR cert_revoke OR otptoken_add OR host_add OR host_del OR service_add)",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 5.0,
+   "tactic": "Persistence",
+   "technique": "T1098 Account Manipulation",
+   "techniques": "T1098, T1136"
+  },
+  {
+   "title": "FREEIPA - Неудачный вход в веб-интерфейс",
+   "priority": 2,
+   "streams": [
+    "FreeIPA Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Linux"
+   ],
+   "state": "ENABLED",
+   "description": "Веб-интерфейс FreeIPA ответил 401 на вход по паролю. Одиночный случай значит опечатку, серия значит подбор пароля.",
+   "query": "application_name:freeipa_httpd_access AND message:\"login_password http 1.1 401\"",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 5.0,
+   "tactic": "Credential Access",
+   "technique": "T1110 Brute Force",
+   "techniques": "T1110"
+  },
+  {
    "title": "FREEIPA - Подбор пароля (10+ PREAUTH_FAILED за 5 мин)",
    "priority": 3,
    "streams": [
@@ -297,6 +339,27 @@
    "tactic": "Initial Access",
    "technique": "T1200 Hardware Additions",
    "techniques": "T1200"
+  },
+  {
+   "title": "KEENETIC - Обрыв PPPoE-соединения с провайдером",
+   "priority": 1,
+   "streams": [
+    "Syslog Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Linux"
+   ],
+   "state": "ENABLED",
+   "description": "Роутер потерял PPPoE-соединение с провайдером (pppd: Connection terminated или Modem hangup). Интернет пропал или роутер переподключился.",
+   "query": "process:pppd* AND message:(\"Connection terminated\" OR \"Modem hangup\")",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 60.0,
+   "tactic": null,
+   "technique": null,
+   "techniques": null
   },
   {
    "title": "KEENETIC - Отказ во входе на роутер",
@@ -1146,6 +1209,30 @@
    "tactic": "Defense Impairment",
    "technique": "T1685 Disable or Modify Tools",
    "techniques": "T1685"
+  },
+  {
+   "title": "Windows - Defender: сигнатуры не обновлялись 7 дней",
+   "priority": 1,
+   "streams": [
+    "WindowsLogs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Windows"
+   ],
+   "state": "ENABLED",
+   "description": "За 7 дней ни один Windows-хост не прислал событие об обновлении сигнатур Defender (2000). Защита работает с устаревшей базой или хосты не в сети.",
+   "query": "win_channel:\"Microsoft-Windows-Windows Defender/Operational\" AND win_event_id:2000",
+   "group_by": [],
+   "condition": {
+    "op": "<",
+    "value": 1
+   },
+   "aggregated": true,
+   "window_min": 10080.0,
+   "grace_min": 1440.0,
+   "tactic": null,
+   "technique": null,
+   "techniques": null
   },
   {
    "title": "Windows - LOLBins (certutil, mshta, bitsadmin, regsvr32)",

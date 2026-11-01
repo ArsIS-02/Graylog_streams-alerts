@@ -1,18 +1,18 @@
 # Каталог детектов Graylog
 
-> Все правила (event definitions) лаборатории в одном месте: какой лог проверяется, по какому условию, как коррелируются события, к какой тактике и технике MITRE ATT&CK относятся. Всего **140** правил, из них **114** привязаны к технике ATT&CK v20 (88 разных техник). Остальные описывают здоровье сервисов и тишину в логах: атак они не ловят.
+> Все правила (event definitions) лаборатории в одном месте: какой лог проверяется, по какому условию, как коррелируются события, к какой тактике и технике MITRE ATT&CK относятся. Всего **144** правил, из них **116** привязаны к технике ATT&CK v20 (89 разных техник). Остальные описывают здоровье сервисов и тишину в логах: атак они не ловят.
 
 Страница собирается скриптом из выгрузки Graylog и руками не правится: [как обновить](#как-обновить-каталог). Запросы очищены: IP, MAC, отпечатки ключей и белые списки заменены на `<IP>`, `<MAC>`, `<белый список>`. Готовые определения для импорта лежат в `graylog/*-event-definitions.json`, соответствие техникам подробно описано в [graylog/mitre](../graylog/mitre/README.md).
 
 ## Содержание
 
 - [Покрытие: тактики × платформы](#покрытие-тактики--платформы)
-- [Windows](#windows) — 31
+- [Windows](#windows) — 32
 - [Linux](#linux) — 32
 - [macOS (osquery и unified log)](#macos-osquery-и-unified-log) — 33
 - [macOS (BI.ZONE Triage)](#macos-bizone-triage) — 9
-- [Keenetic](#keenetic) — 8
-- [FreeIPA и здоровье сервисов](#freeipa-и-здоровье-сервисов) — 9
+- [Keenetic](#keenetic) — 9
+- [FreeIPA и здоровье сервисов](#freeipa-и-здоровье-сервисов) — 11
 - [Контейнеры](#контейнеры) — 18
 - [Как читать таблицы](#как-читать-таблицы)
 - [Как обновить каталог](#как-обновить-каталог)
@@ -26,23 +26,23 @@
 | Reconnaissance (Разведка) |  |  |  | 1 |  |  | **1** |
 | Initial Access (Первоначальный доступ) | 2 | 2 | 3 | 1 |  | 1 | **9** |
 | Execution (Выполнение) | 6 | 3 | 7 |  |  |  | **16** |
-| Persistence (Закрепление) | 7 | 6 | 8 | 1 |  |  | **22** |
+| Persistence (Закрепление) | 7 | 6 | 8 | 1 | 1 |  | **23** |
 | Privilege Escalation (Повышение привилегий) |  | 4 | 6 |  |  |  | **10** |
 | Stealth (Скрытность) | 3 | 2 | 2 |  |  |  | **7** |
 | Defense Impairment (Подавление защиты) | 4 | 4 | 4 | 1 |  |  | **13** |
-| Credential Access (Доступ к учётным данным) | 5 | 2 | 4 | 3 | 2 | 1 | **17** |
+| Credential Access (Доступ к учётным данным) | 5 | 2 | 4 | 3 | 3 | 1 | **18** |
 | Discovery (Исследование среды) | 1 | 1 |  |  |  |  | **2** |
 | Lateral Movement (Перемещение) | 1 |  | 1 | 1 |  |  | **3** |
 | Collection (Сбор данных) |  | 1 | 2 |  |  |  | **3** |
 | Command and Control (управление, C2) | 1 | 2 | 1 |  |  |  | **4** |
 | Exfiltration (Вывод данных) |  | 1 | 1 |  |  |  | **2** |
 | Impact (Воздействие) | 1 | 3 | 1 |  |  |  | **5** |
-| Без техники (служебные) |  | 1 | 2 |  | 7 | 16 | **26** |
-| **Всего** | **31** | **32** | **42** | **8** | **9** | **18** | **140** |
+| Без техники (служебные) | 1 | 1 | 2 | 1 | 7 | 16 | **28** |
+| **Всего** | **32** | **32** | **42** | **9** | **11** | **18** | **144** |
 
 ## Windows
 
-Sysmon, Security, PowerShell, Defender; поток WindowsLogs. Правил: 31. Сортировка: сначала высокий приоритет.
+Sysmon, Security, PowerShell, Defender; поток WindowsLogs. Правил: 32. Сортировка: сначала высокий приоритет.
 
 | Правило | Приоритет | Источник логов | Что проверяет | Корреляция | Тактика | Техника |
 |---|---|---|---|---|---|---|
@@ -75,6 +75,7 @@ Sysmon, Security, PowerShell, Defender; поток WindowsLogs. Правил: 31
 | Новая служба | средний | WindowsLogs<br>EventID 7045, 4697 | Установлена новая служба (7045, 4697), кроме драйверов Kaspersky. Частый способ закрепления. | каждое событие | Persistence | `T1543.003` Windows Service |
 | Перебор несуществующих пользователей (5+ за 10 мин) | средний | WindowsLogs<br>EventID 4625 | 5 и более неудачных входов с одного IP за 10 минут с причиной «пользователь не существует» (SubStatus 0xc0000064): перебор имён учёток. | число событий ≥ 5 за 10 мин, группировка по IpAddress | Credential Access | `T1110` Brute Force<br>`T1087` |
 | Создание задачи через schtasks | средний | WindowsLogs<br>EventID 1 | Запланированная задача создана командой schtasks /create. Частый способ закрепления и запуска. | каждое событие | Execution | `T1053.005` Scheduled Task |
+| Defender: сигнатуры не обновлялись 7 дней | низкий | WindowsLogs<br>канал Microsoft-Windows-Windows Defender/Operational, EventID 2000 | За 7 дней ни один Windows-хост не прислал событие об обновлении сигнатур Defender (2000). Защита работает с устаревшей базой или хосты не в сети. | число событий < 1 за 7 сут; повтор не чаще раза в 1 сут | — | — |
 | Вход по RDP | низкий | WindowsLogs<br>EventID 4624 | Успешный интерактивный вход по RDP (4624, LogonType 10). | каждое событие | Lateral Movement | `T1021.001` Remote Desktop Protocol |
 | Серия разведки (5+ команд за 5 мин) | низкий | WindowsLogs<br>EventID 1 | 5 и более запусков net, whoami, nltest, systeminfo, quser, arp на одном хосте за 5 минут — типичная разведка после проникновения. | число событий ≥ 5 за 5 мин, группировка по source | Discovery | `T1082` System Information Discovery |
 
@@ -252,6 +253,12 @@ win_event_id:4625 AND winlogbeat_winlog_event_data_SubStatus:0xc0000064
 
 ```
 win_event_id:1 AND message:"schtasks" AND message:"/create"
+```
+
+**Windows - Defender: сигнатуры не обновлялись 7 дней**
+
+```
+win_channel:"Microsoft-Windows-Windows Defender/Operational" AND win_event_id:2000
 ```
 
 **Windows - Вход по RDP**
@@ -821,7 +828,7 @@ mac_bz_event_type:LogonHistoryFailure
 
 ## Keenetic
 
-syslog роутера; поток Syslog Logs. Правил: 8. Сортировка: сначала высокий приоритет.
+syslog роутера; поток Syslog Logs. Правил: 9. Сортировка: сначала высокий приоритет.
 
 | Правило | Приоритет | Источник логов | Что проверяет | Корреляция | Тактика | Техника |
 |---|---|---|---|---|---|---|
@@ -832,6 +839,7 @@ syslog роутера; поток Syslog Logs. Правил: 8. Сортиров
 | Новое устройство в сети | средний | Syslog Logs<br>событие Keenetic DHCP_Request | DHCP выдал адрес устройству, MAC которого отсутствует в белом списке. Возможно подключение нового клиента. | каждое событие; повтор не чаще раза в 7 сут | Initial Access | `T1200` Hardware Additions |
 | Сканирование веб-интерфейса из интернета | средний | Syslog Logs | Запросы к веб-интерфейсу роутера несуществующих или служебных файлов (.env, readme.html и т. п.): типичное сканирование уязвимостей. | каждое событие | Reconnaissance | `T1595.002` Vulnerability Scanning<br>`T1190` |
 | Сохранена конфигурация роутера | средний | Syslog Logs | Конфигурация роутера сохранена (StartupConfig: configuration saved). Событие редкое: сверьте, что это ваша правка. | каждое событие | Defense Impairment | `T1686` Disable or Modify System Firewall |
+| Обрыв PPPoE-соединения с провайдером | низкий | Syslog Logs | Роутер потерял PPPoE-соединение с провайдером (pppd: Connection terminated или Modem hangup). Интернет пропал или роутер переподключился. | каждое событие; повтор не чаще раза в 1 ч | — | — |
 | Отказы WireGuard (ежедневная сводка) | низкий | Syslog Logs<br>событие Keenetic Wireguard_Failed | Количество неудачных WireGuard-handshake за прошедшие сутки. Высокое число (сотни или тысячи) может означать подбор ключа или сканирование извне. Проверяется раз в сутки, одно письмо в день. | число событий ≥ 1 за 1 сут, группировка по source | Persistence | `T1133` External Remote Services |
 
 <details><summary>Запросы Graylog (очищенные)</summary>
@@ -878,6 +886,12 @@ source:"<роутер>" AND message:"Core::Scgi::Session" AND (message:"unsuppor
 source:"<роутер>" AND message:"StartupConfig" AND message:"configuration saved"
 ```
 
+**KEENETIC - Обрыв PPPoE-соединения с провайдером**
+
+```
+process:pppd* AND message:("Connection terminated" OR "Modem hangup")
+```
+
 **KEENETIC - Отказы WireGuard (ежедневная сводка)**
 
 ```
@@ -888,13 +902,15 @@ kn_event_type:Wireguard_Failed
 
 ## FreeIPA и здоровье сервисов
 
-аудит FreeIPA и служебные проверки. Правил: 9. Сортировка: сначала высокий приоритет.
+аудит FreeIPA и служебные проверки. Правил: 11. Сортировка: сначала высокий приоритет.
 
 | Правило | Приоритет | Источник логов | Что проверяет | Корреляция | Тактика | Техника |
 |---|---|---|---|---|---|---|
 | Подбор пароля (10+ PREAUTH_FAILED за 5 мин) | высокий | FreeIPA Logs | Серия отказов предварительной аутентификации Kerberos на контроллере домена. Возможен подбор пароля доменной учётной записи (password spray). | число событий ≥ 10 за 5 мин, группировка по source | Credential Access | `T1110.001` Password Guessing |
 | Клиенты не могут связаться с KDC | высокий | RedOS auditd Logs | На хостах auditd/sssd сообщает «Cannot contact any KDC for realm». Признак того, что контроллер домена FreeIPA упал или недоступен по сети. | каждое событие | — | — |
 | Выпуск сертификата в CA (Dogtag) | средний | FreeIPA Logs<br>приложение freeipa_389_audit | Запрос на выпуск сертификата через CA FreeIPA (Dogtag). Выпуски должны происходить только при добавлении новых сервисов или хостов. Внезапный массовый выпуск — повод проверить. | каждое событие | Credential Access | `T1649` Steal or Forge Authentication Certificates |
+| Изменение пользователей, групп и правил через API | средний | FreeIPA Logs<br>приложение freeipa_httpd_error | Администратор FreeIPA изменил пользователей, группы, правила HBAC или sudo, роли, пароли или хосты через API. В журнале записаны только такие вызовы, чтения (show, find) не учитываются.… | каждое событие | Persistence | `T1098` Account Manipulation<br>`T1136` |
+| Неудачный вход в веб-интерфейс | средний | FreeIPA Logs<br>приложение freeipa_httpd_access | Веб-интерфейс FreeIPA ответил 401 на вход по паролю. Одиночный случай значит опечатку, серия значит подбор пароля. | каждое событие | Credential Access | `T1110` Brute Force |
 | Тишина: FreeIPA (3 часа) | средний | FreeIPA Logs | За 3 часа не пришло ни одного сообщения от FreeIPA. Сервер или доставка логов остановились. | число событий < 1 за 3 ч; повтор не чаще раза в 1 сут | — | — |
 | Тишина: Keenetic не шлёт логи (час) | средний | Syslog Logs | За последний час от роутера не пришло ни одного сообщения. Роутер или связь с Graylog отвалились. | число событий < 1 за 1 ч; повтор не чаще раза в 1 сут | — | — |
 | Тишина: MacMiniM2 не шлёт логи (час) | средний | MacOS Logs | За последний час от MacMiniM2 не пришло ни одного сообщения. Агент сбора остановился, Mac выключен или пропала сеть. | число событий < 1 за 1 ч; повтор не чаще раза в 1 сут | — | — |
@@ -920,6 +936,18 @@ message:"Cannot contact any KDC"
 
 ```
 application_name:freeipa_389_audit AND message:cert--005frequest
+```
+
+**FREEIPA - Изменение пользователей, групп и правил через API**
+
+```
+application_name:freeipa_httpd_error AND message:"ipa: INFO" AND message:(user_add OR user_del OR user_mod OR user_disable OR group_add OR group_del OR group_mod OR group_add_member OR group_remove_member OR hbacrule_add OR hbacrule_mod OR hbacrule_del OR hbacrule_add_user OR hbacrule_add_host OR sudorule_add OR sudorule_mod OR sudorule_del OR sudorule_add_user OR sudorule_add_option OR passwd OR role_add_member OR privilege_add_member OR cert_revoke OR otptoken_add OR host_add OR host_del OR service_add)
+```
+
+**FREEIPA - Неудачный вход в веб-интерфейс**
+
+```
+application_name:freeipa_httpd_access AND message:"login_password http 1.1 401"
 ```
 
 **HEALTH - Тишина: FreeIPA (3 часа)**

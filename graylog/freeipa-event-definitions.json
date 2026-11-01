@@ -1,0 +1,222 @@
+[
+  {
+    "title": "FREEIPA - Изменение пользователей, групп и правил через API",
+    "description": "Администратор FreeIPA изменил пользователей, группы, правила HBAC или sudo, роли, пароли или хосты через API. В журнале записаны только такие вызовы, чтения (show, find) не учитываются. Неожиданное изменение означает правку каталога не вами.\nMITRE ATT&CK. Тактики: Persistence. Техники: T1098 Account Manipulation.",
+    "priority": 2,
+    "alert": true,
+    "config": {
+      "type": "aggregation-v1",
+      "query": "application_name:freeipa_httpd_error AND message:\"ipa: INFO\" AND message:(user_add OR user_del OR user_mod OR user_disable OR group_add OR group_del OR group_mod OR group_add_member OR group_remove_member OR hbacrule_add OR hbacrule_mod OR hbacrule_del OR hbacrule_add_user OR hbacrule_add_host OR sudorule_add OR sudorule_mod OR sudorule_del OR sudorule_add_user OR sudorule_add_option OR passwd OR role_add_member OR privilege_add_member OR cert_revoke OR otptoken_add OR host_add OR host_del OR service_add)",
+      "query_parameters": [],
+      "filters": [],
+      "streams": [
+        "<FREEIPA_STREAM_ID>"
+      ],
+      "stream_categories": [],
+      "group_by": [],
+      "series": [],
+      "conditions": {
+        "expression": null
+      },
+      "search_within_ms": 300000,
+      "execute_every_ms": 300000,
+      "use_cron_scheduling": false,
+      "cron_expression": null,
+      "cron_timezone": null,
+      "event_limit": 100
+    },
+    "field_spec": {
+      "host": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.source}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "event": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.message}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "mitre_tactic": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "Persistence",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_technique": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1098 Account Manipulation",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_techniques": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1098, T1136",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      }
+    },
+    "key_spec": [
+      "host"
+    ],
+    "notification_settings": {
+      "grace_period_ms": 300000,
+      "backlog_size": 5
+    },
+    "notifications": [
+      {
+        "notification_id": "<NOTIFICATION_ID>",
+        "notification_parameters": null
+      }
+    ],
+    "storage": [
+      {
+        "type": "persist-to-streams-v1",
+        "streams": [
+          "000000000000000000000002"
+        ]
+      }
+    ],
+    "tags": [
+      "detection",
+      "freeipa",
+      "medium"
+    ]
+  },
+  {
+    "title": "FREEIPA - Неудачный вход в веб-интерфейс",
+    "description": "Веб-интерфейс FreeIPA ответил 401 на вход по паролю. Одиночный случай значит опечатку, серия значит подбор пароля.\nMITRE ATT&CK. Тактики: Credential Access. Техники: T1110 Brute Force.",
+    "priority": 2,
+    "alert": true,
+    "config": {
+      "type": "aggregation-v1",
+      "query": "application_name:freeipa_httpd_access AND message:\"login_password http 1.1 401\"",
+      "query_parameters": [],
+      "filters": [],
+      "streams": [
+        "<FREEIPA_STREAM_ID>"
+      ],
+      "stream_categories": [],
+      "group_by": [],
+      "series": [],
+      "conditions": {
+        "expression": null
+      },
+      "search_within_ms": 300000,
+      "execute_every_ms": 300000,
+      "use_cron_scheduling": false,
+      "cron_expression": null,
+      "cron_timezone": null,
+      "event_limit": 100
+    },
+    "field_spec": {
+      "host": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.source}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "event": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.message}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "mitre_tactic": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "Credential Access",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_technique": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1110 Brute Force",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_techniques": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1110",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      }
+    },
+    "key_spec": [
+      "host"
+    ],
+    "notification_settings": {
+      "grace_period_ms": 300000,
+      "backlog_size": 5
+    },
+    "notifications": [
+      {
+        "notification_id": "<NOTIFICATION_ID>",
+        "notification_parameters": null
+      }
+    ],
+    "storage": [
+      {
+        "type": "persist-to-streams-v1",
+        "streams": [
+          "000000000000000000000002"
+        ]
+      }
+    ],
+    "tags": [
+      "detection",
+      "freeipa",
+      "medium"
+    ]
+  }
+]
