@@ -144,6 +144,7 @@ def build_samples(rules, variants=3, use_manual=True, use_harvest=True):
                 src = "manual" if key in manual else "harvest"
                 items += [(src, "P", x) for x in extra.get("positive", [])]
                 items += [(src, "N", x) for x in extra.get("negative", [])]
+        rng = sorted({l.field for l in L.literals(node) if l.kind == "range"})
         counters = {"P": 0, "N": 0}
         for src, kind, it in items:
             counters[kind] += 1
@@ -151,13 +152,14 @@ def build_samples(rules, variants=3, use_manual=True, use_harvest=True):
             expect = "match" if kind == "P" else "no_match"
             agree = L.evaluate(node, doc) == (kind == "P")
             out.append({"id": sid(title, kind, counters[kind]), "rule": title, "expect": expect, "doc": doc,
-                        "why": it.get("why", ""), "src": src, "offline_ok": agree})
+                        "why": it.get("why", ""), "src": src, "offline_ok": agree, "numeric": rng})
         report[title] = {"warns": sorted(set(warns)), "lint": lint, "problems": problems,
                          "pos": len(pos), "neg": len(neg)}
     return out, report
 
 
 def prepare_doc(sample, run, numeric):
+    numeric = set(numeric) | set(sample.get("numeric", []))
     d = {}
     for k, v in sample["doc"].items():
         if k in numeric and isinstance(v, str) and re.fullmatch(r"-?\d+", v):
