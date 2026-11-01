@@ -19,7 +19,14 @@ import yaml
 HERE = Path(__file__).resolve().parent
 CATALOG = HERE.parent / "graylog" / "detections" / "detections-source.json"
 
-# (платформа, техника, номер теста в YAML, подмена аргументов, что делает тест на хосте)
+# (платформа, техника, номер теста в YAML, подмена аргументов, что делает тест на хосте, риск)
+#
+# Риск по умолчанию определяется автоматически (см. risk_of): для тестов на чтение — «нет», для тестов без
+# прав root/администратора, которые сами всё убирают — «низкий». Явная строка в 6-м элементе нужна только
+# тестам, где это недостаточно (создают механизм закрепления, меняют реестр/systemd/правило файрвола) —
+# такие тесты отбирались с дополнительной осторожностью: без скачивания файлов, без отключения существующей
+# защиты/журналирования/бэкапов, без внедрения в процессы и без похищения учётных данных — это по-прежнему
+# не включается в план ни при каких условиях.
 CURATED = [
     ("linux", "T1018", 6, {}, "читает ARP-таблицу"),
     ("linux", "T1018", 12, {}, "читает таблицу соседей (ip neighbour)"),
@@ -57,6 +64,45 @@ CURATED = [
     ("windows", "T1547.001", 1, {}, "добавляет и удаляет значение в HKCU\\...\\Run"),
     ("windows", "T1552.001", 4, {}, "ищет слово pass в файлах текущего каталога (чтение)"),
     ("windows", "T1569.002", 1, {}, "создаёт службу ARTService, запускает, удаляет; создаёт и удаляет C:\\art-marker.txt"),
+    # --- дополнительные тесты с повышенным риском (нужны права root/администратора) ---
+    ("linux", "T1543.002", 1, {}, "создаёт systemd-службу с безвредными командами (touch маркеров), включает её "
+     "автозапуск и удаляет юнит",
+     "средний: нужен root; служба реально включается (systemctl enable, start). Если скрипт прервётся до очистки, "
+     "служба art-systemd-service.service останется включённой — проверьте `systemctl list-unit-files | grep art-systemd` "
+     "и уберите вручную: systemctl disable --now art-systemd-service.service; rm /etc/systemd/system/art-systemd-service.service"),
+    ("linux", "T1686", 11, {}, "добавляет правило ufw, запрещающее несуществующий адрес 1.2.3.4, и удаляет его "
+     "(сам firewall не отключает)",
+     "средний: нужен root. На РЕД ОС обычно нет ufw (используется firewalld/iptables) — команда просто завершится "
+     "ошибкой «command not found», без эффекта. Если ufw есть, проверьте после теста `ufw status numbered`: "
+     "правила на 1.2.3.4 быть не должно"),
+    ("linux", "T1548.001", 3, {"file_to_setuid": "/tmp/art-setuid-test"}, "создаёт пустой файл /tmp/art-setuid-test, "
+     "делает его владельцем root и ставит бит setuid, затем удаляет файл",
+     "средний: нужен root. Файл создаётся специально для теста и пустой (не исполняемый код) — поставленный "
+     "setuid безопасен сам по себе, но если скрипт прервётся до удаления, в /tmp останется файл с битом setuid "
+     "от root — проверьте `ls -la /tmp/art-setuid-test` и удалите его вручную, если он остался"),
+    ("macos", "T1548.001", 3, {"file_to_setuid": "/tmp/art-setuid-test"}, "создаёт пустой файл /tmp/art-setuid-test, "
+     "делает его владельцем root и ставит бит setuid, затем удаляет файл",
+     "средний: нужен root (sudo). Файл пустой, не исполняемый код. Если скрипт прервётся до очистки, проверьте "
+     "`ls -la /tmp/art-setuid-test` и удалите вручную, если он остался"),
+    ("windows", "T1546.012", 1, {}, "добавляет ключ отладчика (Debugger) в Image File Execution Options для "
+     "calc.exe (запуск calc.exe подменяется на cmd.exe) и удаляет ключ",
+     "средний: нужны права администратора. На время теста запуск calc.exe на этом хосте будет открывать cmd.exe "
+     "вместо калькулятора. Если скрипт прервётся до очистки, это останется — проверьте ключ реестра "
+     "HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Image File Execution Options\\calc.exe и удалите "
+     "значение Debugger вручную, если он остался"),
+    ("windows", "T1547.004", 1, {}, "правит HKCU\\...\\Winlogon\\Shell, добавляя запуск cmd.exe при следующем "
+     "входе в систему, и возвращает значение обратно",
+     "средний: прав администратора не требует (меняет только текущего пользователя). Если во время теста "
+     "произойдёт выход из системы/перезапуск explorer.exe до очистки, при следующем входе рядом с рабочим столом "
+     "запустится окно cmd.exe — не выходите из системы во время теста. Если ключ остался, проверьте "
+     "HKCU\\Software\\Microsoft\\Windows NT\\CurrentVersion\\Winlogon\\Shell и верните значение в \"explorer.exe\""),
+    ("windows", "T1546.003", 1, {}, "создаёт постоянную подписку WMI (фильтр + получатель + привязка), которая "
+     "при попадании в узкое окно времени работы системы запускает notepad.exe, и удаляет все три объекта",
+     "средний: нужны права администратора. Подписка WMI создаётся реально; условие запуска узкое (аптайм "
+     "240-325 секунд), поэтому срабатывание notepad.exe на практике редкое, но если скрипт прервётся до "
+     "очистки, подписка останется в системе. Проверьте: Get-WmiObject -Namespace root/subscription -Class "
+     "__EventFilter -Filter \"Name='AtomicRedTeam-WMIPersistence-CommandLineEventConsumer-Example'\" — и удалите "
+     "её вместе с CommandLineEventConsumer и __FilterToConsumerBinding, если она осталась"),
 ]
 
 PREFIX = {"windows": "Windows", "linux": "LNX", "macos": "macOS"}
@@ -86,13 +132,25 @@ def subst(text, args):
     return re.sub(r"#\{([^}]+)\}", one, text or "")
 
 
+def risk_of(admin, effect, explicit):
+    if explicit:
+        return explicit
+    if re.search(r"чита|чтение|выводит|ищет|кодирует", effect):
+        return "нет: тест только читает данные, ничего не меняет"
+    if admin:
+        return "низкий: нужны права root/администратора, но тест сам создаёт и удаляет свой тестовый объект"
+    return "низкий: не требует повышенных прав, тест сам создаёт и удаляет свой тестовый объект"
+
+
 def main():
     if len(sys.argv) != 2:
         sys.exit(__doc__)
     root = Path(sys.argv[1])
     rules = load_rules()
     plan, dropped = [], []
-    for platform, tech, no, over, effect in CURATED:
+    for row in CURATED:
+        platform, tech, no, over, effect = row[:5]
+        explicit_risk = row[5] if len(row) > 5 else ""
         d = yaml.safe_load((root / tech / (tech + ".yaml")).read_text(encoding="utf-8"))
         a = d["atomic_tests"][no - 1]
         if platform not in a.get("supported_platforms", []):
@@ -110,10 +168,11 @@ def main():
         if not exp:
             dropped.append("%s %s#%d" % (platform, tech, no))
             continue
+        admin = bool(ex.get("elevation_required"))
         plan.append({"id": "%s#%d" % (tech, no), "platform": platform, "technique": tech, "test": no,
                      "name": a["name"], "guid": a.get("auto_generated_guid", ""), "executor": ex.get("name"),
-                     "admin": bool(ex.get("elevation_required")), "effect": effect, "args": args if over else {},
-                     "command": cmd, "cleanup": clean, "expected": exp})
+                     "admin": admin, "effect": effect, "risk": risk_of(admin, effect, explicit_risk),
+                     "args": args if over else {}, "command": cmd, "cleanup": clean, "expected": exp})
     out = HERE / "art" / "plan.json"
     out.write_text(json.dumps({"source": "https://github.com/redcanaryco/atomic-red-team", "license": "MIT",
                                "tests": plan}, ensure_ascii=False, indent=1), encoding="utf-8")

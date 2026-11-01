@@ -64,16 +64,16 @@ TMP=$(mktemp -d); trap 'rm -rf "$TMP"' EXIT
 IS_ROOT=0; [ "$(id -u)" = 0 ] && IS_ROOT=1
 sel() {{ [ -z "$ONLY" ] && return 0; case ",$ONLY," in *",$1,"*) return 0;; esac; return 1; }}
 START=$(date -u +%Y-%m-%dT%H:%M:%SZ)
-run_test() {{ # id, имя, нужен root, что делает, ожидаемые правила
+run_test() {{ # id, имя, нужен root, что делает, ожидаемые правила, риск
   sel "$1" || return 0
-  echo; echo "=== $1  $2"; echo "    делает: $4"; echo "    ждём правила: $5"
+  echo; echo "=== $1  $2"; echo "    делает: $4"; echo "    ждём правила: $5"; echo "    риск: $6"
   [ "$MODE" = plan ] && {{ echo "    (план, не выполняется)"; return 0; }}
   if [ "$3" = 1 ] && [ "$IS_ROOT" != 1 ]; then echo "    ПРОПУЩЕНО: нужен root (запустите через sudo)"; return 0; fi
 }}
 '''
 
 SH_TEST = r'''
-run_test {id} {name} {admin} {effect} {rules}
+run_test {id} {name} {admin} {effect} {rules} {risk}
 if sel {id} && [ "$MODE" != plan ]; then
   if [ "{admin}" != 1 ] || [ "$IS_ROOT" = 1 ]; then
     cat > "$TMP/c.sh" <<'ART_CMD'
@@ -113,9 +113,10 @@ $mode = if ($Run) { 'run' } elseif ($Cleanup) { 'cleanup' } else { 'plan' }
 $isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
 $tmp = Join-Path $env:TEMP ('art-' + [guid]::NewGuid().ToString('N')); New-Item -ItemType Directory -Path $tmp | Out-Null
 $start = (Get-Date).ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ssZ')
-function Invoke-Art($id, $name, $admin, $effect, $rules, $exe, $cmd, $clean) {
+function Invoke-Art($id, $name, $admin, $effect, $rules, $risk, $exe, $cmd, $clean) {
   if ($Only.Count -gt 0 -and ($Only -notcontains $id)) { return }
   Write-Host ""; Write-Host "=== $id  $name"; Write-Host "    делает: $effect"; Write-Host "    ждём правила: $rules"
+  Write-Host "    риск: $risk"
   if ($mode -eq 'plan') { Write-Host "    (план, не выполняется)"; return }
   if ($admin -and -not $isAdmin) { Write-Host "    ПРОПУЩЕНО: нужен запуск от администратора"; return }
   $ext = if ($exe -eq 'powershell') { 'ps1' } else { 'cmd' }
@@ -132,7 +133,7 @@ function Invoke-Art($id, $name, $admin, $effect, $rules, $exe, $cmd, $clean) {
 '''
 
 PS_TEST = r'''
-Invoke-Art '{id}' '{name}' {admin} '{effect}' '{rules}' '{exe}' @'
+Invoke-Art '{id}' '{name}' {admin} '{effect}' '{rules}' '{risk}' '{exe}' @'
 {command}
 '@ @'
 {cleanup}
@@ -171,7 +172,8 @@ def gen_runner(platform):
         for t in tests:
             exe = "powershell" if t["executor"] == "powershell" else "cmd"
             out.append(PS_TEST.format(id=t["id"], name=_pq(t["name"]), admin="$true" if t["admin"] else "$false",
-                                      effect=_pq(t["effect"]), rules=_pq("; ".join(t["expected"])), exe=exe,
+                                      effect=_pq(t["effect"]), rules=_pq("; ".join(t["expected"])),
+                                      risk=_pq(t["risk"]), exe=exe,
                                       command=t["command"], cleanup=t["cleanup"] or "rem"))
         out.append(PS_TAIL)
         return "\r\n".join("".join(out).splitlines()) + "\r\n"
@@ -179,8 +181,8 @@ def gen_runner(platform):
     for t in tests:
         exe = "bash" if t["executor"] == "bash" else "sh"
         out.append(SH_TEST.format(id=_q(t["id"]), name=_q(t["name"]), admin="1" if t["admin"] else "0",
-                                  effect=_q(t["effect"]), rules=_q("; ".join(t["expected"])), exe=exe,
-                                  command=t["command"], cleanup=t["cleanup"] or ":"))
+                                  effect=_q(t["effect"]), rules=_q("; ".join(t["expected"])), risk=_q(t["risk"]),
+                                  exe=exe, command=t["command"], cleanup=t["cleanup"] or ":"))
     out.append(SH_TAIL.format(plat=platform))
     return "".join(out)
 
