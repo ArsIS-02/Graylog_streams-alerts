@@ -148,6 +148,25 @@ bash rule-tester/deploy/install.sh      # собирает образ, став�
 
 По расписанию запускаются режимы из `RT_SCHEDULE` (или со страницы «Настройки»), например `queries@02:30`. Время считается по часовому поясу контейнера.
 
+### Atomic Red Team
+
+Режимы «Запросы» и «До алерта» проверяют только сам запрос правила — подставленным, заранее подогнанным сообщением. Они не показывают, действительно ли реальная атака на хосте (с настоящим агентом, настоящим auditd/Sysmon/winlogbeat между хостом и Graylog) дойдёт до события. Для этого в версии 0.1 добавлена страница **Atomic Red Team**: план безопасных тестов [Atomic Red Team](https://github.com/redcanaryco/atomic-red-team) (Red Canary, MIT, см. [`rule-tester/art/NOTICE.md`](../rule-tester/art/NOTICE.md)) для Linux, macOS и Windows, каждый тест сопоставлен с правилами, которые должны на него сработать.
+
+![Страница Atomic Red Team: план тестов для Linux, риск у каждого — «нет»/«низкий»](images/16-art.png)
+*Вкладки по системам, у каждого теста — что он делает на хосте и какие правила должны сработать. Скрипт по умолчанию только показывает план, ничего не выполняет.*
+
+Как это устроено:
+
+1. **Тесты отбирались вручную**, не автоматическим фильтром: читались команда и очистка каждого теста. В план не попадают и не будут добавлены тесты, которые отключают существующую защиту или журналирование (антивирус/EDR, auditd, syslog, SELinux, firewall), удаляют теневые копии или бэкапы, внедряются в чужие процессы или похищают учётные данные (LSASS, Keychain, Mimikatz и аналоги) — независимо от того, есть ли у них очистка.
+2. **У каждого теста — явная оценка риска**: «нет» (только чтение), «низкий» (создаёт и сам убирает тестовый объект, прав администратора не требует) или «средний» (нужен root/администратор, тест реально меняет системный объект — службу, правило firewall, ключ реестра, бит setuid). Для «среднего» риска расписано, что произойдёт, если скрипт прервётся до очистки, и как проверить/убрать вручную.
+
+   ![Тесты со средним риском: создание systemd-службы и правила firewall, с подробным описанием последствий](images/16-art-risk.png)
+
+3. **Скрипт скачивается и выполняется на тестовом хосте**, не здесь: страница ничего не делает с хостами сама. Скрипт самодостаточный (bash для Linux/macOS, PowerShell для Windows), не требует установки Invoke-AtomicRedTeam и не качает ничего из интернета. Без флагов — только план; `--run`/`-Run` выполняет и сразу чистит за собой; есть `--only` (конкретные тесты) и `--cleanup` (если прервали).
+4. **Сверка с Graylog** — по технике MITRE и окну времени (его печатает скрипт в конце работы, в UTC): какие из ожидаемых правил получили событие, какие нет. Правила проверяются раз в 5 минут, поэтому сверять стоит не раньше чем через 10 минут после теста.
+
+Для FreeIPA, Keenetic и контейнеров готовых тестов Atomic Red Team нет — FreeIPA покрывается отдельной [главой 15](15-detection-tests.md). Совпадение правила с тестом идёт по технике MITRE, поэтому «нет события» не всегда значит, что правило сломано: возможно, тест не создал то конкретное поле, которое ищет запрос, либо сообщение не дошло до агента.
+
 ### Результаты
 
 Три вкладки: «Отчёты», «Сравнение» и «История запусков» (кто и когда запускал, чем закончилось). Отчёт открывается построчно: статус, причина, запрос, таблица образцов (ожидалось, результат, поля). Доступны фильтр «только проблемы», поиск, выгрузка в **CSV** и страница для **печати или PDF**. Отчёты сохраняются на томе в `reports/<запуск>-<режим>.json` и `.md`.
@@ -230,10 +249,13 @@ python3 rule_tester.py --url … --gelf … --stream "Rule Tester" --platform Wi
 python3 rule_tester.py --url … --gelf … --stream "Rule Tester" --rule "=LNX - Разведка (id, whoami)" run-queries
 python3 rule_tester.py --url … harvest --days 7          # настоящие сообщения, обезличены
 python3 rule_tester.py --url … --gelf … --rule DCSync run-e2e --yes-send-alerts   # настоящие алерты и письма
+python3 rule_tester.py art-plan                                                   # план Atomic Red Team: тесты, риски, правила
+python3 rule_tester.py art-runner --os linux --out art-linux.sh                   # скрипт запуска (можно без --out, в stdout)
+python3 rule_tester.py --url … art-verify --os linux --since 90m                  # сверка с Graylog (--since: ISO-время или "90m")
 python3 rule_tester.py --version
 ```
 
-Команды: `list`, `selftest`, `generate`, `doctor`, `setup`, `harvest`, `run-queries`, `run-e2e`. Общие параметры: `--url`, `--token-env`, `--insecure`, `--ca-file`, `--gelf`, `--stream`, `--source {auto,file,live}`, `--rule`, `--platform`. `run-e2e` без `--yes-send-alerts` не запустится. Код возврата 1, если есть провалы, поэтому команду удобно подключать в cron или CI.
+Команды: `list`, `selftest`, `generate`, `doctor`, `setup`, `harvest`, `run-queries`, `run-e2e`, `art-plan`, `art-runner`, `art-verify`. Общие параметры: `--url`, `--token-env`, `--insecure`, `--ca-file`, `--gelf`, `--stream`, `--source {auto,file,live}`, `--rule`, `--platform`. `run-e2e` без `--yes-send-alerts` не запустится. Код возврата 1, если есть провалы, поэтому команду удобно подключать в cron или CI.
 
 ## Безопасность
 
@@ -262,6 +284,8 @@ python3 rule_tester.py --version
 | [`web.py`](../rule-tester/web.py), [`web_index.html`](../rule-tester/web_index.html) | веб-интерфейс, роли, расписание, журнал |
 | [`insights.py`](../rule-tester/insights.py) | покрытие MITRE и качество запросов |
 | [`mock_graylog.py`](../rule-tester/mock_graylog.py) | заглушка Graylog для проверки самого инструмента |
+| [`art.py`](../rule-tester/art.py), [`art/plan.json`](../rule-tester/art/plan.json) | генератор скриптов запуска и сверки Atomic Red Team, план тестов с рисками |
+| [`art_build.py`](../rule-tester/art_build.py), [`art/NOTICE.md`](../rule-tester/art/NOTICE.md) | пересборка плана из локальной копии Atomic Red Team, атрибуция и лицензия MIT |
 | [`samples/manual.json`](../rule-tester/samples/manual.json) | ручные образцы в репозитории |
 | [`Containerfile`](../rule-tester/Containerfile), [`deploy/`](../rule-tester/deploy/) | контейнер, compose, quadlet, `install.sh`, пример настроек |
 
