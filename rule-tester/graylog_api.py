@@ -122,6 +122,15 @@ class Graylog:
         r = self.post("/api/events/search", body)
         return [e.get("event", e) for e in r.get("events", [])]
 
+    def count_events(self, definition_id, days):
+        """Сколько событий создало правило за последние days суток."""
+        since = now_utc() - timedelta(days=days)
+        body = {"query": "", "page": 1, "per_page": 1,
+                "timerange": {"type": "absolute", "from": iso(since), "to": iso(now_utc() + timedelta(minutes=1))},
+                "filter": {"alerts": "include", "event_definitions": [definition_id]}}
+        r = self.post("/api/events/search", body)
+        return int(r.get("total_events", 0))
+
     # ---- запись
     def create_test_stream(self, title, index_set_id):
         body = {"title": title, "description": "Тестовые сообщения rule-tester (не боевой поток)",
