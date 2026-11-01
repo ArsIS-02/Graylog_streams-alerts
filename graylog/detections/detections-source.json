@@ -4455,6 +4455,352 @@
    "tactic": "Persistence",
    "technique": "T1098 Account Manipulation",
    "techniques": "T1098"
+  },
+  {
+   "title": "Windows - DCSync: репликация каталога не от контроллера домена (4662)",
+   "priority": 3,
+   "streams": [
+    "WindowsLogs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Windows"
+   ],
+   "state": "ENABLED",
+   "description": "Чтение прав репликации каталога учётной записью, которая не является компьютером. Так атака DCSync забирает хэши всех паролей. Работает только при включённой SACL на корне домена.",
+   "query": "win_channel:Security AND win_event_id:4662 AND winlogbeat_winlog_event_data_Properties:/.*(1131[fF]6[aA][aA]-9[cC]07-11[dD]1-[fF]79[fF]-00[cC]04[fF][cC]2[dD][cC][dD]2|1131[fF]6[aA][dD]-9[cC]07-11[dD]1-[fF]79[fF]-00[cC]04[fF][cC]2[dD][cC][dD]2|89[eE]95[bB]76-444[dD]-4[cC]62-991[aA]-0[fF][aA][cC][bB][eE][dD][aA]640[cC]).*/ AND NOT winlogbeat_winlog_event_data_SubjectUserName:/.*[$]/",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 60.0,
+   "tactic": "Credential Access",
+   "technique": "T1003.006 DCSync",
+   "techniques": "T1003.006"
+  },
+  {
+   "title": "Windows - Kerberoasting: билет службы с шифрованием RC4 (4769)",
+   "priority": 3,
+   "streams": [
+    "WindowsLogs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Windows"
+   ],
+   "state": "ENABLED",
+   "description": "Запрошен билет службы с шифрованием RC4 (0x17) к учётной записи службы, не к компьютеру. Так выглядит Kerberoasting: атакующий забирает билеты, чтобы подобрать пароль службы офлайн. Старые клиенты и службы тоже могут просить RC4.",
+   "query": "win_channel:Security AND win_event_id:4769 AND winlogbeat_winlog_event_data_TicketEncryptionType:\"0x17\" AND NOT winlogbeat_winlog_event_data_ServiceName:\"krbtgt\" AND NOT winlogbeat_winlog_event_data_ServiceName:/.*[$]/",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 60.0,
+   "tactic": "Credential Access",
+   "technique": "T1558.003 Kerberoasting",
+   "techniques": "T1558.003"
+  },
+  {
+   "title": "Windows - Блокировка учётной записи (4740)",
+   "priority": 2,
+   "streams": [
+    "WindowsLogs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Windows"
+   ],
+   "state": "ENABLED",
+   "description": "Учётная запись заблокирована после череды ошибок входа. Возможен подбор пароля.",
+   "query": "win_channel:Security AND win_event_id:4740",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 60.0,
+   "tactic": "Credential Access",
+   "technique": "T1110 Brute Force",
+   "techniques": "T1110"
+  },
+  {
+   "title": "Windows - Добавление в группу администраторов (4728, 4732, 4756)",
+   "priority": 3,
+   "streams": [
+    "WindowsLogs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Windows"
+   ],
+   "state": "ENABLED",
+   "description": "В привилегированную группу (администраторы, администраторы домена, предприятия, схемы) добавлен участник.",
+   "query": "win_channel:Security AND win_event_id:(4728 OR 4732 OR 4756) AND winlogbeat_winlog_event_data_TargetUserName:(Администраторы OR \"Администраторы домена\" OR \"Администраторы предприятия\" OR \"Администраторы схемы\" OR Administrators OR \"Domain Admins\" OR \"Enterprise Admins\" OR \"Schema Admins\")",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 60.0,
+   "tactic": "Privilege Escalation",
+   "technique": "T1098 Account Manipulation",
+   "techniques": "T1098, T1078.002"
+  },
+  {
+   "title": "Windows - Задание планировщика с Temp, AppData или Public (4698)",
+   "priority": 2,
+   "streams": [
+    "WindowsLogs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Windows"
+   ],
+   "state": "ENABLED",
+   "description": "Создано задание планировщика, в котором упомянуты временные или пользовательские папки.",
+   "query": "win_channel:Security AND win_event_id:4698 AND message:(Temp OR AppData OR Public)",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 60.0,
+   "tactic": "Persistence",
+   "technique": "T1053.005 Scheduled Task",
+   "techniques": "T1053.005"
+  },
+  {
+   "title": "Windows - Изменение объектов AD: GPO и AdminSDHolder (5136)",
+   "priority": 3,
+   "streams": [
+    "WindowsLogs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Windows"
+   ],
+   "state": "ENABLED",
+   "description": "Изменён объект групповой политики или AdminSDHolder. Через них закрепляются и раздают права по всему домену.",
+   "query": "win_channel:Security AND win_event_id:5136 AND (winlogbeat_winlog_event_data_ObjectClass:groupPolicyContainer OR winlogbeat_winlog_event_data_ObjectDN:/.*[aA][dD][mM][iI][nN][sS][dD][hH][oO][lL][dD][eE][rR].*/)",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 60.0,
+   "tactic": "Persistence",
+   "technique": "T1484.001 Group Policy Modification",
+   "techniques": "T1484.001, T1098"
+  },
+  {
+   "title": "Windows - Изменение политики аудита (4719)",
+   "priority": 3,
+   "streams": [
+    "WindowsLogs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Windows"
+   ],
+   "state": "ENABLED",
+   "description": "Изменена политика аудита системы. Атакующий отключает аудит, чтобы не оставлять следов.",
+   "query": "win_channel:Security AND win_event_id:4719",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 60.0,
+   "tactic": "Defense Impairment",
+   "technique": "T1685 Disable or Modify Tools",
+   "techniques": "T1685"
+  },
+  {
+   "title": "Windows - Подбор пароля на DC по Kerberos (10+ ошибок 4771 за 5 мин)",
+   "priority": 3,
+   "streams": [
+    "WindowsLogs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Windows"
+   ],
+   "state": "ENABLED",
+   "description": "Десять и более ошибок предварительной проверки Kerberos (4771) с одного адреса за 5 минут. Подбор пароля к доменным учётным записям.",
+   "query": "win_channel:Security AND win_event_id:4771",
+   "group_by": [
+    "winlogbeat_winlog_event_data_IpAddress"
+   ],
+   "condition": {
+    "op": ">=",
+    "value": 10
+   },
+   "aggregated": true,
+   "window_min": 5.0,
+   "grace_min": 5.0,
+   "tactic": "Credential Access",
+   "technique": "T1110.001 Password Guessing",
+   "techniques": "T1110.001, T1110.003"
+  },
+  {
+   "title": "Windows - Подбор пароля на DC по NTLM (10+ ошибок 4776 за 5 мин)",
+   "priority": 3,
+   "streams": [
+    "WindowsLogs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Windows"
+   ],
+   "state": "ENABLED",
+   "description": "Десять и более неудачных проверок NTLM (4776) с одного рабочего места за 5 минут. Подбор пароля или забытый пароль в службе.",
+   "query": "win_channel:Security AND win_event_id:4776 AND NOT winlogbeat_winlog_event_data_Status:\"0x0\"",
+   "group_by": [
+    "winlogbeat_winlog_event_data_Workstation"
+   ],
+   "condition": {
+    "op": ">=",
+    "value": 10
+   },
+   "aggregated": true,
+   "window_min": 5.0,
+   "grace_min": 5.0,
+   "tactic": "Credential Access",
+   "technique": "T1110.001 Password Guessing",
+   "techniques": "T1110.001, T1110.003"
+  },
+  {
+   "title": "Windows - Постоянная подписка WMI (5861)",
+   "priority": 3,
+   "streams": [
+    "WindowsLogs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Windows"
+   ],
+   "state": "ENABLED",
+   "description": "Создана постоянная подписка на события WMI. Этим способом закрепляются без файлов.",
+   "query": "win_channel:\"Microsoft-Windows-WMI-Activity/Operational\" AND win_event_id:5861",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 60.0,
+   "tactic": "Persistence",
+   "technique": "T1546.003 Windows Management Instrumentation Event Subscription",
+   "techniques": "T1546.003"
+  },
+  {
+   "title": "Windows - Сброс пароля учётной записи (4724)",
+   "priority": 2,
+   "streams": [
+    "WindowsLogs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Windows"
+   ],
+   "state": "ENABLED",
+   "description": "Кто-то сбросил пароль другой учётной записи. Плановые сбросы тоже сработают.",
+   "query": "win_channel:Security AND win_event_id:4724",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 60.0,
+   "tactic": "Persistence",
+   "technique": "T1098 Account Manipulation",
+   "techniques": "T1098"
+  },
+  {
+   "title": "Windows - Создана компьютерная учётная запись пользователем (4741)",
+   "priority": 2,
+   "streams": [
+    "WindowsLogs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Windows"
+   ],
+   "state": "ENABLED",
+   "description": "Компьютерную учётную запись создал пользователь, а не компьютер. Может быть присоединением к домену, а может быть атакой через MachineAccountQuota.",
+   "query": "win_channel:Security AND win_event_id:4741 AND NOT winlogbeat_winlog_event_data_SubjectUserName:/.*[$]/",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 60.0,
+   "tactic": "Persistence",
+   "technique": "T1136.002 Domain Account",
+   "techniques": "T1136.002"
+  },
+  {
+   "title": "Windows - Создана учётная запись (4720)",
+   "priority": 2,
+   "streams": [
+    "WindowsLogs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Windows"
+   ],
+   "state": "ENABLED",
+   "description": "Создана новая учётная запись пользователя. Нужно для закрепления.",
+   "query": "win_channel:Security AND win_event_id:4720",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 60.0,
+   "tactic": "Persistence",
+   "technique": "T1136 Create Account",
+   "techniques": "T1136.001, T1136.002"
+  },
+  {
+   "title": "Windows - Создание, удаление или изменение доверия домена (4706/4707/4716)",
+   "priority": 3,
+   "streams": [
+    "WindowsLogs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Windows"
+   ],
+   "state": "ENABLED",
+   "description": "Создано, удалено или изменено доверительное отношение между доменами. Тип и направление доверия, а также отключение фильтрации SID видно в тексте события. Плановые изменения (например, доверие с FreeIPA) тоже сработают.",
+   "query": "win_channel:Security AND win_event_id:(4706 OR 4707 OR 4716)",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 60.0,
+   "tactic": "Defense Evasion, Privilege Escalation",
+   "technique": "T1484.002 Domain Trust Modification",
+   "techniques": "T1484.002"
+  },
+  {
+   "title": "Windows - Удалённый вход по WinRM (91)",
+   "priority": 2,
+   "streams": [
+    "WindowsLogs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Windows"
+   ],
+   "state": "ENABLED",
+   "description": "Создана сессия WinRM (удалённое управление PowerShell).",
+   "query": "win_channel:\"Microsoft-Windows-WinRM/Operational\" AND win_event_id:91",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 60.0,
+   "tactic": "Lateral Movement",
+   "technique": "T1021.006 Windows Remote Management",
+   "techniques": "T1021.006"
+  },
+  {
+   "title": "Windows - Установка службы вне System32 и Program Files (4697)",
+   "priority": 2,
+   "streams": [
+    "WindowsLogs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Windows"
+   ],
+   "state": "ENABLED",
+   "description": "Установлена служба, файл которой лежит не в System32 и не в Program Files.",
+   "query": "win_channel:Security AND win_event_id:4697 AND NOT winlogbeat_winlog_event_data_ServiceFileName:/.*([Ss]ystem32|[Pp]rogram [Ff]iles).*/",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 60.0,
+   "tactic": "Persistence",
+   "technique": "T1543.003 Windows Service",
+   "techniques": "T1543.003, T1569.002"
   }
  ]
 }

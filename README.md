@@ -136,7 +136,7 @@
 
 | # | Глава | О чём |
 |---|---|---|
-| 3 | [Windows](docs/03-windows.md) | Sysmon, Winlogbeat, алерт на событие 4625, алерты по Sysmon и Security |
+| 3 | [Windows](docs/03-windows.md) | Sysmon, Winlogbeat, алерт на событие 4625, алерты по Sysmon и Security, аудит и алерты контроллера домена |
 | 4 | [Linux](docs/04-linux.md) | auditd, rsyslog, алерт на SSH, алерты по auditd, источник входа |
 | 5 | [macOS: unified log, Filebeat, osquery](docs/05-macos.md) | Unified log, USB, osquery, ротация логов, алерты по процессам |
 | 6 | [macOS: BI.ZONE Triage](docs/06-macos-bztriage.md) | Три launchd-агента, телеметрия по `nc` |
