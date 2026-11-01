@@ -1,0 +1,30 @@
+{
+  "Windows - DCSync": {
+    "positive": [
+      {"why": "ручной: репликация каталога обычной учётной записью (GUID DS-Replication-Get-Changes-All)",
+       "doc": {"win_channel": "Security", "win_event_id": "4662", "source": "rt-dc",
+               "winlogbeat_winlog_event_data_SubjectUserName": "svc_backup",
+               "winlogbeat_winlog_event_data_Properties": "%%7688 {1131f6ad-9c07-11d1-f79f-00c04fc2dcd2}"}}
+    ],
+    "negative": [
+      {"why": "ручной: учётная запись компьютера (имя с $) исключена",
+       "doc": {"win_channel": "Security", "win_event_id": "4662", "source": "rt-dc",
+               "winlogbeat_winlog_event_data_SubjectUserName": "DC01$",
+               "winlogbeat_winlog_event_data_Properties": "%%7688 {1131f6ad-9c07-11d1-f79f-00c04fc2dcd2}"}}
+    ]
+  },
+  "Windows - Kerberoasting": {
+    "positive": [
+      {"why": "ручной: билет службы с RC4 к учётной записи службы",
+       "doc": {"win_channel": "Security", "win_event_id": "4769", "source": "rt-dc",
+               "winlogbeat_winlog_event_data_TicketEncryptionType": "0x17",
+               "winlogbeat_winlog_event_data_ServiceName": "MSSQLSvc"}}
+    ],
+    "negative": [
+      {"why": "ручной: AES (0x12) не должен срабатывать",
+       "doc": {"win_channel": "Security", "win_event_id": "4769", "source": "rt-dc",
+               "winlogbeat_winlog_event_data_TicketEncryptionType": "0x12",
+               "winlogbeat_winlog_event_data_ServiceName": "MSSQLSvc"}}
+    ]
+  }
+}

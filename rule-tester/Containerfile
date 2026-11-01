@@ -1,0 +1,13 @@
+# Сборка из корня репозитория:  podman build -f rule-tester/Containerfile -t localhost/rule-tester:latest .
+FROM docker.io/library/python:3.12-slim
+ENV PYTHONUNBUFFERED=1 RT_DATA=/data RT_PORT=8080 TZ=Asia/Yekaterinburg
+RUN useradd -r -u 10001 -d /app rt && mkdir -p /data && chown rt /data
+WORKDIR /app/rule-tester
+COPY rule-tester/lucene.py rule-tester/graylog_api.py rule-tester/rule_tester.py rule-tester/web.py rule-tester/web_index.html rule-tester/mock_graylog.py ./
+COPY rule-tester/samples/manual.json samples/manual.json
+COPY graylog/detections/detections-source.json /app/graylog/detections/detections-source.json
+USER rt
+VOLUME /data
+EXPOSE 8080
+HEALTHCHECK --interval=60s --timeout=5s CMD python3 -c "import urllib.request;urllib.request.urlopen('http://127.0.0.1:8080/',timeout=3)"
+CMD ["python3", "web.py"]

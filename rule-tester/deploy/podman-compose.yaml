@@ -1,0 +1,19 @@
+services:
+  rule-tester:
+    build:
+      context: ../..
+      dockerfile: rule-tester/Containerfile
+    image: localhost/rule-tester:latest
+    container_name: rule-tester
+    restart: unless-stopped
+    env_file: ./rule-tester.env
+    ports:
+      - "127.0.0.1:8085:8080"
+    volumes:
+      - rule-tester-data:/data:Z
+    read_only: true
+    tmpfs: [/tmp]
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges"]
+volumes:
+  rule-tester-data:
