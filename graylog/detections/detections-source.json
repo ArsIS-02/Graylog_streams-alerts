@@ -3715,6 +3715,494 @@
    "tactic": "Collection",
    "technique": "T1560.001 Archive via Utility",
    "techniques": "T1560.001"
+  },
+  {
+   "title": "LNX - Создана локальная учётная запись (useradd)",
+   "priority": 2,
+   "streams": [
+    "RedOS auditd Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Linux"
+   ],
+   "state": "ENABLED",
+   "description": "Создана новая локальная учётная запись. Нужно для закрепления. Исключены служебные учётные записи, которые разворачиваются штатно: beszel, node_exporter, graylog-collector, logatlas-collect, nginx, zaslon. Новый сервис добавляй в список.",
+   "query": "audit_type:ADD_USER AND NOT acct:(beszel OR node_exporter OR \"graylog-collector\" OR \"logatlas-collect\" OR nginx OR zaslon)",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 60.0,
+   "tactic": "Persistence",
+   "technique": "T1136.001 Local Account",
+   "techniques": "T1136.001"
+  },
+  {
+   "title": "LNX - Участник добавлен в группу wheel, sudo, root, adm или docker",
+   "priority": 3,
+   "streams": [
+    "RedOS auditd Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Linux"
+   ],
+   "state": "ENABLED",
+   "description": "Пользователь добавлен в привилегированную группу. Группа docker равна root. Служебные учётные записи исключены.",
+   "query": "audit_type:USER_MGMT AND message:\"add-user-to-group\" AND message:(wheel OR sudo OR root OR adm OR docker) AND NOT acct:(beszel OR node_exporter OR \"graylog-collector\" OR \"logatlas-collect\" OR nginx OR zaslon)",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 60.0,
+   "tactic": "Privilege Escalation",
+   "technique": "T1098 Account Manipulation",
+   "techniques": "T1098"
+  },
+  {
+   "title": "LNX - Подбор пароля sudo или su (5+ ошибок за 5 мин)",
+   "priority": 3,
+   "streams": [
+    "RedOS auditd Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Linux"
+   ],
+   "state": "ENABLED",
+   "description": "Пять и более неудачных вводов пароля для sudo или su на одном хосте за 5 минут.",
+   "query": "audit_type:USER_AUTH AND res:failed AND exe:(\"/usr/bin/sudo\" OR \"/usr/bin/su\")",
+   "group_by": [
+    "source"
+   ],
+   "condition": {
+    "op": ">=",
+    "value": 5
+   },
+   "aggregated": true,
+   "window_min": 5.0,
+   "grace_min": 5.0,
+   "tactic": "Credential Access",
+   "technique": "T1110 Brute Force",
+   "techniques": "T1110"
+  },
+  {
+   "title": "LNX - Установка бита setuid или setgid (chmod u+s)",
+   "priority": 2,
+   "streams": [
+    "RedOS auditd Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Linux"
+   ],
+   "state": "ENABLED",
+   "description": "Файлу выставлен бит setuid или setgid. Так готовят повышение прав.",
+   "query": "audit_type:EXECVE AND a0:chmod AND a1:(\"u+s\" OR \"g+s\" OR 4755 OR 2755 OR 4777 OR 6755 OR 4750 OR 4711)",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 60.0,
+   "tactic": "Privilege Escalation",
+   "technique": "T1548.001 Setuid and Setgid",
+   "techniques": "T1548.001"
+  },
+  {
+   "title": "LNX - Обратная оболочка (bash -i, nc -e, socat exec)",
+   "priority": 3,
+   "streams": [
+    "RedOS auditd Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Linux"
+   ],
+   "state": "ENABLED",
+   "description": "В командной строке типичные приёмы обратной оболочки. Проверки порта вида echo > /dev/tcp/хост/порт не считаются.",
+   "query": "audit_type:PROCTITLE AND proctitle:/.*(bash[ ]+-i.*\\/dev\\/tcp|\\/dev\\/tcp\\/.*0>&1|>&[ ]*\\/dev\\/tcp|nc[ ]+-[a-z]*e[ ]|ncat[ ].*-e[ ]|socat[ ].*exec|mkfifo[ ].*nc[ ]).*/",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 60.0,
+   "tactic": "Execution",
+   "technique": "T1059.004 Unix Shell",
+   "techniques": "T1059.004, T1071"
+  },
+  {
+   "title": "LNX - Очистка истории команд (history -c, unset HISTFILE)",
+   "priority": 2,
+   "streams": [
+    "RedOS auditd Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Linux"
+   ],
+   "state": "ENABLED",
+   "description": "Очищена или отключена история командной строки. Так заметают следы.",
+   "query": "audit_type:PROCTITLE AND proctitle:/.*(history[ ]+-c|unset[ ]+HISTFILE|HISTFILE=\\/dev\\/null|rm[ ].*bash_history|HISTSIZE=0).*/",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 60.0,
+   "tactic": "Stealth",
+   "technique": "T1070.003 Clear Command History",
+   "techniques": "T1070.003"
+  },
+  {
+   "title": "LNX - Загрузка или выгрузка модуля ядра (insmod, modprobe, rmmod)",
+   "priority": 2,
+   "streams": [
+    "RedOS auditd Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Linux"
+   ],
+   "state": "ENABLED",
+   "description": "Загружен или выгружен модуль ядра. Так ставят руткиты.",
+   "query": "audit_type:EXECVE AND a0:(insmod OR modprobe OR rmmod)",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 60.0,
+   "tactic": "Persistence",
+   "technique": "T1547.006 Kernel Modules and Extensions",
+   "techniques": "T1547.006"
+  },
+  {
+   "title": "LNX - Правка crontab (crontab -e)",
+   "priority": 1,
+   "streams": [
+    "RedOS auditd Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Linux"
+   ],
+   "state": "ENABLED",
+   "description": "Пользователь открыл редактирование своего crontab. Закрепление через планировщик.",
+   "query": "audit_type:PROCTITLE AND proctitle:/.*crontab[ ]+-e.*/",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 60.0,
+   "tactic": "Persistence",
+   "technique": "T1053.003 Cron",
+   "techniques": "T1053.003"
+  },
+  {
+   "title": "LNX - Отключение SELinux или аудита (setenforce 0, auditctl -e 0)",
+   "priority": 3,
+   "streams": [
+    "RedOS auditd Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Linux"
+   ],
+   "state": "ENABLED",
+   "description": "SELinux переведён в разрешающий режим или отключён аудит ядра.",
+   "query": "audit_type:PROCTITLE AND proctitle:/.*(setenforce[ ]+0|auditctl[ ]+-e[ ]+0|semanage[ ]+permissive|SELINUX=(disabled|permissive)).*/",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 60.0,
+   "tactic": "Defense Impairment",
+   "technique": "T1685 Disable or Modify Tools",
+   "techniques": "T1685"
+  },
+  {
+   "title": "LNX - Опасный запуск контейнера (--privileged, -v /:/, docker.sock)",
+   "priority": 3,
+   "streams": [
+    "RedOS auditd Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Linux"
+   ],
+   "state": "ENABLED",
+   "description": "Контейнер запущен с полным доступом к хосту: привилегированный режим, корень хоста, сокет docker, пространство процессов хоста.",
+   "query": "audit_type:PROCTITLE AND proctitle:/.*docker[ ]+(run|create)[ ].*(--privileged|-v[ ]+\\/:|--pid=host|docker[.]sock|--cap-add[ =]+(SYS_ADMIN|ALL)).*/",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 60.0,
+   "tactic": "Privilege Escalation",
+   "technique": "T1611 Escape to Host",
+   "techniques": "T1611"
+  },
+  {
+   "title": "LNX - Ручная смена системного времени",
+   "priority": 1,
+   "streams": [
+    "RedOS auditd Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert Linux"
+   ],
+   "state": "ENABLED",
+   "description": "Время вручную изменено. Сбивает корреляцию событий.",
+   "query": "audit_type:PROCTITLE AND proctitle:/.*(date[ ]+-s|timedatectl[ ]+set-time|hwclock[ ]+--set).*/",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 60.0,
+   "tactic": "Stealth",
+   "technique": "T1070 Indicator Removal",
+   "techniques": "T1070"
+  },
+  {
+   "title": "macOS - Снятие карантина вне Applications или отключение Gatekeeper",
+   "priority": 2,
+   "streams": [
+    "MacOS Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert MacOS"
+   ],
+   "state": "ENABLED",
+   "description": "Отключён Gatekeeper или снят атрибут карантина с файла вне /Applications. Установка приложений в /Applications и hostdeck-agent исключены.",
+   "query": "log_type:macos_osquery AND name:es_process_events AND columns_cmdline:/.*(spctl[ ]+--(master|global)-disable|xattr[ ]+.*-[a-z]*[dc].*)/ AND NOT columns_cmdline:/.*(\\/Applications\\/|hostdeck-agent).*/ AND columns_cmdline:/.*(spctl|quarantine|xattr[ ]+-[a-z]*c).*/",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 60.0,
+   "tactic": "Stealth",
+   "technique": "T1553.001 Gatekeeper Bypass",
+   "techniques": "T1553.001"
+  },
+  {
+   "title": "macOS - Отключение SIP (csrutil disable)",
+   "priority": 3,
+   "streams": [
+    "MacOS Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert MacOS"
+   ],
+   "state": "ENABLED",
+   "description": "Запрошено отключение защиты целостности системы (SIP).",
+   "query": "log_type:macos_osquery AND name:es_process_events AND columns_cmdline:/.*csrutil[ ]+(disable|authenticated-root[ ]+disable).*/",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 60.0,
+   "tactic": "Defense Impairment",
+   "technique": "T1685 Disable or Modify Tools",
+   "techniques": "T1685"
+  },
+  {
+   "title": "macOS - Установка доверенного корневого сертификата",
+   "priority": 3,
+   "streams": [
+    "MacOS Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert MacOS"
+   ],
+   "state": "ENABLED",
+   "description": "В систему добавлен доверенный сертификат. Так подменяют TLS. Свой сертификат caddy-root исключён.",
+   "query": "log_type:macos_osquery AND name:es_process_events AND columns_cmdline:/.*security[ ]+(add-trusted-cert|trust-settings-import).*/ AND NOT columns_cmdline:/.*caddy-root.*/",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 60.0,
+   "tactic": "Stealth",
+   "technique": "T1553.004 Install Root Certificate",
+   "techniques": "T1553.004"
+  },
+  {
+   "title": "macOS - Выгрузка паролей из Keychain (security dump-keychain)",
+   "priority": 3,
+   "streams": [
+    "MacOS Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert MacOS"
+   ],
+   "state": "ENABLED",
+   "description": "Команда security выгружает связку ключей или печатает пароль из неё.",
+   "query": "log_type:macos_osquery AND name:es_process_events AND columns_cmdline:/.*security[ ]+(dump-keychain|find-(generic|internet)-password[ ].*-[a-z]*w).*/",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 60.0,
+   "tactic": "Credential Access",
+   "technique": "T1555.001 Keychain",
+   "techniques": "T1555.001"
+  },
+  {
+   "title": "macOS - Поддельное окно ввода пароля (osascript hidden answer)",
+   "priority": 2,
+   "streams": [
+    "MacOS Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert MacOS"
+   ],
+   "state": "ENABLED",
+   "description": "AppleScript показывает окно со скрытым вводом. Так выманивают пароль.",
+   "query": "log_type:macos_osquery AND name:es_process_events AND columns_cmdline:/.*osascript.*hidden[ ]+answer.*/",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 60.0,
+   "tactic": "Credential Access",
+   "technique": "T1056.002 GUI Input Capture",
+   "techniques": "T1056.002"
+  },
+  {
+   "title": "macOS - Создана учётная запись (dscl, sysadminctl)",
+   "priority": 3,
+   "streams": [
+    "MacOS Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert MacOS"
+   ],
+   "state": "ENABLED",
+   "description": "Создана локальная учётная запись или скрыты учётные записи с экрана входа.",
+   "query": "log_type:macos_osquery AND name:es_process_events AND columns_cmdline:/.*(dscl[ ]+[^ ]+[ ]+-create[ ]+\\/Users|sysadminctl.*-addUser|Hide500Users).*/",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 60.0,
+   "tactic": "Persistence",
+   "technique": "T1136.001 Local Account",
+   "techniques": "T1136.001"
+  },
+  {
+   "title": "macOS - Включение удалённого доступа (SSH, Screen Sharing, ARD)",
+   "priority": 3,
+   "streams": [
+    "MacOS Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert MacOS"
+   ],
+   "state": "ENABLED",
+   "description": "Включён удалённый вход по SSH, общий экран или Remote Desktop. Простые launchctl print не учитываются.",
+   "query": "log_type:macos_osquery AND name:es_process_events AND columns_cmdline:/.*(systemsetup.*-setremotelogin[ ]+on|kickstart.*-activate|launchctl[ ]+(load|enable|bootstrap|kickstart).*(com[.]apple[.]screensharing|com[.]openssh[.]sshd)).*/",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 60.0,
+   "tactic": "Lateral Movement",
+   "technique": "T1021.004 SSH",
+   "techniques": "T1021.004, T1021.005"
+  },
+  {
+   "title": "macOS - Установка конфигурационного профиля (profiles install)",
+   "priority": 3,
+   "streams": [
+    "MacOS Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert MacOS"
+   ],
+   "state": "ENABLED",
+   "description": "Установлен конфигурационный профиль. Через профили меняют настройки безопасности, прокси и сертификаты.",
+   "query": "log_type:macos_osquery AND name:es_process_events AND columns_cmdline:/.*profiles[ ]+(install|-I).*/",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 60.0,
+   "tactic": "Persistence",
+   "technique": "T1547 Boot or Logon Autostart Execution",
+   "techniques": "T1547"
+  },
+  {
+   "title": "macOS - Загрузка расширения ядра или системного расширения",
+   "priority": 2,
+   "streams": [
+    "MacOS Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert MacOS"
+   ],
+   "state": "ENABLED",
+   "description": "Загружено расширение ядра или системное расширение. Служба logkextloadsd не считается.",
+   "query": "log_type:macos_osquery AND name:es_process_events AND columns_cmdline:/.*(kextload[ ]|kmutil[ ]+load|systemextensionsctl[ ]+(install|developer)).*/",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 60.0,
+   "tactic": "Persistence",
+   "technique": "T1547.006 Kernel Modules and Extensions",
+   "techniques": "T1547.006"
+  },
+  {
+   "title": "macOS - Смена DNS или прокси (networksetup)",
+   "priority": 2,
+   "streams": [
+    "MacOS Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert MacOS"
+   ],
+   "state": "ENABLED",
+   "description": "Изменены DNS-серверы или прокси. Так перехватывают трафик.",
+   "query": "log_type:macos_osquery AND name:es_process_events AND columns_cmdline:/.*networksetup.*-set(dnsservers|webproxy|securewebproxy|autoproxyurl|socksfirewallproxy).*/",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 60.0,
+   "tactic": "Credential Access",
+   "technique": "T1557 Adversary-in-the-Middle",
+   "techniques": "T1557"
+  },
+  {
+   "title": "macOS - Уничтожение резервных копий или дисков (tmutil, diskutil)",
+   "priority": 3,
+   "streams": [
+    "MacOS Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert MacOS"
+   ],
+   "state": "ENABLED",
+   "description": "Удалены резервные копии Time Machine или стёрт диск.",
+   "query": "log_type:macos_osquery AND name:es_process_events AND columns_cmdline:/.*(tmutil[ ]+(delete|disable|deletelocalsnapshots)|diskutil[ ]+(eraseDisk|eraseVolume|secureErase|apfs[ ]+deleteVolume)).*/",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 60.0,
+   "tactic": "Impact",
+   "technique": "T1490 Inhibit System Recovery",
+   "techniques": "T1490, T1485"
+  },
+  {
+   "title": "macOS - Добавление элемента входа (sfltool, osascript login item)",
+   "priority": 1,
+   "streams": [
+    "MacOS Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert MacOS"
+   ],
+   "state": "ENABLED",
+   "description": "Добавлен элемент автозапуска при входе.",
+   "query": "log_type:macos_osquery AND name:es_process_events AND columns_cmdline:/.*(sfltool[ ]+add|osascript.*make[ ]+login[ ]+item).*/",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 60.0,
+   "tactic": "Persistence",
+   "technique": "T1547.015 Login Items",
+   "techniques": "T1547.015"
   }
  ]
 }

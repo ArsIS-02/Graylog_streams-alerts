@@ -1,6 +1,6 @@
 # Каталог детектов Graylog
 
-> Все правила (event definitions) лаборатории в одном месте: какой лог проверяется, по какому условию, как коррелируются события, к какой тактике и технике MITRE ATT&CK относятся. Всего **167** правил, из них **139** привязаны к технике ATT&CK v20 (105 разных техник). Остальные описывают здоровье сервисов и тишину в логах: атак они не ловят.
+> Все правила (event definitions) лаборатории в одном месте: какой лог проверяется, по какому условию, как коррелируются события, к какой тактике и технике MITRE ATT&CK относятся. Всего **190** правил, из них **162** привязаны к технике ATT&CK v20 (107 разных техник). Остальные описывают здоровье сервисов и тишину в логах: атак они не ловят.
 
 Страница собирается скриптом из выгрузки Graylog и руками не правится: [как обновить](#как-обновить-каталог). Запросы очищены: IP, MAC, отпечатки ключей и белые списки заменены на `<IP>`, `<MAC>`, `<белый список>`. Готовые определения для импорта лежат в `graylog/*-event-definitions.json`, соответствие техникам подробно описано в [graylog/mitre](../graylog/mitre/README.md).
 
@@ -8,8 +8,8 @@
 
 - [Покрытие: тактики × платформы](#покрытие-тактики--платформы)
 - [Windows](#windows) — 43
-- [Linux](#linux) — 39
-- [macOS (osquery и unified log)](#macos-osquery-и-unified-log) — 38
+- [Linux](#linux) — 50
+- [macOS (osquery и unified log)](#macos-osquery-и-unified-log) — 50
 - [macOS (BI.ZONE Triage)](#macos-bizone-triage) — 9
 - [Keenetic](#keenetic) — 9
 - [FreeIPA и здоровье сервисов](#freeipa-и-здоровье-сервисов) — 11
@@ -25,20 +25,20 @@
 |---|---|---|---|---|---|---|---|
 | Reconnaissance (Разведка) |  |  |  | 1 |  |  | **1** |
 | Initial Access (Первоначальный доступ) | 2 | 3 | 3 | 1 |  | 1 | **10** |
-| Execution (Выполнение) | 6 | 3 | 7 |  |  |  | **16** |
-| Persistence (Закрепление) | 7 | 6 | 8 | 1 | 1 |  | **23** |
-| Privilege Escalation (Повышение привилегий) | 1 | 4 | 6 |  |  |  | **11** |
-| Stealth (Скрытность) | 4 | 2 | 2 |  |  |  | **8** |
-| Defense Impairment (Подавление защиты) | 5 | 5 | 5 | 1 |  |  | **16** |
-| Credential Access (Доступ к учётным данным) | 6 | 3 | 5 | 3 | 3 | 1 | **21** |
+| Execution (Выполнение) | 6 | 4 | 7 |  |  |  | **17** |
+| Persistence (Закрепление) | 7 | 9 | 12 | 1 | 1 |  | **30** |
+| Privilege Escalation (Повышение привилегий) | 1 | 7 | 6 |  |  |  | **14** |
+| Stealth (Скрытность) | 4 | 4 | 4 |  |  |  | **12** |
+| Defense Impairment (Подавление защиты) | 5 | 6 | 6 | 1 |  |  | **18** |
+| Credential Access (Доступ к учётным данным) | 6 | 4 | 8 | 3 | 3 | 1 | **25** |
 | Discovery (Исследование среды) | 2 | 2 | 1 |  |  |  | **5** |
-| Lateral Movement (Перемещение) | 2 | 1 | 1 | 1 |  |  | **5** |
+| Lateral Movement (Перемещение) | 2 | 1 | 2 | 1 |  |  | **6** |
 | Collection (Сбор данных) | 1 | 1 | 2 |  |  |  | **4** |
 | Command and Control (управление, C2) | 3 | 3 | 2 |  |  |  | **8** |
 | Exfiltration (Вывод данных) | 1 | 2 | 2 |  |  |  | **5** |
-| Impact (Воздействие) | 2 | 3 | 1 |  |  |  | **6** |
+| Impact (Воздействие) | 2 | 3 | 2 |  |  |  | **7** |
 | Без техники (служебные) | 1 | 1 | 2 | 1 | 7 | 16 | **28** |
-| **Всего** | **43** | **39** | **47** | **9** | **11** | **18** | **167** |
+| **Всего** | **43** | **50** | **59** | **9** | **11** | **18** | **190** |
 
 ## Windows
 
@@ -354,7 +354,7 @@ win_event_id:1 AND message:("whoami.exe" OR "nltest.exe" OR "net.exe" OR "net1.e
 
 ## Linux
 
-auditd на RED OS; поток RedOS auditd Logs. Правил: 39. Сортировка: сначала высокий приоритет.
+auditd на RED OS; поток RedOS auditd Logs. Правил: 50. Сортировка: сначала высокий приоритет.
 
 | Правило | Приоритет | Источник логов | Что проверяет | Корреляция | Тактика | Техника |
 |---|---|---|---|---|---|---|
@@ -369,14 +369,20 @@ auditd на RED OS; поток RedOS auditd Logs. Правил: 39. Сортир
 | Изменение sshd_config | высокий | RedOS auditd Logs<br>auditd SYSCALL, ключ sshd | Изменение конфигурации SSH-сервера. Возможны включение входа root, паролей или подмена AuthorizedKeysFile. | каждое событие | Defense Impairment | `T1556` Modify Authentication Process |
 | Массовое удаление файлов (200+ за 5 мин) | высокий | RedOS auditd Logs<br>auditd SYSCALL, ключ file_deletion | Один процесс удалил 200 и более файлов за 5 минут (обычный максимум в лаборатории около 30). Так выглядит затирание данных или шифровальщик. | число событий ≥ 200 за 5 мин, группировка по source, exe | Impact | `T1485` Data Destruction<br>`T1070.004` |
 | Обратная оболочка (/dev/tcp) | высокий | RedOS auditd Logs<br>auditd EXECVE | В командной строке использован /dev/tcp — типичный приём reverse shell в bash. | каждое событие | Execution | `T1059.004` Unix Shell |
+| Обратная оболочка (bash -i, nc -e, socat exec) | высокий | RedOS auditd Logs<br>auditd PROCTITLE | В командной строке типичные приёмы обратной оболочки. Проверки порта вида echo > /dev/tcp/хост/порт не считаются. | каждое событие; повтор не чаще раза в 1 ч | Execution | `T1059.004` Unix Shell<br>`T1071` |
 | Обратная оболочка (python, perl, nc, socat, mkfifo) | высокий | RedOS auditd Logs<br>auditd PROCTITLE | Командная строка с типовыми обратными оболочками: python -c с socket, perl -e с socket, nc -e, mkfifo, socat с exec:, bash -i с перенаправлением. Дополняет алерт на /dev/tcp. | каждое событие | Execution | `T1059.004` Unix Shell<br>`T1571` |
+| Опасный запуск контейнера (--privileged, -v /:/, docker.sock) | высокий | RedOS auditd Logs<br>auditd PROCTITLE | Контейнер запущен с полным доступом к хосту: привилегированный режим, корень хоста, сокет docker, пространство процессов хоста. | каждое событие; повтор не чаще раза в 1 ч | Privilege Escalation | `T1611` Escape to Host |
+| Отключение SELinux или аудита (setenforce 0, auditctl -e 0) | высокий | RedOS auditd Logs<br>auditd PROCTITLE | SELinux переведён в разрешающий режим или отключён аудит ядра. | каждое событие; повтор не чаще раза в 1 ч | Defense Impairment | `T1685` Disable or Modify Tools |
 | Отключение аудита или удаление правил auditd | высокий | RedOS auditd Logs<br>auditd CONFIG_CHANGE | Удалено правило auditd или аудит отключён (audit_enabled=0). Атакующий может ослеплять мониторинг. | каждое событие | Defense Impairment | `T1685.004` Disable or Modify Linux Audit System Log |
+| Подбор пароля sudo или su (5+ ошибок за 5 мин) | высокий | RedOS auditd Logs<br>auditd USER_AUTH | Пять и более неудачных вводов пароля для sudo или su на одном хосте за 5 минут. | число событий ≥ 5 за 5 мин, группировка по source | Credential Access | `T1110` Brute Force |
 | Подбор пароля и успешный вход по SSH (6+ событий за 15 мин) | высокий | RedOS auditd Logs<br>auditd USER_LOGIN | На одном хосте за 15 минут 6 и более событий входа по SSH, среди которых есть и неудачные, и успешные. Похоже на подбор пароля, закончившийся входом. | число событий ≥ 6 за 15 мин, группировка по source | Credential Access | `T1110` Brute Force<br>`T1078` |
 | Привилегированный контейнер или docker.sock | высокий | RedOS auditd Logs<br>auditd EXECVE | Запуск docker или podman с флагом --privileged или с монтированием docker.sock. Это путь к root на хосте. | каждое событие | Privilege Escalation | `T1611` Escape to Host<br>`T1610` |
 | Успешный вход root по SSH | высокий | RedOS auditd Logs<br>auditd USER_LOGIN | Успешный вход по SSH под root. Прямой вход под root обычно отключают, повод проверить. | каждое событие; повтор не чаще раза в 1 ч | Lateral Movement | `T1021.004` SSH<br>`T1078.003` |
 | Установка setuid или setgid | высокий | RedOS auditd Logs<br>auditd SYSCALL, ключ perm_modification | chmod, fchmod, fchmodat с битом setuid (04000) или setgid (02000). Исключены systemd-tmpfiles, rpm и dnf: их установки штатно выставляют такие права. | каждое событие | Privilege Escalation | `T1548.001` Setuid and Setgid |
+| Участник добавлен в группу wheel, sudo, root, adm или docker | высокий | RedOS auditd Logs<br>auditd USER_MGMT | Пользователь добавлен в привилегированную группу. Группа docker равна root. Служебные учётные записи исключены. | каждое событие; повтор не чаще раза в 1 ч | Privilege Escalation | `T1098` Account Manipulation |
 | SSH-туннель (-R, -L, -D) | средний | RedOS auditd Logs<br>auditd PROCTITLE | Запуск ssh с пробросом портов (-R, -L, -D). Так выводят внутренние сервисы наружу или строят прокси. | каждое событие | Command and Control | `T1572` Protocol Tunneling<br>`T1090` |
 | Вход по SSH ночью (00:00-06:00) | средний | RedOS auditd Logs | Успешный вход по SSH ночью (с 00:00 до 06:00 по Екатеринбургу). Правило проверяется только в ночные часы. Часы подгоните под свой распорядок. | каждое событие; повтор не чаще раза в 1 ч | Initial Access | `T1078` Valid Accounts<br>`T1021.004` |
+| Загрузка или выгрузка модуля ядра (insmod, modprobe, rmmod) | средний | RedOS auditd Logs<br>auditd EXECVE | Загружен или выгружен модуль ядра. Так ставят руткиты. | каждое событие; повтор не чаще раза в 1 ч | Persistence | `T1547.006` Kernel Modules and Extensions |
 | Загрузка модуля ядра | средний | RedOS auditd Logs<br>auditd SYSCALL, ключ kernel_modules, kernel_modules_config | Загрузка или смена конфигурации модулей ядра (init_module, finit_module, modprobe). Вредоносные модули (руткиты) загружаются так же; штатные загрузки драйверов (udev) тоже попадают сюда,… | каждое событие | Persistence | `T1547.006` Kernel Modules and Extensions |
 | Закрепление через cron | средний | RedOS auditd Logs<br>auditd SYSCALL, ключ cron_persistence | Запись в каталоги и файлы cron (crontab, /etc/cron.*, /var/spool/cron). | каждое событие | Persistence | `T1053.003` Cron |
 | Закрепление через systemctl enable | средний | RedOS auditd Logs<br>auditd EXECVE | Служба добавлена в автозапуск командой systemctl enable. Проверьте, что это ожидаемая служба. | каждое событие | Persistence | `T1543.002` Systemd Service |
@@ -386,17 +392,22 @@ auditd на RED OS; поток RedOS auditd Logs. Правил: 39. Сортир
 | Неудачная попытка sudo | средний | RedOS auditd Logs | Неудачная аутентификация sudo: неверный пароль или отказ PAM/SSSD. Возможен подбор пароля или ошибка пользователя. | число событий > 0 за 5 мин, группировка по source | Privilege Escalation | `T1548.003` Sudo and Sudo Caching |
 | Остановка auditd, rsyslog, wazuh, filebeat, sshd или firewalld | средний | RedOS auditd Logs<br>auditd SERVICE_STOP | Остановлена служба аудита, логирования, защиты или SSH. Исключён постоянно перезапускающийся юнит filebeat-wazuh на хосте wazuh (около тысячи остановок в месяц). | каждое событие; повтор не чаще раза в 1 ч | Defense Impairment | `T1685` Disable or Modify Tools |
 | Остановка службы (systemctl stop) | средний | RedOS auditd Logs<br>auditd EXECVE | Остановка системной службы через systemctl stop. Имя службы: аргумент a2 в исходных сообщениях. | число событий > 0 за 5 мин, группировка по source | Impact | `T1489` Service Stop |
+| Очистка истории команд (history -c, unset HISTFILE) | средний | RedOS auditd Logs<br>auditd PROCTITLE | Очищена или отключена история командной строки. Так заметают следы. | каждое событие; повтор не чаще раза в 1 ч | Stealth | `T1070.003` Clear Command History |
 | Передача файлов наружу (scp, sftp, rsync) из терминала | средний | RedOS auditd Logs<br>auditd SYSCALL | Пользователь запустил scp, sftp или rsync в интерактивной сессии. Служебные запуски без терминала не учитываются. | каждое событие | Exfiltration | `T1048` Exfiltration Over Alternative Protocol |
 | Подозрительные утилиты (base64, nc, socat, scp) | средний | RedOS auditd Logs<br>auditd SYSCALL, ключ susp_activity | Запуск утилит, часто используемых для передачи и кодирования данных: base64, nc, socat, scp. | каждое событие | Command and Control | `T1105` Ingress Tool Transfer<br>`T1140` |
 | Поиск паролей в файлах (grep -r, find) | средний | RedOS auditd Logs<br>auditd EXECVE | Рекурсивный поиск слов password, secret, id_rsa, api_key и подобных по файлам (grep -r, find, rg). | каждое событие; повтор не чаще раза в 1 ч | Credential Access | `T1552.001` Credentials In Files |
 | Сканеры сети (nmap, masscan, arp-scan) | средний | RedOS auditd Logs<br>auditd EXECVE | Запущен сканер сети (nmap, masscan, arp-scan, netdiscover, nbtscan, fping, zmap). | каждое событие; повтор не чаще раза в 1 ч | Discovery | `T1046` Network Service Discovery<br>`T1018` |
+| Создана локальная учётная запись (useradd) | средний | RedOS auditd Logs<br>auditd ADD_USER | Создана новая локальная учётная запись. Нужно для закрепления. Исключены служебные учётные записи, которые разворачиваются штатно: beszel, node_exporter, graylog-collector,… | каждое событие; повтор не чаще раза в 1 ч | Persistence | `T1136.001` Local Account |
+| Установка бита setuid или setgid (chmod u+s) | средний | RedOS auditd Logs<br>auditd EXECVE | Файлу выставлен бит setuid или setgid. Так готовят повышение прав. | каждое событие; повтор не чаще раза в 1 ч | Privilege Escalation | `T1548.001` Setuid and Setgid |
 | Утилиты выгрузки в облако (rclone, MEGAcmd) | средний | RedOS auditd Logs<br>auditd EXECVE | Запущена утилита выгрузки в облако (rclone, MEGAcmd, megatools). | каждое событие; повтор не чаще раза в 1 ч | Exfiltration | `T1567.002` Exfiltration to Cloud Storage<br>`T1048` |
 | Архивация данных пользователем (tar, zip, 7z) | низкий | RedOS auditd Logs<br>auditd SYSCALL, ключ Data_Compressed | Пользователь запустил архиватор (tar, zip и аналоги). Частая подготовка к выгрузке данных. gzip и pigz исключены, их запускают logrotate и системные задачи. | каждое событие | Collection | `T1560.001` Archive via Utility |
 | Изменение правил firewall (iptables, nft) | низкий | RedOS auditd Logs<br>auditd SYSCALL, ключ sbin_susp | Запуск iptables/nft. Обычно Docker или firewalld, но так же отключают защиту. | каждое событие | Defense Impairment | `T1686` Disable or Modify System Firewall |
 | Изменение сетевых настроек и /etc/hosts | низкий | RedOS auditd Logs<br>auditd SYSCALL, ключ network_modifications | Правка сетевых файлов (hosts, resolv.conf и аналогов) не NetworkManager и не рантаймом контейнеров. Так подменяют DNS или перенаправляют трафик. | каждое событие | Impact | `T1565.001` Stored Data Manipulation |
 | Использование sudo | низкий | RedOS auditd Logs<br>auditd EXECVE | Выполнение команды через sudo (кроме служебного пользователя). Команда собирается из аргументов a0 a1 a2 a3 в исходных сообщениях. | число событий > 0 за 5 мин, группировка по source | Privilege Escalation | `T1548.003` Sudo and Sudo Caching |
 | Отказ SELinux (AVC) | низкий | RedOS auditd Logs<br>auditd AVC | SELinux запретил действие процессу. Может указывать на попытку обхода политики или на ошибку настройки. | каждое событие | — | — |
+| Правка crontab (crontab -e) | низкий | RedOS auditd Logs<br>auditd PROCTITLE | Пользователь открыл редактирование своего crontab. Закрепление через планировщик. | каждое событие; повтор не чаще раза в 1 ч | Persistence | `T1053.003` Cron |
 | Разведка (id, whoami) | низкий | RedOS auditd Logs<br>auditd SYSCALL, ключ recon | Запуск команд разведки системы. Сами по себе безобидны, важны в связке с другими событиями. | каждое событие | Discovery | `T1033` System Owner/User Discovery |
+| Ручная смена системного времени | низкий | RedOS auditd Logs<br>auditd PROCTITLE | Время вручную изменено. Сбивает корреляцию событий. | каждое событие; повтор не чаще раза в 1 ч | Stealth | `T1070` Indicator Removal |
 
 <details><summary>Запросы Graylog (очищенные)</summary>
 
@@ -466,16 +477,40 @@ audit_type:SYSCALL AND key:file_deletion
 audit_type:EXECVE AND message:"/dev/tcp"
 ```
 
+**LNX - Обратная оболочка (bash -i, nc -e, socat exec)**
+
+```
+audit_type:PROCTITLE AND proctitle:/.*(bash[ ]+-i.*\/dev\/tcp|\/dev\/tcp\/.*0>&1|>&[ ]*\/dev\/tcp|nc[ ]+-[a-z]*e[ ]|ncat[ ].*-e[ ]|socat[ ].*exec|mkfifo[ ].*nc[ ]).*/
+```
+
 **LNX - Обратная оболочка (python, perl, nc, socat, mkfifo)**
 
 ```
 audit_type:PROCTITLE AND proctitle:/.*(python[0-9.]* -c .*socket|perl -e .*socket|nc(at)? .* -e |mkfifo |socat .*exec:|bash -i .*>&).*/
 ```
 
+**LNX - Опасный запуск контейнера (--privileged, -v /:/, docker.sock)**
+
+```
+audit_type:PROCTITLE AND proctitle:/.*docker[ ]+(run|create)[ ].*(--privileged|-v[ ]+\/:|--pid=host|docker[.]sock|--cap-add[ =]+(SYS_ADMIN|ALL)).*/
+```
+
+**LNX - Отключение SELinux или аудита (setenforce 0, auditctl -e 0)**
+
+```
+audit_type:PROCTITLE AND proctitle:/.*(setenforce[ ]+0|auditctl[ ]+-e[ ]+0|semanage[ ]+permissive|SELINUX=(disabled|permissive)).*/
+```
+
 **LNX - Отключение аудита или удаление правил auditd**
 
 ```
 audit_type:CONFIG_CHANGE AND (op:remove_rule OR message:"audit_enabled=0")
+```
+
+**LNX - Подбор пароля sudo или su (5+ ошибок за 5 мин)**
+
+```
+audit_type:USER_AUTH AND res:failed AND exe:("/usr/bin/sudo" OR "/usr/bin/su")
 ```
 
 **LNX - Подбор пароля и успешный вход по SSH (6+ событий за 15 мин)**
@@ -502,6 +537,12 @@ audit_type:USER_LOGIN AND exe:"/usr/libexec/openssh/sshd-session" AND acct:root 
 audit_type:SYSCALL AND key:perm_modification AND ((syscall:(53 OR 268) AND a2:/[4-9a-f][0-9a-f]{2}/) OR (syscall:(52 OR 90 OR 91) AND a1:/[4-9a-f][0-9a-f]{2}/)) AND NOT exe:("/usr/bin/systemd-tmpfiles" OR "/usr/bin/rpm" OR "/usr/bin/dnf" OR "/usr/bin/dnf5")
 ```
 
+**LNX - Участник добавлен в группу wheel, sudo, root, adm или docker**
+
+```
+audit_type:USER_MGMT AND message:"add-user-to-group" AND message:(wheel OR sudo OR root OR adm OR docker) AND NOT acct:(beszel OR node_exporter OR "graylog-collector" OR "logatlas-collect" OR nginx OR zaslon)
+```
+
 **LNX - SSH-туннель (-R, -L, -D)**
 
 ```
@@ -512,6 +553,12 @@ audit_type:PROCTITLE AND proctitle:/(.*[ \/])?ssh( .*)? -[RLD] ?[^ ]+.*/
 
 ```
 message:"sshd" AND message:"Accepted"
+```
+
+**LNX - Загрузка или выгрузка модуля ядра (insmod, modprobe, rmmod)**
+
+```
+audit_type:EXECVE AND a0:(insmod OR modprobe OR rmmod)
 ```
 
 **LNX - Загрузка модуля ядра**
@@ -568,6 +615,12 @@ audit_type:SERVICE_STOP AND message:(auditd OR rsyslog OR "wazuh-agent" OR "wazu
 audit_type:EXECVE AND a0:"systemctl" AND a1:"stop"
 ```
 
+**LNX - Очистка истории команд (history -c, unset HISTFILE)**
+
+```
+audit_type:PROCTITLE AND proctitle:/.*(history[ ]+-c|unset[ ]+HISTFILE|HISTFILE=\/dev\/null|rm[ ].*bash_history|HISTSIZE=0).*/
+```
+
 **LNX - Передача файлов наружу (scp, sftp, rsync) из терминала**
 
 ```
@@ -590,6 +643,18 @@ audit_type:EXECVE AND a0:(grep OR egrep OR rg OR find OR locate) AND a1:("-r" OR
 
 ```
 audit_type:EXECVE AND a0:(nmap OR masscan OR "arp-scan" OR netdiscover OR nbtscan OR fping OR zmap)
+```
+
+**LNX - Создана локальная учётная запись (useradd)**
+
+```
+audit_type:ADD_USER AND NOT acct:(beszel OR node_exporter OR "graylog-collector" OR "logatlas-collect" OR nginx OR zaslon)
+```
+
+**LNX - Установка бита setuid или setgid (chmod u+s)**
+
+```
+audit_type:EXECVE AND a0:chmod AND a1:("u+s" OR "g+s" OR 4755 OR 2755 OR 4777 OR 6755 OR 4750 OR 4711)
 ```
 
 **LNX - Утилиты выгрузки в облако (rclone, MEGAcmd)**
@@ -628,27 +693,42 @@ audit_type:EXECVE AND a0:"sudo" AND NOT uid:<служебный> AND NOT a2="<с
 audit_type:AVC AND NOT comm:(<исключения>)
 ```
 
+**LNX - Правка crontab (crontab -e)**
+
+```
+audit_type:PROCTITLE AND proctitle:/.*crontab[ ]+-e.*/
+```
+
 **LNX - Разведка (id, whoami)**
 
 ```
 key:recon AND audit_type:SYSCALL AND NOT exe:(<белый список>)
 ```
 
+**LNX - Ручная смена системного времени**
+
+```
+audit_type:PROCTITLE AND proctitle:/.*(date[ ]+-s|timedatectl[ ]+set-time|hwclock[ ]+--set).*/
+```
+
 </details>
 
 ## macOS (osquery и unified log)
 
-osquery Endpoint Security и unified log; поток MacOS Logs. Правил: 38. Сортировка: сначала высокий приоритет.
+osquery Endpoint Security и unified log; поток MacOS Logs. Правил: 50. Сортировка: сначала высокий приоритет.
 
 | Правило | Приоритет | Источник логов | Что проверяет | Корреляция | Тактика | Техника |
 |---|---|---|---|---|---|---|
+| Включение удалённого доступа (SSH, Screen Sharing, ARD) | высокий | MacOS Logs<br>osquery es_process_events | Включён удалённый вход по SSH, общий экран или Remote Desktop. Простые launchctl print не учитываются. | каждое событие; повтор не чаще раза в 1 ч | Lateral Movement | `T1021.004` SSH<br>`T1021.005` |
 | Вмешательство в TCC | высокий | MacOS Logs<br>osquery es_process_events | Сброс разрешений приватности (tccutil) или прямой доступ к базе TCC.db. | каждое событие | Privilege Escalation | `T1548.006` TCC Manipulation |
 | Выгрузка паролей из Keychain | высокий | MacOS Logs<br>osquery es_process_events | Команда security читает пароли из Keychain (dump-keychain, find-generic-password, find-internet-password). Типично для стилеров. | каждое событие | Credential Access | `T1555.001` Keychain |
+| Выгрузка паролей из Keychain (security dump-keychain) | высокий | MacOS Logs<br>osquery es_process_events | Команда security выгружает связку ключей или печатает пароль из неё. | каждое событие; повтор не чаще раза в 1 ч | Credential Access | `T1555.001` Keychain |
 | Изменение /etc/sudoers | высокий | MacOS Logs<br>osquery file_events | Изменён файл /etc/sudoers, задающий права суперпользователя. Возможна эскалация привилегий. | число событий > 0 за 5 мин, группировка по source | Privilege Escalation | `T1548.003` Sudo and Sudo Caching |
 | Изменение базы авторизации (authorizationdb) | высокий | MacOS Logs<br>osquery es_process_events | security authorizationdb: правка прав на системные действия. Позволяет выполнять привилегированные операции без пароля. | каждое событие | Privilege Escalation | `T1548` Abuse Elevation Control Mechanism |
 | Копирование данных браузера | высокий | MacOS Logs<br>osquery es_process_events | sqlite3, cp, cat, strings, tar, zip или python, работающие с Login Data, Cookies.binarycookies, key4.db, logins.json, Local State. Видны только команды, чтение файлов самим процессом не… | каждое событие | Credential Access | `T1555.003` Credentials from Web Browsers |
 | Новый/изменённый plist в автозагрузке | высокий | MacOS Logs<br>osquery file_events | Создан, изменён или удалён plist в LaunchDaemons/LaunchAgents (кроме com.apple.*). Типичный способ закрепления (persistence). | число событий > 0 за 5 мин, группировка по source | Persistence | `T1543.004` Launch Daemon<br>`T1543.001` |
 | Обратная оболочка (/dev/tcp, pty.spawn) | высокий | MacOS Logs<br>osquery es_process_events | В командной строке /dev/tcp, pty.spawn или socket.socket — признаки reverse shell. | каждое событие | Execution | `T1059.004` Unix Shell |
+| Отключение SIP (csrutil disable) | высокий | MacOS Logs<br>osquery es_process_events | Запрошено отключение защиты целостности системы (SIP). | каждое событие; повтор не чаще раза в 1 ч | Defense Impairment | `T1685` Disable or Modify Tools |
 | Отключение SIP или Gatekeeper | высокий | MacOS Logs<br>osquery es_process_events | Попытка отключить SIP (csrutil disable) или Gatekeeper (spctl --master-disable). Резко снижает защищённость системы. | каждое событие | Defense Impairment | `T1685` Disable or Modify Tools |
 | Отключение межсетевого экрана (socketfilterfw, pfctl) | высокий | MacOS Logs<br>osquery es_process_events | socketfilterfw с --set… off либо pfctl с ключами -d, -F, -f, -e. Включение режима stealth (on) не срабатывает. | каждое событие | Defense Impairment | `T1686` Disable or Modify System Firewall |
 | Очистка журналов | высокий | MacOS Logs<br>osquery es_process_events | log erase, log config, rm в /var/log или diagnostics, killall syslogd, truncate логов. Так заметают следы. | каждое событие | Stealth | `T1070.002` Clear Linux or Mac System Logs<br>`T1070` |
@@ -656,7 +736,11 @@ osquery Endpoint Security и unified log; поток MacOS Logs. Правил: 3
 | Подмена библиотек (DYLD_INSERT_LIBRARIES) | высокий | MacOS Logs<br>osquery es_process_events | DYLD_INSERT_LIBRARIES в окружении или командной строке процесса: внедрение динамической библиотеки. | каждое событие | Persistence | `T1574.006` Dynamic Linker Hijacking |
 | Подозрительный процесс открыл TCP-порт | высокий | MacOS Logs<br>osquery listening_ports | nc/ncat/python/bash/sh начал слушать нестандартный порт. Возможен бэкдор или reverse shell. | каждое событие | Command and Control | `T1571` Non-Standard Port |
 | Скачивание и запуск (curl \| sh) | высокий | MacOS Logs<br>osquery es_process_events | curl или wget с конвейером в sh, bash, zsh либо bash -c "$(curl …)". Типичный способ запустить загруженный скрипт без файла. | каждое событие | Execution | `T1059.004` Unix Shell<br>`T1105` |
+| Создана учётная запись (dscl, sysadminctl) | высокий | MacOS Logs<br>osquery es_process_events | Создана локальная учётная запись или скрыты учётные записи с экрана входа. | каждое событие; повтор не чаще раза в 1 ч | Persistence | `T1136.001` Local Account |
+| Уничтожение резервных копий или дисков (tmutil, diskutil) | высокий | MacOS Logs<br>osquery es_process_events | Удалены резервные копии Time Machine или стёрт диск. | каждое событие; повтор не чаще раза в 1 ч | Impact | `T1490` Inhibit System Recovery<br>`T1485` |
+| Установка доверенного корневого сертификата | высокий | MacOS Logs<br>osquery es_process_events | В систему добавлен доверенный сертификат. Так подменяют TLS. Свой сертификат caddy-root исключён. | каждое событие; повтор не чаще раза в 1 ч | Stealth | `T1553.004` Install Root Certificate |
 | Установка или удаление профиля конфигурации | высокий | MacOS Logs<br>osquery es_process_events | Запуск profiles с install, remove, -I или -R. Профили конфигурации ставят прокси, сертификаты и VPN, отключают защиту. Штатные `profiles list` и `profiles status` не попадают. | каждое событие | Defense Impairment | `T1685` Disable or Modify Tools<br>`T1553.004` |
+| Установка конфигурационного профиля (profiles install) | высокий | MacOS Logs<br>osquery es_process_events | Установлен конфигурационный профиль. Через профили меняют настройки безопасности, прокси и сертификаты. | каждое событие; повтор не чаще раза в 1 ч | Persistence | `T1547` Boot or Logon Autostart Execution |
 | Фишинговый запрос пароля через osascript | высокий | MacOS Logs<br>osquery es_process_events | osascript показывает диалог со скрытым вводом — так вредоносы выманивают пароль пользователя. | каждое событие | Collection | `T1056.002` GUI Input Capture |
 | JXA-скрипт через osascript | средний | MacOS Logs | Запуск osascript с JavaScript (JXA). Такие скрипты используют для сбора данных и запуска команд. Исключены инвентаризация Wi-Fi через CoreWLAN и подбор приложения для файла (NSWorkspace). | каждое событие; повтор не чаще раза в 1 ч | Execution | `T1059.002` AppleScript |
 | Активность AirDrop | средний | MacOS Logs<br>журнал macos_unified | Передача или приём через AirDrop (sharingd). Возможна утечка данных. | число событий ≥ 1 за 5 мин, группировка по source | — | — |
@@ -664,24 +748,35 @@ osquery Endpoint Security и unified log; поток MacOS Logs. Правил: 3
 | Добавление корневого сертификата | средний | MacOS Logs<br>osquery es_process_events | security add-trusted-cert, trust-settings-import или add-certificates: сертификат становится доверенным в системе. Так подготавливают перехват TLS. | каждое событие | Stealth | `T1553.004` Install Root Certificate |
 | Загрузка launchd-задания (load, bootstrap, submit) | средний | MacOS Logs<br>osquery es_process_events | launchctl load, bootstrap или submit для заданий вне исключений (Apple, hostdeck, Graylog, Elastic, beszel, Homebrew, homelab, logatlas). Так запускают закреплённые задания. | каждое событие | Execution | `T1569.001` Launchctl<br>`T1543.004` |
 | Загрузка расширения ядра | средний | MacOS Logs<br>osquery es_process_events | Загрузка kext через kextload или kmutil load. | каждое событие | Persistence | `T1547.006` Kernel Modules and Extensions |
+| Загрузка расширения ядра или системного расширения | средний | MacOS Logs<br>osquery es_process_events | Загружено расширение ядра или системное расширение. Служба logkextloadsd не считается. | каждое событие; повтор не чаще раза в 1 ч | Persistence | `T1547.006` Kernel Modules and Extensions |
 | Запуск программы из /tmp или /Users/Shared | средний | MacOS Logs<br>osquery es_process_events | Исполняемый файл запущен из временного или общего каталога (кроме Bi.Zone Triage). Типично для загрузчиков. | каждое событие | Execution | `T1059` Command and Scripting Interpreter |
 | Запуск утилит удалённого доступа и туннелей | средний | MacOS Logs<br>osquery es_process_events | В командной строке процесса есть утилита удалённого доступа или туннелирования (ngrok, cloudflared, AnyDesk, TeamViewer, RustDesk, chisel, tailscale, zerotier, frpc). | каждое событие; повтор не чаще раза в 1 ч | Command and Control | `T1219` Remote Access Tools<br>`T1572` |
 | Неудачная попытка sudo (неверный пароль) | средний | MacOS Logs<br>журнал macos_unified | При выполнении sudo введён неверный пароль. Возможен подбор пароля. | число событий > 0 за 5 мин, группировка по source | Privilege Escalation | `T1548.003` Sudo and Sudo Caching |
 | Остановка агентов сбора логов и защиты (launchctl) | средний | MacOS Logs<br>osquery es_process_events | launchctl остановил или отключил агент сбора логов или защиты (osquery, filebeat, Graylog collector, Bi.Zone, Velociraptor, HostDeck, firewall). Плановое обслуживание тоже срабатывает,… | каждое событие; повтор не чаще раза в 1 ч | Defense Impairment | `T1685` Disable or Modify Tools |
 | Передача данных наружу (scp, rsync, nc, socat) | средний | MacOS Logs<br>osquery es_process_events | scp или rsync на user@host с точкой в имени, а также nc, ncat, socat без -l, если адрес не из частных сетей и не в monitoring.test. | каждое событие | Exfiltration | `T1048` Exfiltration Over Alternative Protocol |
+| Поддельное окно ввода пароля (osascript hidden answer) | средний | MacOS Logs<br>osquery es_process_events | AppleScript показывает окно со скрытым вводом. Так выманивают пароль. | каждое событие; повтор не чаще раза в 1 ч | Credential Access | `T1056.002` GUI Input Capture |
 | Подключено Apple-устройство (iPhone/iPad/iPod) | средний | MacOS Logs<br>журнал macos_wifi_usb | По USB подключено и распознано Apple-устройство (wifi.log, hostNotificationUSBDeviceInserted). | каждое событие | Initial Access | `T1200` Hardware Additions |
 | Подключён USB-накопитель | средний | MacOS Logs<br>журнал macos_unified | Ядро распознало USB-накопитель (IOUSBMassStorageDriver): флешку или внешний диск. | число событий > 0 за 5 мин, группировка по source | Initial Access | `T1200` Hardware Additions<br>`T1052.001` |
 | Поиск паролей в файлах (grep -r по / и ~) | средний | MacOS Logs<br>osquery es_process_events | Рекурсивный поиск слов password, secret, token, id_rsa по домашней папке или всему диску (grep -r, rg, find). Запуски через ssh с BatchMode (автоматизация) и поиск внутри рабочих… | каждое событие; повтор не чаще раза в 1 ч | Credential Access | `T1552.001` Credentials In Files |
 | Сканеры сети (nmap, masscan, arp-scan) | средний | MacOS Logs<br>osquery es_process_events | В командной строке процесса есть сканер сети (nmap, masscan, arp-scan, netdiscover, nbtscan, fping, zmap). | каждое событие; повтор не чаще раза в 1 ч | Discovery | `T1046` Network Service Discovery<br>`T1018` |
+| Смена DNS или прокси (networksetup) | средний | MacOS Logs<br>osquery es_process_events | Изменены DNS-серверы или прокси. Так перехватывают трафик. | каждое событие; повтор не чаще раза в 1 ч | Credential Access | `T1557` Adversary-in-the-Middle |
+| Снятие карантина вне Applications или отключение Gatekeeper | средний | MacOS Logs<br>osquery es_process_events | Отключён Gatekeeper или снят атрибут карантина с файла вне /Applications. Установка приложений в /Applications и hostdeck-agent исключены. | каждое событие; повтор не чаще раза в 1 ч | Stealth | `T1553.001` Gatekeeper Bypass |
 | Создание пользователя или изменение групп | средний | MacOS Logs<br>osquery es_process_events | dscl, sysadminctl или dseditgroup создают пользователя или меняют членство в группах (в т.ч. admin). | каждое событие | Persistence | `T1136.001` Local Account<br>`T1098` |
 | Утилиты выгрузки в облако (rclone, MEGAsync) | средний | MacOS Logs<br>osquery es_process_events | В командной строке процесса есть утилита выгрузки в облако (rclone, MEGAsync, MEGAcmd). | каждое событие; повтор не чаще раза в 1 ч | Exfiltration | `T1567.002` Exfiltration to Cloud Storage<br>`T1048` |
 | Элемент входа через sfltool или osascript | средний | MacOS Logs<br>osquery es_process_events | Добавление Login Items командами sfltool или osascript (System Events, login item). Закрепление без plist; дополняет алерт на LaunchAgents. | каждое событие | Persistence | `T1547.015` Login Items |
 | Выполнение команды через sudo | низкий | MacOS Logs<br>osquery sudo_commands | Выполнение команды с повышенными привилегиями через sudo (не от root). | число событий > 0 за 5 мин, группировка по source | Privilege Escalation | `T1548.003` Sudo and Sudo Caching |
+| Добавление элемента входа (sfltool, osascript login item) | низкий | MacOS Logs<br>osquery es_process_events | Добавлен элемент автозапуска при входе. | каждое событие; повтор не чаще раза в 1 ч | Persistence | `T1547.015` Login Items |
 | Запись экрана на MacBook (replayd) | низкий | MacOS Logs<br>журнал macos_unified | Служба replayd начала сессию захвата экрана на MacBook. Mac mini исключён: на нём захват экрана идёт при твоей удалённой работе. | каждое событие; повтор не чаще раза в 1 ч | Collection | `T1113` Screen Capture |
 | Открытая Wi-Fi сеть в сохранённых (сводка раз в сутки) | низкий | MacOS Logs | В сохранённых сетях есть открытая Wi-Fi сеть без шифрования. Через такую сеть трафик можно перехватить. Сводка раз в сутки, повтор не чаще раза в неделю. | число событий ≥ 1 за 1 сут, группировка по source, columns_network_name; повтор не чаще раза в 7 сут | Credential Access | `T1557` Adversary-in-the-Middle |
 | Снятие карантина с приложения | низкий | MacOS Logs<br>osquery es_process_events | С файла снят атрибут com.apple.quarantine — Gatekeeper не проверит приложение при запуске. | каждое событие | Defense Impairment | `T1553.001` Gatekeeper Bypass |
 
 <details><summary>Запросы Graylog (очищенные)</summary>
+
+**macOS - Включение удалённого доступа (SSH, Screen Sharing, ARD)**
+
+```
+log_type:macos_osquery AND name:es_process_events AND columns_cmdline:/.*(systemsetup.*-setremotelogin[ ]+on|kickstart.*-activate|launchctl[ ]+(load|enable|bootstrap|kickstart).*(com[.]apple[.]screensharing|com[.]openssh[.]sshd)).*/
+```
 
 **macOS - Вмешательство в TCC**
 
@@ -693,6 +788,12 @@ name:es_process_events AND message:("tccutil" OR "TCC.db")
 
 ```
 name:es_process_events AND message:("dump-keychain" OR "find-generic-password" OR "find-internet-password" OR "export-keychain")
+```
+
+**macOS - Выгрузка паролей из Keychain (security dump-keychain)**
+
+```
+log_type:macos_osquery AND name:es_process_events AND columns_cmdline:/.*security[ ]+(dump-keychain|find-(generic|internet)-password[ ].*-[a-z]*w).*/
 ```
 
 **macOS - Изменение /etc/sudoers**
@@ -723,6 +824,12 @@ name:file_events AND (columns_action:CREATED OR columns_action:UPDATED OR column
 
 ```
 name:es_process_events AND message:("/dev/tcp" OR "pty.spawn" OR "socket.socket") AND NOT message:"/dev/tcp/<IP>"
+```
+
+**macOS - Отключение SIP (csrutil disable)**
+
+```
+log_type:macos_osquery AND name:es_process_events AND columns_cmdline:/.*csrutil[ ]+(disable|authenticated-root[ ]+disable).*/
 ```
 
 **macOS - Отключение SIP или Gatekeeper**
@@ -767,10 +874,34 @@ name:listening_ports AND (columns_name:(nc OR ncat OR netcat OR python OR python
 name:es_process_events AND (columns_cmdline:/.*(curl|wget).*\| *(sudo )?(ba|z|da)?sh( .*)?/ OR columns_cmdline:/.*sh -c [\\"]*\$\((curl|wget) .*/)
 ```
 
+**macOS - Создана учётная запись (dscl, sysadminctl)**
+
+```
+log_type:macos_osquery AND name:es_process_events AND columns_cmdline:/.*(dscl[ ]+[^ ]+[ ]+-create[ ]+\/Users|sysadminctl.*-addUser|Hide500Users).*/
+```
+
+**macOS - Уничтожение резервных копий или дисков (tmutil, diskutil)**
+
+```
+log_type:macos_osquery AND name:es_process_events AND columns_cmdline:/.*(tmutil[ ]+(delete|disable|deletelocalsnapshots)|diskutil[ ]+(eraseDisk|eraseVolume|secureErase|apfs[ ]+deleteVolume)).*/
+```
+
+**macOS - Установка доверенного корневого сертификата**
+
+```
+log_type:macos_osquery AND name:es_process_events AND columns_cmdline:/.*security[ ]+(add-trusted-cert|trust-settings-import).*/ AND NOT columns_cmdline:/.*caddy-root.*/
+```
+
 **macOS - Установка или удаление профиля конфигурации**
 
 ```
 name:es_process_events AND columns_cmdline:/(.*[ \/])?profiles( .*)? (install|remove|-I|-R)( .*)?/
+```
+
+**macOS - Установка конфигурационного профиля (profiles install)**
+
+```
+log_type:macos_osquery AND name:es_process_events AND columns_cmdline:/.*profiles[ ]+(install|-I).*/
 ```
 
 **macOS - Фишинговый запрос пароля через osascript**
@@ -815,6 +946,12 @@ name:es_process_events AND columns_cmdline:/.*launchctl (load|bootstrap|submit).
 name:es_process_events AND (message:"kextload" OR (columns_path:"/usr/bin/kmutil" AND message:"load"))
 ```
 
+**macOS - Загрузка расширения ядра или системного расширения**
+
+```
+log_type:macos_osquery AND name:es_process_events AND columns_cmdline:/.*(kextload[ ]|kmutil[ ]+load|systemextensionsctl[ ]+(install|developer)).*/
+```
+
 **macOS - Запуск программы из /tmp или /Users/Shared**
 
 ```
@@ -845,6 +982,12 @@ log_type:macos_osquery AND name:es_process_events AND columns_cmdline:/.*launchc
 name:es_process_events AND ((columns_cmdline:/(.*[ \/])?(scp|rsync)( .*)? [^ ]*@[^ ]*[.][^ ]*:.*/) OR (columns_cmdline:/(.*[ \/])?(nc|ncat|socat)( .*)?/ AND NOT columns_cmdline:/.* -l .*/)) AND NOT columns_cmdline:/.*(--server|192\.168\.|10\.|172\.(1[6-9]|2[0-9]|3[01])\.|localhost|127\.0\.0\.1|monitoring\.test).*/
 ```
 
+**macOS - Поддельное окно ввода пароля (osascript hidden answer)**
+
+```
+log_type:macos_osquery AND name:es_process_events AND columns_cmdline:/.*osascript.*hidden[ ]+answer.*/
+```
+
 **macOS - Подключено Apple-устройство (iPhone/iPad/iPod)**
 
 ```
@@ -869,6 +1012,18 @@ log_type:macos_osquery AND name:es_process_events AND columns_cmdline:/.*(grep|r
 log_type:macos_osquery AND name:es_process_events AND columns_cmdline:/.*([nN][mM][aA][pP]|[mM][aA][sS][sS][cC][aA][nN]|[aA][rR][pP]-[sS][cC][aA][nN]|[nN][eE][tT][dD][iI][sS][cC][oO][vV][eE][rR]|[nN][bB][tT][sS][cC][aA][nN]|[fF][pP][iI][nN][gG]|[zZ][mM][aA][pP]).*/
 ```
 
+**macOS - Смена DNS или прокси (networksetup)**
+
+```
+log_type:macos_osquery AND name:es_process_events AND columns_cmdline:/.*networksetup.*-set(dnsservers|webproxy|securewebproxy|autoproxyurl|socksfirewallproxy).*/
+```
+
+**macOS - Снятие карантина вне Applications или отключение Gatekeeper**
+
+```
+log_type:macos_osquery AND name:es_process_events AND columns_cmdline:/.*(spctl[ ]+--(master|global)-disable|xattr[ ]+.*-[a-z]*[dc].*)/ AND NOT columns_cmdline:/.*(\/Applications\/|hostdeck-agent).*/ AND columns_cmdline:/.*(spctl|quarantine|xattr[ ]+-[a-z]*c).*/
+```
+
 **macOS - Создание пользователя или изменение групп**
 
 ```
@@ -891,6 +1046,12 @@ name:es_process_events AND columns_cmdline:/.*(sfltool|osascript.*login item|Sys
 
 ```
 name:sudo_commands AND -columns_uid:0
+```
+
+**macOS - Добавление элемента входа (sfltool, osascript login item)**
+
+```
+log_type:macos_osquery AND name:es_process_events AND columns_cmdline:/.*(sfltool[ ]+add|osascript.*make[ ]+login[ ]+item).*/
 ```
 
 **macOS - Запись экрана на MacBook (replayd)**
