@@ -241,6 +241,7 @@ journalctl -u graylog-server | grep -i smtp
 | 🐧 Linux (auditd, РЕД ОС) | SSH-ключ в authorized_keys, добавление/удаление пользователя, chmod, брутфорс SSH (5+ за 5 мин), неудачный sudo, использование sudo, systemctl stop | Mail.ru Alert Linux |
 | 🍎 macOS | изменение /etc/sudoers, подозрительный процесс на TCP-порту, sudo, неудачный sudo, plist в автозагрузке, AirDrop, Apple-устройство по USB, USB-накопитель, мобильное устройство не Apple | Mail.ru Alert MacOS |
 | 🪟 Windows | группа «Администраторы домена», подбор пароля (5+ событий 4625 за 5 мин), net user /add и /delete | Mail.ru Alert Windows |
+| 🐳 Контейнеры | 18 правил «Контейнеры: …» (ошибки, нехватка памяти, тишина, подбор пароля Grafana и другие) | Mail.ru Alert Containers |
 
 Все алерты раз в 5 минут проверяют последние 5 минут, группируют по `source`
 и прикладывают к письму до 5 исходных сообщений.

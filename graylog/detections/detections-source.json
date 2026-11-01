@@ -2788,7 +2788,7 @@
     "Containers"
    ],
    "notifications": [
-    "Mail.ru Alert Linux"
+    "Mail.ru Alert Containers"
    ],
    "state": "ENABLED",
    "description": "Больше 5 неудачных входов в Grafana за 5 минут.",
@@ -2814,7 +2814,7 @@
     "Containers"
    ],
    "notifications": [
-    "Mail.ru Alert Linux"
+    "Mail.ru Alert Containers"
    ],
    "state": "ENABLED",
    "description": "Loki пишет level=error (например, write operation failed).",
@@ -2840,7 +2840,7 @@
     "Containers"
    ],
    "notifications": [
-    "Mail.ru Alert Linux"
+    "Mail.ru Alert Containers"
    ],
    "state": "ENABLED",
    "description": "Сообщение уровня E (ошибка) в логе MongoDB (komodo_mongo_1).",
@@ -2866,7 +2866,7 @@
     "Containers"
    ],
    "notifications": [
-    "Mail.ru Alert Linux"
+    "Mail.ru Alert Containers"
    ],
    "state": "ENABLED",
    "description": "Больше чем втрое выше обычного: более 4500 сообщений netalertx за 15 минут (норма около 1500).",
@@ -2892,7 +2892,7 @@
     "Containers"
    ],
    "notifications": [
-    "Mail.ru Alert Linux"
+    "Mail.ru Alert Containers"
    ],
    "state": "ENABLED",
    "description": "Скан netalertx нашёл новые устройства (New Devices больше нуля).",
@@ -2918,7 +2918,7 @@
     "Containers"
    ],
    "notifications": [
-    "Mail.ru Alert Linux"
+    "Mail.ru Alert Containers"
    ],
    "state": "ENABLED",
    "description": "Больше 15 ошибок «context deadline exceeded» за 10 минут на одном хосте — promtail не может записать в Loki.",
@@ -2944,7 +2944,7 @@
     "Containers"
    ],
    "notifications": [
-    "Mail.ru Alert Linux"
+    "Mail.ru Alert Containers"
    ],
    "state": "ENABLED",
    "description": "Больше 10 реальных ошибок за 5 минут в одном контейнере: loglevel error/warn/fatal (loki/promtail) или ключевые слова error/fatal/panic/exception/traceback в message. Исключены cadvisor, fluent-bit и promtail (штатный инфраструктурный шум).",
@@ -2970,7 +2970,7 @@
     "Containers"
    ],
    "notifications": [
-    "Mail.ru Alert Linux"
+    "Mail.ru Alert Containers"
    ],
    "state": "ENABLED",
    "description": "В логах контейнера OOM, Killed process, segfault или core dumped.",
@@ -2996,7 +2996,7 @@
     "Containers"
    ],
    "notifications": [
-    "Mail.ru Alert Linux"
+    "Mail.ru Alert Containers"
    ],
    "state": "ENABLED",
    "description": "Больше 50 сообщений «Operation not permitted» за 10 минут в одном контейнере.",
@@ -3022,7 +3022,7 @@
     "Containers"
    ],
    "notifications": [
-    "Mail.ru Alert Linux"
+    "Mail.ru Alert Containers"
    ],
    "state": "ENABLED",
    "description": "Больше 2 запусков entrypoint MariaDB (контейнер observiumdb) за 15 минут — цикл перезапусков БД Observium.",
@@ -3048,7 +3048,7 @@
     "Containers"
    ],
    "notifications": [
-    "Mail.ru Alert Linux"
+    "Mail.ru Alert Containers"
    ],
    "state": "ENABLED",
    "description": "Контейнер atrium не прислал ни одного сообщения за 15 минут — остановлен или завис.",
@@ -3072,7 +3072,7 @@
     "Containers"
    ],
    "notifications": [
-    "Mail.ru Alert Linux"
+    "Mail.ru Alert Containers"
    ],
    "state": "ENABLED",
    "description": "Контейнер grafana не прислал ни одного сообщения за 15 минут — остановлен или завис.",
@@ -3096,7 +3096,7 @@
     "Containers"
    ],
    "notifications": [
-    "Mail.ru Alert Linux"
+    "Mail.ru Alert Containers"
    ],
    "state": "ENABLED",
    "description": "Контейнер komodo_mongo_1 не прислал ни одного сообщения за 15 минут — остановлен или завис.",
@@ -3120,7 +3120,7 @@
     "Containers"
    ],
    "notifications": [
-    "Mail.ru Alert Linux"
+    "Mail.ru Alert Containers"
    ],
    "state": "ENABLED",
    "description": "Контейнер loki не прислал ни одного сообщения за 15 минут — остановлен или завис.",
@@ -3144,7 +3144,7 @@
     "Containers"
    ],
    "notifications": [
-    "Mail.ru Alert Linux"
+    "Mail.ru Alert Containers"
    ],
    "state": "ENABLED",
    "description": "Контейнер netalertx не прислал ни одного сообщения за 15 минут — остановлен или завис.",
@@ -3168,7 +3168,7 @@
     "Containers"
    ],
    "notifications": [
-    "Mail.ru Alert Linux"
+    "Mail.ru Alert Containers"
    ],
    "state": "ENABLED",
    "description": "Контейнер wazuh.dashboard не прислал ни одного сообщения за 15 минут — остановлен или завис.",
@@ -3192,7 +3192,7 @@
     "Containers"
    ],
    "notifications": [
-    "Mail.ru Alert Linux"
+    "Mail.ru Alert Containers"
    ],
    "state": "ENABLED",
    "description": "Контейнер zaslon не прислал ни одного сообщения за 15 минут — остановлен или завис.",
@@ -3216,7 +3216,7 @@
     "Containers"
    ],
    "notifications": [
-    "Mail.ru Alert Linux"
+    "Mail.ru Alert Containers"
    ],
    "state": "ENABLED",
    "description": "Поток Containers не получил ни одного сообщения за 10 минут — упал input «Podman Logs», Graylog или все хосты разом.",
