@@ -1,0 +1,1179 @@
+[
+ {
+  "id": "WIN-01",
+  "platform": "WIN",
+  "name": "Создание учётной записи (net user /add)",
+  "rules": [
+   "Windows - Создана учётная запись (4720)",
+   "Windows - Создание/удаление локального пользователя (net user)"
+  ],
+  "risk": "низкий",
+  "needs": "права администратора; на DC создаётся доменная учётка",
+  "note": "Нужен аудит управления учётными записями"
+ },
+ {
+  "id": "WIN-02",
+  "platform": "WIN",
+  "name": "Сброс пароля учётной записи",
+  "rules": [
+   "Windows - Сброс пароля учётной записи (4724)"
+  ],
+  "risk": "низкий",
+  "needs": "права администратора",
+  "note": ""
+ },
+ {
+  "id": "WIN-03",
+  "platform": "WIN",
+  "name": "Добавление в локальные администраторы",
+  "rules": [
+   "Windows - Добавление в группу администраторов (4728, 4732, 4756)",
+   "Windows - Добавление в локальные администраторы (командная строка)"
+  ],
+  "risk": "средний",
+  "needs": "права администратора",
+  "note": "Тестовая учётка сразу убирается из группы"
+ },
+ {
+  "id": "WIN-04",
+  "platform": "WIN",
+  "name": "Добавление в «Администраторы домена»",
+  "rules": [
+   "Windows - Изменение группы «Администраторы домена»",
+   "Windows - Изменение привилегированных групп и учёток"
+  ],
+  "risk": "средний",
+  "needs": "запуск на контроллере домена",
+  "note": "Тестовая учётка на секунды получает права администратора домена"
+ },
+ {
+  "id": "WIN-05",
+  "platform": "WIN",
+  "name": "Неудачные входы: подбор пароля (12 попыток)",
+  "rules": [
+   "Windows - Подбор пароля (5+ ошибок входа 4625 за 5 мин)",
+   "Windows - Подбор пароля на DC по Kerberos (10+ ошибок 4771 за 5 мин)",
+   "Windows - Подбор пароля на DC по NTLM (10+ ошибок 4776 за 5 мин)",
+   "Windows - Блокировка учётной записи (4740)"
+  ],
+  "risk": "низкий",
+  "needs": "параметр -Target (имя DC или хоста); для Kerberos запускай с рабочей станции",
+  "note": "Тестовая учётка, скорее всего, заблокируется: это и проверяется. 4771 появится на DC только при Kerberos-входе"
+ },
+ {
+  "id": "WIN-06",
+  "platform": "WIN",
+  "name": "Перебор несуществующих пользователей",
+  "rules": [
+   "Windows - Перебор несуществующих пользователей (5+ за 10 мин)"
+  ],
+  "risk": "низкий",
+  "needs": "параметр -Target",
+  "note": ""
+ },
+ {
+  "id": "WIN-07",
+  "platform": "WIN",
+  "name": "Изменение политики аудита",
+  "rules": [
+   "Windows - Изменение политики аудита (4719)"
+  ],
+  "risk": "средний",
+  "needs": "права администратора",
+  "note": "Политика сохраняется в файл и восстанавливается после теста"
+ },
+ {
+  "id": "WIN-08",
+  "platform": "WIN",
+  "name": "Очистка журнала событий (тестовый журнал)",
+  "rules": [
+   "Windows - Очистка журнала событий"
+  ],
+  "risk": "низкий",
+  "needs": "права администратора",
+  "note": "Очищается собственный журнал DetectTest, боевые журналы не затрагиваются"
+ },
+ {
+  "id": "WIN-09",
+  "platform": "WIN",
+  "name": "Задание планировщика с путём в Temp",
+  "rules": [
+   "Windows - Создание задачи через schtasks",
+   "Windows - Задание планировщика с Temp, AppData или Public (4698)"
+  ],
+  "risk": "низкий",
+  "needs": "права администратора",
+  "note": ""
+ },
+ {
+  "id": "WIN-10",
+  "platform": "WIN",
+  "name": "Установка службы вне System32",
+  "rules": [
+   "Windows - Новая служба",
+   "Windows - Установка службы вне System32 и Program Files (4697)"
+  ],
+  "risk": "низкий",
+  "needs": "права администратора",
+  "note": "Служба не запускается и сразу удаляется"
+ },
+ {
+  "id": "WIN-11",
+  "platform": "WIN",
+  "name": "Исключение для Defender",
+  "rules": [
+   "Windows - Исключения или отключение защиты Defender"
+  ],
+  "risk": "низкий",
+  "needs": "Defender включён",
+  "note": ""
+ },
+ {
+  "id": "WIN-12",
+  "platform": "WIN",
+  "name": "Тестовый файл EICAR",
+  "rules": [
+   "Windows - Defender обнаружил угрозу или отключён"
+  ],
+  "risk": "низкий",
+  "needs": "Defender включён",
+  "note": "Стандартная безвредная тестовая строка антивирусов; файл будет удалён"
+ },
+ {
+  "id": "WIN-13",
+  "platform": "WIN",
+  "name": "Команда удаления теневых копий (несуществующий ID)",
+  "rules": [
+   "Windows - Удаление теневых копий"
+  ],
+  "risk": "низкий",
+  "needs": "права администратора",
+  "note": "Команда с несуществующим идентификатором копии: реальные копии не затрагиваются"
+ },
+ {
+  "id": "WIN-14",
+  "platform": "WIN",
+  "name": "Командная строка с «firewall disable» (имитация)",
+  "rules": [
+   "Windows - Отключение Firewall (netsh или PS)"
+  ],
+  "risk": "низкий",
+  "needs": "",
+  "note": "Выполняется только показ правила с подходящим именем"
+ },
+ {
+  "id": "WIN-15",
+  "platform": "WIN",
+  "name": "PowerShell с закодированной командой",
+  "rules": [
+   "Windows - PowerShell с закодированной командой"
+  ],
+  "risk": "низкий",
+  "needs": "Sysmon (событие 1)",
+  "note": ""
+ },
+ {
+  "id": "WIN-16",
+  "platform": "WIN",
+  "name": "Скриптблок со строками DownloadString и IEX",
+  "rules": [
+   "Windows - PowerShell скачивает и исполняет код"
+  ],
+  "risk": "низкий",
+  "needs": "включено журналирование блоков сценариев (4104)",
+  "note": "Сеть не используется: строки только в тексте скрипта"
+ },
+ {
+  "id": "WIN-17",
+  "platform": "WIN",
+  "name": "Командная строка с LOLBins (имитация)",
+  "rules": [
+   "Windows - LOLBins (certutil, mshta, bitsadmin, regsvr32)"
+  ],
+  "risk": "низкий",
+  "needs": "Sysmon",
+  "note": "Выполняется cmd /c rem: команда ничего не делает"
+ },
+ {
+  "id": "WIN-18",
+  "platform": "WIN",
+  "name": "Командная строка «reg save hklm sam» (имитация)",
+  "rules": [
+   "Windows - Дамп учётных данных (reg save, comsvcs, ntdsutil)"
+  ],
+  "risk": "низкий",
+  "needs": "Sysmon",
+  "note": "Выполняется cmd /c rem: команда ничего не делает"
+ },
+ {
+  "id": "WIN-19",
+  "platform": "WIN",
+  "name": "Серия команд разведки",
+  "rules": [
+   "Windows - Серия разведки (5+ команд за 5 мин)",
+   "Windows - Разведка в домене (nltest, dsquery, AdFind, SharpHound)"
+  ],
+  "risk": "низкий",
+  "needs": "Sysmon",
+  "note": ""
+ },
+ {
+  "id": "WIN-20",
+  "platform": "WIN",
+  "name": "Автозагрузка через ключ Run",
+  "rules": [
+   "Windows - Автозагрузка через ключ реестра Run"
+  ],
+  "risk": "низкий",
+  "needs": "Sysmon (события 12-14)",
+  "note": ""
+ },
+ {
+  "id": "WIN-21",
+  "platform": "WIN",
+  "name": "IFEO Debugger для несуществующей программы",
+  "rules": [
+   "Windows - Закрепление через IFEO Debugger, AppInit_DLLs и Winlogon"
+  ],
+  "risk": "средний",
+  "needs": "права администратора, Sysmon",
+  "note": "Ключ создаётся для dt_test.exe и сразу удаляется"
+ },
+ {
+  "id": "WIN-22",
+  "platform": "WIN",
+  "name": "Обход UAC через реестр (ms-settings)",
+  "rules": [
+   "Windows - Обход UAC через реестр (fodhelper, eventvwr, ms-settings)"
+  ],
+  "risk": "низкий",
+  "needs": "Sysmon",
+  "note": "Значение ключа создаётся и сразу удаляется, fodhelper не запускается"
+ },
+ {
+  "id": "WIN-23",
+  "platform": "WIN",
+  "name": "Постоянная подписка WMI",
+  "rules": [
+   "Windows - Постоянная подписка WMI (5861)"
+  ],
+  "risk": "средний",
+  "needs": "права администратора, журнал WMI-Activity",
+  "note": "Подписка с безвредной командой, удаляется сразу"
+ },
+ {
+  "id": "WIN-24",
+  "platform": "WIN",
+  "name": "Удалённая сессия WinRM",
+  "rules": [
+   "Windows - Удалённый вход по WinRM (91)"
+  ],
+  "risk": "низкий",
+  "needs": "включён WinRM",
+  "note": "Invoke-Command на localhost"
+ },
+ {
+  "id": "WIN-25",
+  "platform": "WIN",
+  "name": "Именованный канал в стиле C2",
+  "rules": [
+   "Windows - Именованные каналы C2 (Cobalt Strike и аналоги)"
+  ],
+  "risk": "низкий",
+  "needs": "Sysmon (события 17, 18)",
+  "note": ""
+ },
+ {
+  "id": "WIN-26",
+  "platform": "WIN",
+  "name": "DNS-запросы: туннель и длинное имя",
+  "rules": [
+   "Windows - DNS-запрос к туннелям и файлообменникам",
+   "Windows - Подозрительно длинные DNS-имена (туннель, DGA)"
+  ],
+  "risk": "низкий",
+  "needs": "Sysmon (событие 22)",
+  "note": ""
+ },
+ {
+  "id": "WIN-27",
+  "platform": "WIN",
+  "name": "Файл с расширением шифровальщика",
+  "rules": [
+   "Windows - Признаки шифровальщика (расширения и записки)"
+  ],
+  "risk": "низкий",
+  "needs": "Sysmon (событие 11)",
+  "note": ""
+ },
+ {
+  "id": "WIN-28",
+  "platform": "WIN",
+  "name": "Процесс svchost.exe не из System32",
+  "rules": [
+   "Windows - Маскировка под системный процесс (svchost, lsass, csrss вне System32)"
+  ],
+  "risk": "низкий",
+  "needs": "Sysmon",
+  "note": "Копия whoami.exe под именем svchost.exe в Temp"
+ },
+ {
+  "id": "WIN-29",
+  "platform": "WIN",
+  "name": "Программы с именами ngrok и rclone",
+  "rules": [
+   "Windows - Запуск утилит удалённого доступа и туннелей",
+   "Windows - Утилиты выгрузки в облако (rclone, MEGAsync, WinSCP)"
+  ],
+  "risk": "низкий",
+  "needs": "Sysmon",
+  "note": "Копии whoami.exe под этими именами, настоящих утилит нет"
+ },
+ {
+  "id": "WIN-30",
+  "platform": "WIN",
+  "name": "Архивация через Compress-Archive",
+  "rules": [
+   "Windows - Архивация не из проводника (7z, WinRAR, Compress-Archive)"
+  ],
+  "risk": "низкий",
+  "needs": "Sysmon",
+  "note": ""
+ },
+ {
+  "id": "WIN-31",
+  "platform": "WIN",
+  "name": "Поиск паролей через findstr",
+  "rules": [
+   "Windows - Поиск паролей в файлах (findstr, Select-String)"
+  ],
+  "risk": "низкий",
+  "needs": "Sysmon",
+  "note": ""
+ },
+ {
+  "id": "WIN-32",
+  "platform": "WIN",
+  "name": "Билет службы с RC4 (Kerberoasting)",
+  "rules": [
+   "Windows - Kerberoasting: билет службы с шифрованием RC4 (4769)"
+  ],
+  "risk": "средний",
+  "needs": "запуск в домене, модуль ActiveDirectory",
+  "note": "Не сработает, если политика домена запрещает RC4"
+ },
+ {
+  "id": "WIN-33",
+  "platform": "WIN",
+  "name": "Создание компьютерной учётки пользователем",
+  "rules": [
+   "Windows - Создана компьютерная учётная запись пользователем (4741)"
+  ],
+  "risk": "низкий",
+  "needs": "запуск в домене, модуль ActiveDirectory",
+  "note": ""
+ },
+ {
+  "id": "LNX-01",
+  "platform": "LNX",
+  "name": "Создание пользователя (useradd)",
+  "rules": [
+   "LNX - Создана локальная учётная запись (useradd)",
+   "LNX - Добавление/удаление пользователя"
+  ],
+  "risk": "низкий",
+  "needs": "root",
+  "note": ""
+ },
+ {
+  "id": "LNX-02",
+  "platform": "LNX",
+  "name": "Изменение /etc/passwd (usermod)",
+  "rules": [
+   "LNX - Изменение /etc/passwd, shadow, group"
+  ],
+  "risk": "низкий",
+  "needs": "root",
+  "note": ""
+ },
+ {
+  "id": "LNX-03",
+  "platform": "LNX",
+  "name": "Добавление пользователя в группу wheel",
+  "rules": [
+   "LNX - Участник добавлен в группу wheel, sudo, root, adm или docker"
+  ],
+  "risk": "низкий",
+  "needs": "root",
+  "note": ""
+ },
+ {
+  "id": "LNX-04",
+  "platform": "LNX",
+  "name": "Правка sshd_config с откатом",
+  "rules": [
+   "LNX - Изменение sshd_config"
+  ],
+  "risk": "средний",
+  "needs": "root",
+  "note": "Файл бэкапится и восстанавливается, sshd не перезапускается"
+ },
+ {
+  "id": "LNX-05",
+  "platform": "LNX",
+  "name": "Запуск программы из /tmp",
+  "rules": [
+   "LNX - Запуск из /tmp, /dev/shm, /var/tmp"
+  ],
+  "risk": "низкий",
+  "needs": "root",
+  "note": ""
+ },
+ {
+  "id": "LNX-06",
+  "platform": "LNX",
+  "name": "Затирание следов: shred и очистка своего лога",
+  "rules": [
+   "LNX - Затирание следов (shred, history, truncate логов)"
+  ],
+  "risk": "низкий",
+  "needs": "root",
+  "note": "Затрагиваются только созданные тестом файлы, в /var/log создаётся и усекается dt_test.log"
+ },
+ {
+  "id": "LNX-07",
+  "platform": "LNX",
+  "name": "Очистка истории (history -c, unset HISTFILE)",
+  "rules": [
+   "LNX - Очистка истории команд (history -c, unset HISTFILE)"
+  ],
+  "risk": "низкий",
+  "needs": "root",
+  "note": ""
+ },
+ {
+  "id": "LNX-08",
+  "platform": "LNX",
+  "name": "Строки обратной оболочки в командной строке (имитация)",
+  "rules": [
+   "LNX - Обратная оболочка (/dev/tcp)",
+   "LNX - Обратная оболочка (bash -i, nc -e, socat exec)",
+   "LNX - Обратная оболочка (python, perl, nc, socat, mkfifo)"
+  ],
+  "risk": "низкий",
+  "needs": "root",
+  "note": "Выполняется echo строк: соединений нет"
+ },
+ {
+  "id": "LNX-09",
+  "platform": "LNX",
+  "name": "Опасный запуск контейнера (имитация) и docker с «privileged»",
+  "rules": [
+   "LNX - Опасный запуск контейнера (--privileged, -v /:/, docker.sock)",
+   "LNX - Привилегированный контейнер или docker.sock"
+  ],
+  "risk": "низкий",
+  "needs": "root; для второго правила установлен docker или podman",
+  "note": "Контейнер не запускается: echo строки и безвредный docker ps"
+ },
+ {
+  "id": "LNX-10",
+  "platform": "LNX",
+  "name": "Строки отключения SELinux и аудита (имитация)",
+  "rules": [
+   "LNX - Отключение SELinux или аудита (setenforce 0, auditctl -e 0)"
+  ],
+  "risk": "низкий",
+  "needs": "root",
+  "note": "Выполняется echo: настройки не меняются"
+ },
+ {
+  "id": "LNX-11",
+  "platform": "LNX",
+  "name": "Неудачные sudo (6 попыток)",
+  "rules": [
+   "LNX - Подбор пароля sudo или su (5+ ошибок за 5 мин)",
+   "LNX - Неудачная попытка sudo"
+  ],
+  "risk": "низкий",
+  "needs": "root, sudo",
+  "note": ""
+ },
+ {
+  "id": "LNX-12",
+  "platform": "LNX",
+  "name": "Неудачные входы по SSH (7 попыток)",
+  "rules": [
+   "LNX - Брутфорс SSH (5+ неудачных входов за 5 мин)",
+   "LNX - Подбор пароля и успешный вход по SSH (6+ событий за 15 мин)"
+  ],
+  "risk": "низкий",
+  "needs": "root, sshd слушает на 127.0.0.1, OpenSSH 8.4+",
+  "note": ""
+ },
+ {
+  "id": "LNX-13",
+  "platform": "LNX",
+  "name": "Установка бита setuid",
+  "rules": [
+   "LNX - Установка бита setuid или setgid (chmod u+s)",
+   "LNX - Установка setuid или setgid",
+   "LNX - Изменение прав доступа (chmod)"
+  ],
+  "risk": "низкий",
+  "needs": "root",
+  "note": ""
+ },
+ {
+  "id": "LNX-14",
+  "platform": "LNX",
+  "name": "Закрепление через cron и crontab -e",
+  "rules": [
+   "LNX - Закрепление через cron",
+   "LNX - Правка crontab (crontab -e)"
+  ],
+  "risk": "низкий",
+  "needs": "root",
+  "note": ""
+ },
+ {
+  "id": "LNX-15",
+  "platform": "LNX",
+  "name": "Служба systemd: enable и stop",
+  "rules": [
+   "LNX - Закрепление через systemctl enable",
+   "LNX - Остановка службы (systemctl stop)"
+  ],
+  "risk": "низкий",
+  "needs": "root, systemd",
+  "note": "Создаётся служба dt-test с командой /bin/true и удаляется"
+ },
+ {
+  "id": "LNX-16",
+  "platform": "LNX",
+  "name": "modprobe в пробном режиме",
+  "rules": [
+   "LNX - Загрузка или выгрузка модуля ядра (insmod, modprobe, rmmod)"
+  ],
+  "risk": "низкий",
+  "needs": "root",
+  "note": "Ключ -n: модуль не загружается"
+ },
+ {
+  "id": "LNX-17",
+  "platform": "LNX",
+  "name": "Программы с именами ngrok, nmap, rclone",
+  "rules": [
+   "LNX - Запуск утилит удалённого доступа и туннелей",
+   "LNX - Сканеры сети (nmap, masscan, arp-scan)",
+   "LNX - Утилиты выгрузки в облако (rclone, MEGAcmd)"
+  ],
+  "risk": "низкий",
+  "needs": "root",
+  "note": "Копии /bin/true под этими именами запускаются через PATH"
+ },
+ {
+  "id": "LNX-18",
+  "platform": "LNX",
+  "name": "Поиск паролей через grep -r",
+  "rules": [
+   "LNX - Поиск паролей в файлах (grep -r, find)"
+  ],
+  "risk": "низкий",
+  "needs": "root",
+  "note": ""
+ },
+ {
+  "id": "LNX-19",
+  "platform": "LNX",
+  "name": "Установка времени той же датой",
+  "rules": [
+   "LNX - Ручная смена системного времени"
+  ],
+  "risk": "средний",
+  "needs": "root",
+  "note": "Время задаётся равным текущему, сдвиг меньше секунды"
+ },
+ {
+  "id": "LNX-20",
+  "platform": "LNX",
+  "name": "Использование sudo",
+  "rules": [
+   "LNX - Использование sudo"
+  ],
+  "risk": "низкий",
+  "needs": "root, sudo",
+  "note": ""
+ },
+ {
+  "id": "LNX-21",
+  "platform": "LNX",
+  "name": "Разведка: id и whoami",
+  "rules": [
+   "LNX - Разведка (id, whoami)"
+  ],
+  "risk": "низкий",
+  "needs": "правило auditd с ключом recon",
+  "note": ""
+ },
+ {
+  "id": "LNX-22",
+  "platform": "LNX",
+  "name": "rsync и base64 из терминала",
+  "rules": [
+   "LNX - Передача файлов наружу (scp, sftp, rsync) из терминала",
+   "LNX - Подозрительные утилиты (base64, nc, socat, scp)"
+  ],
+  "risk": "низкий",
+  "needs": "root, утилита script (псевдотерминал)",
+  "note": "rsync копирует файл между двумя локальными папками"
+ },
+ {
+  "id": "LNX-23",
+  "platform": "LNX",
+  "name": "Архивация через tar",
+  "rules": [
+   "LNX - Архивация данных пользователем (tar, zip, 7z)"
+  ],
+  "risk": "низкий",
+  "needs": "root; правило с ключом Data_Compressed",
+  "note": ""
+ },
+ {
+  "id": "LNX-24",
+  "platform": "LNX",
+  "name": "Просмотр правил iptables и nft",
+  "rules": [
+   "LNX - Изменение правил firewall (iptables, nft)"
+  ],
+  "risk": "низкий",
+  "needs": "root",
+  "note": "Только чтение правил"
+ },
+ {
+  "id": "LNX-25",
+  "platform": "LNX",
+  "name": "Правка /etc/hosts с откатом",
+  "rules": [
+   "LNX - Изменение сетевых настроек и /etc/hosts"
+  ],
+  "risk": "средний",
+  "needs": "root",
+  "note": "Строка-комментарий добавляется и удаляется"
+ },
+ {
+  "id": "LNX-26",
+  "platform": "LNX",
+  "name": "memfd_create из python",
+  "rules": [
+   "LNX - Исполнение из памяти (memfd_create)"
+  ],
+  "risk": "низкий",
+  "needs": "root, python3",
+  "note": "python может быть в белом списке правила"
+ },
+ {
+  "id": "LNX-27",
+  "platform": "LNX",
+  "name": "Файл authorized_keys у тестовой учётки",
+  "rules": [
+   "LNX - Добавление SSH-ключа в authorized_keys"
+  ],
+  "risk": "низкий",
+  "needs": "root",
+  "note": "Нужно, чтобы файловый мониторинг следил за /home"
+ },
+ {
+  "id": "LNX-28",
+  "platform": "LNX",
+  "name": "Оболочка от имени веб-сервера",
+  "rules": [
+   "LNX - Веб-сервер запустил оболочку"
+  ],
+  "risk": "низкий",
+  "needs": "root, в системе есть пользователь apache или nginx",
+  "note": "Запускается /bin/sh -c true от имени пользователя веб-сервера"
+ },
+ {
+  "id": "LNX-29",
+  "platform": "LNX",
+  "name": "Массовое удаление файлов (250 штук)",
+  "rules": [
+   "LNX - Массовое удаление файлов (200+ за 5 мин)"
+  ],
+  "risk": "низкий",
+  "needs": "root; правило auditd с ключом file_deletion",
+  "note": ""
+ },
+ {
+  "id": "LNX-30",
+  "platform": "LNX",
+  "name": "Строка SSH-туннеля в командной строке",
+  "rules": [
+   "LNX - SSH-туннель (-R, -L, -D)"
+  ],
+  "risk": "низкий",
+  "needs": "root",
+  "note": "ssh к 127.0.0.1 без авторизации завершается ошибкой, туннель не поднимается"
+ },
+ {
+  "id": "MAC-01",
+  "platform": "MAC",
+  "name": "Создание пользователя через dscl",
+  "rules": [
+   "macOS - Создана учётная запись (dscl, sysadminctl)",
+   "macOS - Создание пользователя или изменение групп",
+   "macOS - Bi.Zone: новый пользователь"
+  ],
+  "risk": "средний",
+  "needs": "sudo",
+  "note": "Пользователь dt_test создаётся с UID 599 и удаляется"
+ },
+ {
+  "id": "MAC-02",
+  "platform": "MAC",
+  "name": "Неверный пароль sudo",
+  "rules": [
+   "macOS - Неудачная попытка sudo (неверный пароль)"
+  ],
+  "risk": "низкий",
+  "needs": "sudo",
+  "note": ""
+ },
+ {
+  "id": "MAC-03",
+  "platform": "MAC",
+  "name": "Команда через sudo",
+  "rules": [
+   "macOS - Выполнение команды через sudo"
+  ],
+  "risk": "низкий",
+  "needs": "sudo",
+  "note": ""
+ },
+ {
+  "id": "MAC-04",
+  "platform": "MAC",
+  "name": "Запрос пароля из Keychain (несуществующая запись)",
+  "rules": [
+   "macOS - Выгрузка паролей из Keychain (security dump-keychain)",
+   "macOS - Выгрузка паролей из Keychain"
+  ],
+  "risk": "низкий",
+  "needs": "",
+  "note": "Ищется несуществующая запись: ничего не выдаётся"
+ },
+ {
+  "id": "MAC-05",
+  "platform": "MAC",
+  "name": "Снятие карантина с файла",
+  "rules": [
+   "macOS - Снятие карантина с приложения",
+   "macOS - Снятие карантина вне Applications или отключение Gatekeeper"
+  ],
+  "risk": "низкий",
+  "needs": "",
+  "note": ""
+ },
+ {
+  "id": "MAC-06",
+  "platform": "MAC",
+  "name": "Командная строка «curl | sh» (имитация)",
+  "rules": [
+   "macOS - Скачивание и запуск (curl | sh)"
+  ],
+  "risk": "низкий",
+  "needs": "",
+  "note": "Выполняется bash -c с комментарием: ничего не загружается"
+ },
+ {
+  "id": "MAC-07",
+  "platform": "MAC",
+  "name": "Командные строки отключения SIP и Gatekeeper (имитация)",
+  "rules": [
+   "macOS - Отключение SIP (csrutil disable)",
+   "macOS - Отключение SIP или Gatekeeper"
+  ],
+  "risk": "низкий",
+  "needs": "",
+  "note": "Выполняется bash -c с комментарием"
+ },
+ {
+  "id": "MAC-08",
+  "platform": "MAC",
+  "name": "Диалог пароля через osascript",
+  "rules": [
+   "macOS - Фишинговый запрос пароля через osascript",
+   "macOS - Поддельное окно ввода пароля (osascript hidden answer)"
+  ],
+  "risk": "низкий",
+  "needs": "",
+  "note": "На экране на 3 секунды появится диалог, потом закроется сам"
+ },
+ {
+  "id": "MAC-09",
+  "platform": "MAC",
+  "name": "Сценарий JXA через osascript",
+  "rules": [
+   "macOS - JXA-скрипт через osascript"
+  ],
+  "risk": "низкий",
+  "needs": "",
+  "note": "Выполняется строка JavaScript без действий"
+ },
+ {
+  "id": "MAC-10",
+  "platform": "MAC",
+  "name": "Тестовый LaunchAgent: plist и load",
+  "rules": [
+   "macOS - Новый/изменённый plist в автозагрузке",
+   "macOS - Загрузка launchd-задания (load, bootstrap, submit)",
+   "macOS - Bi.Zone: новый элемент автозагрузки"
+  ],
+  "risk": "средний",
+  "needs": "пользовательская сессия",
+  "note": "Агент с командой /usr/bin/true, сразу выгружается и удаляется"
+ },
+ {
+  "id": "MAC-11",
+  "platform": "MAC",
+  "name": "Сброс TCC для несуществующего приложения",
+  "rules": [
+   "macOS - Вмешательство в TCC"
+  ],
+  "risk": "низкий",
+  "needs": "",
+  "note": "tccutil reset для вымышленного идентификатора"
+ },
+ {
+  "id": "MAC-12",
+  "platform": "MAC",
+  "name": "Смена DNS и прокси (имитация)",
+  "rules": [
+   "macOS - Смена DNS или прокси (networksetup)"
+  ],
+  "risk": "низкий",
+  "needs": "",
+  "note": "Выполняется bash -c с комментарием"
+ },
+ {
+  "id": "MAC-13",
+  "platform": "MAC",
+  "name": "Профили конфигурации (имитация)",
+  "rules": [
+   "macOS - Установка или удаление профиля конфигурации",
+   "macOS - Установка конфигурационного профиля (profiles install)"
+  ],
+  "risk": "низкий",
+  "needs": "",
+  "note": "Выполняется bash -c с комментарием"
+ },
+ {
+  "id": "MAC-14",
+  "platform": "MAC",
+  "name": "Доверенный сертификат (имитация)",
+  "rules": [
+   "macOS - Добавление корневого сертификата",
+   "macOS - Установка доверенного корневого сертификата"
+  ],
+  "risk": "низкий",
+  "needs": "",
+  "note": "Выполняется bash -c с комментарием"
+ },
+ {
+  "id": "MAC-15",
+  "platform": "MAC",
+  "name": "Отключение межсетевого экрана (имитация)",
+  "rules": [
+   "macOS - Отключение межсетевого экрана (socketfilterfw, pfctl)"
+  ],
+  "risk": "низкий",
+  "needs": "",
+  "note": "Выполняется bash -c с комментарием"
+ },
+ {
+  "id": "MAC-16",
+  "platform": "MAC",
+  "name": "Очистка журналов (имитация)",
+  "rules": [
+   "macOS - Очистка журналов"
+  ],
+  "risk": "низкий",
+  "needs": "",
+  "note": "Выполняется bash -c с комментарием"
+ },
+ {
+  "id": "MAC-17",
+  "platform": "MAC",
+  "name": "DYLD_INSERT_LIBRARIES в окружении процесса",
+  "rules": [
+   "macOS - Подмена библиотек (DYLD_INSERT_LIBRARIES)"
+  ],
+  "risk": "низкий",
+  "needs": "",
+  "note": "Запускается /usr/bin/true с переменной, библиотека не существует"
+ },
+ {
+  "id": "MAC-18",
+  "platform": "MAC",
+  "name": "Запуск программы из /tmp",
+  "rules": [
+   "macOS - Запуск программы из /tmp или /Users/Shared",
+   "macOS - Bi.Zone: процесс из /tmp или /Users/Shared"
+  ],
+  "risk": "низкий",
+  "needs": "",
+  "note": ""
+ },
+ {
+  "id": "MAC-19",
+  "platform": "MAC",
+  "name": "Слушающий порт у nc (60 секунд)",
+  "rules": [
+   "macOS - Подозрительный процесс открыл TCP-порт"
+  ],
+  "risk": "низкий",
+  "needs": "",
+  "note": "Порт 49999, интервал запроса osquery может быть больше минуты"
+ },
+ {
+  "id": "MAC-20",
+  "platform": "MAC",
+  "name": "Включение удалённого входа (имитация)",
+  "rules": [
+   "macOS - Включение удалённого доступа (SSH, Screen Sharing, ARD)",
+   "macOS - Включение удалённого входа или Screen Sharing"
+  ],
+  "risk": "низкий",
+  "needs": "",
+  "note": "Выполняется bash -c с комментарием"
+ },
+ {
+  "id": "MAC-21",
+  "platform": "MAC",
+  "name": "Строки обратной оболочки (имитация)",
+  "rules": [
+   "macOS - Обратная оболочка (/dev/tcp, pty.spawn)"
+  ],
+  "risk": "низкий",
+  "needs": "",
+  "note": "Выполняется bash -c с комментарием"
+ },
+ {
+  "id": "MAC-22",
+  "platform": "MAC",
+  "name": "Программы с именами ngrok, rclone, nmap",
+  "rules": [
+   "macOS - Запуск утилит удалённого доступа и туннелей",
+   "macOS - Утилиты выгрузки в облако (rclone, MEGAsync)",
+   "macOS - Сканеры сети (nmap, masscan, arp-scan)"
+  ],
+  "risk": "низкий",
+  "needs": "",
+  "note": "Копии /usr/bin/true под этими именами"
+ },
+ {
+  "id": "MAC-23",
+  "platform": "MAC",
+  "name": "Поиск паролей через grep -r",
+  "rules": [
+   "macOS - Поиск паролей в файлах (grep -r по / и ~)"
+  ],
+  "risk": "низкий",
+  "needs": "",
+  "note": ""
+ },
+ {
+  "id": "MAC-24",
+  "platform": "MAC",
+  "name": "Файл в /etc/sudoers.d",
+  "rules": [
+   "macOS - Изменение /etc/sudoers",
+   "macOS - Bi.Zone: новое правило в sudoers"
+  ],
+  "risk": "средний",
+  "needs": "sudo",
+  "note": "Файл с комментарием, проверяется visudo, удаляется сразу"
+ },
+ {
+  "id": "MAC-25",
+  "platform": "MAC",
+  "name": "Элемент входа и launchctl bootout (имитация)",
+  "rules": [
+   "macOS - Элемент входа через sfltool или osascript",
+   "macOS - Добавление элемента входа (sfltool, osascript login item)",
+   "macOS - Остановка агентов сбора логов и защиты (launchctl)"
+  ],
+  "risk": "низкий",
+  "needs": "",
+  "note": "Выполняется bash -c с комментарием"
+ },
+ {
+  "id": "MAC-26",
+  "platform": "MAC",
+  "name": "Передача данных наружу (имитация)",
+  "rules": [
+   "macOS - Передача данных наружу (scp, rsync, nc, socat)"
+  ],
+  "risk": "низкий",
+  "needs": "",
+  "note": "Выполняется bash -c с комментарием"
+ },
+ {
+  "id": "MAC-27",
+  "platform": "MAC",
+  "name": "tmutil и diskutil (имитация)",
+  "rules": [
+   "macOS - Уничтожение резервных копий или дисков (tmutil, diskutil)"
+  ],
+  "risk": "низкий",
+  "needs": "",
+  "note": "Выполняется bash -c с комментарием"
+ },
+ {
+  "id": "MAC-28",
+  "platform": "MAC",
+  "name": "Копирование данных браузера (имитация)",
+  "rules": [
+   "macOS - Копирование данных браузера"
+  ],
+  "risk": "низкий",
+  "needs": "",
+  "note": "Выполняется bash -c с комментарием"
+ },
+ {
+  "id": "MAC-29",
+  "platform": "MAC",
+  "name": "Расширения ядра и authorizationdb (имитация)",
+  "rules": [
+   "macOS - Загрузка расширения ядра",
+   "macOS - Изменение базы авторизации (authorizationdb)",
+   "macOS - Вмешательство в TCC"
+  ],
+  "risk": "низкий",
+  "needs": "",
+  "note": "Выполняется bash -c с комментарием"
+ },
+ {
+  "id": "IPA-01",
+  "platform": "IPA",
+  "name": "Пользователь и группа через API",
+  "rules": [
+   "FREEIPA - Изменение пользователей, групп и правил через API"
+  ],
+  "risk": "низкий",
+  "needs": "kinit admin",
+  "note": ""
+ },
+ {
+  "id": "IPA-02",
+  "platform": "IPA",
+  "name": "Правило HBAC через API",
+  "rules": [
+   "FREEIPA - Изменение HBAC и sudo-правил (API)"
+  ],
+  "risk": "низкий",
+  "needs": "kinit admin",
+  "note": ""
+ },
+ {
+  "id": "IPA-03",
+  "platform": "IPA",
+  "name": "Парольная политика группы через API",
+  "rules": [
+   "FREEIPA - Изменение политик паролей, Kerberos и конфигурации (API)"
+  ],
+  "risk": "средний",
+  "needs": "kinit admin",
+  "note": "Политика создаётся для тестовой группы и удаляется"
+ },
+ {
+  "id": "IPA-04",
+  "platform": "IPA",
+  "name": "Роль и привилегии через API",
+  "rules": [
+   "FREEIPA - Изменение привилегированных групп и ролей (API)"
+  ],
+  "risk": "средний",
+  "needs": "kinit admin",
+  "note": "Создаётся тестовая роль без привилегий и удаляется"
+ },
+ {
+  "id": "IPA-05",
+  "platform": "IPA",
+  "name": "Разблокировка и включение пользователя",
+  "rules": [
+   "FREEIPA - Разблокировка учётной записи, ключи и сертификаты пользователя (API)"
+  ],
+  "risk": "низкий",
+  "needs": "kinit admin",
+  "note": ""
+ },
+ {
+  "id": "IPA-06",
+  "platform": "IPA",
+  "name": "Неудачные kinit: подбор пароля (12 попыток)",
+  "rules": [
+   "FREEIPA - Подбор пароля (10+ PREAUTH_FAILED за 5 мин)",
+   "FREEIPA - Kerberos: вход отключённой, заблокированной или просроченной учётной записи"
+  ],
+  "risk": "низкий",
+  "needs": "kinit admin; запуск на сервере или клиенте IPA",
+  "note": "Тестовый пользователь заблокируется по политике: это и проверяется"
+ },
+ {
+  "id": "IPA-07",
+  "platform": "IPA",
+  "name": "Неудачный вход в веб-интерфейс",
+  "rules": [
+   "FREEIPA - Неудачный вход в веб-интерфейс"
+  ],
+  "risk": "низкий",
+  "needs": "curl; доступ к https серверу IPA",
+  "note": ""
+ },
+ {
+  "id": "IPA-08",
+  "platform": "IPA",
+  "name": "Успешный вход в веб-интерфейс",
+  "rules": [
+   "FREEIPA - Успешный вход в веб-интерфейс"
+  ],
+  "risk": "средний",
+  "needs": "kinit admin, curl",
+  "note": "Нужна смена временного пароля тестового пользователя через kinit; если не получится, проверка пропускается"
+ },
+ {
+  "id": "IPA-09",
+  "platform": "IPA",
+  "name": "Выпуск сертификата в Dogtag",
+  "rules": [
+   "FREEIPA - Выпуск сертификата в CA (Dogtag)"
+  ],
+  "risk": "средний",
+  "needs": "kinit admin, openssl",
+  "note": "Для тестового хоста выдаётся сертификат, затем он отзывается, хост удаляется"
+ },
+ {
+  "id": "IPA-10",
+  "platform": "IPA",
+  "name": "Массовая выгрузка из каталога (100+ записей)",
+  "rules": [
+   "FREEIPA - Массовая выгрузка из каталога LDAP (100+ записей за запрос)"
+  ],
+  "risk": "низкий",
+  "needs": "kinit admin; в домене 100 и более пользователей",
+  "note": "Столько пользователей даёт наполнение из tools/ipa_manager.py"
+ },
+ {
+  "id": "IPA-11",
+  "platform": "IPA",
+  "name": "Билет службы с RC4 (best effort)",
+  "rules": [
+   "FREEIPA - Kerberos: билет службы с шифрованием RC4 (Kerberoasting)"
+  ],
+  "risk": "низкий",
+  "needs": "kinit admin",
+  "note": "Сработает, только если KDC ещё разрешает RC4 для службы"
+ }
+]
