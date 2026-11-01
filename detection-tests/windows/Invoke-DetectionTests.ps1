@@ -392,7 +392,8 @@ function Add-Cleanup([scriptblock]$Block) { [void]$script:Cleanups.Add($Block) }
 
 function Invoke-Native {
     param([string]$Exe, [string[]]$Arguments)
-    $o = & $Exe @Arguments 2>&1
+    # net.exe может задавать вопрос (Y/N): отвечаем Y, чтобы скрипт не завис в ожидании ввода
+    if ($Exe -like 'net*') { $o = 'Y' | & $Exe @Arguments 2>&1 } else { $o = & $Exe @Arguments 2>&1 }
     $script:LastExit = $LASTEXITCODE
     return $o
 }
@@ -401,7 +402,8 @@ function New-DtPassword {
     $u = 'ABCDEFGHJKLMNPQRSTUVWXYZ'; $l = 'abcdefghijkmnopqrstuvwxyz'; $d = '23456789'; $s = '!#%+=-'
     $chars = @(($u.ToCharArray() | Get-Random), ($l.ToCharArray() | Get-Random), ($d.ToCharArray() | Get-Random), ($s.ToCharArray() | Get-Random))
     $all = ($u + $l + $d).ToCharArray()
-    1..12 | ForEach-Object { $chars += ($all | Get-Random) }
+    # не длиннее 14 символов: иначе net user задаёт скрытый вопрос и скрипт зависает
+    1..9 | ForEach-Object { $chars += ($all | Get-Random) }
     return -join ($chars | Sort-Object { Get-Random })
 }
 
