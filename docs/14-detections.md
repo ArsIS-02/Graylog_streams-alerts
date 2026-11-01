@@ -1,6 +1,6 @@
 # Каталог детектов Graylog
 
-> Все правила (event definitions) лаборатории в одном месте: какой лог проверяется, по какому условию, как коррелируются события, к какой тактике и технике MITRE ATT&CK относятся. Всего **190** правил, из них **162** привязаны к технике ATT&CK v20 (107 разных техник). Остальные описывают здоровье сервисов и тишину в логах: атак они не ловят.
+> Все правила (event definitions) лаборатории в одном месте: какой лог проверяется, по какому условию, как коррелируются события, к какой тактике и технике MITRE ATT&CK относятся. Всего **202** правил, из них **172** привязаны к технике ATT&CK v20 (108 разных техник). Остальные описывают здоровье сервисов и тишину в логах: атак они не ловят.
 
 Страница собирается скриптом из выгрузки Graylog и руками не правится: [как обновить](#как-обновить-каталог). Запросы очищены: IP, MAC, отпечатки ключей и белые списки заменены на `<IP>`, `<MAC>`, `<белый список>`. Готовые определения для импорта лежат в `graylog/*-event-definitions.json`, соответствие техникам подробно описано в [graylog/mitre](../graylog/mitre/README.md).
 
@@ -12,7 +12,7 @@
 - [macOS (osquery и unified log)](#macos-osquery-и-unified-log) — 50
 - [macOS (BI.ZONE Triage)](#macos-bizone-triage) — 9
 - [Keenetic](#keenetic) — 9
-- [FreeIPA и здоровье сервисов](#freeipa-и-здоровье-сервисов) — 11
+- [FreeIPA и здоровье сервисов](#freeipa-и-здоровье-сервисов) — 23
 - [Контейнеры](#контейнеры) — 18
 - [Как читать таблицы](#как-читать-таблицы)
 - [Как обновить каталог](#как-обновить-каталог)
@@ -24,21 +24,21 @@
 | Тактика | Windows | Linux | macOS | Keenetic | FreeIPA | Контейнеры | Всего |
 |---|---|---|---|---|---|---|---|
 | Reconnaissance (Разведка) |  |  |  | 1 |  |  | **1** |
-| Initial Access (Первоначальный доступ) | 2 | 3 | 3 | 1 |  | 1 | **10** |
+| Initial Access (Первоначальный доступ) | 2 | 3 | 3 | 1 | 2 | 1 | **12** |
 | Execution (Выполнение) | 6 | 4 | 7 |  |  |  | **17** |
-| Persistence (Закрепление) | 7 | 9 | 12 | 1 | 1 |  | **30** |
-| Privilege Escalation (Повышение привилегий) | 1 | 7 | 6 |  |  |  | **14** |
+| Persistence (Закрепление) | 7 | 9 | 12 | 1 | 3 |  | **32** |
+| Privilege Escalation (Повышение привилегий) | 1 | 7 | 6 |  | 2 |  | **16** |
 | Stealth (Скрытность) | 4 | 4 | 4 |  |  |  | **12** |
-| Defense Impairment (Подавление защиты) | 5 | 6 | 6 | 1 |  |  | **18** |
-| Credential Access (Доступ к учётным данным) | 6 | 4 | 8 | 3 | 3 | 1 | **25** |
-| Discovery (Исследование среды) | 2 | 2 | 1 |  |  |  | **5** |
+| Defense Impairment (Подавление защиты) | 5 | 6 | 6 | 1 | 1 |  | **19** |
+| Credential Access (Доступ к учётным данным) | 6 | 4 | 8 | 3 | 5 | 1 | **27** |
+| Discovery (Исследование среды) | 2 | 2 | 1 |  | 1 |  | **6** |
 | Lateral Movement (Перемещение) | 2 | 1 | 2 | 1 |  |  | **6** |
 | Collection (Сбор данных) | 1 | 1 | 2 |  |  |  | **4** |
 | Command and Control (управление, C2) | 3 | 3 | 2 |  |  |  | **8** |
 | Exfiltration (Вывод данных) | 1 | 2 | 2 |  |  |  | **5** |
 | Impact (Воздействие) | 2 | 3 | 2 |  |  |  | **7** |
-| Без техники (служебные) | 1 | 1 | 2 | 1 | 7 | 16 | **28** |
-| **Всего** | **43** | **50** | **59** | **9** | **11** | **18** | **190** |
+| Без техники (служебные) | 1 | 1 | 2 | 1 | 9 | 16 | **30** |
+| **Всего** | **43** | **50** | **59** | **9** | **23** | **18** | **202** |
 
 ## Windows
 
@@ -1224,23 +1224,65 @@ kn_event_type:Wireguard_Failed
 
 ## FreeIPA и здоровье сервисов
 
-аудит FreeIPA и служебные проверки. Правил: 11. Сортировка: сначала высокий приоритет.
+аудит FreeIPA и служебные проверки. Правил: 23. Сортировка: сначала высокий приоритет.
 
 | Правило | Приоритет | Источник логов | Что проверяет | Корреляция | Тактика | Техника |
 |---|---|---|---|---|---|---|
+| Kerberos: билет службы с шифрованием RC4 (Kerberoasting) | высокий | FreeIPA Logs<br>приложение freeipa_krb5kdc | KDC выдал билет службы с шифрованием RC4. Современные клиенты просят AES, RC4 указывает на Kerberoasting или устаревший клиент. | каждое событие; повтор не чаще раза в 1 ч | Credential Access | `T1558.003` Kerberoasting |
+| Изменение HBAC и sudo-правил (API) | высокий | FreeIPA Logs<br>приложение freeipa_httpd_error | Изменены правила доступа (HBAC) или sudo-правила. Через них выдают право входа и повышения прав на хостах домена. | каждое событие; повтор не чаще раза в 1 ч | Privilege Escalation | `T1548.003` Sudo and Sudo Caching<br>`T1098` |
+| Изменение политик паролей, Kerberos и конфигурации (API) | высокий | FreeIPA Logs<br>приложение freeipa_httpd_error | Изменены политики паролей, времени жизни Kerberos-билетов, глобальная конфигурация или доверительные отношения. Так ослабляют защиту. | каждое событие; повтор не чаще раза в 1 ч | Credential Access | `T1556` Modify Authentication Process |
+| Изменение привилегированных групп и ролей (API) | высокий | FreeIPA Logs<br>приложение freeipa_httpd_error | Через API изменены роли, привилегии или группа admins. Так повышают права в домене. | каждое событие; повтор не чаще раза в 1 ч | Privilege Escalation | `T1098` Account Manipulation |
+| Остановка служб IPA на сервере (dirsrv, krb5kdc, httpd, pki) | высокий | RedOS auditd Logs<br>auditd SERVICE_STOP | На сервере FreeIPA остановлена одна из служб домена. Без неё не работают вход, DNS и сертификаты. | каждое событие; повтор не чаще раза в 1 ч | Defense Impairment | `T1685` Disable or Modify Tools |
 | Подбор пароля (10+ PREAUTH_FAILED за 5 мин) | высокий | FreeIPA Logs | Серия отказов предварительной аутентификации Kerberos на контроллере домена. Возможен подбор пароля доменной учётной записи (password spray). | число событий ≥ 10 за 5 мин, группировка по source | Credential Access | `T1110.001` Password Guessing |
 | Клиенты не могут связаться с KDC | высокий | RedOS auditd Logs | На хостах auditd/sssd сообщает «Cannot contact any KDC for realm». Признак того, что контроллер домена FreeIPA упал или недоступен по сети. | каждое событие | — | — |
+| Kerberos: вход отключённой, заблокированной или просроченной учётной записи | средний | FreeIPA Logs<br>приложение freeipa_krb5kdc | KDC отказал: учётная запись отключена, заблокирована, или истёк срок ключа. Использование чужих или забытых учётных записей. | каждое событие; повтор не чаще раза в 1 ч | Initial Access | `T1078` Valid Accounts |
 | Выпуск сертификата в CA (Dogtag) | средний | FreeIPA Logs<br>приложение freeipa_389_audit | Запрос на выпуск сертификата через CA FreeIPA (Dogtag). Выпуски должны происходить только при добавлении новых сервисов или хостов. Внезапный массовый выпуск — повод проверить. | каждое событие | Credential Access | `T1649` Steal or Forge Authentication Certificates |
 | Изменение пользователей, групп и правил через API | средний | FreeIPA Logs<br>приложение freeipa_httpd_error | Администратор FreeIPA изменил пользователей, группы, правила HBAC или sudo, роли, пароли или хосты через API. В журнале записаны только такие вызовы, чтения (show, find) не учитываются.… | каждое событие | Persistence | `T1098` Account Manipulation<br>`T1136` |
+| Массовая выгрузка из каталога LDAP (100+ записей за запрос) | средний | FreeIPA Logs<br>приложение freeipa_389_access | Один LDAP-запрос вернул сто и более записей. Разведка по каталогу или выгрузка учётных записей. | каждое событие; повтор не чаще раза в 1 ч | Discovery | `T1087.002` Domain Account<br>`T1018` |
 | Неудачный вход в веб-интерфейс | средний | FreeIPA Logs<br>приложение freeipa_httpd_access | Веб-интерфейс FreeIPA ответил 401 на вход по паролю. Одиночный случай значит опечатку, серия значит подбор пароля. | каждое событие | Credential Access | `T1110` Brute Force |
+| Прямое изменение атрибутов безопасности в каталоге (389) | средний | FreeIPA Logs<br>приложение freeipa_389_audit | В журнале аудита 389 DS изменён атрибут блокировки, пароля или ключа Kerberos. | каждое событие; повтор не чаще раза в 1 ч | Persistence | `T1098` Account Manipulation |
+| Разблокировка учётной записи, ключи и сертификаты пользователя (API) | средний | FreeIPA Logs<br>приложение freeipa_httpd_error | Разблокирована или включена учётная запись, изменены OTP-токены, сертификаты или альтернативные имена пользователя. | каждое событие; повтор не чаще раза в 1 ч | Persistence | `T1098` Account Manipulation |
+| Сбои certmonger (продление сертификатов) | средний | FreeIPA Logs | Certmonger не смог продлить или получить сертификат. Сертификаты сервера могут истечь, после чего FreeIPA перестанет работать. | каждое событие; повтор не чаще раза в 1 сут | — | — |
 | Тишина: FreeIPA (3 часа) | средний | FreeIPA Logs | За 3 часа не пришло ни одного сообщения от FreeIPA. Сервер или доставка логов остановились. | число событий < 1 за 3 ч; повтор не чаще раза в 1 сут | — | — |
 | Тишина: Keenetic не шлёт логи (час) | средний | Syslog Logs | За последний час от роутера не пришло ни одного сообщения. Роутер или связь с Graylog отвалились. | число событий < 1 за 1 ч; повтор не чаще раза в 1 сут | — | — |
 | Тишина: MacMiniM2 не шлёт логи (час) | средний | MacOS Logs | За последний час от MacMiniM2 не пришло ни одного сообщения. Агент сбора остановился, Mac выключен или пропала сеть. | число событий < 1 за 1 ч; повтор не чаще раза в 1 сут | — | — |
 | Тишина: auditd на redos-server (час) | средний | RedOS auditd Logs | За последний час от redos-server не пришло ни одного события auditd. Служба или доставка логов остановились. | число событий < 1 за 1 ч; повтор не чаще раза в 1 сут | — | — |
+| Kerberos: расхождение часов (CLOCK_SKEW) | низкий | FreeIPA Logs<br>приложение freeipa_krb5kdc | Клиент отправил запрос с расхождением часов больше допустимого. Kerberos перестанет работать для этого хоста. | каждое событие; повтор не чаще раза в 1 ч | — | — |
+| Успешный вход в веб-интерфейс | низкий | FreeIPA Logs<br>приложение freeipa_httpd_access | Успешный вход по паролю в веб-интерфейс FreeIPA. Входов мало (около 10 в месяц), все видны. | каждое событие; повтор не чаще раза в 1 ч | Initial Access | `T1078` Valid Accounts |
 | Тишина: MacBook-Pro не шлёт логи (3 часа) | низкий | MacOS Logs | За 3 часа от MacBook-Pro не пришло ни одного сообщения. Ноутбук мог уснуть или выключиться, поэтому приоритет низкий. | число событий < 1 за 3 ч; повтор не чаще раза в 1 сут | — | — |
 | Тишина: macOS (сутки) | низкий | MacOS Logs | За сутки не пришло ни одного сообщения от Mac-хостов. Агент сбора остановился или все Mac выключены. | число событий < 1 за 1 сут; повтор не чаще раза в 1 сут | — | — |
 
 <details><summary>Запросы Graylog (очищенные)</summary>
+
+**FREEIPA - Kerberos: билет службы с шифрованием RC4 (Kerberoasting)**
+
+```
+application_name:freeipa_krb5kdc AND message:"TGS_REQ" AND message:ISSUE AND message:"rep=arcfour"
+```
+
+**FREEIPA - Изменение HBAC и sudo-правил (API)**
+
+```
+application_name:freeipa_httpd_error AND message:"ipa: INFO" AND message:(hbacrule_add OR hbacrule_mod OR hbacrule_del OR hbacrule_add_user OR hbacrule_add_host OR hbacrule_add_service OR hbacrule_enable OR hbacrule_disable OR sudorule_add OR sudorule_mod OR sudorule_del OR sudorule_add_user OR sudorule_add_host OR sudorule_add_option OR sudorule_add_allow_command OR sudorule_enable OR sudorule_disable)
+```
+
+**FREEIPA - Изменение политик паролей, Kerberos и конфигурации (API)**
+
+```
+application_name:freeipa_httpd_error AND message:"ipa: INFO" AND message:(pwpolicy_add OR pwpolicy_mod OR pwpolicy_del OR krbtpolicy_mod OR krbtpolicy_reset OR config_mod OR trust_add OR trust_del)
+```
+
+**FREEIPA - Изменение привилегированных групп и ролей (API)**
+
+```
+application_name:freeipa_httpd_error AND message:"ipa: INFO" AND (message:(role_add_member OR role_remove_member OR privilege_add_member OR privilege_remove_member OR role_add_privilege OR privilege_add_permission) OR (message:(group_add_member OR group_mod OR group_remove_member) AND message:admins))
+```
+
+**FREEIPA - Остановка служб IPA на сервере (dirsrv, krb5kdc, httpd, pki)**
+
+```
+audit_type:SERVICE_STOP AND source:server AND message:(krb5kdc OR kadmin OR httpd OR dirsrv* OR pki* OR named* OR ipa*)
+```
 
 **FREEIPA - Подбор пароля (10+ PREAUTH_FAILED за 5 мин)**
 
@@ -1254,6 +1296,12 @@ message:PREAUTH_FAILED
 message:"Cannot contact any KDC"
 ```
 
+**FREEIPA - Kerberos: вход отключённой, заблокированной или просроченной учётной записи**
+
+```
+application_name:freeipa_krb5kdc AND message:(CLIENT_REVOKED OR KEY_EXP OR LOCKED_OUT OR DISABLED)
+```
+
 **FREEIPA - Выпуск сертификата в CA (Dogtag)**
 
 ```
@@ -1263,13 +1311,37 @@ application_name:freeipa_389_audit AND message:cert--005frequest
 **FREEIPA - Изменение пользователей, групп и правил через API**
 
 ```
-application_name:freeipa_httpd_error AND message:"ipa: INFO" AND message:(user_add OR user_del OR user_mod OR user_disable OR group_add OR group_del OR group_mod OR group_add_member OR group_remove_member OR hbacrule_add OR hbacrule_mod OR hbacrule_del OR hbacrule_add_user OR hbacrule_add_host OR sudorule_add OR sudorule_mod OR sudorule_del OR sudorule_add_user OR sudorule_add_option OR passwd OR role_add_member OR privilege_add_member OR cert_revoke OR otptoken_add OR host_add OR host_del OR service_add)
+application_name:freeipa_httpd_error AND message:"ipa: INFO" AND message:(user_add OR user_del OR user_mod OR user_disable OR group_add OR group_del OR group_mod OR group_add_member OR group_remove_member OR passwd OR cert_revoke OR otptoken_add OR host_add OR host_del OR service_add)
+```
+
+**FREEIPA - Массовая выгрузка из каталога LDAP (100+ записей за запрос)**
+
+```
+application_name:freeipa_389_access AND ldap_nentries:/[0-9]{3,}/
 ```
 
 **FREEIPA - Неудачный вход в веб-интерфейс**
 
 ```
 application_name:freeipa_httpd_access AND message:"login_password http 1.1 401"
+```
+
+**FREEIPA - Прямое изменение атрибутов безопасности в каталоге (389)**
+
+```
+application_name:freeipa_389_audit AND message:("replace: nsAccountLock" OR "add: nsAccountLock" OR "replace: userPassword" OR "replace: krbPrincipalKey")
+```
+
+**FREEIPA - Разблокировка учётной записи, ключи и сертификаты пользователя (API)**
+
+```
+application_name:freeipa_httpd_error AND message:"ipa: INFO" AND message:(user_unlock OR user_enable OR user_undel OR user_stage OR otptoken_mod OR otptoken_del OR user_add_cert OR user_add_certmapdata OR user_add_principal)
+```
+
+**FREEIPA - Сбои certmonger (продление сертификатов)**
+
+```
+message:certmonger AND NOT message:ansible* AND message:("Cannot contact" OR CA_UNREACHABLE OR NEED_GUIDANCE OR CA_REJECTED OR "ca-error")
 ```
 
 **HEALTH - Тишина: FreeIPA (3 часа)**
@@ -1294,6 +1366,18 @@ source:macminim2
 
 ```
 source:redos-server
+```
+
+**FREEIPA - Kerberos: расхождение часов (CLOCK_SKEW)**
+
+```
+application_name:freeipa_krb5kdc AND message:CLOCK_SKEW
+```
+
+**FREEIPA - Успешный вход в веб-интерфейс**
+
+```
+application_name:freeipa_httpd_access AND message:"login_password http 1.1 200"
 ```
 
 **HEALTH - Тишина: MacBook-Pro не шлёт логи (3 часа)**
