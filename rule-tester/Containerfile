@@ -4,8 +4,9 @@ LABEL org.opencontainers.image.title="GraylogRuleTester" org.opencontainers.imag
 ENV PYTHONUNBUFFERED=1 RT_DATA=/data RT_PORT=8080 TZ=Asia/Yekaterinburg
 RUN useradd -r -u 10001 -d /app rt && mkdir -p /data && chown rt /data
 WORKDIR /app/rule-tester
-COPY rule-tester/lucene.py rule-tester/graylog_api.py rule-tester/rule_tester.py rule-tester/insights.py rule-tester/version.py rule-tester/web.py rule-tester/web_index.html rule-tester/favicon.svg rule-tester/mock_graylog.py ./
+COPY rule-tester/lucene.py rule-tester/graylog_api.py rule-tester/rule_tester.py rule-tester/insights.py rule-tester/version.py rule-tester/web.py rule-tester/web_index.html rule-tester/favicon.svg rule-tester/mock_graylog.py rule-tester/art.py ./
 COPY rule-tester/samples/manual.json samples/manual.json
+COPY rule-tester/art/plan.json rule-tester/art/NOTICE.md art/
 COPY graylog/detections/detections-source.json /app/graylog/detections/detections-source.json
 USER rt
 VOLUME /data

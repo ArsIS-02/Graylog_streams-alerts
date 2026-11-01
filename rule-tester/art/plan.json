@@ -1,0 +1,652 @@
+{
+ "source": "https://github.com/redcanaryco/atomic-red-team",
+ "license": "MIT",
+ "tests": [
+  {
+   "id": "T1018#6",
+   "platform": "linux",
+   "technique": "T1018",
+   "test": 6,
+   "name": "Remote System Discovery - arp nix",
+   "guid": "acb6b1ff-e2ad-4d64-806c-6c35fe73b951",
+   "executor": "sh",
+   "admin": false,
+   "effect": "читает ARP-таблицу",
+   "args": {},
+   "command": "arp -a | grep -v '^?'",
+   "cleanup": "",
+   "expected": [
+    "LNX - Сканеры сети (nmap, masscan, arp-scan)"
+   ]
+  },
+  {
+   "id": "T1018#12",
+   "platform": "linux",
+   "technique": "T1018",
+   "test": 12,
+   "name": "Remote System Discovery - ip neighbour",
+   "guid": "158bd4dd-6359-40ab-b13c-285b9ef6fa25",
+   "executor": "sh",
+   "admin": false,
+   "effect": "читает таблицу соседей (ip neighbour)",
+   "args": {},
+   "command": "ip neighbour show",
+   "cleanup": "",
+   "expected": [
+    "LNX - Сканеры сети (nmap, masscan, arp-scan)"
+   ]
+  },
+  {
+   "id": "T1033#2",
+   "platform": "linux",
+   "technique": "T1033",
+   "test": 2,
+   "name": "System Owner/User Discovery",
+   "guid": "2a9b677d-a230-44f4-ad86-782df1ef108c",
+   "executor": "sh",
+   "admin": false,
+   "effect": "выводит вошедших пользователей (users, w, who)",
+   "args": {},
+   "command": "users\nw\nwho",
+   "cleanup": "",
+   "expected": [
+    "LNX - Разведка (id, whoami)"
+   ]
+  },
+  {
+   "id": "T1053.003#1",
+   "platform": "linux",
+   "technique": "T1053.003",
+   "test": 1,
+   "name": "Cron - Replace crontab with referenced file",
+   "guid": "435057fb-74b1-410e-9403-d81baf194f75",
+   "executor": "sh",
+   "admin": false,
+   "effect": "на время теста подменяет crontab пользователя, потом возвращает прежний",
+   "args": {},
+   "command": "crontab -l > /tmp/notevil\necho \"* * * * * /tmp/evil.sh\" > /tmp/persistevil && crontab /tmp/persistevil",
+   "cleanup": "crontab /tmp/notevil",
+   "expected": [
+    "LNX - Закрепление через cron",
+    "LNX - Правка crontab (crontab -e)"
+   ]
+  },
+  {
+   "id": "T1059.004#1",
+   "platform": "linux",
+   "technique": "T1059.004",
+   "test": 1,
+   "name": "Create and Execute Bash Shell Script",
+   "guid": "7e7ac3ed-f795-4fa5-b711-09d6fbe9b873",
+   "executor": "sh",
+   "admin": false,
+   "effect": "создаёт и запускает скрипт /tmp/art.sh, пингует localhost",
+   "args": {
+    "script_path": "/tmp/art.sh",
+    "host": "127.0.0.1"
+   },
+   "command": "sh -c \"echo 'echo Hello from the Atomic Red Team' > /tmp/art.sh\"\nsh -c \"echo 'ping -c 4 127.0.0.1' >> /tmp/art.sh\"\nchmod +x /tmp/art.sh\nsh /tmp/art.sh",
+   "cleanup": "rm /tmp/art.sh",
+   "expected": [
+    "LNX - Запуск из /tmp, /dev/shm, /var/tmp",
+    "LNX - Обратная оболочка (/dev/tcp)",
+    "LNX - Обратная оболочка (python, perl, nc, socat, mkfifo)",
+    "LNX - Веб-сервер запустил оболочку",
+    "LNX - Обратная оболочка (bash -i, nc -e, socat exec)"
+   ]
+  },
+  {
+   "id": "T1059.004#5",
+   "platform": "linux",
+   "technique": "T1059.004",
+   "test": 5,
+   "name": "New script file in the tmp directory",
+   "guid": "8cd1947b-4a54-41fb-b5ea-07d0ace04f81",
+   "executor": "sh",
+   "admin": false,
+   "effect": "запускает временный скрипт из /tmp (id)",
+   "args": {},
+   "command": "TMPFILE=$(mktemp)\necho \"id\" > $TMPFILE\nbash $TMPFILE",
+   "cleanup": "rm $TMPFILE\nunset TMPFILE",
+   "expected": [
+    "LNX - Запуск из /tmp, /dev/shm, /var/tmp",
+    "LNX - Обратная оболочка (/dev/tcp)",
+    "LNX - Обратная оболочка (python, perl, nc, socat, mkfifo)",
+    "LNX - Веб-сервер запустил оболочку",
+    "LNX - Обратная оболочка (bash -i, nc -e, socat exec)"
+   ]
+  },
+  {
+   "id": "T1070.004#1",
+   "platform": "linux",
+   "technique": "T1070.004",
+   "test": 1,
+   "name": "Delete a single file - FreeBSD/Linux/macOS",
+   "guid": "562d737f-2fc6-4b09-8c2a-7f8ff0828480",
+   "executor": "sh",
+   "admin": false,
+   "effect": "создаёт и удаляет файл в /tmp/victim-files",
+   "args": {},
+   "command": "rm -f /tmp/victim-files/T1070.004-test.txt",
+   "cleanup": "rm -rf /tmp/victim-files/",
+   "expected": [
+    "LNX - Массовое удаление файлов (200+ за 5 мин)"
+   ]
+  },
+  {
+   "id": "T1078.003#8",
+   "platform": "linux",
+   "technique": "T1078.003",
+   "test": 8,
+   "name": "Create local account (Linux)",
+   "guid": "02a91c34-8a5b-4bed-87af-501103eb5357",
+   "executor": "bash",
+   "admin": true,
+   "effect": "создаёт пользователя art, входит под ним и удаляет его",
+   "args": {},
+   "command": "password=$(openssl passwd -1 art)\n([ \"$(uname)\" = 'Linux' ] && useradd --shell /bin/bash --create-home --password $password art) || (pw useradd art -g wheel -s /bin/sh && (echo $password | pw mod user testuser1 -h 0))\nsu art -c \"whoami; exit\"",
+   "cleanup": "[ \"$(uname)\" = 'Linux' ] && userdel art -rf || rmuser -y art",
+   "expected": [
+    "LNX - Успешный вход root по SSH"
+   ]
+  },
+  {
+   "id": "T1098.004#1",
+   "platform": "linux",
+   "technique": "T1098.004",
+   "test": 1,
+   "name": "Modify SSH Authorized Keys",
+   "guid": "342cc723-127c-4d3a-8292-9c0c6b4ecadc",
+   "executor": "sh",
+   "admin": false,
+   "effect": "перезаписывает ~/.ssh/authorized_keys тем же содержимым",
+   "args": {},
+   "command": "if [ -f ~/.ssh/authorized_keys ]; then ssh_authorized_keys=$(cat ~/.ssh/authorized_keys); echo \"$ssh_authorized_keys\" > ~/.ssh/authorized_keys; fi;",
+   "cleanup": "unset ssh_authorized_keys",
+   "expected": [
+    "LNX - Добавление SSH-ключа в authorized_keys"
+   ]
+  },
+  {
+   "id": "T1136.001#1",
+   "platform": "linux",
+   "technique": "T1136.001",
+   "test": 1,
+   "name": "Create a user account on a Linux system",
+   "guid": "40d8eabd-e394-46f6-8785-b9bfa1d011d2",
+   "executor": "bash",
+   "admin": true,
+   "effect": "создаёт системного пользователя evil_user и удаляет его",
+   "args": {},
+   "command": "useradd -M -N -r -s /bin/bash -c evil_account evil_user",
+   "cleanup": "userdel evil_user",
+   "expected": [
+    "LNX - Добавление/удаление пользователя",
+    "LNX - Создана локальная учётная запись (useradd)"
+   ]
+  },
+  {
+   "id": "T1140#3",
+   "platform": "linux",
+   "technique": "T1140",
+   "test": 3,
+   "name": "Base64 decoding with Python",
+   "guid": "356dc0e8-684f-4428-bb94-9313998ad608",
+   "executor": "sh",
+   "admin": false,
+   "effect": "кодирует и декодирует строку base64 в Python",
+   "args": {},
+   "command": "ENCODED=$(python3 -c 'import base64;enc=base64.b64encode(\"Hello from Atomic Red Team test T1140!\".encode());print(enc.decode())')\npython3 -c \"import base64;dec=base64.b64decode(\\\"$ENCODED\\\");print(dec.decode())\"\npython3 -c \"import base64 as d;dec=d.b64decode(\\\"$ENCODED\\\");print(dec.decode())\"\npython3 -c \"from base64 import b64decode;dec=b64decode(\\\"$ENCODED\\\");print(dec.decode())\"\npython3 -c \"from base64 import b64decode as d;dec=d(\\\"$ENCODED\\\");print(dec.decode())\"\necho $ENCODED | python3 -c \"import base64,sys;dec=base64.b64decode(sys.stdin.read());print(dec.decode())\"\necho $ENCODED > /tmp/T1140.encoded && python3 -c \"import base64;dec=base64.b64decode(open('/tmp/T1140.encoded').read());print(dec.decode())\"",
+   "cleanup": "",
+   "expected": [
+    "LNX - Подозрительные утилиты (base64, nc, socat, scp)"
+   ]
+  },
+  {
+   "id": "T1552.001#1",
+   "platform": "linux",
+   "technique": "T1552.001",
+   "test": 1,
+   "name": "Find AWS credentials",
+   "guid": "37807632-d3da-442e-8c2e-00f44928ff8f",
+   "executor": "sh",
+   "admin": false,
+   "effect": "ищет файлы .aws/credentials в /home (чтение)",
+   "args": {
+    "file_path": "/home",
+    "filename": "credentials"
+   },
+   "command": "find /home -path '*/.aws/credentials' -type f 2>/dev/null",
+   "cleanup": "",
+   "expected": [
+    "LNX - Поиск паролей в файлах (grep -r, find)"
+   ]
+  },
+  {
+   "id": "T1552.001#3",
+   "platform": "linux",
+   "technique": "T1552.001",
+   "test": 3,
+   "name": "Extract passwords with grep",
+   "guid": "bd4cf0d1-7646-474e-8610-78ccf5a097c4",
+   "executor": "sh",
+   "admin": false,
+   "effect": "ищет слово password в /tmp (чтение)",
+   "args": {
+    "file_path": "/tmp"
+   },
+   "command": "grep -ri password /tmp\nexit 0",
+   "cleanup": "",
+   "expected": [
+    "LNX - Поиск паролей в файлах (grep -r, find)"
+   ]
+  },
+  {
+   "id": "T1560.001#6",
+   "platform": "linux",
+   "technique": "T1560.001",
+   "test": 6,
+   "name": "Data Compressed - nix - gzip Single File",
+   "guid": "cde3c2af-3485-49eb-9c1f-0ed60e9cc0af",
+   "executor": "sh",
+   "admin": false,
+   "effect": "сжимает файл gzip в домашнем каталоге с вымышленными данными",
+   "args": {},
+   "command": "test -e $HOME/victim-gzip.txt && gzip -k $HOME/victim-gzip.txt || (echo 'confidential! SSN: 078-05-1120 - CCN: 4000 1234 5678 9101' >> $HOME/victim-gzip.txt; gzip -k $HOME/victim-gzip.txt)",
+   "cleanup": "rm -f $HOME/victim-gzip.txt.gz",
+   "expected": [
+    "LNX - Архивация данных пользователем (tar, zip, 7z)"
+   ]
+  },
+  {
+   "id": "T1018#6",
+   "platform": "macos",
+   "technique": "T1018",
+   "test": 6,
+   "name": "Remote System Discovery - arp nix",
+   "guid": "acb6b1ff-e2ad-4d64-806c-6c35fe73b951",
+   "executor": "sh",
+   "admin": false,
+   "effect": "читает ARP-таблицу",
+   "args": {},
+   "command": "arp -a | grep -v '^?'",
+   "cleanup": "",
+   "expected": [
+    "macOS - Сканеры сети (nmap, masscan, arp-scan)"
+   ]
+  },
+  {
+   "id": "T1059.004#1",
+   "platform": "macos",
+   "technique": "T1059.004",
+   "test": 1,
+   "name": "Create and Execute Bash Shell Script",
+   "guid": "7e7ac3ed-f795-4fa5-b711-09d6fbe9b873",
+   "executor": "sh",
+   "admin": false,
+   "effect": "создаёт и запускает скрипт /tmp/art.sh, пингует localhost",
+   "args": {
+    "script_path": "/tmp/art.sh",
+    "host": "127.0.0.1"
+   },
+   "command": "sh -c \"echo 'echo Hello from the Atomic Red Team' > /tmp/art.sh\"\nsh -c \"echo 'ping -c 4 127.0.0.1' >> /tmp/art.sh\"\nchmod +x /tmp/art.sh\nsh /tmp/art.sh",
+   "cleanup": "rm /tmp/art.sh",
+   "expected": [
+    "macOS - Bi.Zone: опасная команда в истории оболочки",
+    "macOS - Обратная оболочка (/dev/tcp, pty.spawn)",
+    "macOS - Скачивание и запуск (curl | sh)"
+   ]
+  },
+  {
+   "id": "T1098.004#1",
+   "platform": "macos",
+   "technique": "T1098.004",
+   "test": 1,
+   "name": "Modify SSH Authorized Keys",
+   "guid": "342cc723-127c-4d3a-8292-9c0c6b4ecadc",
+   "executor": "sh",
+   "admin": false,
+   "effect": "перезаписывает ~/.ssh/authorized_keys тем же содержимым",
+   "args": {},
+   "command": "if [ -f ~/.ssh/authorized_keys ]; then ssh_authorized_keys=$(cat ~/.ssh/authorized_keys); echo \"$ssh_authorized_keys\" > ~/.ssh/authorized_keys; fi;",
+   "cleanup": "unset ssh_authorized_keys",
+   "expected": [
+    "macOS - Bi.Zone: неизвестный SSH-ключ в authorized_keys"
+   ]
+  },
+  {
+   "id": "T1113#1",
+   "platform": "macos",
+   "technique": "T1113",
+   "test": 1,
+   "name": "Screencapture",
+   "guid": "0f47ceb1-720f-4275-96b8-21f0562217ac",
+   "executor": "bash",
+   "admin": false,
+   "effect": "делает снимок экрана в /tmp и удаляет его (нужно разрешение на запись экрана)",
+   "args": {},
+   "command": "screencapture /tmp/T1113_desktop.png",
+   "cleanup": "rm /tmp/T1113_desktop.png",
+   "expected": [
+    "macOS - Запись экрана на MacBook (replayd)"
+   ]
+  },
+  {
+   "id": "T1136.001#3",
+   "platform": "macos",
+   "technique": "T1136.001",
+   "test": 3,
+   "name": "Create a user account on a MacOS system",
+   "guid": "01993ba5-1da3-4e15-a719-b690d4f0f0b2",
+   "executor": "bash",
+   "admin": true,
+   "effect": "создаёт пользователя evil_user через dscl и удаляет его",
+   "args": {},
+   "command": "dscl . -create /Users/evil_user\ndscl . -create /Users/evil_user UserShell /bin/zsh\ndscl . -create /Users/evil_user RealName \"Evil Account\"\ndscl . -create /Users/evil_user UniqueID \"1010\"\ndscl . -create /Users/evil_user PrimaryGroupID 80\ndscl . -create /Users/evil_user NFSHomeDirectory /Users/evil_user",
+   "cleanup": "dscl . -delete /Users/evil_user",
+   "expected": [
+    "macOS - Bi.Zone: новый пользователь",
+    "macOS - Создание пользователя или изменение групп",
+    "macOS - Создана учётная запись (dscl, sysadminctl)"
+   ]
+  },
+  {
+   "id": "T1552.001#1",
+   "platform": "macos",
+   "technique": "T1552.001",
+   "test": 1,
+   "name": "Find AWS credentials",
+   "guid": "37807632-d3da-442e-8c2e-00f44928ff8f",
+   "executor": "sh",
+   "admin": false,
+   "effect": "ищет файлы .aws/credentials в /Users (чтение)",
+   "args": {
+    "file_path": "/Users",
+    "filename": "credentials"
+   },
+   "command": "find /Users -path '*/.aws/credentials' -type f 2>/dev/null",
+   "cleanup": "",
+   "expected": [
+    "macOS - Поиск паролей в файлах (grep -r по / и ~)"
+   ]
+  },
+  {
+   "id": "T1552.001#3",
+   "platform": "macos",
+   "technique": "T1552.001",
+   "test": 3,
+   "name": "Extract passwords with grep",
+   "guid": "bd4cf0d1-7646-474e-8610-78ccf5a097c4",
+   "executor": "sh",
+   "admin": false,
+   "effect": "ищет слово password в /tmp (чтение)",
+   "args": {
+    "file_path": "/tmp"
+   },
+   "command": "grep -ri password /tmp\nexit 0",
+   "cleanup": "",
+   "expected": [
+    "macOS - Поиск паролей в файлах (grep -r по / и ~)"
+   ]
+  },
+  {
+   "id": "T1569.001#1",
+   "platform": "macos",
+   "technique": "T1569.001",
+   "test": 1,
+   "name": "Launchctl",
+   "guid": "6fb61988-724e-4755-a595-07743749d4e2",
+   "executor": "bash",
+   "admin": false,
+   "effect": "запускает Калькулятор как задачу launchctl и снимает задачу",
+   "args": {},
+   "command": "launchctl submit -l evil -- /System/Applications/Calculator.app/Contents/MacOS/Calculator",
+   "cleanup": "launchctl remove evil",
+   "expected": [
+    "macOS - Загрузка launchd-задания (load, bootstrap, submit)"
+   ]
+  },
+  {
+   "id": "T1018#1",
+   "platform": "windows",
+   "technique": "T1018",
+   "test": 1,
+   "name": "Remote System Discovery - net",
+   "guid": "85321a9c-897f-4a60-9f20-29788e50bccd",
+   "executor": "command_prompt",
+   "admin": false,
+   "effect": "net view (чтение)",
+   "args": {},
+   "command": "net view /domain\nnet view",
+   "cleanup": "",
+   "expected": [
+    "Windows - Разведка в домене (nltest, dsquery, AdFind, SharpHound)"
+   ]
+  },
+  {
+   "id": "T1018#2",
+   "platform": "windows",
+   "technique": "T1018",
+   "test": 2,
+   "name": "Remote System Discovery - net group Domain Computers",
+   "guid": "f1bf6c8f-9016-4edf-aff9-80b65f5d711f",
+   "executor": "command_prompt",
+   "admin": false,
+   "effect": "net group \"Domain Computers\" /domain (чтение)",
+   "args": {},
+   "command": "net group \"Domain Computers\" /domain",
+   "cleanup": "",
+   "expected": [
+    "Windows - Разведка в домене (nltest, dsquery, AdFind, SharpHound)"
+   ]
+  },
+  {
+   "id": "T1047#1",
+   "platform": "windows",
+   "technique": "T1047",
+   "test": 1,
+   "name": "WMI Reconnaissance Users",
+   "guid": "c107778c-dcf5-47c5-af2e-1d058a3df3ea",
+   "executor": "command_prompt",
+   "admin": false,
+   "effect": "wmic useraccount (чтение, нужен wmic)",
+   "args": {},
+   "command": "wmic useraccount get /ALL /format:csv",
+   "cleanup": "",
+   "expected": [
+    "Windows - Командная оболочка запущена через WMI"
+   ]
+  },
+  {
+   "id": "T1047#2",
+   "platform": "windows",
+   "technique": "T1047",
+   "test": 2,
+   "name": "WMI Reconnaissance Processes",
+   "guid": "5750aa16-0e59-4410-8b9a-8a47ca2788e2",
+   "executor": "command_prompt",
+   "admin": false,
+   "effect": "wmic process (чтение, нужен wmic)",
+   "args": {},
+   "command": "wmic process get caption,executablepath,commandline /format:csv",
+   "cleanup": "",
+   "expected": [
+    "Windows - Командная оболочка запущена через WMI"
+   ]
+  },
+  {
+   "id": "T1053.005#2",
+   "platform": "windows",
+   "technique": "T1053.005",
+   "test": 2,
+   "name": "Scheduled task Local",
+   "guid": "42f53695-ad4a-4546-abb6-7d837f644a71",
+   "executor": "command_prompt",
+   "admin": false,
+   "effect": "создаёт задачу планировщика spawn и удаляет её",
+   "args": {},
+   "command": "SCHTASKS /Create /SC ONCE /TN spawn /TR C:\\windows\\system32\\cmd.exe /ST 20:10",
+   "cleanup": "SCHTASKS /Delete /TN spawn /F >nul 2>&1",
+   "expected": [
+    "Windows - Создание задачи через schtasks",
+    "Windows - Задание планировщика с Temp, AppData или Public (4698)"
+   ]
+  },
+  {
+   "id": "T1082#1",
+   "platform": "windows",
+   "technique": "T1082",
+   "test": 1,
+   "name": "System Information Discovery",
+   "guid": "66703791-c902-4560-8770-42b8a91f7667",
+   "executor": "command_prompt",
+   "admin": false,
+   "effect": "systeminfo и чтение ветки реестра (чтение)",
+   "args": {},
+   "command": "systeminfo\nreg query HKLM\\SYSTEM\\CurrentControlSet\\Services\\Disk\\Enum",
+   "cleanup": "",
+   "expected": [
+    "Windows - Серия разведки (5+ команд за 5 мин)"
+   ]
+  },
+  {
+   "id": "T1082#7",
+   "platform": "windows",
+   "technique": "T1082",
+   "test": 7,
+   "name": "Hostname Discovery (Windows)",
+   "guid": "85cfbf23-4a1e-4342-8792-007e004b975f",
+   "executor": "command_prompt",
+   "admin": false,
+   "effect": "hostname (чтение)",
+   "args": {},
+   "command": "hostname",
+   "cleanup": "",
+   "expected": [
+    "Windows - Серия разведки (5+ команд за 5 мин)"
+   ]
+  },
+  {
+   "id": "T1087.002#3",
+   "platform": "windows",
+   "technique": "T1087.002",
+   "test": 3,
+   "name": "Enumerate logged on users via CMD (Domain)",
+   "guid": "161dcd85-d014-4f5e-900c-d3eaae82a0f7",
+   "executor": "command_prompt",
+   "admin": false,
+   "effect": "query user (чтение)",
+   "args": {},
+   "command": "query user /SERVER:%COMPUTERNAME%",
+   "cleanup": "",
+   "expected": [
+    "Windows - Разведка в домене (nltest, dsquery, AdFind, SharpHound)"
+   ]
+  },
+  {
+   "id": "T1136.001#4",
+   "platform": "windows",
+   "technique": "T1136.001",
+   "test": 4,
+   "name": "Create a new user in a command prompt",
+   "guid": "6657864e-0323-4206-9344-ac9cd7265a4f",
+   "executor": "command_prompt",
+   "admin": true,
+   "effect": "создаёт локального пользователя T1136.001_CMD и удаляет его",
+   "args": {},
+   "command": "net user /add \"T1136.001_CMD\" \"T1136.001_CMD!\"",
+   "cleanup": "net user /del \"T1136.001_CMD\" >nul 2>&1",
+   "expected": [
+    "Windows - Создание/удаление локального пользователя (net user)",
+    "Windows - Создана учётная запись (4720)"
+   ]
+  },
+  {
+   "id": "T1136.001#5",
+   "platform": "windows",
+   "technique": "T1136.001",
+   "test": 5,
+   "name": "Create a new user in PowerShell",
+   "guid": "bc8be0ac-475c-4fbf-9b1d-9fffd77afbde",
+   "executor": "powershell",
+   "admin": true,
+   "effect": "создаёт локального пользователя T1136.001_PowerShell и удаляет его",
+   "args": {},
+   "command": "New-LocalUser -Name \"T1136.001_PowerShell\" -NoPassword",
+   "cleanup": "Remove-LocalUser -Name \"T1136.001_PowerShell\" -ErrorAction Ignore",
+   "expected": [
+    "Windows - Создание/удаление локального пользователя (net user)",
+    "Windows - Создана учётная запись (4720)"
+   ]
+  },
+  {
+   "id": "T1482#2",
+   "platform": "windows",
+   "technique": "T1482",
+   "test": 2,
+   "name": "Windows - Discover domain trusts with nltest",
+   "guid": "2e22641d-0498-48d2-b9ff-c71e496ccdbe",
+   "executor": "command_prompt",
+   "admin": false,
+   "effect": "nltest /domain_trusts (чтение, нужен RSAT)",
+   "args": {},
+   "command": "nltest /domain_trusts\nnltest /trusted_domains",
+   "cleanup": "",
+   "expected": [
+    "Windows - Разведка в домене (nltest, dsquery, AdFind, SharpHound)"
+   ]
+  },
+  {
+   "id": "T1547.001#1",
+   "platform": "windows",
+   "technique": "T1547.001",
+   "test": 1,
+   "name": "Reg Key Run",
+   "guid": "e55be3fd-3521-4610-9d1a-e210e42dcf05",
+   "executor": "command_prompt",
+   "admin": false,
+   "effect": "добавляет и удаляет значение в HKCU\\...\\Run",
+   "args": {},
+   "command": "REG ADD \"HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run\" /V \"Atomic Red Team\" /t REG_SZ /F /D \"C:\\Path\\AtomicRedTeam.exe\"",
+   "cleanup": "REG DELETE \"HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run\" /V \"Atomic Red Team\" /f >nul 2>&1",
+   "expected": [
+    "Windows - Автозагрузка через ключ реестра Run"
+   ]
+  },
+  {
+   "id": "T1552.001#4",
+   "platform": "windows",
+   "technique": "T1552.001",
+   "test": 4,
+   "name": "Extracting passwords with findstr",
+   "guid": "0e56bf29-ff49-4ea5-9af4-3b81283fd513",
+   "executor": "powershell",
+   "admin": false,
+   "effect": "ищет слово pass в файлах текущего каталога (чтение)",
+   "args": {},
+   "command": "findstr /si pass *.xml *.doc *.txt *.xls\nls -R | select-string -ErrorAction SilentlyContinue -Pattern password",
+   "cleanup": "",
+   "expected": [
+    "Windows - Поиск паролей в файлах (findstr, Select-String)"
+   ]
+  },
+  {
+   "id": "T1569.002#1",
+   "platform": "windows",
+   "technique": "T1569.002",
+   "test": 1,
+   "name": "Execute a Command as a Service",
+   "guid": "2382dee2-a75f-49aa-9378-f52df6ed3fb1",
+   "executor": "command_prompt",
+   "admin": true,
+   "effect": "создаёт службу ARTService, запускает, удаляет; создаёт и удаляет C:\\art-marker.txt",
+   "args": {},
+   "command": "sc.exe create ARTService binPath= \"%COMSPEC% /c powershell.exe -nop -w hidden -command New-Item -ItemType File C:\\art-marker.txt\"\nsc.exe start ARTService\nsc.exe delete ARTService",
+   "cleanup": "del C:\\art-marker.txt >nul 2>&1",
+   "expected": [
+    "Windows - PsExec и аналоги (процесс, служба, канал)",
+    "Windows - Установка службы вне System32 и Program Files (4697)"
+   ]
+  }
+ ]
+}
