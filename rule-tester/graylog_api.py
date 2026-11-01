@@ -129,7 +129,10 @@ class Graylog:
                            "description": "есть поле rt_run"}],
                 "matching_type": "AND", "remove_matches_from_default_stream": True,
                 "index_set_id": index_set_id}
-        sid = self.post("/api/streams", body)["stream_id"]
+        try:  # Graylog 7: тело завёрнуто в entity
+            sid = self.post("/api/streams", {"entity": body})["stream_id"]
+        except ApiError:  # старые версии принимают поля напрямую
+            sid = self.post("/api/streams", body)["stream_id"]
         self._req("POST", "/api/streams/%s/resume" % sid)
         return sid
 
