@@ -182,6 +182,8 @@ class Parser:
             raise QueryError("диапазоны [a TO b] не поддерживаются тестером")
         txt, wild = self.bare(want_wild=True)
         self.suffix()
+        if re.fullmatch(r"(<=|>=|<|>)-?\d+(\.\d+)?", txt):
+            return Lit(field, "range", txt)
         return Lit(field, "wild" if wild else "term", txt)
 
     def bare(self, want_wild=False):
@@ -276,6 +278,17 @@ def match_lit(lit, doc):
     vals = _vals(doc, lit.field)
     if lit.kind == "exists":
         return any(v != "" for v in vals)
+    if lit.kind == "range":
+        m = re.fullmatch(r"(<=|>=|<|>)(.+)", lit.text)
+        op, lim = m.group(1), float(m.group(2))
+        for v in vals:
+            try:
+                x = float(v)
+            except ValueError:
+                continue
+            if (op == "<" and x < lim) or (op == "<=" and x <= lim) or (op == ">" and x > lim) or (op == ">=" and x >= lim):
+                return True
+        return False
     if lit.field in TEXT_FIELDS:
         toks_all = [_tokens(v) for v in vals]
         if lit.kind in ("term", "phrase"):
@@ -381,6 +394,10 @@ def regex_example(pattern):
         raise QueryError("регулярное выражение не разобрано: %s" % e)
     if not re.fullmatch(pattern, text, re.S):
         raise QueryError("не удалось собрать строку под регулярное выражение")
+    if text != text.strip():  # Graylog может обрезать пробелы по краям: добавим опорные символы, если шаблон позволяет
+        for cand in ("x " + text + "x", text + "x", "x" + text, "x " + text, text + " x"):
+            if cand == cand.strip() and re.fullmatch(pattern, cand, re.S):
+                return cand
     return text
 
 
@@ -393,6 +410,11 @@ def lit_example(lit):
         return regex_example(lit.text)
     if lit.kind == "exists":
         return "rt"
+    if lit.kind == "range":
+        m = re.fullmatch(r"(<=|>=|<|>)(.+)", lit.text)
+        op, lim = m.group(1), float(m.group(2))
+        v = lim - 1 if op == "<" else lim + 1 if op == ">" else lim
+        return str(int(v)) if v == int(v) else str(v)
     raise QueryError(lit.kind)
 
 
@@ -502,6 +524,8 @@ def make_samples(node, group_by=(), max_pos=3, max_neg=4):
             break
         if not p or lit.kind == "exists" and lit.field in (base or {}):
             continue
+        if lit.kind == "wild" and lit.text == "*":
+            continue  # «любое значение»: через GELF поле message есть всегда, отрицательный образец невозможен
         same = [l for l, pp in first if pp and l.field == lit.field]
         if len(same) > 1:
             continue
