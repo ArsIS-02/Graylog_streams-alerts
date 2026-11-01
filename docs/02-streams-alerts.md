@@ -386,6 +386,18 @@ BI.ZONE Triage присылает не события, а **снимки сос�
 
 Файл [graylog/health-event-definitions.json](../graylog/health-event-definitions.json): шесть алертов вида «за окно пришло меньше одного сообщения» (условие `count < 1`) для роутера Keenetic (час), auditd на `redos-server` (час), FreeIPA (3 часа), macOS (сутки), а также отдельно для Mac mini (час) и MacBook-Pro (3 часа). Повтор не чаще раза в сутки. Это самая простая защита от тихой поломки доставки логов. В запросах и окнах замени имена источников и интервалы на свои; для хостов, которые часто выключены (контроллер домена, ноутбуки), такое правило давало бы ложные срабатывания, поэтому для них его нет.
 
+### Ещё 3 алерта: FreeIPA и Keenetic
+
+Файлы [freeipa-event-definitions.json](../graylog/freeipa-event-definitions.json) и [keenetic-event-definitions.json](../graylog/keenetic-event-definitions.json) (плейсхолдеры `<FREEIPA_STREAM_ID>`, `<SYSLOG_STREAM_ID>`, `<NOTIFICATION_ID>`).
+
+| Алерт | Что ловит | Приоритет | За 30 дней |
+|---|---|---|---|
+| FREEIPA - Изменение пользователей, групп и правил через API | команды администратора из журнала `httpd_error` (`user_add`, `group_add_member`, `hbacrule_*`, `sudorule_*`, `passwd` и другие), чтения не учитываются | 2 | 0 |
+| FREEIPA - Неудачный вход в веб-интерфейс | ответ 401 на `login_password` в журнале `httpd_access` | 2 | 2 |
+| KEENETIC - Обрыв PPPoE-соединения с провайдером | сообщения `pppd` «Connection terminated» и «Modem hangup» | 1 | 2 |
+
+Изменения через API за месяц не было совсем, поэтому правило пока молчит: запрос проверен на чтениях (токены вроде `user_show` находятся), на записях не проверен. Через API видно только то, что делает администратор в веб-интерфейсе или командой `ipa`, правки через LDAP напрямую сюда не попадают.
+
 ## Дальше
 
 Разделы по каждой операционной системе:
