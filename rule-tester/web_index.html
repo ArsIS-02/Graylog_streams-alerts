@@ -259,8 +259,10 @@ async function pArt(q,m){m.textContent='';const d=await api('/api/art');let os=q
     if(!isAdmin())go.disabled=true;
     body.append(h('div',{class:'card'},h('div',{class:'row'},dl,h('span',{class:'mut'},`тестов ${v.tests.length}, правил ожидается ${v.rules.length}`)),h('pre',{},how),
       h('h2',{},'Сверка с Graylog'),h('div',{class:'row'},since,go),h('div',{class:'mut'},'Время начала скрипт печатает в конце работы (UTC). Правила проверяются раз в 5 минут, подождите 10 минут.')));
-    const t=h('table',{},h('tr',{},h('th',{},'Тест'),h('th',{class:'h'},'Что делает'),h('th',{},'Ожидаемые правила')));
-    v.tests.forEach(x=>t.append(h('tr',{},h('td',{},x.name,h('div',{class:'mut mono'},x.id+(x.admin?' · админ':''))),h('td',{class:'h'},x.effect),h('td',{},...x.expected.map(r=>h('div',{},r))))));
+    const t=h('table',{},h('tr',{},h('th',{},'Тест'),h('th',{class:'h'},'Что делает'),h('th',{class:'h'},'Риск'),h('th',{},'Ожидаемые правила')));
+    v.tests.forEach(x=>t.append(h('tr',{},h('td',{},x.name,h('div',{class:'mut mono'},x.id+(x.admin?' · админ':''))),h('td',{class:'h'},x.effect),
+      h('td',{class:'h'},h('span',{class:'badge '+(x.risk.startsWith('нет')?'b-ok':x.risk.startsWith('низкий')?'b-warn':'b-bad')},x.risk.split(':')[0]),h('div',{class:'mut',style:'margin-top:4px'},x.risk.split(':').slice(1).join(':').trim())),
+      h('td',{},...x.expected.map(r=>h('div',{},r))))));
     body.append(h('div',{class:'card',style:'overflow:auto'},t))}
   draw()}
 

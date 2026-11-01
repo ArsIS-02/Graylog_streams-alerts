@@ -696,6 +696,7 @@ def cmd_art_plan(args):
         print("%s: тестов %d, правил ожидается %d" % (art.PLATFORM_RU[plat], len(tests), len(rules)))
         for t in tests:
             print("  %-14s %-5s %s -> %s" % (t["id"], "admin" if t["admin"] else "", t["name"][:50], "; ".join(t["expected"])[:100]))
+            print("      риск: %s" % t["risk"])
 
 
 def cmd_art_runner(args):
