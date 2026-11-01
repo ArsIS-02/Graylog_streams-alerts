@@ -185,3 +185,23 @@ Pipeline подключается к потоку с логами auditd. Есл
 | Поиск паролей в файлах | `grep -r`, `find`, `rg` со словами password, secret, id_rsa, api_key | 2 | 0 |
 
 Что не вошло. Интерактивный SSH-вход как признак перемещения: за месяц 43 срабатывания от обычной работы.
+
+### Ещё 11 алертов по матрице MITRE (волна 2)
+
+Определения добавлены в [linux-event-definitions.json](../graylog/linux-event-definitions.json). Проверены на истории за 30 дней; «0» значит, что в логах такого не было, запрос проверен только на корректность.
+
+| Алерт | Что ловит | Приоритет | За 30 дней |
+|---|---|---|---|
+| Новая учётная запись | `ADD_USER`; служебные beszel, node_exporter, graylog-collector, logatlas-collect, nginx, zaslon исключены (их ставит раскатка, 34 события за месяц) | 2 | 0 |
+| Добавление в привилегированную группу | `add-user-to-group` для wheel, sudo, root, adm, docker | 3 | 0 |
+| Подбор пароля sudo или su | 5+ ошибок `USER_AUTH` за 5 минут на хосте | 3 | 0 |
+| setuid и setgid | `chmod u+s`, `g+s`, `4755` и подобные | 2 | 0 |
+| Обратная оболочка | `bash -i … /dev/tcp`, `nc -e`, `socat … exec`; проверки порта `echo > /dev/tcp/…` исключены | 3 | 0 |
+| Очистка истории | `history -c`, `unset HISTFILE`, `rm …bash_history` | 2 | 0 |
+| Модули ядра | `insmod`, `modprobe`, `rmmod` | 2 | 0 |
+| Правка crontab | `crontab -e` | 1 | 0 |
+| Отключение SELinux и аудита | `setenforce 0`, `auditctl -e 0`, `semanage permissive` | 3 | 1 |
+| Опасный запуск контейнера | `--privileged`, `-v /:`, `docker.sock`, `--pid=host` | 3 | 0 |
+| Смена времени | `date -s`, `timedatectl set-time`, `hwclock --set` | 1 | 0 |
+
+Что не вошло. `systemctl enable` для новых служб: 20 событий в месяц от обычной настройки (snmpd, podman). Правила наблюдения за файлами (`/etc/passwd`, `/etc/shadow`, `/etc/sudoers`, `authorized_keys`, `ld.so.preload`, `/etc/cron*`, `/etc/pam.d`) требуют новых строк в auditd на хостах, поэтому ждут отдельного шага.

@@ -164,3 +164,24 @@ BI.ZONE Triage (процессы, сеть, autoruns, baseline). О нём — �
 | Выгрузка в облако | rclone, MEGAsync, MEGAcmd | 2 | 0 |
 | Сканеры сети | nmap, masscan, arp-scan, netdiscover, nbtscan, fping, zmap | 2 | 0 |
 | Поиск паролей в файлах | `grep -r`, `rg`, `find` по `/`, `~`, `/Users`; запуски через ssh с BatchMode исключены | 2 | 0 |
+
+### Ещё 12 алертов по матрице MITRE (волна 2)
+
+Определения добавлены в [macos-event-definitions.json](../graylog/macos-event-definitions.json). Проверены на истории за 30 дней; «0» значит, что в логах такого не было, запрос проверен только на корректность.
+
+| Алерт | Что ловит | Приоритет | За 30 дней |
+|---|---|---|---|
+| Снятие карантина вне Applications | `xattr -d … quarantine`, `spctl --master-disable`; `/Applications` и hostdeck-agent исключены | 2 | 1 |
+| Отключение SIP | `csrutil disable` | 3 | 0 |
+| Доверенный корневой сертификат | `security add-trusted-cert`; свой caddy-root исключён | 3 | 0 |
+| Выгрузка Keychain | `security dump-keychain`, `find-generic-password -w` | 3 | 0 |
+| Поддельное окно пароля | `osascript … hidden answer` | 2 | 0 |
+| Новая учётная запись | `dscl . -create /Users`, `sysadminctl -addUser`, `Hide500Users` | 3 | 0 |
+| Включение удалённого доступа | `systemsetup -setremotelogin on`, `kickstart -activate`, `launchctl load` для screensharing и sshd | 3 | 0 |
+| Конфигурационный профиль | `profiles install` | 3 | 0 |
+| Расширения ядра и системы | `kextload`, `kmutil load`, `systemextensionsctl install`; служебный `logkextloadsd` исключён | 2 | 0 |
+| Смена DNS и прокси | `networksetup -setdnsservers`, `-setwebproxy` и др. | 2 | 0 |
+| Уничтожение бэкапов и дисков | `tmutil delete/disable`, `diskutil eraseDisk` | 3 | 0 |
+| Элемент входа | `sfltool add`, `osascript … make login item` | 1 | 0 |
+
+Что не вошло. Запросы про `launchctl print system/com.apple.screensharing` давали 589 событий в месяц, поэтому алерт на удалённый доступ смотрит только на включение. Алерты по таблицам osquery (новые расширения браузера, слушающие порты, USB, неподписанные процессы) требуют знать имена таблиц и дифференциальный режим в вашей выгрузке; отложены.
