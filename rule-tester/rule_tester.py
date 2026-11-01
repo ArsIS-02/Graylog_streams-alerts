@@ -686,6 +686,47 @@ def cmd_run_e2e(args):
     return 1 if bad else 0
 
 
+# ---------------------------------------------------------------- Atomic Red Team
+
+def cmd_art_plan(args):
+    import art
+    for plat in art.PLATFORMS:
+        tests = art.load_plan(plat)
+        rules = art.plan_rules(tests)
+        print("%s: тестов %d, правил ожидается %d" % (art.PLATFORM_RU[plat], len(tests), len(rules)))
+        for t in tests:
+            print("  %-14s %-5s %s -> %s" % (t["id"], "admin" if t["admin"] else "", t["name"][:50], "; ".join(t["expected"])[:100]))
+
+
+def cmd_art_runner(args):
+    import art
+    text = art.gen_runner(args.os)
+    if args.out:
+        Path(args.out).write_text(text, encoding="utf-8", newline="")
+        log("Скрипт записан: " + args.out)
+    else:
+        sys.stdout.write(text)
+
+
+def cmd_art_verify(args):
+    import art
+    gl = connect(args)
+    since = art.parse_time(args.since)
+    until = art.parse_time(args.until) if args.until else None
+    run = run_id()
+    log("Запуск %s: сверка Atomic Red Team (%s) с %s" % (run, art.PLATFORM_RU[args.os], since.isoformat(timespec="seconds")))
+    rows, summary = art.verify(gl, args.os, since, until)
+    for row in rows:
+        row.setdefault("query", "")
+        row.setdefault("platform", platform_of(row["rule"]))
+        row.setdefault("samples", [])
+    path = write_report(run, "art", rows, summary, {"platform": args.os, "source": "Atomic Red Team"})
+    for r in rows:
+        log("  %-13s %s" % (r["status"], r["rule"][:90]))
+    log("\n" + summary + "\nОтчёт: " + str(path))
+    return 1 if any(r["status"] == "НЕТ СОБЫТИЯ" for r in rows) else 0
+
+
 # ---------------------------------------------------------------- CLI
 
 def main(argv=None):
@@ -723,8 +764,16 @@ def main(argv=None):
     p.add_argument("--wait", type=int, default=720)
     p.add_argument("--all", action="store_true")
     p.add_argument("--yes-send-alerts", action="store_true")
+    sub.add_parser("art-plan")
+    p = sub.add_parser("art-runner")
+    p.add_argument("--os", required=True, choices=["linux", "macos", "windows"])
+    p.add_argument("--out")
+    p = sub.add_parser("art-verify")
+    p.add_argument("--os", required=True, choices=["linux", "macos", "windows"])
+    p.add_argument("--since", required=True, help="начало окна: 2026-11-01T20:30, ...Z (UTC) или 90m")
+    p.add_argument("--until")
     args = ap.parse_args(argv)
-    fn = {"list": cmd_list, "selftest": cmd_selftest, "generate": cmd_generate, "doctor": cmd_doctor,
+    fn = {"art-plan": cmd_art_plan, "art-runner": cmd_art_runner, "art-verify": cmd_art_verify, "list": cmd_list, "selftest": cmd_selftest, "generate": cmd_generate, "doctor": cmd_doctor,
           "setup": cmd_setup, "harvest": cmd_harvest, "run-queries": cmd_run_queries, "run-e2e": cmd_run_e2e}[args.cmd]
     try:
         return fn(args) or 0

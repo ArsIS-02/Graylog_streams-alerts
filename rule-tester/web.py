@@ -44,7 +44,7 @@ SESSIONS = {}
 JOB = {"lock": threading.Lock(), "cur": None, "last": None}
 CACHE = {}
 LIVE = {"t": 0, "data": {}, "running": False, "done": 0, "total": 0, "error": ""}
-MODES = {"queries": "run-queries", "e2e": "run-e2e", "doctor": "doctor", "selftest": "selftest", "harvest": "harvest"}
+MODES = {"queries": "run-queries", "e2e": "run-e2e", "doctor": "doctor", "selftest": "selftest", "harvest": "harvest", "art": "art-verify"}
 MODE_RU = {"queries": "Запросы в тестовом потоке", "e2e": "До алерта", "doctor": "Проверка доступа",
            "selftest": "Самопроверка запросов", "harvest": "Сбор настоящих сообщений"}
 SETTING_ENV = {"graylog_url": "GRAYLOG_URL", "graylog_token": "GRAYLOG_TOKEN", "gelf": "RT_GELF", "stream": "RT_STREAM",
@@ -123,9 +123,17 @@ def base_cmd():
 
 # ------------------------------------------------------------------ запуски
 
-def start_job(mode, platform="", rule="", confirm=False, who="вручную"):
+def start_job(mode, platform="", rule="", confirm=False, who="вручную", since=""):
     if mode not in MODES:
         return None, "неизвестный режим"
+    if mode == "art":
+        if platform not in ("linux", "macos", "windows"):
+            return None, "для сверки Atomic Red Team выберите систему: linux, macos или windows"
+        import art
+        try:
+            art.parse_time(since)
+        except ValueError as e:
+            return None, str(e)
     if mode == "e2e" and not confirm:
         return None, "для режима «до алерта» нужно подтверждение"
     if mode == "e2e" and not (platform or rule):
@@ -134,11 +142,13 @@ def start_job(mode, platform="", rule="", confirm=False, who="вручную"):
         if JOB["cur"] and JOB["cur"]["status"] == "идёт":
             return None, "уже идёт другой запуск"
         cmd = base_cmd()
-        if platform:
+        if platform and mode != "art":
             cmd += ["--platform", platform]
-        if rule:
+        if rule and mode != "art":
             cmd += ["--rule", rule]
         cmd.append(MODES[mode])
+        if mode == "art":
+            cmd += ["--os", platform, "--since", since]
         if mode == "e2e":
             cmd.append("--yes-send-alerts")
         job = {"id": datetime.now().strftime("%Y%m%d-%H%M%S"), "mode": mode, "platform": platform,
@@ -595,6 +605,25 @@ class H(BaseHTTPRequestHandler):
         if path == "/api/rule":
             d = rule_detail(q.get("title", ""))
             return self.reply(d if d else {"error": "нет такого правила"}, 200 if d else 404)
+        if path == "/api/art":
+            import art
+            out = {}
+            for plat in art.PLATFORMS:
+                tests = art.load_plan(plat)
+                out[plat] = {"name": art.PLATFORM_RU[plat], "file": art.runner_name(plat), "tests": tests,
+                             "rules": sorted(art.plan_rules(tests))}
+            for plat in out.values():
+                for t in plat["tests"]:
+                    t.pop("command", None)
+                    t.pop("cleanup", None)
+            return self.reply(out)
+        if path == "/api/art/runner":
+            import art
+            plat = q.get("os", "")
+            if plat not in art.PLATFORMS:
+                return self.reply({"error": "система: linux, macos или windows"}, 400)
+            return self.reply(art.gen_runner(plat).encode("utf-8"), ctype="text/plain",
+                              headers={"Content-Disposition": 'attachment; filename="%s"' % art.runner_name(plat)})
         if path == "/api/job":
             return self.reply({"job": pub_job(JOB["cur"] or JOB["last"], log=True)})
         if path == "/api/history":
@@ -686,7 +715,7 @@ class H(BaseHTTPRequestHandler):
         ip = self.ip()
         if path == "/api/run":
             mode, platform, rule = str(b.get("mode", "")), str(b.get("platform", ""))[:40], str(b.get("rule", ""))[:200]
-            job, err = start_job(mode, platform, rule, bool(b.get("confirm")))
+            job, err = start_job(mode, platform, rule, bool(b.get("confirm")), since=str(b.get("since", ""))[:40])
             audit(role, ip, "запуск: %s" % mode, "платформа=%s правило=%s%s" % (platform, rule, "" if not err else " ОТКАЗ: " + err))
             return self.reply({"error": err} if err else {"job": pub_job(job)}, 400 if err else 200)
         if path == "/api/samples/save":
