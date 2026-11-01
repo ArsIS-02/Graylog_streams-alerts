@@ -4,6 +4,7 @@
 с очисткой. Скрипты запуска генерируются из плана и не требуют ни PowerShell на Linux/macOS, ни самого
 Atomic Red Team: каждая команда видна в скрипте целиком. По умолчанию скрипт ничего не выполняет, а печатает план.
 """
+import base64
 import json
 import re
 from datetime import datetime, timedelta, timezone
@@ -113,7 +114,8 @@ $mode = if ($Run) { 'run' } elseif ($Cleanup) { 'cleanup' } else { 'plan' }
 $isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
 $tmp = Join-Path $env:TEMP ('art-' + [guid]::NewGuid().ToString('N')); New-Item -ItemType Directory -Path $tmp | Out-Null
 $start = (Get-Date).ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ssZ')
-function Invoke-Art($id, $name, $admin, $effect, $rules, $risk, $exe, $cmd, $clean) {
+function FromB64($s) { [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($s)) }
+function Invoke-Art($id, $name, $admin, $effect, $rules, $risk, $exe, $cmdB64, $cleanB64) {
   if ($Only.Count -gt 0 -and ($Only -notcontains $id)) { return }
   Write-Host ""; Write-Host "=== $id  $name"; Write-Host "    делает: $effect"; Write-Host "    ждём правила: $rules"
   Write-Host "    риск: $risk"
@@ -121,7 +123,7 @@ function Invoke-Art($id, $name, $admin, $effect, $rules, $risk, $exe, $cmd, $cle
   if ($admin -and -not $isAdmin) { Write-Host "    ПРОПУЩЕНО: нужен запуск от администратора"; return }
   $ext = if ($exe -eq 'powershell') { 'ps1' } else { 'cmd' }
   $c = Join-Path $tmp "c.$ext"; $x = Join-Path $tmp "x.$ext"
-  Set-Content -Path $c -Value $cmd -Encoding UTF8; Set-Content -Path $x -Value $clean -Encoding UTF8
+  Set-Content -Path $c -Value (FromB64 $cmdB64) -Encoding UTF8; Set-Content -Path $x -Value (FromB64 $cleanB64) -Encoding UTF8
   if ($mode -eq 'run') {
     if ($exe -eq 'powershell') { & powershell -NoProfile -ExecutionPolicy Bypass -File $c } else { & cmd /c $c }
     Write-Host "    код возврата: $LASTEXITCODE"
@@ -133,11 +135,7 @@ function Invoke-Art($id, $name, $admin, $effect, $rules, $risk, $exe, $cmd, $cle
 '''
 
 PS_TEST = r'''
-Invoke-Art '{id}' '{name}' {admin} '{effect}' '{rules}' '{risk}' '{exe}' @'
-{command}
-'@ @'
-{cleanup}
-'@
+Invoke-Art '{id}' '{name}' {admin} '{effect}' '{rules}' '{risk}' '{exe}' '{command_b64}' '{cleanup_b64}'
 '''
 
 PS_TAIL = r'''
@@ -159,6 +157,10 @@ def _pq(s):
     return str(s).replace("'", "''")
 
 
+def _b64(s):
+    return base64.b64encode(str(s).encode("utf-8")).decode("ascii")
+
+
 def runner_name(platform):
     return "art-windows.ps1" if platform == "windows" else "art-%s.sh" % platform
 
@@ -174,7 +176,7 @@ def gen_runner(platform):
             out.append(PS_TEST.format(id=t["id"], name=_pq(t["name"]), admin="$true" if t["admin"] else "$false",
                                       effect=_pq(t["effect"]), rules=_pq("; ".join(t["expected"])),
                                       risk=_pq(t["risk"]), exe=exe,
-                                      command=t["command"], cleanup=t["cleanup"] or "rem"))
+                                      command_b64=_b64(t["command"]), cleanup_b64=_b64(t["cleanup"] or "rem")))
         out.append(PS_TAIL)
         return "\r\n".join("".join(out).splitlines()) + "\r\n"
     out = [SH_HEAD.format(ru=PLATFORM_RU[platform], name=runner_name(platform))]
