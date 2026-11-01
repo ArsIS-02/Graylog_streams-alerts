@@ -9,7 +9,7 @@
     "FreeIPA Logs"
    ],
    "notifications": [
-    "Mail.ru Alert Linux"
+    "Mail.ru Alert FreeIPA"
    ],
    "state": "ENABLED",
    "description": "Запрос на выпуск сертификата через CA FreeIPA (Dogtag). Выпуски должны происходить только при добавлении новых сервисов или хостов. Внезапный массовый выпуск — повод проверить.",
@@ -30,11 +30,11 @@
     "FreeIPA Logs"
    ],
    "notifications": [
-    "Mail.ru Alert Linux"
+    "Mail.ru Alert FreeIPA"
    ],
    "state": "ENABLED",
    "description": "Администратор FreeIPA изменил пользователей, группы, правила HBAC или sudo, роли, пароли или хосты через API. В журнале записаны только такие вызовы, чтения (show, find) не учитываются. Неожиданное изменение означает правку каталога не вами.",
-   "query": "application_name:freeipa_httpd_error AND message:\"ipa: INFO\" AND message:(user_add OR user_del OR user_mod OR user_disable OR group_add OR group_del OR group_mod OR group_add_member OR group_remove_member OR hbacrule_add OR hbacrule_mod OR hbacrule_del OR hbacrule_add_user OR hbacrule_add_host OR sudorule_add OR sudorule_mod OR sudorule_del OR sudorule_add_user OR sudorule_add_option OR passwd OR role_add_member OR privilege_add_member OR cert_revoke OR otptoken_add OR host_add OR host_del OR service_add)",
+   "query": "application_name:freeipa_httpd_error AND message:\"ipa: INFO\" AND message:(user_add OR user_del OR user_mod OR user_disable OR group_add OR group_del OR group_mod OR group_add_member OR group_remove_member OR passwd OR cert_revoke OR otptoken_add OR host_add OR host_del OR service_add)",
    "group_by": [],
    "condition": null,
    "aggregated": false,
@@ -51,7 +51,7 @@
     "FreeIPA Logs"
    ],
    "notifications": [
-    "Mail.ru Alert Linux"
+    "Mail.ru Alert FreeIPA"
    ],
    "state": "ENABLED",
    "description": "Веб-интерфейс FreeIPA ответил 401 на вход по паролю. Одиночный случай значит опечатку, серия значит подбор пароля.",
@@ -72,7 +72,7 @@
     "FreeIPA Logs"
    ],
    "notifications": [
-    "Mail.ru Alert Linux"
+    "Mail.ru Alert FreeIPA"
    ],
    "state": "ENABLED",
    "description": "Серия отказов предварительной аутентификации Kerberos на контроллере домена. Возможен подбор пароля доменной учётной записи (password spray).",
@@ -119,7 +119,7 @@
     "FreeIPA Logs"
    ],
    "notifications": [
-    "Mail.ru Alert Linux"
+    "Mail.ru Alert FreeIPA"
    ],
    "state": "ENABLED",
    "description": "За 3 часа не пришло ни одного сообщения от FreeIPA. Сервер или доставка логов остановились.",
@@ -4203,6 +4203,258 @@
    "tactic": "Persistence",
    "technique": "T1547.015 Login Items",
    "techniques": "T1547.015"
+  },
+  {
+   "title": "FREEIPA - Изменение привилегированных групп и ролей (API)",
+   "priority": 3,
+   "streams": [
+    "FreeIPA Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert FreeIPA"
+   ],
+   "state": "ENABLED",
+   "description": "Через API изменены роли, привилегии или группа admins. Так повышают права в домене.",
+   "query": "application_name:freeipa_httpd_error AND message:\"ipa: INFO\" AND (message:(role_add_member OR role_remove_member OR privilege_add_member OR privilege_remove_member OR role_add_privilege OR privilege_add_permission) OR (message:(group_add_member OR group_mod OR group_remove_member) AND message:admins))",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 60.0,
+   "tactic": "Privilege Escalation",
+   "technique": "T1098 Account Manipulation",
+   "techniques": "T1098"
+  },
+  {
+   "title": "FREEIPA - Изменение HBAC и sudo-правил (API)",
+   "priority": 3,
+   "streams": [
+    "FreeIPA Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert FreeIPA"
+   ],
+   "state": "ENABLED",
+   "description": "Изменены правила доступа (HBAC) или sudo-правила. Через них выдают право входа и повышения прав на хостах домена.",
+   "query": "application_name:freeipa_httpd_error AND message:\"ipa: INFO\" AND message:(hbacrule_add OR hbacrule_mod OR hbacrule_del OR hbacrule_add_user OR hbacrule_add_host OR hbacrule_add_service OR hbacrule_enable OR hbacrule_disable OR sudorule_add OR sudorule_mod OR sudorule_del OR sudorule_add_user OR sudorule_add_host OR sudorule_add_option OR sudorule_add_allow_command OR sudorule_enable OR sudorule_disable)",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 60.0,
+   "tactic": "Privilege Escalation",
+   "technique": "T1548.003 Sudo and Sudo Caching",
+   "techniques": "T1548.003, T1098"
+  },
+  {
+   "title": "FREEIPA - Изменение политик паролей, Kerberos и конфигурации (API)",
+   "priority": 3,
+   "streams": [
+    "FreeIPA Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert FreeIPA"
+   ],
+   "state": "ENABLED",
+   "description": "Изменены политики паролей, времени жизни Kerberos-билетов, глобальная конфигурация или доверительные отношения. Так ослабляют защиту.",
+   "query": "application_name:freeipa_httpd_error AND message:\"ipa: INFO\" AND message:(pwpolicy_add OR pwpolicy_mod OR pwpolicy_del OR krbtpolicy_mod OR krbtpolicy_reset OR config_mod OR trust_add OR trust_del)",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 60.0,
+   "tactic": "Credential Access",
+   "technique": "T1556 Modify Authentication Process",
+   "techniques": "T1556"
+  },
+  {
+   "title": "FREEIPA - Разблокировка учётной записи, ключи и сертификаты пользователя (API)",
+   "priority": 2,
+   "streams": [
+    "FreeIPA Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert FreeIPA"
+   ],
+   "state": "ENABLED",
+   "description": "Разблокирована или включена учётная запись, изменены OTP-токены, сертификаты или альтернативные имена пользователя.",
+   "query": "application_name:freeipa_httpd_error AND message:\"ipa: INFO\" AND message:(user_unlock OR user_enable OR user_undel OR user_stage OR otptoken_mod OR otptoken_del OR user_add_cert OR user_add_certmapdata OR user_add_principal)",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 60.0,
+   "tactic": "Persistence",
+   "technique": "T1098 Account Manipulation",
+   "techniques": "T1098"
+  },
+  {
+   "title": "FREEIPA - Kerberos: билет службы с шифрованием RC4 (Kerberoasting)",
+   "priority": 3,
+   "streams": [
+    "FreeIPA Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert FreeIPA"
+   ],
+   "state": "ENABLED",
+   "description": "KDC выдал билет службы с шифрованием RC4. Современные клиенты просят AES, RC4 указывает на Kerberoasting или устаревший клиент.",
+   "query": "application_name:freeipa_krb5kdc AND message:\"TGS_REQ\" AND message:ISSUE AND message:\"rep=arcfour\"",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 60.0,
+   "tactic": "Credential Access",
+   "technique": "T1558.003 Kerberoasting",
+   "techniques": "T1558.003"
+  },
+  {
+   "title": "FREEIPA - Kerberos: вход отключённой, заблокированной или просроченной учётной записи",
+   "priority": 2,
+   "streams": [
+    "FreeIPA Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert FreeIPA"
+   ],
+   "state": "ENABLED",
+   "description": "KDC отказал: учётная запись отключена, заблокирована, или истёк срок ключа. Использование чужих или забытых учётных записей.",
+   "query": "application_name:freeipa_krb5kdc AND message:(CLIENT_REVOKED OR KEY_EXP OR LOCKED_OUT OR DISABLED)",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 60.0,
+   "tactic": "Initial Access",
+   "technique": "T1078 Valid Accounts",
+   "techniques": "T1078"
+  },
+  {
+   "title": "FREEIPA - Kerberos: расхождение часов (CLOCK_SKEW)",
+   "priority": 1,
+   "streams": [
+    "FreeIPA Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert FreeIPA"
+   ],
+   "state": "ENABLED",
+   "description": "Клиент отправил запрос с расхождением часов больше допустимого. Kerberos перестанет работать для этого хоста.",
+   "query": "application_name:freeipa_krb5kdc AND message:CLOCK_SKEW",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 60.0,
+   "tactic": null,
+   "technique": null,
+   "techniques": null
+  },
+  {
+   "title": "FREEIPA - Массовая выгрузка из каталога LDAP (100+ записей за запрос)",
+   "priority": 2,
+   "streams": [
+    "FreeIPA Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert FreeIPA"
+   ],
+   "state": "ENABLED",
+   "description": "Один LDAP-запрос вернул сто и более записей. Разведка по каталогу или выгрузка учётных записей.",
+   "query": "application_name:freeipa_389_access AND ldap_nentries:/[0-9]{3,}/",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 60.0,
+   "tactic": "Discovery",
+   "technique": "T1087.002 Domain Account",
+   "techniques": "T1087.002, T1018"
+  },
+  {
+   "title": "FREEIPA - Успешный вход в веб-интерфейс",
+   "priority": 1,
+   "streams": [
+    "FreeIPA Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert FreeIPA"
+   ],
+   "state": "ENABLED",
+   "description": "Успешный вход по паролю в веб-интерфейс FreeIPA. Входов мало (около 10 в месяц), все видны.",
+   "query": "application_name:freeipa_httpd_access AND message:\"login_password http 1.1 200\"",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 60.0,
+   "tactic": "Initial Access",
+   "technique": "T1078 Valid Accounts",
+   "techniques": "T1078"
+  },
+  {
+   "title": "FREEIPA - Остановка служб IPA на сервере (dirsrv, krb5kdc, httpd, pki)",
+   "priority": 3,
+   "streams": [
+    "RedOS auditd Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert FreeIPA"
+   ],
+   "state": "ENABLED",
+   "description": "На сервере FreeIPA остановлена одна из служб домена. Без неё не работают вход, DNS и сертификаты.",
+   "query": "audit_type:SERVICE_STOP AND source:server AND message:(krb5kdc OR kadmin OR httpd OR dirsrv* OR pki* OR named* OR ipa*)",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 60.0,
+   "tactic": "Defense Impairment",
+   "technique": "T1685 Disable or Modify Tools",
+   "techniques": "T1685"
+  },
+  {
+   "title": "FREEIPA - Сбои certmonger (продление сертификатов)",
+   "priority": 2,
+   "streams": [
+    "FreeIPA Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert FreeIPA"
+   ],
+   "state": "ENABLED",
+   "description": "Certmonger не смог продлить или получить сертификат. Сертификаты сервера могут истечь, после чего FreeIPA перестанет работать.",
+   "query": "message:certmonger AND NOT message:ansible* AND message:(\"Cannot contact\" OR CA_UNREACHABLE OR NEED_GUIDANCE OR CA_REJECTED OR \"ca-error\")",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 1440.0,
+   "tactic": null,
+   "technique": null,
+   "techniques": null
+  },
+  {
+   "title": "FREEIPA - Прямое изменение атрибутов безопасности в каталоге (389)",
+   "priority": 2,
+   "streams": [
+    "FreeIPA Logs"
+   ],
+   "notifications": [
+    "Mail.ru Alert FreeIPA"
+   ],
+   "state": "ENABLED",
+   "description": "В журнале аудита 389 DS изменён атрибут блокировки, пароля или ключа Kerberos.",
+   "query": "application_name:freeipa_389_audit AND message:(\"replace: nsAccountLock\" OR \"add: nsAccountLock\" OR \"replace: userPassword\" OR \"replace: krbPrincipalKey\")",
+   "group_by": [],
+   "condition": null,
+   "aggregated": false,
+   "window_min": 5.0,
+   "grace_min": 60.0,
+   "tactic": "Persistence",
+   "technique": "T1098 Account Manipulation",
+   "techniques": "T1098"
   }
  ]
 }
