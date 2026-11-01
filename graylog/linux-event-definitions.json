@@ -792,7 +792,7 @@
     "alert": true,
     "config": {
       "type": "aggregation-v1",
-      "query": "audit_type:PROCTITLE AND proctitle:/.*(python[0-9.]* -c .*socket|perl -e .*socket|nc(at)? .* -e |mkfifo |socat .*exec:|bash -i .*>&).*/",
+      "query": "audit_type:PROCTITLE AND proctitle:/.*(python[0-9.]* -c .*socket|perl -e .*socket|nc(at)? .* -e |mkfifo |socat .*exec:|bash -i .*\\>\\&).*/",
       "query_parameters": [],
       "filters": [],
       "streams": [
@@ -3146,7 +3146,7 @@
     "alert": true,
     "config": {
       "type": "aggregation-v1",
-      "query": "audit_type:PROCTITLE AND proctitle:/.*(bash[ ]+-i.*\\/dev\\/tcp|\\/dev\\/tcp\\/.*0>&1|>&[ ]*\\/dev\\/tcp|nc[ ]+-[a-z]*e[ ]|ncat[ ].*-e[ ]|socat[ ].*exec|mkfifo[ ].*nc[ ]).*/",
+      "query": "audit_type:PROCTITLE AND proctitle:/.*(bash[ ]+-i.*\\/dev\\/tcp|\\/dev\\/tcp\\/.*0\\>\\&1|\\>\\&[ ]*\\/dev\\/tcp|nc[ ]+-[a-z]*e[ ]|ncat[ ].*-e[ ]|socat[ ].*exec|mkfifo[ ].*nc[ ]).*/",
       "query_parameters": [],
       "filters": [],
       "streams": [
