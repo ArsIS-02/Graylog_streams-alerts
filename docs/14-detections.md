@@ -1,15 +1,15 @@
 # Каталог детектов Graylog
 
-> Все правила (event definitions) лаборатории в одном месте: какой лог проверяется, по какому условию, как коррелируются события, к какой тактике и технике MITRE ATT&CK относятся. Всего **144** правил, из них **116** привязаны к технике ATT&CK v20 (89 разных техник). Остальные описывают здоровье сервисов и тишину в логах: атак они не ловят.
+> Все правила (event definitions) лаборатории в одном месте: какой лог проверяется, по какому условию, как коррелируются события, к какой тактике и технике MITRE ATT&CK относятся. Всего **167** правил, из них **139** привязаны к технике ATT&CK v20 (105 разных техник). Остальные описывают здоровье сервисов и тишину в логах: атак они не ловят.
 
 Страница собирается скриптом из выгрузки Graylog и руками не правится: [как обновить](#как-обновить-каталог). Запросы очищены: IP, MAC, отпечатки ключей и белые списки заменены на `<IP>`, `<MAC>`, `<белый список>`. Готовые определения для импорта лежат в `graylog/*-event-definitions.json`, соответствие техникам подробно описано в [graylog/mitre](../graylog/mitre/README.md).
 
 ## Содержание
 
 - [Покрытие: тактики × платформы](#покрытие-тактики--платформы)
-- [Windows](#windows) — 32
-- [Linux](#linux) — 32
-- [macOS (osquery и unified log)](#macos-osquery-и-unified-log) — 33
+- [Windows](#windows) — 43
+- [Linux](#linux) — 39
+- [macOS (osquery и unified log)](#macos-osquery-и-unified-log) — 38
 - [macOS (BI.ZONE Triage)](#macos-bizone-triage) — 9
 - [Keenetic](#keenetic) — 9
 - [FreeIPA и здоровье сервисов](#freeipa-и-здоровье-сервисов) — 11
@@ -24,25 +24,25 @@
 | Тактика | Windows | Linux | macOS | Keenetic | FreeIPA | Контейнеры | Всего |
 |---|---|---|---|---|---|---|---|
 | Reconnaissance (Разведка) |  |  |  | 1 |  |  | **1** |
-| Initial Access (Первоначальный доступ) | 2 | 2 | 3 | 1 |  | 1 | **9** |
+| Initial Access (Первоначальный доступ) | 2 | 3 | 3 | 1 |  | 1 | **10** |
 | Execution (Выполнение) | 6 | 3 | 7 |  |  |  | **16** |
 | Persistence (Закрепление) | 7 | 6 | 8 | 1 | 1 |  | **23** |
-| Privilege Escalation (Повышение привилегий) |  | 4 | 6 |  |  |  | **10** |
-| Stealth (Скрытность) | 3 | 2 | 2 |  |  |  | **7** |
-| Defense Impairment (Подавление защиты) | 4 | 4 | 4 | 1 |  |  | **13** |
-| Credential Access (Доступ к учётным данным) | 5 | 2 | 4 | 3 | 3 | 1 | **18** |
-| Discovery (Исследование среды) | 1 | 1 |  |  |  |  | **2** |
-| Lateral Movement (Перемещение) | 1 |  | 1 | 1 |  |  | **3** |
-| Collection (Сбор данных) |  | 1 | 2 |  |  |  | **3** |
-| Command and Control (управление, C2) | 1 | 2 | 1 |  |  |  | **4** |
-| Exfiltration (Вывод данных) |  | 1 | 1 |  |  |  | **2** |
-| Impact (Воздействие) | 1 | 3 | 1 |  |  |  | **5** |
+| Privilege Escalation (Повышение привилегий) | 1 | 4 | 6 |  |  |  | **11** |
+| Stealth (Скрытность) | 4 | 2 | 2 |  |  |  | **8** |
+| Defense Impairment (Подавление защиты) | 5 | 5 | 5 | 1 |  |  | **16** |
+| Credential Access (Доступ к учётным данным) | 6 | 3 | 5 | 3 | 3 | 1 | **21** |
+| Discovery (Исследование среды) | 2 | 2 | 1 |  |  |  | **5** |
+| Lateral Movement (Перемещение) | 2 | 1 | 1 | 1 |  |  | **5** |
+| Collection (Сбор данных) | 1 | 1 | 2 |  |  |  | **4** |
+| Command and Control (управление, C2) | 3 | 3 | 2 |  |  |  | **8** |
+| Exfiltration (Вывод данных) | 1 | 2 | 2 |  |  |  | **5** |
+| Impact (Воздействие) | 2 | 3 | 1 |  |  |  | **6** |
 | Без техники (служебные) | 1 | 1 | 2 | 1 | 7 | 16 | **28** |
-| **Всего** | **32** | **32** | **42** | **9** | **11** | **18** | **144** |
+| **Всего** | **43** | **39** | **47** | **9** | **11** | **18** | **167** |
 
 ## Windows
 
-Sysmon, Security, PowerShell, Defender; поток WindowsLogs. Правил: 32. Сортировка: сначала высокий приоритет.
+Sysmon, Security, PowerShell, Defender; поток WindowsLogs. Правил: 43. Сортировка: сначала высокий приоритет.
 
 | Правило | Приоритет | Источник логов | Что проверяет | Корреляция | Тактика | Техника |
 |---|---|---|---|---|---|---|
@@ -50,6 +50,7 @@ Sysmon, Security, PowerShell, Defender; поток WindowsLogs. Правил: 32
 | Office, wscript или mshta создал исполняемый файл | высокий | WindowsLogs<br>канал Microsoft-Windows-Sysmon/Operational, EventID 11 | Sysmon 11: Office, wscript, cscript или mshta записал exe, dll, scr, hta, js, vbs, ps1 или bat в Temp, AppData, Public, ProgramData, Downloads, PerfLogs. powershell не включён: он… | каждое событие | Execution | `T1204.002` Malicious File<br>`T1105` |
 | PowerShell с закодированной командой | высокий | WindowsLogs<br>EventID 1 | PowerShell запущен с -EncodedCommand или декодирует Base64. Так прячут вредоносные скрипты. | каждое событие | Execution | `T1059.001` PowerShell<br>`T1027.010` |
 | PowerShell скачивает и исполняет код | высокий | WindowsLogs<br>EventID 4104 | Script Block Logging (4104): DownloadString, Net.WebClient, Invoke-WebRequest или IEX. Типичный загрузчик. | каждое событие | Execution | `T1059.001` PowerShell<br>`T1105` |
+| PsExec и аналоги (процесс, служба, канал) | высокий | WindowsLogs<br>канал Microsoft-Windows-Sysmon/Operational, канал System, EventID 1, EventID 7045 | Признаки удалённого выполнения: запуск PsExec, PAExec, RemCom, winexesvc или wsmprovhost, установка службы PSEXESVC и именованные каналы этих утилит. | каждое событие; повтор не чаще раза в 1 ч | Lateral Movement | `T1021.002` SMB/Windows Admin Shares<br>`T1569.002` |
 | wscript, cscript, mshta или regsvr32 ходит во внешнюю сеть | высокий | WindowsLogs<br>канал Microsoft-Windows-Sysmon/Operational, EventID 3 | Sysmon 3: исходящее соединение на внешний IP от wscript, cscript, mshta или regsvr32. Эти программы почти не ходят в сеть сами, поэтому соединение похоже на загрузчик или канал… | каждое событие | Stealth | `T1218` System Binary Proxy Execution<br>`T1071.001` |
 | Вход из неизвестной сети (4624, тип 3 или 10) | высокий | WindowsLogs<br>канал Security, EventID 4624 | Сетевой вход (тип 3) или RDP (тип 10) с адреса, которого нет в справочнике homelab-subnets (поле src_zone не заполнено). Требует pipeline «homelab: windows enrichment» и обновлённую… | каждое событие | Initial Access | `T1078` Valid Accounts<br>`T1021` |
 | Дамп учётных данных (reg save, comsvcs, ntdsutil) | высокий | WindowsLogs<br>EventID 1 | Выгрузка кустов SAM/SECURITY/SYSTEM через reg save, дамп памяти через comsvcs.dll MiniDump или копирование NTDS через ntdsutil. | каждое событие | Credential Access | `T1003.002` Security Account Manager<br>`T1003.001`, `T1003.003` |
@@ -60,11 +61,13 @@ Sysmon, Security, PowerShell, Defender; поток WindowsLogs. Правил: 32
 | Именованные каналы C2 (Cobalt Strike и аналоги) | высокий | WindowsLogs<br>канал Microsoft-Windows-Sysmon/Operational, EventID 17, 18 | Sysmon 17/18: имена каналов, характерные для Cobalt Strike (msagent_*, postex_*, status_*, MSSE-*-server). Каналы нужны для связи бекона и инъекций. | каждое событие | Stealth | `T1055` Process Injection |
 | Исключения или отключение защиты Defender | высокий | WindowsLogs<br>канал Microsoft-Windows-Sysmon/Operational, EventID 1, EventID 13 | Команда Add-/Set-MpPreference с исключениями или отключением мониторинга, либо запись в ключ Windows Defender\Exclusions (Sysmon 13). | каждое событие | Defense Impairment | `T1685` Disable or Modify Tools |
 | Командная оболочка запущена через WMI | высокий | WindowsLogs<br>канал Microsoft-Windows-Sysmon/Operational, EventID 1 | Sysmon 1: WmiPrvSE.exe породил cmd, powershell, wscript, cscript, mshta или rundll32. Так работает удалённое выполнение через WMI (wmic /node, Impacket wmiexec). | каждое событие | Execution | `T1047` Windows Management Instrumentation |
+| Обход UAC через реестр (fodhelper, eventvwr, ms-settings) | высокий | WindowsLogs<br>канал Microsoft-Windows-Sysmon/Operational, EventID 13 | Запись в ветки реестра, через которые обходят UAC и получают высокие права без запроса (ms-settings, mscfile, exefile, подмена windir и SystemRoot). Sysmon 13. | каждое событие; повтор не чаще раза в 1 ч | Privilege Escalation | `T1548.002` Bypass User Account Control |
 | Отключение Firewall (netsh или PS) | высокий | WindowsLogs<br>EventID 1 | Запуск «netsh advfirewall … disable» или PowerShell «Disable-NetFirewall…». Атакующий отключает брандмауэр, чтобы открыть сетевые соединения. | каждое событие | Defense Impairment | `T1686.003` Windows Host Firewall |
 | Офисное приложение запустило оболочку | высокий | WindowsLogs<br>EventID 1 | Word/Excel/Outlook/PowerPoint запустили cmd, powershell, wscript, cscript или mshta. Характерно для вредоносных макросов. | каждое событие | Execution | `T1204.002` Malicious File<br>`T1059` |
 | Очистка журнала событий | высокий | WindowsLogs<br>EventID 1102, 104 | Журнал Security (1102) или System (104) очищен. Почти всегда признак заметания следов. | каждое событие | Defense Impairment | `T1685.005` Clear Windows Event Logs |
 | Подбор пароля (5+ ошибок входа 4625 за 5 мин) | высокий | WindowsLogs<br>EventID 4625 | 5 и более неудачных входов (Event ID 4625) на одном хосте за 5 минут. Возможен брутфорс, в том числе учётной записи администратора. | число событий ≥ 5 за 5 мин, группировка по source | Credential Access | `T1110` Brute Force |
 | Подбор пароля и успешный вход с одного IP (4625 и 4624) | высокий | WindowsLogs<br>EventID 4624, 4625 | С одного адреса за 15 минут 5 и более сетевых или RDP-входов, среди которых есть и неудачные (4625), и успешные (4624). Так выглядит подбор пароля, закончившийся успехом. | число событий ≥ 5 за 15 мин, группировка по IpAddress | Credential Access | `T1110` Brute Force<br>`T1078` |
+| Признаки шифровальщика (расширения и записки) | высокий | WindowsLogs<br>канал Microsoft-Windows-Sysmon/Operational, EventID 11 | Создан файл с расширением известного шифровальщика (locked, lockbit, akira, conti и другие) или файл-записка с требованием выкупа. | каждое событие; повтор не чаще раза в 1 ч | Impact | `T1486` Data Encrypted for Impact |
 | Создание/удаление локального пользователя (net user) | высокий | WindowsLogs<br>EventID 1 | Создан или удалён локальный пользователь командой net user /add или /delete (Sysmon Event 1). | каждое событие | Persistence | `T1136.001` Local Account |
 | Удаление теневых копий | высокий | WindowsLogs<br>EventID 1 | Удаление теневых копий или отключение восстановления (vssadmin, wmic shadowcopy, bcdedit). Типичный шаг шифровальщика. | каждое событие | Impact | `T1490` Inhibit System Recovery |
 | DNS-запрос к туннелям и файлообменникам | средний | WindowsLogs<br>канал Microsoft-Windows-Sysmon/Operational, EventID 22 | Sysmon 22: запрос к ngrok, pastebin, transfer.sh, trycloudflare, duckdns, anonfiles, serveo. Через них обходят периметр и забирают данные. | каждое событие | Command and Control | `T1572` Protocol Tunneling<br>`T1102` |
@@ -72,10 +75,18 @@ Sysmon, Security, PowerShell, Defender; поток WindowsLogs. Правил: 32
 | Автозагрузка через ключ реестра Run | средний | WindowsLogs<br>EventID 13 | Запись в ключ CurrentVersion\Run (Sysmon 13) не известным приложением. Классический способ закрепления. | каждое событие | Persistence | `T1547.001` Registry Run Keys / Startup Folder |
 | Вход по сети или RDP ночью (00:00-06:00) | средний | WindowsLogs<br>EventID 4624 | Успешный сетевой вход или вход по RDP под обычной (не машинной) учёткой ночью, с 00:00 до 06:00 по Екатеринбургу. Правило проверяется только в ночные часы. | каждое событие; повтор не чаще раза в 1 ч | Initial Access | `T1078` Valid Accounts<br>`T1021.001` |
 | Закрепление через IFEO Debugger, AppInit_DLLs и Winlogon | средний | WindowsLogs<br>канал Microsoft-Windows-Sysmon/Operational, EventID 12, 13 | Sysmon 12/13: значения Debugger, GlobalFlag и VerifierDlls в Image File Execution Options, AppInit_DLLs, Winlogon Shell и Userinit. RunOnce и MitigationOptions не включены: их постоянно… | каждое событие | Persistence | `T1546.012` Image File Execution Options Injection<br>`T1546.010`, `T1547.004` |
+| Запуск утилит удалённого доступа и туннелей | средний | WindowsLogs<br>канал Microsoft-Windows-Sysmon/Operational, EventID 1 | Запущена утилита удалённого доступа или туннелирования (ngrok, cloudflared, AnyDesk, TeamViewer, RustDesk, chisel, tailscale, plink и аналоги). За 30 дней в логах не встречалась. | каждое событие; повтор не чаще раза в 1 ч | Command and Control | `T1219` Remote Access Tools<br>`T1572` |
+| Маскировка под системный процесс (svchost, lsass, csrss вне System32) | средний | WindowsLogs<br>канал Microsoft-Windows-Sysmon/Operational, EventID 1 | Процесс с именем системного (svchost, lsass, csrss и другие) запущен не из System32, SysWOW64 или WinSxS. Так прячут вредоносный файл. За 30 дней более 330 тысяч запусков таких имён, все… | каждое событие; повтор не чаще раза в 1 ч | Stealth | `T1036.005` Match Legitimate Resource Name or Location |
 | Новая служба | средний | WindowsLogs<br>EventID 7045, 4697 | Установлена новая служба (7045, 4697), кроме драйверов Kaspersky. Частый способ закрепления. | каждое событие | Persistence | `T1543.003` Windows Service |
+| Остановка Sysmon, winlogbeat, Defender или журнала событий | средний | WindowsLogs<br>канал System, EventID 7036 | Остановлена служба, от которой зависят защита или сбор логов: Sysmon, winlogbeat, Defender, брандмауэр или журнал событий. Атакующий отключает агентов, чтобы действовать незаметно.… | каждое событие; повтор не чаще раза в 1 ч | Defense Impairment | `T1685` Disable or Modify Tools |
 | Перебор несуществующих пользователей (5+ за 10 мин) | средний | WindowsLogs<br>EventID 4625 | 5 и более неудачных входов с одного IP за 10 минут с причиной «пользователь не существует» (SubStatus 0xc0000064): перебор имён учёток. | число событий ≥ 5 за 10 мин, группировка по IpAddress | Credential Access | `T1110` Brute Force<br>`T1087` |
+| Подозрительно длинные DNS-имена (туннель, DGA) | средний | WindowsLogs<br>канал Microsoft-Windows-Sysmon/Operational, EventID 22 | DNS-запрос с меткой длиннее 40 символов или всё имя длиннее 70. Так выглядят DNS-туннели и сгенерированные домены. Служебные записи AD (_ldap, _kerberos, _msdcs) и крупные CDN исключены. | каждое событие; повтор не чаще раза в 1 ч | Command and Control | `T1071.004` DNS<br>`T1568.002` |
+| Поиск паролей в файлах (findstr, Select-String) | средний | WindowsLogs<br>канал Microsoft-Windows-Sysmon/Operational, EventID 1 | Рекурсивный поиск слов password, secret, credential, id_rsa и подобных по файлам (findstr /s, Select-String -Recurse). Проверки политики паролей через secedit исключены. | каждое событие; повтор не чаще раза в 1 ч | Credential Access | `T1552.001` Credentials In Files |
+| Разведка в домене (nltest, dsquery, AdFind, SharpHound) | средний | WindowsLogs<br>канал Microsoft-Windows-Sysmon/Operational, EventID 1 | Запущены утилиты разведки в Active Directory (nltest, dsquery, AdFind, SharpHound, ldifde, csvde) или команды Get-AD* и nltest /dclist, /domain_trusts. | каждое событие; повтор не чаще раза в 1 ч | Discovery | `T1087.002` Domain Account<br>`T1018`, `T1482` |
 | Создание задачи через schtasks | средний | WindowsLogs<br>EventID 1 | Запланированная задача создана командой schtasks /create. Частый способ закрепления и запуска. | каждое событие | Execution | `T1053.005` Scheduled Task |
+| Утилиты выгрузки в облако (rclone, MEGAsync, WinSCP) | средний | WindowsLogs<br>канал Microsoft-Windows-Sysmon/Operational, EventID 1 | Запущена утилита синхронизации или выгрузки файлов в облако (rclone, MEGAsync, MEGAcmd, WinSCP, pCloud). Так выводят данные наружу. | каждое событие; повтор не чаще раза в 1 ч | Exfiltration | `T1567.002` Exfiltration to Cloud Storage<br>`T1048` |
 | Defender: сигнатуры не обновлялись 7 дней | низкий | WindowsLogs<br>канал Microsoft-Windows-Windows Defender/Operational, EventID 2000 | За 7 дней ни один Windows-хост не прислал событие об обновлении сигнатур Defender (2000). Защита работает с устаревшей базой или хосты не в сети. | число событий < 1 за 7 сут; повтор не чаще раза в 1 сут | — | — |
+| Архивация не из проводника (7z, WinRAR, Compress-Archive) | низкий | WindowsLogs<br>канал Microsoft-Windows-Sysmon/Operational, EventID 1 | Запуск архиватора (7-Zip, WinRAR, zip) не из проводника, либо Compress-Archive и tar -c. Установщики во временных папках и ручной запуск из проводника исключены. | каждое событие; повтор не чаще раза в 1 ч | Collection | `T1560.001` Archive via Utility |
 | Вход по RDP | низкий | WindowsLogs<br>EventID 4624 | Успешный интерактивный вход по RDP (4624, LogonType 10). | каждое событие | Lateral Movement | `T1021.001` Remote Desktop Protocol |
 | Серия разведки (5+ команд за 5 мин) | низкий | WindowsLogs<br>EventID 1 | 5 и более запусков net, whoami, nltest, systeminfo, quser, arp на одном хосте за 5 минут — типичная разведка после проникновения. | число событий ≥ 5 за 5 мин, группировка по source | Discovery | `T1082` System Information Discovery |
 
@@ -103,6 +114,12 @@ win_event_id:1 AND win_image:("C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\p
 
 ```
 win_event_id:4104 AND message:("DownloadString" OR "DownloadFile" OR "Invoke-Expression" OR "IEX" OR "Net.WebClient" OR "Invoke-WebRequest")
+```
+
+**Windows - PsExec и аналоги (процесс, служба, канал)**
+
+```
+(win_channel:"Microsoft-Windows-Sysmon/Operational" AND win_event_id:1 AND winlogbeat_winlog_event_data_Image:/.*([pP][sS][eE][xX][eE][cC]|[pP][sS][eE][xX][eE][sS][vV][cC]|[pP][aA][eE][xX][eE][cC]|[wW][iI][nN][eE][xX][eE][sS][vV][cC]|[rR][eE][mM][cC][oO][mM]|[wW][sS][mM][pP][rR][oO][vV][hH][oO][sS][tT]).*/) OR (win_channel:System AND win_event_id:7045 AND message:(PSEXESVC OR PAExec OR RemCom OR winexesvc)) OR (win_channel:"Microsoft-Windows-Sysmon/Operational" AND win_event_id:(17 OR 18) AND winlogbeat_winlog_event_data_PipeName:/.*([pP][sS][eE][xX][eE][sS][vV][cC]|[pP][aA][eE][xX][eE][cC]|[rR][eE][mM][cC][oO][mM]).*/)
 ```
 
 **Windows - wscript, cscript, mshta или regsvr32 ходит во внешнюю сеть**
@@ -165,6 +182,12 @@ win_channel:"Microsoft-Windows-Sysmon/Operational" AND win_event_id:(17 OR 18) A
 win_channel:"Microsoft-Windows-Sysmon/Operational" AND win_event_id:1 AND winlogbeat_winlog_event_data_ParentImage:/.*\\[Ww]mi[Pp]rv[Ss][Ee]\.exe/ AND win_image:/.*\\(cmd|powershell|pwsh|wscript|cscript|mshta|rundll32)\.exe/
 ```
 
+**Windows - Обход UAC через реестр (fodhelper, eventvwr, ms-settings)**
+
+```
+win_channel:"Microsoft-Windows-Sysmon/Operational" AND win_event_id:13 AND (winlogbeat_winlog_event_data_TargetObject:/.*(ms-settings|mscfile|exefile|Folder).*[Ss]hell.*[Oo]pen.*[Cc]ommand.*/ OR winlogbeat_winlog_event_data_TargetObject:/.*[Ee]nvironment.*(windir|SystemRoot).*/)
+```
+
 **Windows - Отключение Firewall (netsh или PS)**
 
 ```
@@ -193,6 +216,12 @@ winlogbeat_event_code:4625 AND winlogbeat_event_outcome:failure
 
 ```
 winlogbeat_event_code:(4624 OR 4625) AND winlogbeat_winlog_event_data_LogonType:(3 OR 10) AND _exists_:winlogbeat_winlog_event_data_IpAddress AND NOT winlogbeat_winlog_event_data_IpAddress:("-" OR "::1" OR "127.0.0.1" OR "::ffff:127.0.0.1")
+```
+
+**Windows - Признаки шифровальщика (расширения и записки)**
+
+```
+win_channel:"Microsoft-Windows-Sysmon/Operational" AND win_event_id:11 AND winlogbeat_winlog_event_data_TargetFilename:/.*([.](locked|encrypted|crypt|crypted|enc|lockbit|akira|conti|ryuk|wncry|wnry|blackcat|hive|royal|basta|babuk|djvu|zepto|cerber|petya|phobos|mallox|makop)|[\\]([hH][oO][wW]_[tT][oO]_[dD][eE][cC][rR][yY][pP][tT]|[dD][eE][cC][rR][yY][pP][tT]_[iI][nN][sS][tT][rR][uU][cC][tT][iI][oO][nN]|[rR][eE][sS][tT][oO][rR][eE]_[fF][iI][lL][eE][sS]|[rR][eE][aA][dD]_[mM][eE]_[nN][oO][wW]|_[rR][eE][aA][dD][mM][eE]|[hH][oO][wW]_[tT][oO]_[rR][eE][cC][oO][vV][eE][rR]|[rR][eE][cC][oO][vV][eE][rR]_[fF][iI][lL][eE][sS]|[rR][eE][aA][dD][mM][eE]_[tT][oO]_[rR][eE][sS][tT][oO][rR][eE]|@[pP][lL][eE][aA][sS][eE]_[rR][eE][aA][dD]_[mM][eE]@|@[wW][aA][nN][aA][dD][eE][cC][rR][yY][pP][tT][oO][rR]@)[^\\]*)/
 ```
 
 **Windows - Создание/удаление локального пользователя (net user)**
@@ -237,10 +266,28 @@ winlogbeat_event_code:4624 AND winlogbeat_winlog_event_data_LogonType:(3 OR 10) 
 win_channel:"Microsoft-Windows-Sysmon/Operational" AND win_event_id:(12 OR 13) AND winlogbeat_winlog_event_data_TargetObject:/.*(Image File Execution Options\\[^\\]+\\(Debugger|GlobalFlag|VerifierDlls)|\\AppInit_DLLs|CurrentVersion\\Winlogon\\(Userinit|Shell))/
 ```
 
+**Windows - Запуск утилит удалённого доступа и туннелей**
+
+```
+win_channel:"Microsoft-Windows-Sysmon/Operational" AND win_event_id:1 AND winlogbeat_winlog_event_data_Image:/.*([nN][gG][rR][oO][kK]|[cC][lL][oO][uU][dD][fF][lL][aA][rR][eE][dD]|[aA][nN][yY][dD][eE][sS][kK]|[tT][eE][aA][mM][vV][iI][eE][wW][eE][rR]|[rR][uU][sS][tT][dD][eE][sS][kK]|[uU][lL][tT][rR][aA][vV][iI][eE][wW][eE][rR]|[sS][cC][rR][eE][eE][nN][cC][oO][nN][nN][eE][cC][tT]|[mM][eE][sS][hH][aA][gG][eE][nN][tT]|[cC][hH][iI][sS][eE][lL]|[tT][aA][iI][lL][sS][cC][aA][lL][eE]|[zZ][eE][rR][oO][tT][iI][eE][rR]|[fF][rR][pP][cC]|[pP][lL][iI][nN][kK]).*/
+```
+
+**Windows - Маскировка под системный процесс (svchost, lsass, csrss вне System32)**
+
+```
+win_channel:"Microsoft-Windows-Sysmon/Operational" AND win_event_id:1 AND winlogbeat_winlog_event_data_Image:/.*[\\](svchost|lsass|csrss|smss|wininit|services|winlogon|spoolsv|lsm|taskhostw|conhost|dllhost|RuntimeBroker|SearchIndexer)[.]exe/ AND NOT winlogbeat_winlog_event_data_Image:/.*[wW][iI][nN][dD][oO][wW][sS][\\]([sS][yY][sS][tT][eE][mM]32|[sS][yY][sS][wW][oO][wW]64|[wW][iI][nN][sS][xX][sS]).*/
+```
+
 **Windows - Новая служба**
 
 ```
 win_event_id:(7045 OR 4697) AND NOT winlogbeat_winlog_event_data_ServiceName:Kaspersky*
+```
+
+**Windows - Остановка Sysmon, winlogbeat, Defender или журнала событий**
+
+```
+win_channel:System AND win_event_id:7036 AND winlogbeat_winlog_event_data_param2:Остановлена AND winlogbeat_winlog_event_data_param1:(winlogbeat OR Sysmon* OR WinDefend OR "Антивирусная программа Microsoft Defender" OR "Служба защиты от угроз Microsoft Defender" OR "Брандмауэр Защитника Windows" OR "Журнал событий Windows")
 ```
 
 **Windows - Перебор несуществующих пользователей (5+ за 10 мин)**
@@ -249,16 +296,46 @@ win_event_id:(7045 OR 4697) AND NOT winlogbeat_winlog_event_data_ServiceName:Kas
 win_event_id:4625 AND winlogbeat_winlog_event_data_SubStatus:0xc0000064
 ```
 
+**Windows - Подозрительно длинные DNS-имена (туннель, DGA)**
+
+```
+win_channel:"Microsoft-Windows-Sysmon/Operational" AND win_event_id:22 AND (winlogbeat_winlog_event_data_QueryName:/[^.]{40,}[.].*/ OR winlogbeat_winlog_event_data_QueryName:/.{70,}/) AND NOT winlogbeat_winlog_event_data_QueryName:/.*(_msdcs|_sites|_tcp|_udp|[Mm]icrosoft|[Aa]kamai|cloudfront|amazonaws|googleapis).*/
+```
+
+**Windows - Поиск паролей в файлах (findstr, Select-String)**
+
+```
+win_channel:"Microsoft-Windows-Sysmon/Operational" AND win_event_id:1 AND winlogbeat_winlog_event_data_CommandLine:/.*(findstr.*[ ]\/[a-zA-Z]*[sS]|[Rr]ecurse.*[Ss]elect-[Ss]tring).*([pP][aA][sS][sS][wW][oO][rR][dD]|[pP][aA][sS][sS][wW][dD]|[sS][eE][cC][rR][eE][tT]|[cC][rR][eE][dD][eE][nN][tT][iI][aA][lL]|[aA][pP][iI][kK][eE][yY]|[iI][dD]_[rR][sS][aA]|[kK][dD][bB][xX]).*/ AND NOT winlogbeat_winlog_event_data_CommandLine:/.*secedit.*/
+```
+
+**Windows - Разведка в домене (nltest, dsquery, AdFind, SharpHound)**
+
+```
+win_channel:"Microsoft-Windows-Sysmon/Operational" AND win_event_id:1 AND (winlogbeat_winlog_event_data_Image:/.*([nN][lL][tT][eE][sS][tT]|[dD][sS][qQ][uU][eE][rR][yY]|[aA][dD][fF][iI][nN][dD]|[sS][hH][aA][rR][pP][hH][oO][uU][nN][dD]|[bB][lL][oO][oO][dD][hH][oO][uU][nN][dD]|[lL][dD][iI][fF][dD][eE]|[cC][sS][vV][dD][eE]).*/ OR winlogbeat_winlog_event_data_CommandLine:/.*(domain_trusts|dclist|[Gg]et-[Aa][Dd][A-Za-z]+).*/)
+```
+
 **Windows - Создание задачи через schtasks**
 
 ```
 win_event_id:1 AND message:"schtasks" AND message:"/create"
 ```
 
+**Windows - Утилиты выгрузки в облако (rclone, MEGAsync, WinSCP)**
+
+```
+win_channel:"Microsoft-Windows-Sysmon/Operational" AND win_event_id:1 AND winlogbeat_winlog_event_data_Image:/.*([rR][cC][lL][oO][nN][eE]|[mM][eE][gG][aA][sS][yY][nN][cC]|[mM][eE][gG][aA][cC][mM][dD]|[wW][iI][nN][sS][cC][pP]|[pP][cC][lL][oO][uU][dD]).*/
+```
+
 **Windows - Defender: сигнатуры не обновлялись 7 дней**
 
 ```
 win_channel:"Microsoft-Windows-Windows Defender/Operational" AND win_event_id:2000
+```
+
+**Windows - Архивация не из проводника (7z, WinRAR, Compress-Archive)**
+
+```
+win_channel:"Microsoft-Windows-Sysmon/Operational" AND win_event_id:1 AND ((winlogbeat_winlog_event_data_Image:/.*(7[zZ]|7[zZ][aA]|7[zZ][gG]|[wW][iI][nN][rR][aA][rR]|[rR][aA][rR]|[zZ][iI][pP])[.]exe/ AND NOT winlogbeat_winlog_event_data_ParentImage:/.*explorer[.]exe/ AND NOT winlogbeat_winlog_event_data_Image:/.*[Tt]emp.*/) OR winlogbeat_winlog_event_data_CommandLine:/.*([Cc]ompress-[Aa]rchive|tar([.]exe)?[ ]+-[a-zA-Z]*c[a-zA-Z]*[ ]).*/)
 ```
 
 **Windows - Вход по RDP**
@@ -277,11 +354,12 @@ win_event_id:1 AND message:("whoami.exe" OR "nltest.exe" OR "net.exe" OR "net1.e
 
 ## Linux
 
-auditd на RED OS; поток RedOS auditd Logs. Правил: 32. Сортировка: сначала высокий приоритет.
+auditd на RED OS; поток RedOS auditd Logs. Правил: 39. Сортировка: сначала высокий приоритет.
 
 | Правило | Приоритет | Источник логов | Что проверяет | Корреляция | Тактика | Техника |
 |---|---|---|---|---|---|---|
 | Брутфорс SSH (5+ неудачных входов за 5 мин) | высокий | RedOS auditd Logs | 5 и более неудачных SSH-аутентификаций на одном хосте за 5 минут. Возможен подбор пароля. | число событий ≥ 5 за 5 мин, группировка по source | Credential Access | `T1110` Brute Force |
+| Веб-сервер запустил оболочку | высокий | RedOS auditd Logs<br>auditd SYSCALL, ключ susp_shell | Пользователь веб-сервера (apache, uid 48, или www-data, uid 33) запустил bash. Признак веб-шелла или эксплуатации сайта. Исключены redos-raspi и homeserver: там apache штатно запускает… | каждое событие; повтор не чаще раза в 1 ч | Initial Access | `T1190` Exploit Public-Facing Application<br>`T1505.003`, `T1059.004` |
 | Вход по SSH из неизвестной сети | высокий | RedOS auditd Logs<br>auditd USER_LOGIN | Успешный вход по SSH (USER_LOGIN) с адреса вне справочника homelab-subnets (поле src_zone не заполнено). Требует pipeline «homelab: linux enrichment»: он достаёт IP из addr= и ищет сеть… | каждое событие | Initial Access | `T1078` Valid Accounts<br>`T1021.004` |
 | Добавление SSH-ключа в authorized_keys | высокий | RedOS auditd Logs | Запись в файл authorized_keys. Возможно добавление SSH-ключа для постоянного доступа. Проверьте, кто изменил файл и легитимен ли ключ. | число событий > 0 за 5 мин, группировка по source | Persistence | `T1098.004` SSH Authorized Keys |
 | Добавление/удаление пользователя | высокий | RedOS auditd Logs<br>auditd ADD_USER, auditd DEL_USER | На хосте успешно добавлен или удалён локальный пользователь. В исходных сообщениях: учётка и инициатор (auid). | число событий > 0 за 5 мин, группировка по source | Persistence | `T1136.001` Local Account |
@@ -295,18 +373,24 @@ auditd на RED OS; поток RedOS auditd Logs. Правил: 32. Сортир
 | Отключение аудита или удаление правил auditd | высокий | RedOS auditd Logs<br>auditd CONFIG_CHANGE | Удалено правило auditd или аудит отключён (audit_enabled=0). Атакующий может ослеплять мониторинг. | каждое событие | Defense Impairment | `T1685.004` Disable or Modify Linux Audit System Log |
 | Подбор пароля и успешный вход по SSH (6+ событий за 15 мин) | высокий | RedOS auditd Logs<br>auditd USER_LOGIN | На одном хосте за 15 минут 6 и более событий входа по SSH, среди которых есть и неудачные, и успешные. Похоже на подбор пароля, закончившийся входом. | число событий ≥ 6 за 15 мин, группировка по source | Credential Access | `T1110` Brute Force<br>`T1078` |
 | Привилегированный контейнер или docker.sock | высокий | RedOS auditd Logs<br>auditd EXECVE | Запуск docker или podman с флагом --privileged или с монтированием docker.sock. Это путь к root на хосте. | каждое событие | Privilege Escalation | `T1611` Escape to Host<br>`T1610` |
+| Успешный вход root по SSH | высокий | RedOS auditd Logs<br>auditd USER_LOGIN | Успешный вход по SSH под root. Прямой вход под root обычно отключают, повод проверить. | каждое событие; повтор не чаще раза в 1 ч | Lateral Movement | `T1021.004` SSH<br>`T1078.003` |
 | Установка setuid или setgid | высокий | RedOS auditd Logs<br>auditd SYSCALL, ключ perm_modification | chmod, fchmod, fchmodat с битом setuid (04000) или setgid (02000). Исключены systemd-tmpfiles, rpm и dnf: их установки штатно выставляют такие права. | каждое событие | Privilege Escalation | `T1548.001` Setuid and Setgid |
 | SSH-туннель (-R, -L, -D) | средний | RedOS auditd Logs<br>auditd PROCTITLE | Запуск ssh с пробросом портов (-R, -L, -D). Так выводят внутренние сервисы наружу или строят прокси. | каждое событие | Command and Control | `T1572` Protocol Tunneling<br>`T1090` |
 | Вход по SSH ночью (00:00-06:00) | средний | RedOS auditd Logs | Успешный вход по SSH ночью (с 00:00 до 06:00 по Екатеринбургу). Правило проверяется только в ночные часы. Часы подгоните под свой распорядок. | каждое событие; повтор не чаще раза в 1 ч | Initial Access | `T1078` Valid Accounts<br>`T1021.004` |
 | Загрузка модуля ядра | средний | RedOS auditd Logs<br>auditd SYSCALL, ключ kernel_modules, kernel_modules_config | Загрузка или смена конфигурации модулей ядра (init_module, finit_module, modprobe). Вредоносные модули (руткиты) загружаются так же; штатные загрузки драйверов (udev) тоже попадают сюда,… | каждое событие | Persistence | `T1547.006` Kernel Modules and Extensions |
 | Закрепление через cron | средний | RedOS auditd Logs<br>auditd SYSCALL, ключ cron_persistence | Запись в каталоги и файлы cron (crontab, /etc/cron.*, /var/spool/cron). | каждое событие | Persistence | `T1053.003` Cron |
 | Закрепление через systemctl enable | средний | RedOS auditd Logs<br>auditd EXECVE | Служба добавлена в автозапуск командой systemctl enable. Проверьте, что это ожидаемая служба. | каждое событие | Persistence | `T1543.002` Systemd Service |
+| Запуск утилит удалённого доступа и туннелей | средний | RedOS auditd Logs<br>auditd EXECVE | Запущена утилита удалённого доступа или туннелирования (ngrok, cloudflared, AnyDesk, TeamViewer, RustDesk, chisel, tailscale, zerotier, frpc, plink). | каждое событие; повтор не чаще раза в 1 ч | Command and Control | `T1219` Remote Access Tools<br>`T1572` |
 | Изменение прав доступа (chmod) | средний | RedOS auditd Logs<br>auditd SYSCALL | Изменение прав доступа через chmod (кроме uid 1001). В исходных сообщениях: режим, файл и пользователь. | число событий > 0 за 5 мин, группировка по source | Defense Impairment | `T1222.002` Linux and Mac Permissions |
 | Исполнение из памяти (memfd_create) | средний | RedOS auditd Logs<br>auditd SYSCALL, ключ anon_file_create | Создан анонимный файл в памяти (memfd_create). Так работают fileless-загрузчики; легитимно — некоторые AppImage. | каждое событие | Stealth | `T1620` Reflective Code Loading |
 | Неудачная попытка sudo | средний | RedOS auditd Logs | Неудачная аутентификация sudo: неверный пароль или отказ PAM/SSSD. Возможен подбор пароля или ошибка пользователя. | число событий > 0 за 5 мин, группировка по source | Privilege Escalation | `T1548.003` Sudo and Sudo Caching |
+| Остановка auditd, rsyslog, wazuh, filebeat, sshd или firewalld | средний | RedOS auditd Logs<br>auditd SERVICE_STOP | Остановлена служба аудита, логирования, защиты или SSH. Исключён постоянно перезапускающийся юнит filebeat-wazuh на хосте wazuh (около тысячи остановок в месяц). | каждое событие; повтор не чаще раза в 1 ч | Defense Impairment | `T1685` Disable or Modify Tools |
 | Остановка службы (systemctl stop) | средний | RedOS auditd Logs<br>auditd EXECVE | Остановка системной службы через systemctl stop. Имя службы: аргумент a2 в исходных сообщениях. | число событий > 0 за 5 мин, группировка по source | Impact | `T1489` Service Stop |
 | Передача файлов наружу (scp, sftp, rsync) из терминала | средний | RedOS auditd Logs<br>auditd SYSCALL | Пользователь запустил scp, sftp или rsync в интерактивной сессии. Служебные запуски без терминала не учитываются. | каждое событие | Exfiltration | `T1048` Exfiltration Over Alternative Protocol |
 | Подозрительные утилиты (base64, nc, socat, scp) | средний | RedOS auditd Logs<br>auditd SYSCALL, ключ susp_activity | Запуск утилит, часто используемых для передачи и кодирования данных: base64, nc, socat, scp. | каждое событие | Command and Control | `T1105` Ingress Tool Transfer<br>`T1140` |
+| Поиск паролей в файлах (grep -r, find) | средний | RedOS auditd Logs<br>auditd EXECVE | Рекурсивный поиск слов password, secret, id_rsa, api_key и подобных по файлам (grep -r, find, rg). | каждое событие; повтор не чаще раза в 1 ч | Credential Access | `T1552.001` Credentials In Files |
+| Сканеры сети (nmap, masscan, arp-scan) | средний | RedOS auditd Logs<br>auditd EXECVE | Запущен сканер сети (nmap, masscan, arp-scan, netdiscover, nbtscan, fping, zmap). | каждое событие; повтор не чаще раза в 1 ч | Discovery | `T1046` Network Service Discovery<br>`T1018` |
+| Утилиты выгрузки в облако (rclone, MEGAcmd) | средний | RedOS auditd Logs<br>auditd EXECVE | Запущена утилита выгрузки в облако (rclone, MEGAcmd, megatools). | каждое событие; повтор не чаще раза в 1 ч | Exfiltration | `T1567.002` Exfiltration to Cloud Storage<br>`T1048` |
 | Архивация данных пользователем (tar, zip, 7z) | низкий | RedOS auditd Logs<br>auditd SYSCALL, ключ Data_Compressed | Пользователь запустил архиватор (tar, zip и аналоги). Частая подготовка к выгрузке данных. gzip и pigz исключены, их запускают logrotate и системные задачи. | каждое событие | Collection | `T1560.001` Archive via Utility |
 | Изменение правил firewall (iptables, nft) | низкий | RedOS auditd Logs<br>auditd SYSCALL, ключ sbin_susp | Запуск iptables/nft. Обычно Docker или firewalld, но так же отключают защиту. | каждое событие | Defense Impairment | `T1686` Disable or Modify System Firewall |
 | Изменение сетевых настроек и /etc/hosts | низкий | RedOS auditd Logs<br>auditd SYSCALL, ключ network_modifications | Правка сетевых файлов (hosts, resolv.conf и аналогов) не NetworkManager и не рантаймом контейнеров. Так подменяют DNS или перенаправляют трафик. | каждое событие | Impact | `T1565.001` Stored Data Manipulation |
@@ -320,6 +404,12 @@ auditd на RED OS; поток RedOS auditd Logs. Правил: 32. Сортир
 
 ```
 (message:"sshd-session" AND message:"Authentication failure") OR (message:"sshd" AND message:"Failed password")
+```
+
+**LNX - Веб-сервер запустил оболочку**
+
+```
+key:susp_shell AND audit_type:SYSCALL AND uid:(48 OR 33) AND NOT source:(redos-raspi OR homeserver)
 ```
 
 **LNX - Вход по SSH из неизвестной сети**
@@ -400,6 +490,12 @@ audit_type:USER_LOGIN AND exe:"/usr/libexec/openssh/sshd-session"
 audit_type:EXECVE AND a0:(docker OR podman) AND message:(privileged OR "docker.sock")
 ```
 
+**LNX - Успешный вход root по SSH**
+
+```
+audit_type:USER_LOGIN AND exe:"/usr/libexec/openssh/sshd-session" AND acct:root AND res:success*
+```
+
 **LNX - Установка setuid или setgid**
 
 ```
@@ -436,6 +532,12 @@ audit_type:SYSCALL AND key:cron_persistence
 audit_type:EXECVE AND a0:("systemctl" OR "/usr/bin/systemctl") AND message:"enable"
 ```
 
+**LNX - Запуск утилит удалённого доступа и туннелей**
+
+```
+audit_type:EXECVE AND a0:(ngrok OR cloudflared OR anydesk OR teamviewer OR rustdesk OR chisel OR tailscale OR zerotier OR frpc OR plink)
+```
+
 **LNX - Изменение прав доступа (chmod)**
 
 ```
@@ -454,6 +556,12 @@ key:anon_file_create AND audit_type:SYSCALL AND NOT exe:(<белый списо�
 message:"sudo" AND (message:"authentication failure" OR message:"incorrect password" OR (message:"pam_sss" AND message:"failure"))
 ```
 
+**LNX - Остановка auditd, rsyslog, wazuh, filebeat, sshd или firewalld**
+
+```
+audit_type:SERVICE_STOP AND message:(auditd OR rsyslog OR "wazuh-agent" OR "wazuh-manager" OR filebeat OR "systemd-journald" OR sshd OR firewalld) AND NOT message:"filebeat-wazuh"
+```
+
 **LNX - Остановка службы (systemctl stop)**
 
 ```
@@ -470,6 +578,24 @@ audit_type:SYSCALL AND exe:("/usr/bin/scp" OR "/usr/bin/sftp" OR "/usr/bin/rsync
 
 ```
 key:susp_activity AND audit_type:SYSCALL AND NOT exe:("/usr/bin/netstat" OR "/usr/bin/curl" OR "/usr/bin/ssh")
+```
+
+**LNX - Поиск паролей в файлах (grep -r, find)**
+
+```
+audit_type:EXECVE AND a0:(grep OR egrep OR rg OR find OR locate) AND a1:("-r" OR "-R" OR "-rn" OR "-ri" OR "-rI" OR "-ir" OR "-nr") AND message:(password OR passwd OR secret OR id_rsa OR api_key OR credentials)
+```
+
+**LNX - Сканеры сети (nmap, masscan, arp-scan)**
+
+```
+audit_type:EXECVE AND a0:(nmap OR masscan OR "arp-scan" OR netdiscover OR nbtscan OR fping OR zmap)
+```
+
+**LNX - Утилиты выгрузки в облако (rclone, MEGAcmd)**
+
+```
+audit_type:EXECVE AND a0:(rclone OR megacmd OR megatools OR megaput)
 ```
 
 **LNX - Архивация данных пользователем (tar, zip, 7z)**
@@ -512,7 +638,7 @@ key:recon AND audit_type:SYSCALL AND NOT exe:(<белый список>)
 
 ## macOS (osquery и unified log)
 
-osquery Endpoint Security и unified log; поток MacOS Logs. Правил: 33. Сортировка: сначала высокий приоритет.
+osquery Endpoint Security и unified log; поток MacOS Logs. Правил: 38. Сортировка: сначала высокий приоритет.
 
 | Правило | Приоритет | Источник логов | Что проверяет | Корреляция | Тактика | Техника |
 |---|---|---|---|---|---|---|
@@ -539,11 +665,16 @@ osquery Endpoint Security и unified log; поток MacOS Logs. Правил: 3
 | Загрузка launchd-задания (load, bootstrap, submit) | средний | MacOS Logs<br>osquery es_process_events | launchctl load, bootstrap или submit для заданий вне исключений (Apple, hostdeck, Graylog, Elastic, beszel, Homebrew, homelab, logatlas). Так запускают закреплённые задания. | каждое событие | Execution | `T1569.001` Launchctl<br>`T1543.004` |
 | Загрузка расширения ядра | средний | MacOS Logs<br>osquery es_process_events | Загрузка kext через kextload или kmutil load. | каждое событие | Persistence | `T1547.006` Kernel Modules and Extensions |
 | Запуск программы из /tmp или /Users/Shared | средний | MacOS Logs<br>osquery es_process_events | Исполняемый файл запущен из временного или общего каталога (кроме Bi.Zone Triage). Типично для загрузчиков. | каждое событие | Execution | `T1059` Command and Scripting Interpreter |
+| Запуск утилит удалённого доступа и туннелей | средний | MacOS Logs<br>osquery es_process_events | В командной строке процесса есть утилита удалённого доступа или туннелирования (ngrok, cloudflared, AnyDesk, TeamViewer, RustDesk, chisel, tailscale, zerotier, frpc). | каждое событие; повтор не чаще раза в 1 ч | Command and Control | `T1219` Remote Access Tools<br>`T1572` |
 | Неудачная попытка sudo (неверный пароль) | средний | MacOS Logs<br>журнал macos_unified | При выполнении sudo введён неверный пароль. Возможен подбор пароля. | число событий > 0 за 5 мин, группировка по source | Privilege Escalation | `T1548.003` Sudo and Sudo Caching |
+| Остановка агентов сбора логов и защиты (launchctl) | средний | MacOS Logs<br>osquery es_process_events | launchctl остановил или отключил агент сбора логов или защиты (osquery, filebeat, Graylog collector, Bi.Zone, Velociraptor, HostDeck, firewall). Плановое обслуживание тоже срабатывает,… | каждое событие; повтор не чаще раза в 1 ч | Defense Impairment | `T1685` Disable or Modify Tools |
 | Передача данных наружу (scp, rsync, nc, socat) | средний | MacOS Logs<br>osquery es_process_events | scp или rsync на user@host с точкой в имени, а также nc, ncat, socat без -l, если адрес не из частных сетей и не в monitoring.test. | каждое событие | Exfiltration | `T1048` Exfiltration Over Alternative Protocol |
 | Подключено Apple-устройство (iPhone/iPad/iPod) | средний | MacOS Logs<br>журнал macos_wifi_usb | По USB подключено и распознано Apple-устройство (wifi.log, hostNotificationUSBDeviceInserted). | каждое событие | Initial Access | `T1200` Hardware Additions |
 | Подключён USB-накопитель | средний | MacOS Logs<br>журнал macos_unified | Ядро распознало USB-накопитель (IOUSBMassStorageDriver): флешку или внешний диск. | число событий > 0 за 5 мин, группировка по source | Initial Access | `T1200` Hardware Additions<br>`T1052.001` |
+| Поиск паролей в файлах (grep -r по / и ~) | средний | MacOS Logs<br>osquery es_process_events | Рекурсивный поиск слов password, secret, token, id_rsa по домашней папке или всему диску (grep -r, rg, find). Запуски через ssh с BatchMode (автоматизация) и поиск внутри рабочих… | каждое событие; повтор не чаще раза в 1 ч | Credential Access | `T1552.001` Credentials In Files |
+| Сканеры сети (nmap, masscan, arp-scan) | средний | MacOS Logs<br>osquery es_process_events | В командной строке процесса есть сканер сети (nmap, masscan, arp-scan, netdiscover, nbtscan, fping, zmap). | каждое событие; повтор не чаще раза в 1 ч | Discovery | `T1046` Network Service Discovery<br>`T1018` |
 | Создание пользователя или изменение групп | средний | MacOS Logs<br>osquery es_process_events | dscl, sysadminctl или dseditgroup создают пользователя или меняют членство в группах (в т.ч. admin). | каждое событие | Persistence | `T1136.001` Local Account<br>`T1098` |
+| Утилиты выгрузки в облако (rclone, MEGAsync) | средний | MacOS Logs<br>osquery es_process_events | В командной строке процесса есть утилита выгрузки в облако (rclone, MEGAsync, MEGAcmd). | каждое событие; повтор не чаще раза в 1 ч | Exfiltration | `T1567.002` Exfiltration to Cloud Storage<br>`T1048` |
 | Элемент входа через sfltool или osascript | средний | MacOS Logs<br>osquery es_process_events | Добавление Login Items командами sfltool или osascript (System Events, login item). Закрепление без plist; дополняет алерт на LaunchAgents. | каждое событие | Persistence | `T1547.015` Login Items |
 | Выполнение команды через sudo | низкий | MacOS Logs<br>osquery sudo_commands | Выполнение команды с повышенными привилегиями через sudo (не от root). | число событий > 0 за 5 мин, группировка по source | Privilege Escalation | `T1548.003` Sudo and Sudo Caching |
 | Запись экрана на MacBook (replayd) | низкий | MacOS Logs<br>журнал macos_unified | Служба replayd начала сессию захвата экрана на MacBook. Mac mini исключён: на нём захват экрана идёт при твоей удалённой работе. | каждое событие; повтор не чаще раза в 1 ч | Collection | `T1113` Screen Capture |
@@ -690,10 +821,22 @@ name:es_process_events AND (message:"kextload" OR (columns_path:"/usr/bin/kmutil
 name:es_process_events AND columns_path:(\/tmp\/* OR \/private\/tmp\/* OR \/Users\/Shared\/* OR \/private\/var\/tmp\/*) AND NOT columns_path:(\/private\/tmp\/bzt.* OR \/private\/tmp\/bz_triage_tmp_*)
 ```
 
+**macOS - Запуск утилит удалённого доступа и туннелей**
+
+```
+log_type:macos_osquery AND name:es_process_events AND columns_cmdline:/.*([nN][gG][rR][oO][kK]|[cC][lL][oO][uU][dD][fF][lL][aA][rR][eE][dD]|[aA][nN][yY][dD][eE][sS][kK]|[tT][eE][aA][mM][vV][iI][eE][wW][eE][rR]|[rR][uU][sS][tT][dD][eE][sS][kK]|[cC][hH][iI][sS][eE][lL]|[tT][aA][iI][lL][sS][cC][aA][lL][eE]|[zZ][eE][rR][oO][tT][iI][eE][rR]|[fF][rR][pP][cC]).*/
+```
+
 **macOS - Неудачная попытка sudo (неверный пароль)**
 
 ```
 log_type:macos_unified AND processImagePath:"/usr/bin/sudo" AND message:"incorrect password"
+```
+
+**macOS - Остановка агентов сбора логов и защиты (launchctl)**
+
+```
+log_type:macos_osquery AND name:es_process_events AND columns_cmdline:/.*launchctl[ ]+(bootout|unload|remove|disable|kill).*(osquery|filebeat|graylog|bizone|bi[.]zone|velociraptor|hostdeck|socketfilterfw|endpointsecurity).*/
 ```
 
 **macOS - Передача данных наружу (scp, rsync, nc, socat)**
@@ -714,10 +857,28 @@ log_type:macos_wifi_usb AND message:(hostNotificationUSBDeviceInserted AND (iPad
 log_type:macos_unified AND processImagePath:\/kernel AND senderImagePath:"\/System\/Library\/Extensions\/IOUSBMassStorageDriver.kext\/Contents\/MacOS\/IOUSBMassStorageDriver"
 ```
 
+**macOS - Поиск паролей в файлах (grep -r по / и ~)**
+
+```
+log_type:macos_osquery AND name:es_process_events AND columns_cmdline:/.*(grep|rg|find)[ ]+(-[a-zA-Z]*[rR][a-zA-Z]*[ ]+)+.*([pP][aA][sS][sS][wW][oO][rR][dD]|[pP][aA][sS][sS][wW][dD]|[sS][eE][cC][rR][eE][tT]|[cC][rR][eE][dD][eE][nN][tT][iI][aA][lL]|[aA][pP][iI][kK][eE][yY]|[iI][dD]_[rR][sS][aA]|[kK][dD][bB][xX]).*[ ](\/|~|[$]HOME|\/Users[^ ]*)/ AND NOT columns_cmdline:/.*BatchMode.*/
+```
+
+**macOS - Сканеры сети (nmap, masscan, arp-scan)**
+
+```
+log_type:macos_osquery AND name:es_process_events AND columns_cmdline:/.*([nN][mM][aA][pP]|[mM][aA][sS][sS][cC][aA][nN]|[aA][rR][pP]-[sS][cC][aA][nN]|[nN][eE][tT][dD][iI][sS][cC][oO][vV][eE][rR]|[nN][bB][tT][sS][cC][aA][nN]|[fF][pP][iI][nN][gG]|[zZ][mM][aA][pP]).*/
+```
+
 **macOS - Создание пользователя или изменение групп**
 
 ```
 name:es_process_events AND columns_path:("/usr/bin/dscl" OR "/usr/sbin/sysadminctl" OR "/usr/sbin/dseditgroup") AND message:("-create" OR "-append" OR "-addUser" OR "-edit")
+```
+
+**macOS - Утилиты выгрузки в облако (rclone, MEGAsync)**
+
+```
+log_type:macos_osquery AND name:es_process_events AND columns_cmdline:/.*([rR][cC][lL][oO][nN][eE]|[mM][eE][gG][aA][sS][yY][nN][cC]|[mM][eE][gG][aA][cC][mM][dD]).*/
 ```
 
 **macOS - Элемент входа через sfltool или osascript**

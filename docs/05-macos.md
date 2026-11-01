@@ -152,3 +152,15 @@ BI.ZONE Triage (процессы, сеть, autoruns, baseline). О нём — �
 
 Ещё два алерта на тишину отдельных хостов (Mac mini и MacBook-Pro) лежат в [health-event-definitions.json](../graylog/health-event-definitions.json). Ноутбук может уснуть, поэтому для него окно 3 часа и низкий приоритет. Имена хостов (`macminim2`, `macbook-pro`) и исключения под твои скрипты замени на свои.
 
+
+### Ещё 5 алертов по матрице MITRE (волна 1)
+
+Определения добавлены в [macos-event-definitions.json](../graylog/macos-event-definitions.json). Проверены на истории за 30 дней; «0» значит, что в логах такого не было, запрос проверен только на корректность.
+
+| Алерт | Что ловит | Приоритет | За 30 дней |
+|---|---|---|---|
+| Остановка агентов | `launchctl bootout/unload/remove/disable` для osquery, filebeat, Graylog, Bi.Zone, Velociraptor, HostDeck | 2 | 6 |
+| Утилиты удалённого доступа | ngrok, cloudflared, AnyDesk, TeamViewer, RustDesk, chisel, tailscale, zerotier, frpc | 2 | 0 |
+| Выгрузка в облако | rclone, MEGAsync, MEGAcmd | 2 | 0 |
+| Сканеры сети | nmap, masscan, arp-scan, netdiscover, nbtscan, fping, zmap | 2 | 0 |
+| Поиск паролей в файлах | `grep -r`, `rg`, `find` по `/`, `~`, `/Users`; запуски через ssh с BatchMode исключены | 2 | 0 |

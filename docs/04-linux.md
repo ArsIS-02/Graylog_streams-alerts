@@ -169,3 +169,19 @@ Pipeline подключается к потоку с логами auditd. Есл
 
 > ⚠️ Правило про привилегированные контейнеры за месяц не сработало ни разу, проверить формат аргументов на живом запуске `docker run --privileged` стоит самому. Алертов про PAM, `/etc/ld.so.preload`, профили оболочки (`/etc/profile.d`, `.bashrc`) и чтение ключей и конфигов (`id_rsa`, `.kube/config`) пока нет: в auditd нет правил-наблюдателей на эти пути и событий в логах тоже. Добавь в auditd `-w /etc/pam.d -p wa -k pam_config`, `-w /etc/ld.so.preload -p wa -k ld_preload`, `-w /etc/profile.d -p wa -k shell_profile`, затем правила по этим ключам заводятся так же, как остальные.
 
+
+### Ещё 7 алертов по матрице MITRE (волна 1)
+
+Определения добавлены в [linux-event-definitions.json](../graylog/linux-event-definitions.json). Проверены на истории за 30 дней; «0» значит, что в логах такого не было, запрос проверен только на корректность.
+
+| Алерт | Что ловит | Приоритет | За 30 дней |
+|---|---|---|---|
+| Остановка служб аудита и защиты | `SERVICE_STOP` для auditd, rsyslog, wazuh, filebeat, sshd, firewalld; постоянно перезапускающийся `filebeat-wazuh` исключён | 2 | 9 |
+| Утилиты удалённого доступа | ngrok, cloudflared, AnyDesk, TeamViewer, RustDesk, chisel, tailscale, zerotier, frpc, plink | 2 | 0 |
+| Выгрузка в облако | rclone, MEGAcmd, megatools | 2 | 0 |
+| Веб-сервер запустил оболочку | uid 48 (apache) или 33 (www-data) запустил bash; `redos-raspi` и `homeserver` исключены, там это штатно | 3 | 0 |
+| Сканеры сети | nmap, masscan, arp-scan, netdiscover, nbtscan, fping, zmap | 2 | 0 |
+| Вход root по SSH | `USER_LOGIN` по sshd, `acct=root`, успех | 3 | 0 |
+| Поиск паролей в файлах | `grep -r`, `find`, `rg` со словами password, secret, id_rsa, api_key | 2 | 0 |
+
+Что не вошло. Интерактивный SSH-вход как признак перемещения: за месяц 43 срабатывания от обычной работы.
