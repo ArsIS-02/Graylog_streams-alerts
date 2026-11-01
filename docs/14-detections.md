@@ -1,13 +1,13 @@
 # Каталог детектов Graylog
 
-> Все правила (event definitions) лаборатории в одном месте: какой лог проверяется, по какому условию, как коррелируются события, к какой тактике и технике MITRE ATT&CK относятся. Всего **202** правил, из них **172** привязаны к технике ATT&CK v20 (108 разных техник). Остальные описывают здоровье сервисов и тишину в логах: атак они не ловят.
+> Все правила (event definitions) лаборатории в одном месте: какой лог проверяется, по какому условию, как коррелируются события, к какой тактике и технике MITRE ATT&CK относятся. Всего **218** правил, из них **188** привязаны к технике ATT&CK v20 (116 разных техник). Остальные описывают здоровье сервисов и тишину в логах: атак они не ловят.
 
 Страница собирается скриптом из выгрузки Graylog и руками не правится: [как обновить](#как-обновить-каталог). Запросы очищены: IP, MAC, отпечатки ключей и белые списки заменены на `<IP>`, `<MAC>`, `<белый список>`. Готовые определения для импорта лежат в `graylog/*-event-definitions.json`, соответствие техникам подробно описано в [graylog/mitre](../graylog/mitre/README.md).
 
 ## Содержание
 
 - [Покрытие: тактики × платформы](#покрытие-тактики--платформы)
-- [Windows](#windows) — 43
+- [Windows](#windows) — 59
 - [Linux](#linux) — 50
 - [macOS (osquery и unified log)](#macos-osquery-и-unified-log) — 50
 - [macOS (BI.ZONE Triage)](#macos-bizone-triage) — 9
@@ -26,27 +26,29 @@
 | Reconnaissance (Разведка) |  |  |  | 1 |  |  | **1** |
 | Initial Access (Первоначальный доступ) | 2 | 3 | 3 | 1 | 2 | 1 | **12** |
 | Execution (Выполнение) | 6 | 4 | 7 |  |  |  | **17** |
-| Persistence (Закрепление) | 7 | 9 | 12 | 1 | 3 |  | **32** |
-| Privilege Escalation (Повышение привилегий) | 1 | 7 | 6 |  | 2 |  | **16** |
+| Persistence (Закрепление) | 14 | 9 | 12 | 1 | 3 |  | **39** |
+| Privilege Escalation (Повышение привилегий) | 2 | 7 | 6 |  | 2 |  | **17** |
 | Stealth (Скрытность) | 4 | 4 | 4 |  |  |  | **12** |
-| Defense Impairment (Подавление защиты) | 5 | 6 | 6 | 1 | 1 |  | **19** |
-| Credential Access (Доступ к учётным данным) | 6 | 4 | 8 | 3 | 5 | 1 | **27** |
+| Defense Impairment (Подавление защиты) | 6 | 6 | 6 | 1 | 1 |  | **20** |
+| Credential Access (Доступ к учётным данным) | 11 | 4 | 8 | 3 | 5 | 1 | **32** |
 | Discovery (Исследование среды) | 2 | 2 | 1 |  | 1 |  | **6** |
-| Lateral Movement (Перемещение) | 2 | 1 | 2 | 1 |  |  | **6** |
+| Lateral Movement (Перемещение) | 3 | 1 | 2 | 1 |  |  | **7** |
 | Collection (Сбор данных) | 1 | 1 | 2 |  |  |  | **4** |
 | Command and Control (управление, C2) | 3 | 3 | 2 |  |  |  | **8** |
 | Exfiltration (Вывод данных) | 1 | 2 | 2 |  |  |  | **5** |
 | Impact (Воздействие) | 2 | 3 | 2 |  |  |  | **7** |
 | Без техники (служебные) | 1 | 1 | 2 | 1 | 9 | 16 | **30** |
-| **Всего** | **43** | **50** | **59** | **9** | **23** | **18** | **202** |
+| **Всего** | **58** | **50** | **59** | **9** | **23** | **18** | **218** |
 
 ## Windows
 
-Sysmon, Security, PowerShell, Defender; поток WindowsLogs. Правил: 43. Сортировка: сначала высокий приоритет.
+Sysmon, Security, PowerShell, Defender; поток WindowsLogs. Правил: 59. Сортировка: сначала высокий приоритет.
 
 | Правило | Приоритет | Источник логов | Что проверяет | Корреляция | Тактика | Техника |
 |---|---|---|---|---|---|---|
+| DCSync: репликация каталога не от контроллера домена (4662) | высокий | WindowsLogs<br>канал Security, EventID 4662 | Чтение прав репликации каталога учётной записью, которая не является компьютером. Так атака DCSync забирает хэши всех паролей. Работает только при включённой SACL на корне домена. | каждое событие; повтор не чаще раза в 1 ч | Credential Access | `T1003.006` DCSync |
 | Defender обнаружил угрозу или отключён | высокий | WindowsLogs<br>EventID 1116, 1117, 5001, 5010, 5012 | Defender обнаружил или обезвредил угрозу (1116, 1117) либо защита в реальном времени отключена (5001, 5010, 5012). | каждое событие | Defense Impairment | `T1685` Disable or Modify Tools |
+| Kerberoasting: билет службы с шифрованием RC4 (4769) | высокий | WindowsLogs<br>канал Security, EventID 4769 | Запрошен билет службы с шифрованием RC4 (0x17) к учётной записи службы, не к компьютеру. Так выглядит Kerberoasting: атакующий забирает билеты, чтобы подобрать пароль службы офлайн.… | каждое событие; повтор не чаще раза в 1 ч | Credential Access | `T1558.003` Kerberoasting |
 | Office, wscript или mshta создал исполняемый файл | высокий | WindowsLogs<br>канал Microsoft-Windows-Sysmon/Operational, EventID 11 | Sysmon 11: Office, wscript, cscript или mshta записал exe, dll, scr, hta, js, vbs, ps1 или bat в Temp, AppData, Public, ProgramData, Downloads, PerfLogs. powershell не включён: он… | каждое событие | Execution | `T1204.002` Malicious File<br>`T1105` |
 | PowerShell с закодированной командой | высокий | WindowsLogs<br>EventID 1 | PowerShell запущен с -EncodedCommand или декодирует Base64. Так прячут вредоносные скрипты. | каждое событие | Execution | `T1059.001` PowerShell<br>`T1027.010` |
 | PowerShell скачивает и исполняет код | высокий | WindowsLogs<br>EventID 4104 | Script Block Logging (4104): DownloadString, Net.WebClient, Invoke-WebRequest или IEX. Типичный загрузчик. | каждое событие | Execution | `T1059.001` PowerShell<br>`T1105` |
@@ -54,9 +56,12 @@ Sysmon, Security, PowerShell, Defender; поток WindowsLogs. Правил: 43
 | wscript, cscript, mshta или regsvr32 ходит во внешнюю сеть | высокий | WindowsLogs<br>канал Microsoft-Windows-Sysmon/Operational, EventID 3 | Sysmon 3: исходящее соединение на внешний IP от wscript, cscript, mshta или regsvr32. Эти программы почти не ходят в сеть сами, поэтому соединение похоже на загрузчик или канал… | каждое событие | Stealth | `T1218` System Binary Proxy Execution<br>`T1071.001` |
 | Вход из неизвестной сети (4624, тип 3 или 10) | высокий | WindowsLogs<br>канал Security, EventID 4624 | Сетевой вход (тип 3) или RDP (тип 10) с адреса, которого нет в справочнике homelab-subnets (поле src_zone не заполнено). Требует pipeline «homelab: windows enrichment» и обновлённую… | каждое событие | Initial Access | `T1078` Valid Accounts<br>`T1021` |
 | Дамп учётных данных (reg save, comsvcs, ntdsutil) | высокий | WindowsLogs<br>EventID 1 | Выгрузка кустов SAM/SECURITY/SYSTEM через reg save, дамп памяти через comsvcs.dll MiniDump или копирование NTDS через ntdsutil. | каждое событие | Credential Access | `T1003.002` Security Account Manager<br>`T1003.001`, `T1003.003` |
+| Добавление в группу администраторов (4728, 4732, 4756) | высокий | WindowsLogs<br>канал Security, EventID 4728, 4732, 4756 | В привилегированную группу (администраторы, администраторы домена, предприятия, схемы) добавлен участник. | каждое событие; повтор не чаще раза в 1 ч | Privilege Escalation | `T1098` Account Manipulation<br>`T1078.002` |
 | Добавление в локальные администраторы (командная строка) | высокий | WindowsLogs<br>EventID 1 | net localgroup administrators /add или Add-LocalGroupMember. Дополняет алерт по событиям 4728/4732 для случаев, когда аудит групп отключён. | каждое событие | Persistence | `T1098` Account Manipulation |
 | Доступ к памяти LSASS | высокий | WindowsLogs<br>EventID 10 | Процесс открыл память lsass.exe (Sysmon 10). Типичный признак кражи учётных данных (mimikatz, procdump). | каждое событие | Credential Access | `T1003.001` LSASS Memory |
 | Изменение группы «Администраторы домена» | высокий | WindowsLogs | Добавление или удаление учётной записи в группе «Администраторы домена» (net group). Критично: высшие привилегии в домене. | каждое событие | Persistence | `T1098` Account Manipulation |
+| Изменение объектов AD: GPO и AdminSDHolder (5136) | высокий | WindowsLogs<br>канал Security, EventID 5136 | Изменён объект групповой политики или AdminSDHolder. Через них закрепляются и раздают права по всему домену. | каждое событие; повтор не чаще раза в 1 ч | Persistence | `T1484.001` Group Policy Modification<br>`T1098` |
+| Изменение политики аудита (4719) | высокий | WindowsLogs<br>канал Security, EventID 4719 | Изменена политика аудита системы. Атакующий отключает аудит, чтобы не оставлять следов. | каждое событие; повтор не чаще раза в 1 ч | Defense Impairment | `T1685` Disable or Modify Tools |
 | Изменение привилегированных групп и учёток | высокий | WindowsLogs<br>EventID 4720, 4726, 4728, 4732, 4756, 4740, 4724 | Создание/удаление учётки (4720, 4726), сброс пароля (4724), добавление в привилегированную группу (4728, 4732, 4756) или блокировка (4740). Требует включённого аудита управления учётными… | каждое событие | Persistence | `T1098` Account Manipulation |
 | Именованные каналы C2 (Cobalt Strike и аналоги) | высокий | WindowsLogs<br>канал Microsoft-Windows-Sysmon/Operational, EventID 17, 18 | Sysmon 17/18: имена каналов, характерные для Cobalt Strike (msagent_*, postex_*, status_*, MSSE-*-server). Каналы нужны для связи бекона и инъекций. | каждое событие | Stealth | `T1055` Process Injection |
 | Исключения или отключение защиты Defender | высокий | WindowsLogs<br>канал Microsoft-Windows-Sysmon/Operational, EventID 1, EventID 13 | Команда Add-/Set-MpPreference с исключениями или отключением мониторинга, либо запись в ключ Windows Defender\Exclusions (Sysmon 13). | каждое событие | Defense Impairment | `T1685` Disable or Modify Tools |
@@ -67,13 +72,19 @@ Sysmon, Security, PowerShell, Defender; поток WindowsLogs. Правил: 43
 | Очистка журнала событий | высокий | WindowsLogs<br>EventID 1102, 104 | Журнал Security (1102) или System (104) очищен. Почти всегда признак заметания следов. | каждое событие | Defense Impairment | `T1685.005` Clear Windows Event Logs |
 | Подбор пароля (5+ ошибок входа 4625 за 5 мин) | высокий | WindowsLogs<br>EventID 4625 | 5 и более неудачных входов (Event ID 4625) на одном хосте за 5 минут. Возможен брутфорс, в том числе учётной записи администратора. | число событий ≥ 5 за 5 мин, группировка по source | Credential Access | `T1110` Brute Force |
 | Подбор пароля и успешный вход с одного IP (4625 и 4624) | высокий | WindowsLogs<br>EventID 4624, 4625 | С одного адреса за 15 минут 5 и более сетевых или RDP-входов, среди которых есть и неудачные (4625), и успешные (4624). Так выглядит подбор пароля, закончившийся успехом. | число событий ≥ 5 за 15 мин, группировка по IpAddress | Credential Access | `T1110` Brute Force<br>`T1078` |
+| Подбор пароля на DC по Kerberos (10+ ошибок 4771 за 5 мин) | высокий | WindowsLogs<br>канал Security, EventID 4771 | Десять и более ошибок предварительной проверки Kerberos (4771) с одного адреса за 5 минут. Подбор пароля к доменным учётным записям. | число событий ≥ 10 за 5 мин, группировка по IpAddress | Credential Access | `T1110.001` Password Guessing<br>`T1110.003` |
+| Подбор пароля на DC по NTLM (10+ ошибок 4776 за 5 мин) | высокий | WindowsLogs<br>канал Security, EventID 4776 | Десять и более неудачных проверок NTLM (4776) с одного рабочего места за 5 минут. Подбор пароля или забытый пароль в службе. | число событий ≥ 10 за 5 мин, группировка по Workstation | Credential Access | `T1110.001` Password Guessing<br>`T1110.003` |
+| Постоянная подписка WMI (5861) | высокий | WindowsLogs<br>канал Microsoft-Windows-WMI-Activity/Operational, EventID 5861 | Создана постоянная подписка на события WMI. Этим способом закрепляются без файлов. | каждое событие; повтор не чаще раза в 1 ч | Persistence | `T1546.003` Windows Management Instrumentation Event Subscription |
 | Признаки шифровальщика (расширения и записки) | высокий | WindowsLogs<br>канал Microsoft-Windows-Sysmon/Operational, EventID 11 | Создан файл с расширением известного шифровальщика (locked, lockbit, akira, conti и другие) или файл-записка с требованием выкупа. | каждое событие; повтор не чаще раза в 1 ч | Impact | `T1486` Data Encrypted for Impact |
+| Создание, удаление или изменение доверия домена (4706/4707/4716) | высокий | WindowsLogs<br>канал Security, EventID 4706, 4707, 4716 | Создано, удалено или изменено доверительное отношение между доменами. Тип и направление доверия, а также отключение фильтрации SID видно в тексте события. Плановые изменения (например,… | каждое событие; повтор не чаще раза в 1 ч | Defense Evasion, Privilege Escalation | `T1484.002` Domain Trust Modification |
 | Создание/удаление локального пользователя (net user) | высокий | WindowsLogs<br>EventID 1 | Создан или удалён локальный пользователь командой net user /add или /delete (Sysmon Event 1). | каждое событие | Persistence | `T1136.001` Local Account |
 | Удаление теневых копий | высокий | WindowsLogs<br>EventID 1 | Удаление теневых копий или отключение восстановления (vssadmin, wmic shadowcopy, bcdedit). Типичный шаг шифровальщика. | каждое событие | Impact | `T1490` Inhibit System Recovery |
 | DNS-запрос к туннелям и файлообменникам | средний | WindowsLogs<br>канал Microsoft-Windows-Sysmon/Operational, EventID 22 | Sysmon 22: запрос к ngrok, pastebin, transfer.sh, trycloudflare, duckdns, anonfiles, serveo. Через них обходят периметр и забирают данные. | каждое событие | Command and Control | `T1572` Protocol Tunneling<br>`T1102` |
 | LOLBins (certutil, mshta, bitsadmin, regsvr32) | средний | WindowsLogs<br>EventID 1 | Системные утилиты в роли загрузчика: certutil -urlcache, mshta, bitsadmin, regsvr32 /i:http (Squiblydoo). | каждое событие | Stealth | `T1218` System Binary Proxy Execution<br>`T1218.005`, `T1218.010`, `T1105` |
 | Автозагрузка через ключ реестра Run | средний | WindowsLogs<br>EventID 13 | Запись в ключ CurrentVersion\Run (Sysmon 13) не известным приложением. Классический способ закрепления. | каждое событие | Persistence | `T1547.001` Registry Run Keys / Startup Folder |
+| Блокировка учётной записи (4740) | средний | WindowsLogs<br>канал Security, EventID 4740 | Учётная запись заблокирована после череды ошибок входа. Возможен подбор пароля. | каждое событие; повтор не чаще раза в 1 ч | Credential Access | `T1110` Brute Force |
 | Вход по сети или RDP ночью (00:00-06:00) | средний | WindowsLogs<br>EventID 4624 | Успешный сетевой вход или вход по RDP под обычной (не машинной) учёткой ночью, с 00:00 до 06:00 по Екатеринбургу. Правило проверяется только в ночные часы. | каждое событие; повтор не чаще раза в 1 ч | Initial Access | `T1078` Valid Accounts<br>`T1021.001` |
+| Задание планировщика с Temp, AppData или Public (4698) | средний | WindowsLogs<br>канал Security, EventID 4698 | Создано задание планировщика, в котором упомянуты временные или пользовательские папки. | каждое событие; повтор не чаще раза в 1 ч | Persistence | `T1053.005` Scheduled Task |
 | Закрепление через IFEO Debugger, AppInit_DLLs и Winlogon | средний | WindowsLogs<br>канал Microsoft-Windows-Sysmon/Operational, EventID 12, 13 | Sysmon 12/13: значения Debugger, GlobalFlag и VerifierDlls в Image File Execution Options, AppInit_DLLs, Winlogon Shell и Userinit. RunOnce и MitigationOptions не включены: их постоянно… | каждое событие | Persistence | `T1546.012` Image File Execution Options Injection<br>`T1546.010`, `T1547.004` |
 | Запуск утилит удалённого доступа и туннелей | средний | WindowsLogs<br>канал Microsoft-Windows-Sysmon/Operational, EventID 1 | Запущена утилита удалённого доступа или туннелирования (ngrok, cloudflared, AnyDesk, TeamViewer, RustDesk, chisel, tailscale, plink и аналоги). За 30 дней в логах не встречалась. | каждое событие; повтор не чаще раза в 1 ч | Command and Control | `T1219` Remote Access Tools<br>`T1572` |
 | Маскировка под системный процесс (svchost, lsass, csrss вне System32) | средний | WindowsLogs<br>канал Microsoft-Windows-Sysmon/Operational, EventID 1 | Процесс с именем системного (svchost, lsass, csrss и другие) запущен не из System32, SysWOW64 или WinSxS. Так прячут вредоносный файл. За 30 дней более 330 тысяч запусков таких имён, все… | каждое событие; повтор не чаще раза в 1 ч | Stealth | `T1036.005` Match Legitimate Resource Name or Location |
@@ -83,7 +94,12 @@ Sysmon, Security, PowerShell, Defender; поток WindowsLogs. Правил: 43
 | Подозрительно длинные DNS-имена (туннель, DGA) | средний | WindowsLogs<br>канал Microsoft-Windows-Sysmon/Operational, EventID 22 | DNS-запрос с меткой длиннее 40 символов или всё имя длиннее 70. Так выглядят DNS-туннели и сгенерированные домены. Служебные записи AD (_ldap, _kerberos, _msdcs) и крупные CDN исключены. | каждое событие; повтор не чаще раза в 1 ч | Command and Control | `T1071.004` DNS<br>`T1568.002` |
 | Поиск паролей в файлах (findstr, Select-String) | средний | WindowsLogs<br>канал Microsoft-Windows-Sysmon/Operational, EventID 1 | Рекурсивный поиск слов password, secret, credential, id_rsa и подобных по файлам (findstr /s, Select-String -Recurse). Проверки политики паролей через secedit исключены. | каждое событие; повтор не чаще раза в 1 ч | Credential Access | `T1552.001` Credentials In Files |
 | Разведка в домене (nltest, dsquery, AdFind, SharpHound) | средний | WindowsLogs<br>канал Microsoft-Windows-Sysmon/Operational, EventID 1 | Запущены утилиты разведки в Active Directory (nltest, dsquery, AdFind, SharpHound, ldifde, csvde) или команды Get-AD* и nltest /dclist, /domain_trusts. | каждое событие; повтор не чаще раза в 1 ч | Discovery | `T1087.002` Domain Account<br>`T1018`, `T1482` |
+| Сброс пароля учётной записи (4724) | средний | WindowsLogs<br>канал Security, EventID 4724 | Кто-то сбросил пароль другой учётной записи. Плановые сбросы тоже сработают. | каждое событие; повтор не чаще раза в 1 ч | Persistence | `T1098` Account Manipulation |
+| Создана компьютерная учётная запись пользователем (4741) | средний | WindowsLogs<br>канал Security, EventID 4741 | Компьютерную учётную запись создал пользователь, а не компьютер. Может быть присоединением к домену, а может быть атакой через MachineAccountQuota. | каждое событие; повтор не чаще раза в 1 ч | Persistence | `T1136.002` Domain Account |
+| Создана учётная запись (4720) | средний | WindowsLogs<br>канал Security, EventID 4720 | Создана новая учётная запись пользователя. Нужно для закрепления. | каждое событие; повтор не чаще раза в 1 ч | Persistence | `T1136` Create Account<br>`T1136.001`, `T1136.002` |
 | Создание задачи через schtasks | средний | WindowsLogs<br>EventID 1 | Запланированная задача создана командой schtasks /create. Частый способ закрепления и запуска. | каждое событие | Execution | `T1053.005` Scheduled Task |
+| Удалённый вход по WinRM (91) | средний | WindowsLogs<br>канал Microsoft-Windows-WinRM/Operational, EventID 91 | Создана сессия WinRM (удалённое управление PowerShell). | каждое событие; повтор не чаще раза в 1 ч | Lateral Movement | `T1021.006` Windows Remote Management |
+| Установка службы вне System32 и Program Files (4697) | средний | WindowsLogs<br>канал Security, EventID 4697 | Установлена служба, файл которой лежит не в System32 и не в Program Files. | каждое событие; повтор не чаще раза в 1 ч | Persistence | `T1543.003` Windows Service<br>`T1569.002` |
 | Утилиты выгрузки в облако (rclone, MEGAsync, WinSCP) | средний | WindowsLogs<br>канал Microsoft-Windows-Sysmon/Operational, EventID 1 | Запущена утилита синхронизации или выгрузки файлов в облако (rclone, MEGAsync, MEGAcmd, WinSCP, pCloud). Так выводят данные наружу. | каждое событие; повтор не чаще раза в 1 ч | Exfiltration | `T1567.002` Exfiltration to Cloud Storage<br>`T1048` |
 | Defender: сигнатуры не обновлялись 7 дней | низкий | WindowsLogs<br>канал Microsoft-Windows-Windows Defender/Operational, EventID 2000 | За 7 дней ни один Windows-хост не прислал событие об обновлении сигнатур Defender (2000). Защита работает с устаревшей базой или хосты не в сети. | число событий < 1 за 7 сут; повтор не чаще раза в 1 сут | — | — |
 | Архивация не из проводника (7z, WinRAR, Compress-Archive) | низкий | WindowsLogs<br>канал Microsoft-Windows-Sysmon/Operational, EventID 1 | Запуск архиватора (7-Zip, WinRAR, zip) не из проводника, либо Compress-Archive и tar -c. Установщики во временных папках и ручной запуск из проводника исключены. | каждое событие; повтор не чаще раза в 1 ч | Collection | `T1560.001` Archive via Utility |
@@ -92,10 +108,22 @@ Sysmon, Security, PowerShell, Defender; поток WindowsLogs. Правил: 43
 
 <details><summary>Запросы Graylog (очищенные)</summary>
 
+**Windows - DCSync: репликация каталога не от контроллера домена (4662)**
+
+```
+win_channel:Security AND win_event_id:4662 AND winlogbeat_winlog_event_data_Properties:/.*(1131[fF]6[aA][aA]-9[cC]07-11[dD]1-[fF]79[fF]-00[cC]04[fF][cC]2[dD][cC][dD]2|1131[fF]6[aA][dD]-9[cC]07-11[dD]1-[fF]79[fF]-00[cC]04[fF][cC]2[dD][cC][dD]2|89[eE]95[bB]76-444[dD]-4[cC]62-991[aA]-0[fF][aA][cC][bB][eE][dD][aA]640[cC]).*/ AND NOT winlogbeat_winlog_event_data_SubjectUserName:/.*[$]/
+```
+
 **Windows - Defender обнаружил угрозу или отключён**
 
 ```
 win_event_id:(1116 OR 1117 OR 5001 OR 5010 OR 5012)
+```
+
+**Windows - Kerberoasting: билет службы с шифрованием RC4 (4769)**
+
+```
+win_channel:Security AND win_event_id:4769 AND winlogbeat_winlog_event_data_TicketEncryptionType:"0x17" AND NOT winlogbeat_winlog_event_data_ServiceName:"krbtgt" AND NOT winlogbeat_winlog_event_data_ServiceName:/.*[$]/
 ```
 
 **Windows - Office, wscript или mshta создал исполняемый файл**
@@ -140,6 +168,12 @@ win_channel:Security AND win_event_id:4624 AND winlogbeat_winlog_event_data_Logo
 win_event_id:1 AND (message:("reg save hklm sam" OR "reg save hklm security" OR "reg save hklm system" OR "reg.exe save hklm sam" OR "reg.exe save hklm security" OR "reg.exe save hklm system" OR "reg save hkey_local_machine sam" OR "reg save hkey_local_machine security" OR "reg save hkey_local_machine system") OR (message:"comsvcs.dll" AND message:minidump) OR (message:"ntdsutil.exe" AND message:(ifm OR ntds)))
 ```
 
+**Windows - Добавление в группу администраторов (4728, 4732, 4756)**
+
+```
+win_channel:Security AND win_event_id:(4728 OR 4732 OR 4756) AND winlogbeat_winlog_event_data_TargetUserName:(Администраторы OR "Администраторы домена" OR "Администраторы предприятия" OR "Администраторы схемы" OR Administrators OR "Domain Admins" OR "Enterprise Admins" OR "Schema Admins")
+```
+
 **Windows - Добавление в локальные администраторы (командная строка)**
 
 ```
@@ -156,6 +190,18 @@ win_event_id:10 AND message:"lsass.exe" AND NOT winlogbeat_winlog_event_data_Sou
 
 ```
 message:"net group" AND message:("/add" OR "/delete") AND message:"Администраторы домена"
+```
+
+**Windows - Изменение объектов AD: GPO и AdminSDHolder (5136)**
+
+```
+win_channel:Security AND win_event_id:5136 AND (winlogbeat_winlog_event_data_ObjectClass:groupPolicyContainer OR winlogbeat_winlog_event_data_ObjectDN:/.*[aA][dD][mM][iI][nN][sS][dD][hH][oO][lL][dD][eE][rR].*/)
+```
+
+**Windows - Изменение политики аудита (4719)**
+
+```
+win_channel:Security AND win_event_id:4719
 ```
 
 **Windows - Изменение привилегированных групп и учёток**
@@ -218,10 +264,34 @@ winlogbeat_event_code:4625 AND winlogbeat_event_outcome:failure
 winlogbeat_event_code:(4624 OR 4625) AND winlogbeat_winlog_event_data_LogonType:(3 OR 10) AND _exists_:winlogbeat_winlog_event_data_IpAddress AND NOT winlogbeat_winlog_event_data_IpAddress:("-" OR "::1" OR "127.0.0.1" OR "::ffff:127.0.0.1")
 ```
 
+**Windows - Подбор пароля на DC по Kerberos (10+ ошибок 4771 за 5 мин)**
+
+```
+win_channel:Security AND win_event_id:4771
+```
+
+**Windows - Подбор пароля на DC по NTLM (10+ ошибок 4776 за 5 мин)**
+
+```
+win_channel:Security AND win_event_id:4776 AND NOT winlogbeat_winlog_event_data_Status:"0x0"
+```
+
+**Windows - Постоянная подписка WMI (5861)**
+
+```
+win_channel:"Microsoft-Windows-WMI-Activity/Operational" AND win_event_id:5861
+```
+
 **Windows - Признаки шифровальщика (расширения и записки)**
 
 ```
 win_channel:"Microsoft-Windows-Sysmon/Operational" AND win_event_id:11 AND winlogbeat_winlog_event_data_TargetFilename:/.*([.](locked|encrypted|crypt|crypted|enc|lockbit|akira|conti|ryuk|wncry|wnry|blackcat|hive|royal|basta|babuk|djvu|zepto|cerber|petya|phobos|mallox|makop)|[\\]([hH][oO][wW]_[tT][oO]_[dD][eE][cC][rR][yY][pP][tT]|[dD][eE][cC][rR][yY][pP][tT]_[iI][nN][sS][tT][rR][uU][cC][tT][iI][oO][nN]|[rR][eE][sS][tT][oO][rR][eE]_[fF][iI][lL][eE][sS]|[rR][eE][aA][dD]_[mM][eE]_[nN][oO][wW]|_[rR][eE][aA][dD][mM][eE]|[hH][oO][wW]_[tT][oO]_[rR][eE][cC][oO][vV][eE][rR]|[rR][eE][cC][oO][vV][eE][rR]_[fF][iI][lL][eE][sS]|[rR][eE][aA][dD][mM][eE]_[tT][oO]_[rR][eE][sS][tT][oO][rR][eE]|@[pP][lL][eE][aA][sS][eE]_[rR][eE][aA][dD]_[mM][eE]@|@[wW][aA][nN][aA][dD][eE][cC][rR][yY][pP][tT][oO][rR]@)[^\\]*)/
+```
+
+**Windows - Создание, удаление или изменение доверия домена (4706/4707/4716)**
+
+```
+win_channel:Security AND win_event_id:(4706 OR 4707 OR 4716)
 ```
 
 **Windows - Создание/удаление локального пользователя (net user)**
@@ -254,10 +324,22 @@ win_event_id:1 AND message:("urlcache" OR "mshta.exe" OR "bitsadmin" OR "scrobj.
 win_event_id:13 AND message:"CurrentVersion\\Run" AND NOT win_image:("C:\\Program Files\\Yandex\\YandexBrowser\\Application\\browser.exe" OR "C:\\Program Files\\CCleaner\\CCleaner64.exe" OR "C:\\ProgramData\\Wargaming.net\\GameCenter\\wgc.exe" OR "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe")
 ```
 
+**Windows - Блокировка учётной записи (4740)**
+
+```
+win_channel:Security AND win_event_id:4740
+```
+
 **Windows - Вход по сети или RDP ночью (00:00-06:00)**
 
 ```
 winlogbeat_event_code:4624 AND winlogbeat_winlog_event_data_LogonType:(3 OR 10) AND NOT winlogbeat_winlog_event_data_TargetUserName:/.*[$]/ AND NOT winlogbeat_winlog_event_data_IpAddress:("-" OR "::1" OR "127.0.0.1")
+```
+
+**Windows - Задание планировщика с Temp, AppData или Public (4698)**
+
+```
+win_channel:Security AND win_event_id:4698 AND message:(Temp OR AppData OR Public)
 ```
 
 **Windows - Закрепление через IFEO Debugger, AppInit_DLLs и Winlogon**
@@ -314,10 +396,40 @@ win_channel:"Microsoft-Windows-Sysmon/Operational" AND win_event_id:1 AND winlog
 win_channel:"Microsoft-Windows-Sysmon/Operational" AND win_event_id:1 AND (winlogbeat_winlog_event_data_Image:/.*([nN][lL][tT][eE][sS][tT]|[dD][sS][qQ][uU][eE][rR][yY]|[aA][dD][fF][iI][nN][dD]|[sS][hH][aA][rR][pP][hH][oO][uU][nN][dD]|[bB][lL][oO][oO][dD][hH][oO][uU][nN][dD]|[lL][dD][iI][fF][dD][eE]|[cC][sS][vV][dD][eE]).*/ OR winlogbeat_winlog_event_data_CommandLine:/.*(domain_trusts|dclist|[Gg]et-[Aa][Dd][A-Za-z]+).*/)
 ```
 
+**Windows - Сброс пароля учётной записи (4724)**
+
+```
+win_channel:Security AND win_event_id:4724
+```
+
+**Windows - Создана компьютерная учётная запись пользователем (4741)**
+
+```
+win_channel:Security AND win_event_id:4741 AND NOT winlogbeat_winlog_event_data_SubjectUserName:/.*[$]/
+```
+
+**Windows - Создана учётная запись (4720)**
+
+```
+win_channel:Security AND win_event_id:4720
+```
+
 **Windows - Создание задачи через schtasks**
 
 ```
 win_event_id:1 AND message:"schtasks" AND message:"/create"
+```
+
+**Windows - Удалённый вход по WinRM (91)**
+
+```
+win_channel:"Microsoft-Windows-WinRM/Operational" AND win_event_id:91
+```
+
+**Windows - Установка службы вне System32 и Program Files (4697)**
+
+```
+win_channel:Security AND win_event_id:4697 AND NOT winlogbeat_winlog_event_data_ServiceFileName:/.*([Ss]ystem32|[Pp]rogram [Ff]iles).*/
 ```
 
 **Windows - Утилиты выгрузки в облако (rclone, MEGAsync, WinSCP)**
