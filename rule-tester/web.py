@@ -46,14 +46,14 @@ JOB = {"lock": threading.Lock(), "cur": None, "last": None}
 CACHE = {}
 LIVE = {"t": 0, "data": {}, "running": False, "done": 0, "total": 0, "error": ""}
 MODES = {"queries": "run-queries", "e2e": "run-e2e", "doctor": "doctor", "selftest": "selftest", "harvest": "harvest",
-         "art": "art-verify", "method": "method-verify", "drift": "drift"}
+         "art": "art-verify", "method": "method-verify", "drift": "drift", "fp": "fp-check"}
 MODE_RU = {"queries": "Запросы в тестовом потоке", "e2e": "До алерта", "doctor": "Проверка доступа",
            "selftest": "Самопроверка запросов", "harvest": "Сбор настоящих сообщений",
-           "drift": "Сверка каталога с Graylog"}
+           "drift": "Сверка каталога с Graylog", "fp": "Проверка ложных срабатываний"}
 SETTING_ENV = {"graylog_url": "GRAYLOG_URL", "graylog_token": "GRAYLOG_TOKEN", "gelf": "RT_GELF", "stream": "RT_STREAM",
                "schedule": "RT_SCHEDULE", "schedule_enabled": "RT_SCHEDULE_ENABLED", "e2e_platforms": "RT_E2E_PLATFORMS",
                "insecure": "RT_INSECURE", "ca_file": "RT_CA_FILE"}
-OK_STATUS = ("ПРОШЛО", "СОБЫТИЕ ЕСТЬ")
+OK_STATUS = ("ПРОШЛО", "СОБЫТИЕ ЕСТЬ", "ЧИСТО")
 ADMIN_LOGIN = "admin"  # единственная учётная запись; другие пока не планируются
 
 
@@ -171,7 +171,7 @@ def start_job(mode, platform="", rule="", confirm=False, who="вручную", s
     return job, None
 
 
-STATUS_LINE = re.compile(r"^\s+(ПРОШЛО|ПРОВАЛ|ПРОПУЩЕНО|ОШИБКА ЗАПРОСА|СОБЫТИЕ ЕСТЬ|НЕТ СОБЫТИЯ|РАСХОЖДЕНИЕ)\s")
+STATUS_LINE = re.compile(r"^\s+(ПРОШЛО|ПРОВАЛ|ПРОПУЩЕНО|ОШИБКА ЗАПРОСА|СОБЫТИЕ ЕСТЬ|НЕТ СОБЫТИЯ|РАСХОЖДЕНИЕ|ЧИСТО|ЕСТЬ СОВПАДЕНИЯ)\s")
 TOTAL_LINE = re.compile(r"правил (\d+)")
 
 
