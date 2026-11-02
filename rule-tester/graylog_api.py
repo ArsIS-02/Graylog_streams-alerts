@@ -122,6 +122,13 @@ class Graylog:
         r = self.post("/api/events/search", body)
         return [e.get("event", e) for e in r.get("events", [])]
 
+    def last_event(self, definition_id, lookback_days=366):
+        """Время последнего настоящего события правила (ISO, UTC) или None, если за lookback_days ничего не было.
+        search_events уже сортирует по времени по убыванию, поэтому достаточно одной записи."""
+        since = now_utc() - timedelta(days=lookback_days)
+        evs = self.search_events([definition_id], since, per_page=1)
+        return evs[0].get("timestamp") if evs else None
+
     def count_events(self, definition_id, days):
         """Сколько событий создало правило за последние days суток."""
         since = now_utc() - timedelta(days=days)

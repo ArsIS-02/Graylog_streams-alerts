@@ -4,6 +4,7 @@
 detection-tests/build_tests.py из tests_def.py и держит в соответствии с каталогом и раннерами).
 """
 import json
+import re
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -11,22 +12,35 @@ ROOT = HERE.parent
 DT = ROOT / "detection-tests"
 TESTS = DT / "tests.json"
 
-PLATFORMS = ("windows", "linux", "macos", "freeipa")
-PLATFORM_RU = {"windows": "Windows", "linux": "Linux (auditd)", "macos": "macOS", "freeipa": "FreeIPA"}
-PLATFORM_KEY = {"windows": "WIN", "linux": "LNX", "macos": "MAC", "freeipa": "IPA"}
-PLATFORM_PREFIX = {"windows": "Windows", "linux": "LNX", "macos": "macOS", "freeipa": "FREEIPA"}
+PLATFORMS = ("windows", "linux", "macos", "freeipa", "containers", "keenetic")
+PLATFORM_RU = {"windows": "Windows", "linux": "Linux (auditd)", "macos": "macOS", "freeipa": "FreeIPA",
+               "containers": "Контейнеры", "keenetic": "Keenetic"}
+PLATFORM_KEY = {"windows": "WIN", "linux": "LNX", "macos": "MAC", "freeipa": "IPA", "containers": "CTR", "keenetic": "KEN"}
+PLATFORM_PREFIX = {"windows": "Windows", "linux": "LNX", "macos": "macOS", "freeipa": "FREEIPA",
+                   "containers": "Контейнеры", "keenetic": "KEENETIC"}
 RUNNER = {
     "windows": "windows/Invoke-DetectionTests.ps1",
     "linux": "linux/detection-tests.sh",
     "macos": "macos/detection-tests.sh",
     "freeipa": "freeipa/ipa_detection_tests.py",
+    "containers": "containers/detection-tests.sh",
+    "keenetic": "keenetic/detection-tests.sh",
 }
 HOW_TO_RUN = {
     "windows": "powershell -File {f} -List            (список)\npowershell -File {f} -Id WIN-01,WIN-09 -DryRun\npowershell -File {f} -All            (от администратора)",
     "linux": "sudo ./{f} --list\nsudo ./{f} --id LNX-01,LNX-05\nsudo ./{f} --all",
     "macos": "./{f} --list\n./{f} --all",
     "freeipa": "kinit admin\npython3 {f} --list\npython3 {f} --all",
+    "containers": "./{f} --list\n./{f} --id CTR-01,CTR-05\n./{f} --all\n./{f} --id CTR-07 --container <имя>  (для CTR-07/08/09)",
+    "keenetic": "./{f} --host 192.168.1.1 --list\n./{f} --host 192.168.1.1 --id KEN-01,KEN-02\n"
+                "./{f} --host 192.168.1.1 --all   (KEN-07 и KEN-08 — только по --id, не входят в --all)",
 }
+
+_PREFIX_RE = re.compile(r"\s*[-:]\s")
+
+
+def _platform_of(title):
+    return _PREFIX_RE.split(title, maxsplit=1)[0].strip()
 
 
 def _all_tests():
@@ -80,7 +94,7 @@ def verify(gl, platform, since, until=None):
             if did:
                 events.setdefault(did, []).append(e)
     prefix = PLATFORM_PREFIX[platform]
-    others = [i for t, i in defs.items() if t.split(" - ")[0] == prefix and t not in by]
+    others = [i for t, i in defs.items() if _platform_of(t) == prefix and t not in by]
     extra = {}
     if others:
         for e in gl.search_events(others, since, until, per_page=200):

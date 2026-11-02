@@ -15,8 +15,13 @@ def catalog_meta(path):
             for d in data}
 
 
-def coverage(rules, meta, sample_counts, live):
-    """Тактики → техники → правила; правила без ручных образцов; правила без срабатываний."""
+def coverage(rules, meta, sample_counts, live, art_titles=None, method_titles=None):
+    """Тактики → техники → правила; правила без ручных образцов; правила без срабатываний;
+    матрица покрытия тестами (ручные/настоящие образцы, Atomic Red Team, методика главы 15) —
+    чтобы дыры вроде Контейнеров и Keenetic (вообще без тестов) было видно одним списком,
+    а не приходилось сверять три источника в голове."""
+    art_titles = art_titles or set()
+    method_titles = method_titles or set()
     tactics = {}
     for r in rules:
         m = meta.get(r["title"], {"tactic": "—", "technique": "", "techniques": []})
@@ -25,16 +30,26 @@ def coverage(rules, meta, sample_counts, live):
         t["rules"] += 1
         for tid in (m["techniques"] or ["без техники"]):
             t["techniques"].setdefault(tid, []).append(r["title"])
-    no_manual = [r["title"] for r in rules if not sample_counts.get(r["title"], {}).get("manual")
-                 and r["kind"] != "тишина"]
+    active = [r for r in rules if r["kind"] != "тишина"]
+    no_manual = [r["title"] for r in active if not sample_counts.get(r["title"], {}).get("manual")]
+    no_art = [r["title"] for r in active if r["title"] not in art_titles]
+    no_method = [r["title"] for r in active if r["title"] not in method_titles]
+    uncovered = [r["title"] for r in active if r["title"] not in art_titles and r["title"] not in method_titles
+                 and not sample_counts.get(r["title"], {}).get("manual")]
     quiet = []
+    quiet_last = {}
     if live:
-        quiet = [r["title"] for r in rules if r["kind"] != "тишина" and live.get(r["title"], {}).get("d30") == 0]
+        for r in rules:
+            if r["kind"] != "тишина" and live.get(r["title"], {}).get("d30") == 0:
+                quiet.append(r["title"])
+                quiet_last[r["title"]] = (live.get(r["title"]) or {}).get("last")
     out = [{"tactic": k, "rules": v["rules"],
             "techniques": [{"id": tid, "rules": ts} for tid, ts in sorted(v["techniques"].items())]}
            for k, v in sorted(tactics.items(), key=lambda kv: -kv[1]["rules"])]
-    return {"tactics": out, "no_manual": no_manual, "quiet": quiet,
-            "total": len(rules), "with_manual": len(rules) - len(no_manual)}
+    return {"tactics": out, "no_manual": no_manual, "no_art": no_art, "no_method": no_method,
+            "uncovered": uncovered, "quiet": quiet, "quiet_last": quiet_last, "total": len(rules),
+            "with_manual": len(rules) - len(no_manual),
+            "with_art": len(active) - len(no_art), "with_method": len(active) - len(no_method)}
 
 
 def quality(rules, first_pos_docs):
