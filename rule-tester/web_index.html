@@ -102,7 +102,7 @@ function ask(title,text,danger,okText){return new Promise(res=>{$('#mt').textCon
 function note(text,title){return new Promise(res=>{$('#mt').textContent=title||'Сообщение';$('#mb').textContent=text;const y=$('#myes');y.textContent='Понятно';y.className='btn pri';$('#mno').classList.add('hide');
   $('#modal').classList.add('on');y.onclick=()=>{$('#modal').classList.remove('on');res()}})}
 const isAdmin=()=>ROLE==='admin';
-const OK=['ПРОШЛО','СОБЫТИЕ ЕСТЬ','ЧИСТО'];
+const OK=['ПРОШЛО','СОБЫТИЕ ЕСТЬ','ЧИСТО','ИЗМЕРЕНО'];
 function statusBadge(s){if(!s)return h('span',{class:'badge b-mut'},'нет данных');
   if(OK.includes(s))return h('span',{class:'badge b-ok'},'✓ '+s.toLowerCase());if(s==='ПРОПУЩЕНО')return h('span',{class:'badge b-warn'},'– пропущено');return h('span',{class:'badge b-bad'},'✕ '+s.toLowerCase())}
 function fmtTime(s){return s?s.replace('T',' ').slice(0,16):''}
@@ -232,7 +232,8 @@ async function pRun(q,m){m.textContent='';const sum=await api('/api/summary');
   const modes=[['queries','Запросы в тестовом потоке','Отправляет образцы в тестовый поток и проверяет запросы. Алертов и писем нет.'],['e2e','До алерта','Боевой путь до настоящего события. Создаёт алерты и письма.'],
     ['doctor','Проверка доступа и входа GELF','Токен, определения, поток, отправка тестового сообщения.'],['selftest','Самопроверка запросов','Офлайн: разбор запросов, образцы, замечания.'],['harvest','Сбор настоящих сообщений','Берёт из Graylog реальные сообщения по запросам правил, обезличивает.'],
     ['drift','Сверка каталога с Graylog','Сравнивает detections-source.json с живыми определениями событий: запрос, условие, group_by, приоритет, потоки. Ничего не меняет, только показывает расхождения.'],
-    ['fp','Проверка ложных срабатываний','Берёт недавний «чистый» трафик из боевых потоков (7 дней) и прогоняет через него все запросы правил офлайн — ищет слишком широкие запросы. Ничего не отправляет, алертов и писем нет.']];
+    ['fp','Проверка ложных срабатываний','Берёт недавний «чистый» трафик из боевых потоков (7 дней) и прогоняет через него все запросы правил офлайн — ищет слишком широкие запросы. Ничего не отправляет, алертов и писем нет.'],
+    ['latency','Задержка обнаружения','Офлайн: статистика по уже сохранённым отчётам «до алерта», replay и сверки Atomic Red Team/методики — сколько времени проходит от отправки до события. В Graylog не ходит, только читает локальные отчёты за 30 дней.']];
   let mode=q.get('mode')||'queries';
   const plat=h('select',{},h('option',{value:''},'Все платформы'),...sum.platforms.map(p=>h('option',{value:p},p)));const rule=h('input',{placeholder:'Часть названия правила',style:'flex:1;min-width:200px'});
   const hint=h('div',{class:'mut'});const modeBox=h('div',{class:'row'});
@@ -301,7 +302,7 @@ async function pResults(q,m){const d=await api('/api/history');m.textContent='';
   function drawTabs(){tabs.textContent='';Object.entries(names).forEach(([k,t])=>tabs.append(h('button',{class:tab===k?'on':'',onclick:()=>{tab=k;show()}},t)))}
   function show(){drawTabs();body.textContent='';if(tab==='reports')reports();else if(tab==='compare')cmp();else if(tab==='history')hist();else view(q.get('file'))}
   function reports(){const t=h('table',{},h('tr',{},h('th',{},'Запуск'),h('th',{class:'h'},'Вид'),h('th',{class:'h'},'Область'),h('th',{},'Итог'),h('th',{},'')));
-    d.reports.forEach(r=>t.append(h('tr',{class:'cl',onclick:()=>view(r.file)},h('td',{},fmtTime(r.created)||r.run,h('div',{class:'mut mono'},r.run)),h('td',{class:'h'},r.kind==='queries'?'запросы':r.kind==='e2e'?'до алерта':r.kind==='art'?'Atomic Red Team':r.kind==='method'?'проверка детектов':r.kind==='drift'?'сверка с Graylog':r.kind==='fp'?'ложные срабатывания':r.kind==='replay'?'replay инцидента':r.kind),
+    d.reports.forEach(r=>t.append(h('tr',{class:'cl',onclick:()=>view(r.file)},h('td',{},fmtTime(r.created)||r.run,h('div',{class:'mut mono'},r.run)),h('td',{class:'h'},r.kind==='queries'?'запросы':r.kind==='e2e'?'до алерта':r.kind==='art'?'Atomic Red Team':r.kind==='method'?'проверка детектов':r.kind==='drift'?'сверка с Graylog':r.kind==='fp'?'ложные срабатывания':r.kind==='replay'?'replay инцидента':r.kind==='latency'?'задержка обнаружения':r.kind),
       h('td',{class:'h'},r.meta.platform||r.meta.rule||'все'),h('td',{},stackBar(r.stats),h('div',{class:'mut'},`✓ ${r.stats.passed} · ✕ ${r.stats.failed} · – ${r.stats.skipped}`)),h('td',{}, h('span',{class:'badge b-ac'},'Открыть')))));
     body.append(h('div',{class:'card',style:'overflow:auto'},d.reports.length?t:h('div',{class:'mut'},'Отчётов пока нет.')))}
   function hist(){const t=h('table',{},h('tr',{},h('th',{},'Начало'),h('th',{},'Режим'),h('th',{class:'h'},'Область'),h('th',{class:'h'},'Кто'),h('th',{},'Статус')));
@@ -315,7 +316,7 @@ async function pResults(q,m){const d=await api('/api/history');m.textContent='';
       if(!out.children.length)out.append(h('div',{class:'card mut'},'Различий нет.'))};
     body.append(h('div',{class:'card'},h('h2',{},'Сравнение двух отчётов'),h('div',{class:'row'},h('span',{class:'mut'},'Было:'),a,h('span',{class:'mut'},'Стало:'),b,h('button',{class:'btn pri',onclick:go},'Сравнить'))),out)}
   async function view(file){tab='view';drawTabs();body.textContent='';const r=await api('/api/report?file='+encodeURIComponent(file));const st=r.stats||{};let only=false,qs='';const host=h('div');
-    body.append(h('div',{class:'card'},h('div',{class:'row'},h('b',{},`Отчёт ${r.run} (${({queries:'запросы',e2e:'до алерта',art:'Atomic Red Team',method:'проверка детектов',drift:'сверка с Graylog',fp:'ложные срабатывания',replay:'replay инцидента'})[r.kind]||r.kind})`),h('span',{class:'mut'},fmtTime(r.created)),h('span',{class:'mut'},'версия '+(r.version||'—')),
+    body.append(h('div',{class:'card'},h('div',{class:'row'},h('b',{},`Отчёт ${r.run} (${({queries:'запросы',e2e:'до алерта',art:'Atomic Red Team',method:'проверка детектов',drift:'сверка с Graylog',fp:'ложные срабатывания',replay:'replay инцидента',latency:'задержка обнаружения'})[r.kind]||r.kind})`),h('span',{class:'mut'},fmtTime(r.created)),h('span',{class:'mut'},'версия '+(r.version||'—')),
       h('span',{style:'flex:1'}),h('a',{class:'btn sm',href:'/api/report.csv?file='+encodeURIComponent(file)},'CSV'),h('a',{class:'btn sm',target:'_blank',href:'/report?file='+encodeURIComponent(file)},'Печать / PDF'),h('button',{class:'btn sm',onclick:()=>{navigator.clipboard&&navigator.clipboard.writeText(location.origin+'/#/results?file='+encodeURIComponent(file))}},'Копировать ссылку')),
       h('div',{class:'row'},h('span',{class:'badge b-ok'},'✓ '+st.passed),h('span',{class:'badge b-bad'},'✕ '+st.failed),h('span',{class:'badge b-warn'},'– '+st.skipped),h('span',{class:'mut'},r.summary)),
       h('div',{class:'row'},h('label',{},h('input',{type:'checkbox',onchange:e=>{only=e.target.checked;draw()}}),' только проблемы'),h('input',{placeholder:'Поиск',oninput:e=>{qs=e.target.value.toLowerCase();draw()}}))),host);
@@ -379,7 +380,7 @@ async function pAudit(q,m){const d=await api('/api/audit');m.textContent='';cons
   d.audit.forEach(a=>t.append(h('tr',{},h('td',{},fmtTime(a.t)),h('td',{},a.role),h('td',{class:'h mut'},a.ip),h('td',{},a.action),h('td',{class:'h mut'},a.detail))));m.append(h('div',{class:'card',style:'overflow:auto'},d.audit.length?t:'Пусто'))}
 
 (async()=>{try{await boot()}catch(e){if(e.message!=='auth')note(e.message)}})();
-const MODE_RU={art:'Сверка Atomic Red Team',method:'Сверка проверки детектов (глава 15)',queries:'Запросы в тестовом потоке',e2e:'До алерта',doctor:'Проверка доступа',selftest:'Самопроверка запросов',harvest:'Сбор настоящих сообщений',drift:'Сверка каталога с Graylog',fp:'Проверка ложных срабатываний'};
+const MODE_RU={art:'Сверка Atomic Red Team',method:'Сверка проверки детектов (глава 15)',queries:'Запросы в тестовом потоке',e2e:'До алерта',doctor:'Проверка доступа',selftest:'Самопроверка запросов',harvest:'Сбор настоящих сообщений',drift:'Сверка каталога с Graylog',fp:'Проверка ложных срабатываний',latency:'Задержка обнаружения'};
 </script>
 </body>
 </html>
