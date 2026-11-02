@@ -191,6 +191,18 @@ def gen_runner(platform):
 
 # ---------------------------------------------------------------- сверка событий
 
+def _latency_approx(since, first_ts):
+    """Приблизительная задержка обнаружения: от начала окна сверки (--since, когда пользователь запустил
+    тест на хосте) до первого события. Не точная — реальный запуск теста был позже since."""
+    try:
+        ev_dt = datetime.fromisoformat(str(first_ts).replace("Z", "+00:00"))
+    except (ValueError, TypeError):
+        return None
+    if ev_dt.tzinfo is None:
+        ev_dt = ev_dt.replace(tzinfo=timezone.utc)
+    return max(0.0, (ev_dt - since).total_seconds())
+
+
 def plan_rules(tests):
     """Правило -> список тестов, которые его ожидают."""
     by = {}
@@ -235,8 +247,14 @@ def verify(gl, platform, since, until=None):
         if evs:
             hit += 1
             first = sorted(e.get("timestamp", "") for e in evs)[0]
-            rows.append({"rule": title, "status": "СОБЫТИЕ ЕСТЬ",
-                         "detail": "событий %d, первое %s; тесты: %s" % (len(evs), first, names)})
+            lat = _latency_approx(since, first)
+            row = {"rule": title, "status": "СОБЫТИЕ ЕСТЬ",
+                   "detail": "событий %d, первое %s; тесты: %s" % (len(evs), first, names)}
+            if lat is not None:
+                row["latency_sec"] = lat
+                row["latency_approx"] = True
+                row["detail"] += " (задержка от --since ~%.0fs, приблизительно)" % lat
+            rows.append(row)
         else:
             rows.append({"rule": title, "status": "НЕТ СОБЫТИЯ",
                          "detail": "тест подходит по технике MITRE, но событие не создано; тесты: %s. Проверьте, что тест "

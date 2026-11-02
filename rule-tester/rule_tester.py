@@ -12,6 +12,7 @@
   run-e2e      отправить образцы в боевой путь и дождаться событий (будут настоящие алерты)
   fp-check     офлайн: прогнать запросы правил через недавний «чистый» трафик — ищет слишком широкие запросы
   replay       реальный/анонимизированный инцидент через боевой Graylog (будут настоящие алерты)
+  latency      офлайн: статистика задержки обнаружения по уже сохранённым отчётам run-e2e/replay/art/method
 
 Токен API: переменная окружения GRAYLOG_TOKEN. Адрес: --url или GRAYLOG_URL.
 """
@@ -143,6 +144,20 @@ def filter_rules(rules, args):
         p = args.platform.lower()
         sel = [r for r in sel if platform_of(r["title"]).lower().startswith(p)]
     return sel
+
+
+def latency_sec(send_dt, event_ts):
+    """Задержка обнаружения: от момента, когда мы сами отправили сообщение (send_dt, datetime с tzinfo),
+    до времени события в Graylog (event_ts, ISO-строка). None, если нечего посчитать."""
+    if not send_dt or not event_ts:
+        return None
+    try:
+        ev_dt = datetime.fromisoformat(str(event_ts).replace("Z", "+00:00"))
+    except (ValueError, TypeError):
+        return None
+    if ev_dt.tzinfo is None:
+        ev_dt = ev_dt.replace(tzinfo=timezone.utc)
+    return max(0.0, (ev_dt - send_dt).total_seconds())
 
 
 def parse_minutes(s):
@@ -505,7 +520,7 @@ def numeric_fields(args):
     return NUMERIC_DEFAULT | set(x for x in (args.numeric or "").split(",") if x)
 
 
-OKS = ("ПРОШЛО", "СОБЫТИЕ ЕСТЬ", "ЧИСТО")
+OKS = ("ПРОШЛО", "СОБЫТИЕ ЕСТЬ", "ЧИСТО", "ИЗМЕРЕНО")
 
 
 def stats_of(rows):
@@ -776,12 +791,13 @@ def cmd_run_e2e(args):
             plan.append((r, None, "поток не примет сообщение: " + "; ".join(unmet[:2])))
             continue
         plan.append((r, doc, ""))
-    sent = []
+    sent, send_times = [], {}
     for r, doc, why in plan:
         if not doc:
             continue
         for _ in range(threshold(r["cond"])):
             G.send_gelf(args.gelf, doc, ctx=gl.ctx)
+        send_times[r["id"]] = G.now_utc()
         sent.append(r)
         log("  отправлено: %s (копий %d)" % (r["title"][:80], threshold(r["cond"])))
     t0 = t0 - timedelta(minutes=1)
@@ -799,8 +815,14 @@ def cmd_run_e2e(args):
         if not doc:
             rows.append({"rule": r["title"], "status": "ПРОПУЩЕНО", "detail": why})
         elif r["id"] in seen:
-            rows.append({"rule": r["title"], "status": "СОБЫТИЕ ЕСТЬ", "detail": "событие %s в %s" % (
-                seen[r["id"]].get("id", "")[:12], seen[r["id"]].get("timestamp", ""))})
+            ev = seen[r["id"]]
+            row = {"rule": r["title"], "status": "СОБЫТИЕ ЕСТЬ",
+                   "detail": "событие %s в %s" % (ev.get("id", "")[:12], ev.get("timestamp", ""))}
+            lat = latency_sec(send_times.get(r["id"]), ev.get("timestamp"))
+            if lat is not None:
+                row["latency_sec"] = lat
+                row["detail"] += " (задержка %.0fs)" % lat
+            rows.append(row)
         else:
             bad += 1
             rows.append({"rule": r["title"], "status": "НЕТ СОБЫТИЯ", "detail":
@@ -892,6 +914,7 @@ def cmd_replay(args):
         G.send_gelf(args.gelf, d, ctx=gl.ctx, timestamp=ts + offset)
         if args.pace:
             time.sleep(args.pace)
+    send_done = G.now_utc()
     log("Отправлено %d сообщений, жду индексации и срабатывания правил…" % len(events))
     rules = filter_rules(load_live_rules(gl), args)
     if expected:
@@ -921,9 +944,15 @@ def cmd_replay(args):
                      "query": "", "platform": platform_of(t), "priority": None, "samples": []})
     for r in watch:
         if r["id"] in seen:
-            rows.append({"rule": r["title"], "status": "СОБЫТИЕ ЕСТЬ",
-                         "detail": "событие %s в %s" % (seen[r["id"]].get("id", "")[:12], seen[r["id"]].get("timestamp", "")),
-                         "query": r["query"], "platform": platform_of(r["title"]), "priority": r.get("priority"), "samples": []})
+            ev = seen[r["id"]]
+            row = {"rule": r["title"], "status": "СОБЫТИЕ ЕСТЬ",
+                   "detail": "событие %s в %s" % (ev.get("id", "")[:12], ev.get("timestamp", "")),
+                   "query": r["query"], "platform": platform_of(r["title"]), "priority": r.get("priority"), "samples": []}
+            lat = latency_sec(send_done, ev.get("timestamp"))
+            if lat is not None:
+                row["latency_sec"] = lat
+                row["detail"] += " (задержка %.0fs)" % lat
+            rows.append(row)
         elif expected:
             rows.append({"rule": r["title"], "status": "НЕТ СОБЫТИЯ",
                          "detail": "ожидалось по сценарию, но за %d с после replay события не было" % args.wait,
@@ -938,6 +967,71 @@ def cmd_replay(args):
         log("  %-13s %s" % (r["status"], r["rule"][:90]))
     log("\n" + summary + "\nОтчёт: " + str(path))
     return 1 if (expected and bad) else 0
+
+
+# ---------------------------------------------------------------- задержка обнаружения
+
+def cmd_latency(args):
+    """Офлайн: собирает latency_sec из уже сохранённых локальных отчётов run-e2e/replay/art-verify/method-verify
+    за последние --days дней и считает статистику по правилам. Ничего не ходит в Graylog, только читает reports/."""
+    cutoff = datetime.now() - timedelta(days=args.days)
+    per_rule = {}
+    for p in sorted(REPORTS.glob("*.json")) if REPORTS.exists() else []:
+        try:
+            d = json.loads(p.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            continue
+        if d.get("kind") not in ("e2e", "replay", "art", "method"):
+            continue
+        try:
+            created = datetime.fromisoformat(d.get("created", ""))
+        except ValueError:
+            continue
+        if created < cutoff:
+            continue
+        for row in d.get("rows", []):
+            lat = row.get("latency_sec")
+            if row.get("status") == "СОБЫТИЕ ЕСТЬ" and isinstance(lat, (int, float)):
+                per_rule.setdefault(row["rule"], []).append({"latency": lat, "run": d.get("run", ""),
+                                                              "kind": d["kind"], "when": d.get("created", ""),
+                                                              "approx": bool(row.get("latency_approx"))})
+    rules, _ = get_rules(args, None)  # офлайн: каталог репозитория (или живой Graylog, если явно указан --source live)
+    rules = filter_rules(rules, args)
+    bywin = {r["title"]: r for r in rules}
+    run = run_id()
+    log("Запуск %s: правил %d с измерениями задержки за %d дней." % (run, len(per_rule), args.days))
+    rows = []
+    for title, obs in sorted(per_rule.items()):
+        lats = [o["latency"] for o in obs]
+        n = len(lats)
+        approx = any(o["approx"] for o in obs)
+        ref = bywin.get(title) or {}
+        bound = ""
+        if ref.get("window_min") is not None:
+            bound = " (окно+периодичность по конфигурации: ~%.0fs)" % (
+                (ref.get("window_min") or 0) * 60 + (ref.get("every_min") or 0) * 60)
+        rows.append({"rule": title, "status": "ИЗМЕРЕНО",
+                     "detail": "%sнаблюдений %d, задержка мин/сред/макс: %.0fs / %.0fs / %.0fs%s" % (
+                         "приблизительно (по --since тестов art/method): " if approx else "",
+                         n, min(lats), sum(lats) / n, max(lats), bound),
+                     "query": ref.get("query", ""), "platform": platform_of(title), "priority": ref.get("priority"),
+                     "samples": [{"id": "", "expect": "match", "src": o["kind"], "origin": o["run"],
+                                  "why": "задержка %.0fs, %s" % (o["latency"], o["when"][:19]),
+                                  "found": True, "ok": True, "doc": {}} for o in obs[-10:]]})
+        log("  %-10s %s (n=%d, сред. %.0fs)" % ("ИЗМЕРЕНО", title[:70], n, sum(lats) / n))
+    if args.all:
+        for r in rules:
+            if r["title"] not in per_rule:
+                rows.append({"rule": r["title"], "status": "ПРОПУЩЕНО",
+                             "detail": "нет измерений за %d дней (запустите run-e2e/replay/art-verify/method-verify)" % args.days,
+                             "query": r.get("query", ""), "platform": platform_of(r["title"]),
+                             "priority": r.get("priority"), "samples": []})
+    summary = "правил с измерениями %d за %d дней%s" % (
+        len(per_rule), args.days,
+        (", без измерений %d" % sum(1 for r in rows if r["status"] == "ПРОПУЩЕНО")) if args.all else "")
+    path = write_report(run, "latency", rows, summary, {"days": args.days, "all": args.all})
+    log("\n" + summary + "\nОтчёт: " + str(path))
+    return 0
 
 
 # ---------------------------------------------------------------- Atomic Red Team
@@ -1074,6 +1168,9 @@ def main(argv=None):
     p.add_argument("--wait", type=int, default=600)
     p.add_argument("--pace", type=float, default=0, help="пауза между отправкой событий, секунд")
     p.add_argument("--yes-send-alerts", action="store_true")
+    p = sub.add_parser("latency")
+    p.add_argument("--days", type=int, default=30, help="окно для сбора измерений из локальных reports/")
+    p.add_argument("--all", action="store_true", help="показать и правила без измерений (статус ПРОПУЩЕНО)")
     sub.add_parser("art-plan")
     p = sub.add_parser("art-runner")
     p.add_argument("--os", required=True, choices=["linux", "macos", "windows"])
@@ -1095,7 +1192,7 @@ def main(argv=None):
           "method-plan": cmd_method_plan, "method-runner": cmd_method_runner, "method-verify": cmd_method_verify,
           "list": cmd_list, "selftest": cmd_selftest, "generate": cmd_generate, "doctor": cmd_doctor,
           "drift": cmd_drift, "setup": cmd_setup, "harvest": cmd_harvest, "run-queries": cmd_run_queries,
-          "run-e2e": cmd_run_e2e, "fp-check": cmd_fp_check, "replay": cmd_replay}[args.cmd]
+          "run-e2e": cmd_run_e2e, "fp-check": cmd_fp_check, "replay": cmd_replay, "latency": cmd_latency}[args.cmd]
     try:
         return fn(args) or 0
     except G.ApiError as e:
