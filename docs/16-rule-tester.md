@@ -1,6 +1,6 @@
 # 16. GraylogRuleTester: проверка всех правил без запуска на хостах
 
-**GraylogRuleTester** (версия 0.2, каталог [`rule-tester/`](../rule-tester/)) проверяет правила Graylog автоматически. Образцы сообщений отправляются прямо на сервер Graylog по GELF HTTP, а потом инструмент смотрит, находят ли их запросы правил и появляются ли события. На хостах ничего запускать не нужно, в отличие от [проверки детектов](15-detection-tests.md) из главы 15.
+**GraylogRuleTester** (версия 0.3, каталог [`rule-tester/`](../rule-tester/)) проверяет правила Graylog автоматически. Образцы сообщений отправляются прямо на сервер Graylog по GELF HTTP, а потом инструмент смотрит, находят ли их запросы правил и появляются ли события. На хостах ничего запускать не нужно, в отличие от [проверки детектов](15-detection-tests.md) из главы 15.
 
 Инструмент работает как контейнер Podman с веб-интерфейсом и как обычный консольный скрипт. Нужен только Python 3.11+ и доступ к Graylog.
 
@@ -258,10 +258,17 @@ python3 rule_tester.py --url … --gelf … --rule DCSync run-e2e --yes-send-ale
 python3 rule_tester.py art-plan                                                   # план Atomic Red Team: тесты, риски, правила
 python3 rule_tester.py art-runner --os linux --out art-linux.sh                   # скрипт запуска (можно без --out, в stdout)
 python3 rule_tester.py --url … art-verify --os linux --since 90m                  # сверка с Graylog (--since: ISO-время или "90m")
+python3 rule_tester.py method-plan                                               # план проверки детектов (глава 15): тесты, риски, правила
+python3 rule_tester.py method-runner --os freeipa --out ipa-tests.py             # тот же раннер, что и в detection-tests/, без изменений
+python3 rule_tester.py --url … method-verify --os windows --since 90m            # сверка с Graylog, как art-verify
 python3 rule_tester.py --version
 ```
 
-Команды: `list`, `selftest`, `generate`, `doctor`, `setup`, `harvest`, `run-queries`, `run-e2e`, `art-plan`, `art-runner`, `art-verify`. Общие параметры: `--url`, `--token-env`, `--insecure`, `--ca-file`, `--gelf`, `--stream`, `--source {auto,file,live}`, `--rule`, `--platform`. `run-e2e` без `--yes-send-alerts` не запустится. Код возврата 1, если есть провалы, поэтому команду удобно подключать в cron или CI.
+Команды: `list`, `selftest`, `generate`, `doctor`, `setup`, `harvest`, `run-queries`, `run-e2e`, `art-plan`, `art-runner`, `art-verify`, `method-plan`, `method-runner`, `method-verify`. Общие параметры: `--url`, `--token-env`, `--insecure`, `--ca-file`, `--gelf`, `--stream`, `--source {auto,file,live}`, `--rule`, `--platform`. `run-e2e` без `--yes-send-alerts` не запустится. Код возврата 1, если есть провалы, поэтому команду удобно подключать в cron или CI.
+
+### Проверка детектов (глава 15) через инструмент
+
+Страница **Проверка детектов** раздаёт те же раннеры, что и [глава 15](15-detection-tests.md) (`detection-tests/`) — Windows, Linux (auditd), macOS, FreeIPA, 103 проверки на 146 правил — без переписывания: скрипт, который скачивает инструмент, побайтово совпадает с файлом в репозитории. Инструмент только раздаёт его и потом, как и для Atomic Red Team, сверяет результат с Graylog за выбранное окно. Запускать проверки на хостах всё так же нужно руками — страница `run-queries`/`e2e` для этого не подходит, они проверяют только сам запрос правила, а не настоящий путь через агента.
 
 ## Безопасность
 
@@ -292,6 +299,7 @@ python3 rule_tester.py --version
 | [`mock_graylog.py`](../rule-tester/mock_graylog.py) | заглушка Graylog для проверки самого инструмента |
 | [`art.py`](../rule-tester/art.py), [`art/plan.json`](../rule-tester/art/plan.json) | генератор скриптов запуска и сверки Atomic Red Team, план тестов с рисками |
 | [`art_build.py`](../rule-tester/art_build.py), [`art/NOTICE.md`](../rule-tester/art/NOTICE.md) | пересборка плана из локальной копии Atomic Red Team, атрибуция и лицензия MIT |
+| [`methodology.py`](../rule-tester/methodology.py) | то же самое для [проверки детектов главы 15](15-detection-tests.md): раздаёт готовые раннеры `detection-tests/` без изменений, сверяет с Graylog |
 | [`samples/manual.json`](../rule-tester/samples/manual.json) | ручные образцы в репозитории |
 | [`Containerfile`](../rule-tester/Containerfile), [`deploy/`](../rule-tester/deploy/) | контейнер, compose, quadlet, `install.sh`, пример настроек |
 

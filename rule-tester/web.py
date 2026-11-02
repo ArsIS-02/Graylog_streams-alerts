@@ -45,7 +45,8 @@ SESSIONS = {}
 JOB = {"lock": threading.Lock(), "cur": None, "last": None}
 CACHE = {}
 LIVE = {"t": 0, "data": {}, "running": False, "done": 0, "total": 0, "error": ""}
-MODES = {"queries": "run-queries", "e2e": "run-e2e", "doctor": "doctor", "selftest": "selftest", "harvest": "harvest", "art": "art-verify"}
+MODES = {"queries": "run-queries", "e2e": "run-e2e", "doctor": "doctor", "selftest": "selftest", "harvest": "harvest",
+         "art": "art-verify", "method": "method-verify"}
 MODE_RU = {"queries": "Запросы в тестовом потоке", "e2e": "До алерта", "doctor": "Проверка доступа",
            "selftest": "Самопроверка запросов", "harvest": "Сбор настоящих сообщений"}
 SETTING_ENV = {"graylog_url": "GRAYLOG_URL", "graylog_token": "GRAYLOG_TOKEN", "gelf": "RT_GELF", "stream": "RT_STREAM",
@@ -136,6 +137,14 @@ def start_job(mode, platform="", rule="", confirm=False, who="вручную", s
             art.parse_time(since)
         except ValueError as e:
             return None, str(e)
+    if mode == "method":
+        if platform not in ("linux", "macos", "windows", "freeipa"):
+            return None, "для сверки проверки детектов выберите систему: linux, macos, windows или freeipa"
+        import art
+        try:
+            art.parse_time(since)
+        except ValueError as e:
+            return None, str(e)
     if mode == "e2e" and not confirm:
         return None, "для режима «до алерта» нужно подтверждение"
     if mode == "e2e" and not (platform or rule):
@@ -144,12 +153,12 @@ def start_job(mode, platform="", rule="", confirm=False, who="вручную", s
         if JOB["cur"] and JOB["cur"]["status"] == "идёт":
             return None, "уже идёт другой запуск"
         cmd = base_cmd()
-        if platform and mode != "art":
+        if platform and mode not in ("art", "method"):
             cmd += ["--platform", platform]
-        if rule and mode != "art":
+        if rule and mode not in ("art", "method"):
             cmd += ["--rule", rule]
         cmd.append(MODES[mode])
-        if mode == "art":
+        if mode in ("art", "method"):
             cmd += ["--os", platform, "--since", since]
         if mode == "e2e":
             cmd.append("--yes-send-alerts")
@@ -653,6 +662,22 @@ class H(BaseHTTPRequestHandler):
                 return self.reply({"error": "система: linux, macos или windows"}, 400)
             return self.reply(art.gen_runner(plat).encode("utf-8"), ctype="text/plain",
                               headers={"Content-Disposition": 'attachment; filename="%s"' % art.runner_name(plat)})
+        if path == "/api/method":
+            import methodology as M
+            out = {}
+            for plat in M.PLATFORMS:
+                tests = M.load_tests(plat)
+                out[plat] = {"name": M.PLATFORM_RU[plat], "file": M.runner_filename(plat), "how": M.how_to_run(plat),
+                             "tests": tests, "rules": sorted(M.plan_rules(tests))}
+            return self.reply(out)
+        if path == "/api/method/runner":
+            import methodology as M
+            plat = q.get("os", "")
+            if plat not in M.PLATFORMS:
+                return self.reply({"error": "система: linux, macos, windows или freeipa"}, 400)
+            raw = M.runner_path(plat).read_bytes()
+            return self.reply(raw, ctype="text/plain",
+                              headers={"Content-Disposition": 'attachment; filename="%s"' % M.runner_filename(plat)})
         if path == "/api/job":
             return self.reply({"job": pub_job(JOB["cur"] or JOB["last"], log=True)})
         if path == "/api/history":

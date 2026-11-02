@@ -73,6 +73,7 @@ details{border:1px solid var(--ln);border-radius:8px;padding:6px 10px;margin-bot
   <a data-p="run"><span class="ico">▶</span>Запуск</a>
   <a data-p="results"><span class="ico">✓</span>Результаты<span class="pill hide" id="pillf"></span></a>
   <a data-p="art"><span class="ico">⚔</span>Atomic Red Team</a>
+  <a data-p="method"><span class="ico">⛨</span>Проверка детектов</a>
   <a data-p="coverage"><span class="ico">◎</span>Покрытие</a>
   <a data-p="quality"><span class="ico">!</span>Качество</a>
   <a data-p="settings"><span class="ico">⚙</span>Настройки</a>
@@ -121,7 +122,7 @@ function showLogin(){$('#app').classList.add('hide');$('#login').classList.remov
 $('#pwgo').onclick=async()=>{try{await api('/api/login',{login:$('#lgname').value,password:$('#pw').value});$('#login').classList.add('hide');boot()}catch(e){$('#pwerr').textContent=e.message}};
 $('#pw').onkeydown=e=>{if(e.key==='Enter')$('#pwgo').click()};
 $('#logout').onclick=async()=>{try{await api('/api/logout',{})}catch(e){}showLogin()};
-const PAGES={home:['Сводка',pHome],rules:['Правила',pRules],run:['Запуск',pRun],art:['Atomic Red Team',pArt],results:['Результаты',pResults],coverage:['Покрытие',pCoverage],quality:['Качество запросов',pQuality],settings:['Настройки',pSettings],audit:['Журнал действий',pAudit]};
+const PAGES={home:['Сводка',pHome],rules:['Правила',pRules],run:['Запуск',pRun],art:['Atomic Red Team',pArt],method:['Проверка детектов',pMethod],results:['Результаты',pResults],coverage:['Покрытие',pCoverage],quality:['Качество запросов',pQuality],settings:['Настройки',pSettings],audit:['Журнал действий',pAudit]};
 let CUR='',TIMER=null;
 function route(){clearTimeout(TIMER);const[p,qs]=(location.hash.slice(2)||'home').split('?');const page=PAGES[p]?p:'home';CUR=page;
   document.querySelectorAll('aside a').forEach(a=>a.classList.toggle('on',a.dataset.p===page));$('#title').textContent=PAGES[page][0];
@@ -243,7 +244,7 @@ async function pRun(q,m){m.textContent='';const sum=await api('/api/summary');
   async function poll(){clearTimeout(TIMER);if(CUR!=='run')return;const j=(await api('/api/job')).job;jc.textContent='';if(!j){jc.append(h('div',{class:'mut'},'Запусков в этой сессии сервера ещё не было.'));return}
     const done=j.passed+j.failed+j.skipped;const pct=j.total?Math.min(100,Math.round(done/j.total*100)):(j.status==='идёт'?5:100);
     jc.append(h('div',{class:'row'},h('b',{},`${MODE_RU[j.mode]||j.mode}${j.platform?' · '+j.platform:''}${j.rule?' · '+j.rule:''}`),h('span',{class:'badge '+(j.status==='успешно'?'b-ok':j.status==='идёт'?'b-ac':'b-bad')},j.status),h('span',{class:'mut'},`запуск ${j.id}, ${j.who}`)));
-    if(j.total||j.mode==='queries'||j.mode==='e2e'||j.mode==='art')jc.append(h('div',{class:'row'},h('div',{class:'bar',style:'flex:1;height:10px'},h('i',{class:'g',style:`width:${j.total?j.passed/j.total*100:0}%`}),h('i',{class:'r',style:`width:${j.total?j.failed/j.total*100:0}%`}),h('i',{class:'y',style:`width:${j.total?j.skipped/j.total*100:0}%`})),
+    if(j.total||j.mode==='queries'||j.mode==='e2e'||j.mode==='art'||j.mode==='method')jc.append(h('div',{class:'row'},h('div',{class:'bar',style:'flex:1;height:10px'},h('i',{class:'g',style:`width:${j.total?j.passed/j.total*100:0}%`}),h('i',{class:'r',style:`width:${j.total?j.failed/j.total*100:0}%`}),h('i',{class:'y',style:`width:${j.total?j.skipped/j.total*100:0}%`})),
       h('span',{class:'mut'},`${done} из ${j.total||'?'}: ✓ ${j.passed}, ✕ ${j.failed}, – ${j.skipped}`)));
     const pre=h('pre',{},j.log||'');jc.append(pre);pre.scrollTop=pre.scrollHeight;
     if(j.status==='идёт')TIMER=setTimeout(poll,1500);else{chips()}}
@@ -271,6 +272,26 @@ async function pArt(q,m){m.textContent='';const d=await api('/api/art');let os=q
     body.append(h('div',{class:'card',style:'overflow:auto'},t))}
   draw()}
 
+/* ---------- проверка детектов (глава 15) ---------- */
+async function pMethod(q,m){m.textContent='';const d=await api('/api/method');let os=q.get('os')||'windows';
+  const tabs=h('div',{class:'tabs'});const body=h('div');m.append(h('div',{class:'card'},h('h2',{},'Проверка правил на хосте (глава 15)'),
+    h('div',{class:'mut'},'Готовые раннеры: Windows, Linux (auditd), macOS, FreeIPA — 103 проверки на 146 правил каталога. Написаны и проверены вручную, '+
+    'инструмент их только раздаёт и сверяет результат с Graylog; сам на хостах ничего не выполняет.')),tabs,body);
+  function draw(){tabs.textContent='';Object.entries(d).forEach(([k,v])=>tabs.append(h('button',{class:os===k?'on':'',onclick:()=>{os=k;draw()}},v.name+' ('+v.tests.length+')')));
+    body.textContent='';const v=d[os];
+    const dl=h('a',{class:'btn pri',href:'/api/method/runner?os='+os,download:v.file,style:'text-decoration:none'},'Скачать '+v.file);
+    const since=h('input',{placeholder:'начало окна: 2026-11-01T20:30Z или 90m',style:'flex:1;min-width:240px',value:'90m'});
+    const go=h('button',{class:'btn pri',onclick:async()=>{try{await api('/api/run',{mode:'method',platform:os,since:since.value.trim()});location.hash='#/run'}catch(e){note(e.message)}}},'Сверить события');
+    if(!isAdmin())go.disabled=true;
+    body.append(h('div',{class:'card'},h('div',{class:'row'},dl,h('span',{class:'mut'},`проверок ${v.tests.length}, правил ожидается ${v.rules.length}`)),h('pre',{},v.how),
+      h('h2',{},'Сверка с Graylog'),h('div',{class:'row'},since,go),h('div',{class:'mut'},'Время начала скрипт печатает в конце работы. Правила проверяются раз в 5 минут, подождите 10 минут.')));
+    const t=h('table',{},h('tr',{},h('th',{},'Проверка'),h('th',{class:'h'},'Риск'),h('th',{},'Ожидаемые правила')));
+    v.tests.forEach(x=>t.append(h('tr',{},h('td',{},x.name,h('div',{class:'mut mono'},x.id),x.needs?h('div',{class:'mut',style:'margin-top:2px'},x.needs):''),
+      h('td',{class:'h'},h('span',{class:'badge '+(x.risk==='нет'?'b-ok':x.risk==='низкий'?'b-warn':'b-bad')},x.risk),x.note?h('div',{class:'mut',style:'margin-top:4px'},x.note):''),
+      h('td',{},...x.rules.map(r=>h('div',{},r))))));
+    body.append(h('div',{class:'card',style:'overflow:auto'},t))}
+  draw()}
+
 /* ---------- результаты ---------- */
 async function pResults(q,m){const d=await api('/api/history');m.textContent='';let tab=q.get('file')?'view':(q.get('tab')||'reports');
   const tabs=h('div',{class:'tabs'});const body=h('div');m.append(tabs,body);
@@ -278,7 +299,7 @@ async function pResults(q,m){const d=await api('/api/history');m.textContent='';
   function drawTabs(){tabs.textContent='';Object.entries(names).forEach(([k,t])=>tabs.append(h('button',{class:tab===k?'on':'',onclick:()=>{tab=k;show()}},t)))}
   function show(){drawTabs();body.textContent='';if(tab==='reports')reports();else if(tab==='compare')cmp();else if(tab==='history')hist();else view(q.get('file'))}
   function reports(){const t=h('table',{},h('tr',{},h('th',{},'Запуск'),h('th',{class:'h'},'Вид'),h('th',{class:'h'},'Область'),h('th',{},'Итог'),h('th',{},'')));
-    d.reports.forEach(r=>t.append(h('tr',{class:'cl',onclick:()=>view(r.file)},h('td',{},fmtTime(r.created)||r.run,h('div',{class:'mut mono'},r.run)),h('td',{class:'h'},r.kind==='queries'?'запросы':r.kind==='e2e'?'до алерта':r.kind==='art'?'Atomic Red Team':r.kind),
+    d.reports.forEach(r=>t.append(h('tr',{class:'cl',onclick:()=>view(r.file)},h('td',{},fmtTime(r.created)||r.run,h('div',{class:'mut mono'},r.run)),h('td',{class:'h'},r.kind==='queries'?'запросы':r.kind==='e2e'?'до алерта':r.kind==='art'?'Atomic Red Team':r.kind==='method'?'проверка детектов':r.kind),
       h('td',{class:'h'},r.meta.platform||r.meta.rule||'все'),h('td',{},stackBar(r.stats),h('div',{class:'mut'},`✓ ${r.stats.passed} · ✕ ${r.stats.failed} · – ${r.stats.skipped}`)),h('td',{}, h('span',{class:'badge b-ac'},'Открыть')))));
     body.append(h('div',{class:'card',style:'overflow:auto'},d.reports.length?t:h('div',{class:'mut'},'Отчётов пока нет.')))}
   function hist(){const t=h('table',{},h('tr',{},h('th',{},'Начало'),h('th',{},'Режим'),h('th',{class:'h'},'Область'),h('th',{class:'h'},'Кто'),h('th',{},'Статус')));
@@ -351,7 +372,7 @@ async function pAudit(q,m){const d=await api('/api/audit');m.textContent='';cons
   d.audit.forEach(a=>t.append(h('tr',{},h('td',{},fmtTime(a.t)),h('td',{},a.role),h('td',{class:'h mut'},a.ip),h('td',{},a.action),h('td',{class:'h mut'},a.detail))));m.append(h('div',{class:'card',style:'overflow:auto'},d.audit.length?t:'Пусто'))}
 
 (async()=>{try{await boot()}catch(e){if(e.message!=='auth')note(e.message)}})();
-const MODE_RU={art:'Сверка Atomic Red Team',queries:'Запросы в тестовом потоке',e2e:'До алерта',doctor:'Проверка доступа',selftest:'Самопроверка запросов',harvest:'Сбор настоящих сообщений'};
+const MODE_RU={art:'Сверка Atomic Red Team',method:'Сверка проверки детектов (глава 15)',queries:'Запросы в тестовом потоке',e2e:'До алерта',doctor:'Проверка доступа',selftest:'Самопроверка запросов',harvest:'Сбор настоящих сообщений'};
 </script>
 </body>
 </html>
