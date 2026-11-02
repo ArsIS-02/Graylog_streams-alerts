@@ -9,7 +9,7 @@
   RT_VIEWER_PASSWORD           пароль наблюдателя: только просмотр (необязателен)
   RT_INSECURE=1, RT_CA_FILE    проверка сертификата Graylog
   RT_DATA                      каталог тома: история, отчёты, образцы, настройки, журнал
-  RT_SCHEDULE                  расписание: «queries@02:30,selftest@03:00,e2e@04:00»
+  RT_SCHEDULE                  расписание: «queries@02:30,selftest@03:00,drift@03:30,e2e@04:00»
   RT_SCHEDULE_ENABLED          "0" — выключить запуски по расписанию, не трогая само расписание (по умолчанию включено)
   RT_E2E_PLATFORMS             платформы для ночного e2e (по умолчанию e2e по расписанию выключен)
   RT_PORT                      порт (по умолчанию 8080)
@@ -46,9 +46,10 @@ JOB = {"lock": threading.Lock(), "cur": None, "last": None}
 CACHE = {}
 LIVE = {"t": 0, "data": {}, "running": False, "done": 0, "total": 0, "error": ""}
 MODES = {"queries": "run-queries", "e2e": "run-e2e", "doctor": "doctor", "selftest": "selftest", "harvest": "harvest",
-         "art": "art-verify", "method": "method-verify"}
+         "art": "art-verify", "method": "method-verify", "drift": "drift"}
 MODE_RU = {"queries": "Запросы в тестовом потоке", "e2e": "До алерта", "doctor": "Проверка доступа",
-           "selftest": "Самопроверка запросов", "harvest": "Сбор настоящих сообщений"}
+           "selftest": "Самопроверка запросов", "harvest": "Сбор настоящих сообщений",
+           "drift": "Сверка каталога с Graylog"}
 SETTING_ENV = {"graylog_url": "GRAYLOG_URL", "graylog_token": "GRAYLOG_TOKEN", "gelf": "RT_GELF", "stream": "RT_STREAM",
                "schedule": "RT_SCHEDULE", "schedule_enabled": "RT_SCHEDULE_ENABLED", "e2e_platforms": "RT_E2E_PLATFORMS",
                "insecure": "RT_INSECURE", "ca_file": "RT_CA_FILE"}
@@ -138,8 +139,8 @@ def start_job(mode, platform="", rule="", confirm=False, who="вручную", s
         except ValueError as e:
             return None, str(e)
     if mode == "method":
-        if platform not in ("linux", "macos", "windows", "freeipa"):
-            return None, "для сверки проверки детектов выберите систему: linux, macos, windows или freeipa"
+        if platform not in ("linux", "macos", "windows", "freeipa", "containers", "keenetic"):
+            return None, "для сверки проверки детектов выберите систему: linux, macos, windows, freeipa, containers или keenetic"
         import art
         try:
             art.parse_time(since)
@@ -170,7 +171,7 @@ def start_job(mode, platform="", rule="", confirm=False, who="вручную", s
     return job, None
 
 
-STATUS_LINE = re.compile(r"^\s+(ПРОШЛО|ПРОВАЛ|ПРОПУЩЕНО|ОШИБКА ЗАПРОСА|СОБЫТИЕ ЕСТЬ|НЕТ СОБЫТИЯ)\s")
+STATUS_LINE = re.compile(r"^\s+(ПРОШЛО|ПРОВАЛ|ПРОПУЩЕНО|ОШИБКА ЗАПРОСА|СОБЫТИЕ ЕСТЬ|НЕТ СОБЫТИЯ|РАСХОЖДЕНИЕ)\s")
 TOTAL_LINE = re.compile(r"правил (\d+)")
 
 
@@ -414,9 +415,10 @@ def live_worker():
 
         def one(r):
             try:
-                data[r["title"]] = {"d7": gl.count_events(r["id"], 7), "d30": gl.count_events(r["id"], 30)}
+                data[r["title"]] = {"d7": gl.count_events(r["id"], 7), "d30": gl.count_events(r["id"], 30),
+                                    "last": gl.last_event(r["id"])}
             except G.ApiError:
-                data[r["title"]] = {"d7": None, "d30": None}
+                data[r["title"]] = {"d7": None, "d30": None, "last": None}
             LIVE["done"] += 1
         with ThreadPoolExecutor(max_workers=6) as ex:
             list(ex.map(one, rules))
@@ -706,9 +708,17 @@ class H(BaseHTTPRequestHandler):
         if path == "/api/trend":
             return self.reply({"items": trend()})
         if path == "/api/coverage":
+            import art
+            import methodology as M
             rd = rules_data()
+            art_titles, method_titles = set(), set()
+            for plat in art.PLATFORMS:
+                art_titles |= set(art.plan_rules(art.load_plan(plat)))
+            for plat in M.PLATFORMS:
+                method_titles |= set(M.plan_rules(M.load_tests(plat)))
             cov = insights.coverage(rd["rules"], insights.catalog_meta(R.CATALOG),
-                                    {r["title"]: r["counts"] for r in rd["rules"]}, LIVE["data"])
+                                    {r["title"]: r["counts"] for r in rd["rules"]}, LIVE["data"],
+                                    art_titles=art_titles, method_titles=method_titles)
             cov["live"] = {"age": LIVE["t"], "running": LIVE["running"], "done": LIVE["done"],
                            "total": LIVE["total"], "error": LIVE["error"]}
             return self.reply(cov)

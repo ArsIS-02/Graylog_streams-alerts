@@ -97,6 +97,40 @@ def load_live_rules(gl):
     return out
 
 
+def diff_catalog(file_rules, live_rules):
+    """Сравнивает каталог репозитория (detections-source.json) с живыми определениями событий Graylog.
+    Возвращает список расхождений: [{'title','kind','detail'}]. Ничего не меняет ни там, ни там —
+    это именно сверка, чтобы расхождение (как с переименованием полей пайплайном 2026-11-02) было
+    видно сразу, а не только когда правило тихо перестанет находить события."""
+    f = {r["title"]: r for r in file_rules}
+    live = {r["title"]: r for r in live_rules}
+    out = []
+    for t in sorted(set(f) - set(live)):
+        out.append({"title": t, "kind": "нет в Graylog",
+                    "detail": "правило есть в каталоге репозитория, но не найдено среди живых определений событий"})
+    for t in sorted(set(live) - set(f)):
+        out.append({"title": t, "kind": "нет в каталоге",
+                    "detail": "правило есть в Graylog, но не найдено в detections-source.json"})
+    for t in sorted(set(f) & set(live)):
+        fr, lr = f[t], live[t]
+        if fr["query"].strip() != lr["query"].strip():
+            out.append({"title": t, "kind": "запрос отличается",
+                        "detail": "каталог: %s | Graylog: %s" % (fr["query"][:250], lr["query"][:250])})
+        if sorted(fr.get("group_by") or []) != sorted(lr.get("group_by") or []):
+            out.append({"title": t, "kind": "group_by отличается",
+                        "detail": "каталог: %s | Graylog: %s" % (fr.get("group_by"), lr.get("group_by"))})
+        if (fr.get("cond") or None) != (lr.get("cond") or None):
+            out.append({"title": t, "kind": "условие отличается",
+                        "detail": "каталог: %s | Graylog: %s" % (fr.get("cond"), lr.get("cond"))})
+        if fr.get("priority") != lr.get("priority"):
+            out.append({"title": t, "kind": "приоритет отличается",
+                        "detail": "каталог: %s | Graylog: %s" % (fr.get("priority"), lr.get("priority"))})
+        if sorted(fr.get("streams") or []) != sorted(lr.get("streams") or []):
+            out.append({"title": t, "kind": "потоки отличаются",
+                        "detail": "каталог: %s | Graylog: %s" % (fr.get("streams"), lr.get("streams"))})
+    return out
+
+
 def filter_rules(rules, args):
     sel = rules
     if getattr(args, "rule", None):
@@ -686,6 +720,26 @@ def cmd_run_e2e(args):
     return 1 if bad else 0
 
 
+def cmd_drift(args):
+    gl = connect(args)
+    file_rules = load_file_rules()
+    live_rules = load_live_rules(gl)
+    diffs = diff_catalog(file_rules, live_rules)
+    run = run_id()
+    log("Запуск %s: сверка каталога репозитория с живым Graylog. Правил в каталоге: %d, в Graylog: %d." % (
+        run, len(file_rules), len(live_rules)))
+    rows = []
+    for d in diffs:
+        rows.append({"rule": d["title"], "status": "РАСХОЖДЕНИЕ", "detail": "%s: %s" % (d["kind"], d["detail"]),
+                    "query": "", "platform": platform_of(d["title"]), "priority": None, "samples": []})
+        log("  %-13s %s" % ("РАСХОЖДЕНИЕ", d["title"][:90]))
+        log("      %s: %s" % (d["kind"], d["detail"][:200]))
+    summary = "правил в каталоге %d, в Graylog %d, расхождений %d" % (len(file_rules), len(live_rules), len(diffs))
+    path = write_report(run, "drift", rows, summary, {"source": "сверка каталога репозитория с Graylog"})
+    log("\n" + summary + "\nОтчёт: " + str(path))
+    return 1 if diffs else 0
+
+
 # ---------------------------------------------------------------- Atomic Red Team
 
 def cmd_art_plan(args):
@@ -796,6 +850,7 @@ def main(argv=None):
     p = sub.add_parser("generate")
     p.add_argument("--out", default=str(HERE / "samples" / "generated.json"))
     sub.add_parser("doctor")
+    sub.add_parser("drift")
     p = sub.add_parser("setup")
     p.add_argument("--apply", action="store_true")
     p.add_argument("--index-set")
@@ -819,17 +874,18 @@ def main(argv=None):
     p.add_argument("--until")
     sub.add_parser("method-plan")
     p = sub.add_parser("method-runner")
-    p.add_argument("--os", required=True, choices=["linux", "macos", "windows", "freeipa"])
+    p.add_argument("--os", required=True, choices=["linux", "macos", "windows", "freeipa", "containers", "keenetic"])
     p.add_argument("--out")
     p = sub.add_parser("method-verify")
-    p.add_argument("--os", required=True, choices=["linux", "macos", "windows", "freeipa"])
+    p.add_argument("--os", required=True, choices=["linux", "macos", "windows", "freeipa", "containers", "keenetic"])
     p.add_argument("--since", required=True, help="начало окна: 2026-11-01T20:30, ...Z (UTC) или 90m")
     p.add_argument("--until")
     args = ap.parse_args(argv)
     fn = {"art-plan": cmd_art_plan, "art-runner": cmd_art_runner, "art-verify": cmd_art_verify,
           "method-plan": cmd_method_plan, "method-runner": cmd_method_runner, "method-verify": cmd_method_verify,
           "list": cmd_list, "selftest": cmd_selftest, "generate": cmd_generate, "doctor": cmd_doctor,
-          "setup": cmd_setup, "harvest": cmd_harvest, "run-queries": cmd_run_queries, "run-e2e": cmd_run_e2e}[args.cmd]
+          "drift": cmd_drift, "setup": cmd_setup, "harvest": cmd_harvest, "run-queries": cmd_run_queries,
+          "run-e2e": cmd_run_e2e}[args.cmd]
     try:
         return fn(args) or 0
     except G.ApiError as e:

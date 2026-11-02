@@ -34,6 +34,10 @@ PLATFORMS = OrderedDict([
                  impl=lambda i: f"t_{i.replace('-', '_')}")),
     ("IPA", dict(title="FreeIPA", catalog=lambda p: p.startswith("FreeIPA"), runner="freeipa/ipa_detection_tests.py",
                  impl=lambda i: f"test_{i.replace('-', '_')}")),
+    ("CTR", dict(title="Контейнеры", catalog=lambda p: p == "Контейнеры", runner="containers/detection-tests.sh",
+                 impl=lambda i: f"t_{i.replace('-', '_')}")),
+    ("KEN", dict(title="Keenetic", catalog=lambda p: p == "Keenetic", runner="keenetic/detection-tests.sh",
+                 impl=lambda i: f"t_{i.replace('-', '_')}")),
 ])
 
 
@@ -186,7 +190,9 @@ def doc(rows, tests):
             w(f"| {r['Правило'].replace('|', chr(92) + '|')} | {why} |")
         w("")
     other = [r for r in rows if not any(p["catalog"](r["Платформа"]) for p in PLATFORMS.values())]
-    w(f"Платформы без проверок: Keenetic и контейнеры ({len(other)} правил). Роутер и Docker требуют отдельных сценариев.\n")
+    if other:
+        plats = ", ".join(sorted({r["Платформа"] for r in other}))
+        w(f"Платформы без проверок: {plats} ({len(other)} правил).\n")
     w("## Как добавить проверку\n")
     w("1. Опишите её в [`tests_def.py`](../detection-tests/tests_def.py): id, название, подстроки названий правил из каталога, риск, условия.")
     w("2. Напишите реализацию в раннере платформы: функция `Test-WIN34`, `t_LNX_31`, `t_MAC_30` или `test_IPA_12` (по id). "

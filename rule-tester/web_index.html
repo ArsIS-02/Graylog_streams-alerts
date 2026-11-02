@@ -204,7 +204,7 @@ async function openRule(title){const dr=$('#drawer');dr.classList.add('on');dr.t
     h('span',{class:'badge b-mut'},r.kind),h('span',{class:'badge b-mut'},'приоритет '+r.priority),...r.streams.map(s=>h('span',{class:'badge b-ac'},s)),...r.techniques.map(t=>h('span',{class:'badge b-mut'},t)),r.tactic&&r.tactic!=='—'?h('span',{class:'badge b-mut'},r.tactic):''));
   r.flags.forEach(f=>dr.append(h('div',{class:'badge b-warn',style:'display:block;margin-bottom:4px;white-space:normal'},'! '+f)));
   dr.append(h('div',{class:'row'},h('b',{},'Запрос'),h('button',{class:'btn sm',onclick:()=>{navigator.clipboard&&navigator.clipboard.writeText(r.query)}},'Копировать')),h('pre',{},r.query));
-  if(d.live)dr.append(h('div',{class:'mut',style:'margin-top:8px'},`Событий за 7 дней: ${d.live.d7??'—'}, за 30 дней: ${d.live.d30??'—'}`));
+  if(d.live)dr.append(h('div',{class:'mut',style:'margin-top:8px'},`Событий за 7 дней: ${d.live.d7??'—'}, за 30 дней: ${d.live.d30??'—'}. Последнее настоящее срабатывание: ${d.live.last?fmtTime(d.live.last):'не было за последний год (или ещё не считали)'}`));
   if(isAdmin()){const bt=h('div',{class:'row',style:'margin-top:10px'},
     h('button',{class:'btn pri',onclick:async()=>{try{await api('/api/run',{mode:'queries',rule:'='+r.title});dr.classList.remove('on');location.hash='#/run'}catch(e){note(e.message)}}},'Проверить это правило'),
     h('button',{class:'btn',onclick:async()=>{try{await api('/api/run',{mode:'harvest',rule:'='+r.title});dr.classList.remove('on');location.hash='#/run'}catch(e){note(e.message)}}},'Собрать настоящее сообщение'),
@@ -229,7 +229,8 @@ $('#drawer').addEventListener('keydown',e=>{if(e.key==='Escape')$('#drawer').cla
 /* ---------- запуск ---------- */
 async function pRun(q,m){m.textContent='';const sum=await api('/api/summary');
   const modes=[['queries','Запросы в тестовом потоке','Отправляет образцы в тестовый поток и проверяет запросы. Алертов и писем нет.'],['e2e','До алерта','Боевой путь до настоящего события. Создаёт алерты и письма.'],
-    ['doctor','Проверка доступа и входа GELF','Токен, определения, поток, отправка тестового сообщения.'],['selftest','Самопроверка запросов','Офлайн: разбор запросов, образцы, замечания.'],['harvest','Сбор настоящих сообщений','Берёт из Graylog реальные сообщения по запросам правил, обезличивает.']];
+    ['doctor','Проверка доступа и входа GELF','Токен, определения, поток, отправка тестового сообщения.'],['selftest','Самопроверка запросов','Офлайн: разбор запросов, образцы, замечания.'],['harvest','Сбор настоящих сообщений','Берёт из Graylog реальные сообщения по запросам правил, обезличивает.'],
+    ['drift','Сверка каталога с Graylog','Сравнивает detections-source.json с живыми определениями событий: запрос, условие, group_by, приоритет, потоки. Ничего не меняет, только показывает расхождения.']];
   let mode=q.get('mode')||'queries';
   const plat=h('select',{},h('option',{value:''},'Все платформы'),...sum.platforms.map(p=>h('option',{value:p},p)));const rule=h('input',{placeholder:'Часть названия правила',style:'flex:1;min-width:200px'});
   const hint=h('div',{class:'mut'});const modeBox=h('div',{class:'row'});
@@ -244,7 +245,7 @@ async function pRun(q,m){m.textContent='';const sum=await api('/api/summary');
   async function poll(){clearTimeout(TIMER);if(CUR!=='run')return;const j=(await api('/api/job')).job;jc.textContent='';if(!j){jc.append(h('div',{class:'mut'},'Запусков в этой сессии сервера ещё не было.'));return}
     const done=j.passed+j.failed+j.skipped;const pct=j.total?Math.min(100,Math.round(done/j.total*100)):(j.status==='идёт'?5:100);
     jc.append(h('div',{class:'row'},h('b',{},`${MODE_RU[j.mode]||j.mode}${j.platform?' · '+j.platform:''}${j.rule?' · '+j.rule:''}`),h('span',{class:'badge '+(j.status==='успешно'?'b-ok':j.status==='идёт'?'b-ac':'b-bad')},j.status),h('span',{class:'mut'},`запуск ${j.id}, ${j.who}`)));
-    if(j.total||j.mode==='queries'||j.mode==='e2e'||j.mode==='art'||j.mode==='method')jc.append(h('div',{class:'row'},h('div',{class:'bar',style:'flex:1;height:10px'},h('i',{class:'g',style:`width:${j.total?j.passed/j.total*100:0}%`}),h('i',{class:'r',style:`width:${j.total?j.failed/j.total*100:0}%`}),h('i',{class:'y',style:`width:${j.total?j.skipped/j.total*100:0}%`})),
+    if(j.total||j.mode==='queries'||j.mode==='e2e'||j.mode==='art'||j.mode==='method'||j.mode==='drift')jc.append(h('div',{class:'row'},h('div',{class:'bar',style:'flex:1;height:10px'},h('i',{class:'g',style:`width:${j.total?j.passed/j.total*100:0}%`}),h('i',{class:'r',style:`width:${j.total?j.failed/j.total*100:0}%`}),h('i',{class:'y',style:`width:${j.total?j.skipped/j.total*100:0}%`})),
       h('span',{class:'mut'},`${done} из ${j.total||'?'}: ✓ ${j.passed}, ✕ ${j.failed}, – ${j.skipped}`)));
     const pre=h('pre',{},j.log||'');jc.append(pre);pre.scrollTop=pre.scrollHeight;
     if(j.status==='идёт')TIMER=setTimeout(poll,1500);else{chips()}}
@@ -299,7 +300,7 @@ async function pResults(q,m){const d=await api('/api/history');m.textContent='';
   function drawTabs(){tabs.textContent='';Object.entries(names).forEach(([k,t])=>tabs.append(h('button',{class:tab===k?'on':'',onclick:()=>{tab=k;show()}},t)))}
   function show(){drawTabs();body.textContent='';if(tab==='reports')reports();else if(tab==='compare')cmp();else if(tab==='history')hist();else view(q.get('file'))}
   function reports(){const t=h('table',{},h('tr',{},h('th',{},'Запуск'),h('th',{class:'h'},'Вид'),h('th',{class:'h'},'Область'),h('th',{},'Итог'),h('th',{},'')));
-    d.reports.forEach(r=>t.append(h('tr',{class:'cl',onclick:()=>view(r.file)},h('td',{},fmtTime(r.created)||r.run,h('div',{class:'mut mono'},r.run)),h('td',{class:'h'},r.kind==='queries'?'запросы':r.kind==='e2e'?'до алерта':r.kind==='art'?'Atomic Red Team':r.kind==='method'?'проверка детектов':r.kind),
+    d.reports.forEach(r=>t.append(h('tr',{class:'cl',onclick:()=>view(r.file)},h('td',{},fmtTime(r.created)||r.run,h('div',{class:'mut mono'},r.run)),h('td',{class:'h'},r.kind==='queries'?'запросы':r.kind==='e2e'?'до алерта':r.kind==='art'?'Atomic Red Team':r.kind==='method'?'проверка детектов':r.kind==='drift'?'сверка с Graylog':r.kind),
       h('td',{class:'h'},r.meta.platform||r.meta.rule||'все'),h('td',{},stackBar(r.stats),h('div',{class:'mut'},`✓ ${r.stats.passed} · ✕ ${r.stats.failed} · – ${r.stats.skipped}`)),h('td',{}, h('span',{class:'badge b-ac'},'Открыть')))));
     body.append(h('div',{class:'card',style:'overflow:auto'},d.reports.length?t:h('div',{class:'mut'},'Отчётов пока нет.')))}
   function hist(){const t=h('table',{},h('tr',{},h('th',{},'Начало'),h('th',{},'Режим'),h('th',{class:'h'},'Область'),h('th',{class:'h'},'Кто'),h('th',{},'Статус')));
@@ -313,7 +314,7 @@ async function pResults(q,m){const d=await api('/api/history');m.textContent='';
       if(!out.children.length)out.append(h('div',{class:'card mut'},'Различий нет.'))};
     body.append(h('div',{class:'card'},h('h2',{},'Сравнение двух отчётов'),h('div',{class:'row'},h('span',{class:'mut'},'Было:'),a,h('span',{class:'mut'},'Стало:'),b,h('button',{class:'btn pri',onclick:go},'Сравнить'))),out)}
   async function view(file){tab='view';drawTabs();body.textContent='';const r=await api('/api/report?file='+encodeURIComponent(file));const st=r.stats||{};let only=false,qs='';const host=h('div');
-    body.append(h('div',{class:'card'},h('div',{class:'row'},h('b',{},`Отчёт ${r.run} (${r.kind==='queries'?'запросы':'до алерта'})`),h('span',{class:'mut'},fmtTime(r.created)),h('span',{class:'mut'},'версия '+(r.version||'—')),
+    body.append(h('div',{class:'card'},h('div',{class:'row'},h('b',{},`Отчёт ${r.run} (${({queries:'запросы',e2e:'до алерта',art:'Atomic Red Team',method:'проверка детектов',drift:'сверка с Graylog'})[r.kind]||r.kind})`),h('span',{class:'mut'},fmtTime(r.created)),h('span',{class:'mut'},'версия '+(r.version||'—')),
       h('span',{style:'flex:1'}),h('a',{class:'btn sm',href:'/api/report.csv?file='+encodeURIComponent(file)},'CSV'),h('a',{class:'btn sm',target:'_blank',href:'/report?file='+encodeURIComponent(file)},'Печать / PDF'),h('button',{class:'btn sm',onclick:()=>{navigator.clipboard&&navigator.clipboard.writeText(location.origin+'/#/results?file='+encodeURIComponent(file))}},'Копировать ссылку')),
       h('div',{class:'row'},h('span',{class:'badge b-ok'},'✓ '+st.passed),h('span',{class:'badge b-bad'},'✕ '+st.failed),h('span',{class:'badge b-warn'},'– '+st.skipped),h('span',{class:'mut'},r.summary)),
       h('div',{class:'row'},h('label',{},h('input',{type:'checkbox',onchange:e=>{only=e.target.checked;draw()}}),' только проблемы'),h('input',{placeholder:'Поиск',oninput:e=>{qs=e.target.value.toLowerCase();draw()}}))),host);
@@ -330,7 +331,8 @@ async function pResults(q,m){const d=await api('/api/history');m.textContent='';
 
 /* ---------- покрытие ---------- */
 async function pCoverage(q,m){const c=await api('/api/coverage');m.textContent='';const stat=(v,t,cl)=>h('div',{class:'stat'},h('b',{style:cl?`color:var(--${cl})`:''},v),h('span',{},t));
-  m.append(h('div',{class:'grid'},stat(c.total,'правил'),stat(c.with_manual,'с ручными или настоящими образцами','ok'),stat(c.no_manual.length,'только с автообразцами','warn'),stat(c.quiet.length,'без событий за 30 дней')));
+  m.append(h('div',{class:'grid'},stat(c.total,'правил'),stat(c.with_manual,'с ручными или настоящими образцами','ok'),stat(c.no_manual.length,'только с автообразцами','warn'),stat(c.quiet.length,'без событий за 30 дней'),
+    stat(c.with_art,'покрыты Atomic Red Team','ok'),stat(c.with_method,'покрыты методикой (глава 15)','ok'),stat(c.uncovered.length,'совсем без тестов',c.uncovered.length?'bad':'ok')));
   const live=h('div',{class:'row'});
   if(isAdmin())live.append(h('button',{class:'btn',disabled:c.live.running,onclick:async()=>{await api('/api/live/refresh',{});setTimeout(()=>pCoverage(q,m),800)}},c.live.running?`Считаю… ${c.live.done}/${c.live.total}`:'Обновить счётчики событий'));
   live.append(h('span',{class:'mut'},c.live.age?'Счётчики обновлены '+ago(c.live.age):'Счётчики событий ещё не собирались'+(c.live.error?': '+c.live.error:'')));
@@ -339,7 +341,11 @@ async function pCoverage(q,m){const c=await api('/api/coverage');m.textContent='
   m.append(h('div',{class:'card'},h('h2',{},'Тактики и техники MITRE ATT&CK'),...c.tactics.map(t=>h('details',{},h('summary',{},h('b',{},t.tactic),h('span',{class:'mut'},` — правил: ${t.rules}, техник: ${t.techniques.length}`)),
     ...t.techniques.map(x=>h('div',{class:'sub'},h('span',{class:'badge b-ac'},x.id),' ',x.rules.map((r,i)=>[i?', ':'',h('a',{style:'cursor:pointer;color:var(--ac)',onclick:()=>openRule(r)},r)])))))));
   const list=(t,items)=>items.length&&m.append(h('div',{class:'card'},h('h2',{},`${t} (${items.length})`),h('div',{},items.map(r=>h('span',{class:'chip act',style:'margin:0 6px 6px 0',onclick:()=>openRule(r)},r)))));
-  list('Только автообразцы: добавьте ручные',c.no_manual);list('Нет событий за 30 дней: правило могло устареть или не получает данных',c.quiet)}
+  list('Совсем без тестов: нет ни ручных/настоящих образцов, ни Atomic Red Team, ни методики главы 15',c.uncovered);
+  list('Только автообразцы: добавьте ручные',c.no_manual);
+  c.quiet.length&&m.append(h('div',{class:'card'},h('h2',{},`Нет событий за 30 дней: правило могло устареть или не получает данных (${c.quiet.length})`),
+    h('div',{},c.quiet.map(r=>h('span',{class:'chip act',style:'margin:0 6px 6px 0',title:(c.quiet_last||{})[r]?'последнее срабатывание: '+fmtTime((c.quiet_last||{})[r]):'не было за последний год',onclick:()=>openRule(r)},
+      r+((c.quiet_last||{})[r]?' ('+fmtTime((c.quiet_last||{})[r]).slice(0,10)+')':' (никогда)'))))))}
 
 /* ---------- качество ---------- */
 async function pQuality(q,m){const d=await api('/api/quality');m.textContent='';const kinds=[...new Set(d.issues.map(i=>i.kind))];let k='';const host=h('div',{class:'card',style:'overflow:auto'});
@@ -360,7 +366,7 @@ async function pSettings(q,m){const d=await api('/api/settings');m.textContent='
     h('label',{class:'f'},ins,' не проверять сертификат (только лаборатория)')));
   m.append(h('div',{class:'card'},h('h2',{},'Расписание'),
     h('label',{class:'f'},schedOn,' запускать по расписанию'),
-    f('schedule','Запуски по расписанию','text','queries@02:30,selftest@03:00,e2e@04:00'),f('e2e_platforms','Платформы для ночного «до алерта»','text','пусто: не запускать'),
+    f('schedule','Запуски по расписанию','text','queries@02:30,selftest@03:00,drift@03:30,e2e@04:00'),f('e2e_platforms','Платформы для ночного «до алерта»','text','пусто: не запускать'),
     h('div',{class:'mut'},'Время по часовому поясу контейнера. «До алерта» по расписанию создаёт настоящие алерты, включайте осознанно. Снимите галочку выше, чтобы приостановить все запуски по расписанию, не стирая настроенное время.')));
   const act=h('div',{class:'row'});
   if(isAdmin()){act.append(h('button',{class:'btn pri',onclick:async()=>{const b={};Object.entries(inputs).forEach(([k,i])=>b[k]=i.value.trim());b.insecure=ins.checked?'1':'';b.schedule_enabled=schedOn.checked?'1':'0';try{await api('/api/settings/save',b);await note('Настройки сохранены на томе.');pSettings(q,m);chips()}catch(e){note(e.message)}}},'Сохранить'),
@@ -372,7 +378,7 @@ async function pAudit(q,m){const d=await api('/api/audit');m.textContent='';cons
   d.audit.forEach(a=>t.append(h('tr',{},h('td',{},fmtTime(a.t)),h('td',{},a.role),h('td',{class:'h mut'},a.ip),h('td',{},a.action),h('td',{class:'h mut'},a.detail))));m.append(h('div',{class:'card',style:'overflow:auto'},d.audit.length?t:'Пусто'))}
 
 (async()=>{try{await boot()}catch(e){if(e.message!=='auth')note(e.message)}})();
-const MODE_RU={art:'Сверка Atomic Red Team',method:'Сверка проверки детектов (глава 15)',queries:'Запросы в тестовом потоке',e2e:'До алерта',doctor:'Проверка доступа',selftest:'Самопроверка запросов',harvest:'Сбор настоящих сообщений'};
+const MODE_RU={art:'Сверка Atomic Red Team',method:'Сверка проверки детектов (глава 15)',queries:'Запросы в тестовом потоке',e2e:'До алерта',doctor:'Проверка доступа',selftest:'Самопроверка запросов',harvest:'Сбор настоящих сообщений',drift:'Сверка каталога с Graylog'};
 </script>
 </body>
 </html>
