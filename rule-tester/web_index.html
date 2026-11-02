@@ -332,7 +332,7 @@ async function pResults(q,m){const d=await api('/api/history');m.textContent='';
 /* ---------- покрытие ---------- */
 async function pCoverage(q,m){const c=await api('/api/coverage');m.textContent='';const stat=(v,t,cl)=>h('div',{class:'stat'},h('b',{style:cl?`color:var(--${cl})`:''},v),h('span',{},t));
   m.append(h('div',{class:'grid'},stat(c.total,'правил'),stat(c.with_manual,'с ручными или настоящими образцами','ok'),stat(c.no_manual.length,'только с автообразцами','warn'),stat(c.quiet.length,'без событий за 30 дней'),
-    stat(c.with_art,'покрыты Atomic Red Team','ok'),stat(c.with_method,'покрыты методикой (глава 15)','ok'),stat(c.uncovered.length,'совсем без тестов',c.uncovered.length?'bad':'ok')));
+    stat(c.with_art,'покрыты Atomic Red Team','ok'),stat(c.with_method,'покрыты методиками тестирования','ok'),stat(c.uncovered.length,'совсем без тестов',c.uncovered.length?'bad':'ok')));
   const live=h('div',{class:'row'});
   if(isAdmin())live.append(h('button',{class:'btn',disabled:c.live.running,onclick:async()=>{await api('/api/live/refresh',{});setTimeout(()=>pCoverage(q,m),800)}},c.live.running?`Считаю… ${c.live.done}/${c.live.total}`:'Обновить счётчики событий'));
   live.append(h('span',{class:'mut'},c.live.age?'Счётчики обновлены '+ago(c.live.age):'Счётчики событий ещё не собирались'+(c.live.error?': '+c.live.error:'')));
