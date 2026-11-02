@@ -60,6 +60,7 @@ details{border:1px solid var(--ln);border-radius:8px;padding:6px 10px;margin-bot
 <div id="login" class="hide">
   <div class="card">
     <div class="brand" style="color:var(--tx)"><img src="/favicon.svg" alt=""><div>GraylogRuleTester<small class="mut">проверка правил Graylog</small></div></div>
+    <label class="f"><span>Учётная запись</span><input id="lgname" type="text" value="admin" autocomplete="username"></label>
     <label class="f"><span>Пароль</span><input id="pw" type="password" autocomplete="current-password"></label>
     <button class="btn pri" id="pwgo" style="width:100%">Войти</button><div id="pwerr" style="color:var(--bad);margin-top:8px"></div>
   </div>
@@ -117,7 +118,7 @@ applyTheme();
 
 /* ---------- вход, каркас ---------- */
 function showLogin(){$('#app').classList.add('hide');$('#login').classList.remove('hide')}
-$('#pwgo').onclick=async()=>{try{await api('/api/login',{password:$('#pw').value});$('#login').classList.add('hide');boot()}catch(e){$('#pwerr').textContent=e.message}};
+$('#pwgo').onclick=async()=>{try{await api('/api/login',{login:$('#lgname').value,password:$('#pw').value});$('#login').classList.add('hide');boot()}catch(e){$('#pwerr').textContent=e.message}};
 $('#pw').onkeydown=e=>{if(e.key==='Enter')$('#pwgo').click()};
 $('#logout').onclick=async()=>{try{await api('/api/logout',{})}catch(e){}showLogin()};
 const PAGES={home:['Сводка',pHome],rules:['Правила',pRules],run:['Запуск',pRun],art:['Atomic Red Team',pArt],results:['Результаты',pResults],coverage:['Покрытие',pCoverage],quality:['Качество запросов',pQuality],settings:['Настройки',pSettings],audit:['Журнал действий',pAudit]};
@@ -332,13 +333,16 @@ async function pQuality(q,m){const d=await api('/api/quality');m.textContent='';
 async function pSettings(q,m){const d=await api('/api/settings');m.textContent='';const s=d.settings;const inputs={};
   const f=(key,label,type,ph)=>{const i=h('input',{type:type||'text',value:type==='password'?'':s[key]||'',placeholder:ph||'',disabled:!isAdmin()});inputs[key]=i;return h('label',{class:'f'},h('span',{},label),i)};
   const ins=h('input',{type:'checkbox',checked:s.insecure==='1',disabled:!isAdmin()});
+  const schedOn=h('input',{type:'checkbox',checked:s.schedule_enabled!=='0',disabled:!isAdmin()});
   m.append(h('div',{class:'card'},h('h2',{},'Подключение к Graylog'),f('graylog_url','Адрес Graylog','text','http://192.168.1.137:9000'),f('graylog_token','Токен API (только чтение)','password',s.token_set?'задан, оставьте пустым, чтобы не менять':'вставьте токен'),
     f('gelf','Вход GELF HTTP','text','http://host.containers.internal:12203/gelf'),f('stream','Тестовый поток','text','Rule Tester'),f('ca_file','Файл центра сертификации (необязательно)'),
     h('label',{class:'f'},ins,' не проверять сертификат (только лаборатория)')));
-  m.append(h('div',{class:'card'},h('h2',{},'Расписание'),f('schedule','Запуски по расписанию','text','queries@02:30,selftest@03:00,e2e@04:00'),f('e2e_platforms','Платформы для ночного «до алерта»','text','пусто: не запускать'),
-    h('div',{class:'mut'},'Время по часовому поясу контейнера. «До алерта» по расписанию создаёт настоящие алерты, включайте осознанно.')));
+  m.append(h('div',{class:'card'},h('h2',{},'Расписание'),
+    h('label',{class:'f'},schedOn,' запускать по расписанию'),
+    f('schedule','Запуски по расписанию','text','queries@02:30,selftest@03:00,e2e@04:00'),f('e2e_platforms','Платформы для ночного «до алерта»','text','пусто: не запускать'),
+    h('div',{class:'mut'},'Время по часовому поясу контейнера. «До алерта» по расписанию создаёт настоящие алерты, включайте осознанно. Снимите галочку выше, чтобы приостановить все запуски по расписанию, не стирая настроенное время.')));
   const act=h('div',{class:'row'});
-  if(isAdmin()){act.append(h('button',{class:'btn pri',onclick:async()=>{const b={};Object.entries(inputs).forEach(([k,i])=>b[k]=i.value.trim());b.insecure=ins.checked?'1':'';try{await api('/api/settings/save',b);await note('Настройки сохранены на томе.');pSettings(q,m);chips()}catch(e){note(e.message)}}},'Сохранить'),
+  if(isAdmin()){act.append(h('button',{class:'btn pri',onclick:async()=>{const b={};Object.entries(inputs).forEach(([k,i])=>b[k]=i.value.trim());b.insecure=ins.checked?'1':'';b.schedule_enabled=schedOn.checked?'1':'0';try{await api('/api/settings/save',b);await note('Настройки сохранены на томе.');pSettings(q,m);chips()}catch(e){note(e.message)}}},'Сохранить'),
     h('button',{class:'btn',onclick:async()=>{try{await api('/api/run',{mode:'doctor'});location.hash='#/run'}catch(e){note(e.message)}}},'Проверить соединение'))}
   m.append(act,h('div',{class:'mut',style:'margin-top:10px'},`Пароли (RT_PASSWORD, RT_VIEWER_PASSWORD) задаются только переменными окружения. Роль «наблюдатель»: ${s.has_viewer?'включена':'выключена (нет RT_VIEWER_PASSWORD)'}.`))}
 

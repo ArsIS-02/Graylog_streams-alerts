@@ -10,6 +10,7 @@
   RT_INSECURE=1, RT_CA_FILE    проверка сертификата Graylog
   RT_DATA                      каталог тома: история, отчёты, образцы, настройки, журнал
   RT_SCHEDULE                  расписание: «queries@02:30,selftest@03:00,e2e@04:00»
+  RT_SCHEDULE_ENABLED          "0" — выключить запуски по расписанию, не трогая само расписание (по умолчанию включено)
   RT_E2E_PLATFORMS             платформы для ночного e2e (по умолчанию e2e по расписанию выключен)
   RT_PORT                      порт (по умолчанию 8080)
 """
@@ -48,9 +49,10 @@ MODES = {"queries": "run-queries", "e2e": "run-e2e", "doctor": "doctor", "selfte
 MODE_RU = {"queries": "Запросы в тестовом потоке", "e2e": "До алерта", "doctor": "Проверка доступа",
            "selftest": "Самопроверка запросов", "harvest": "Сбор настоящих сообщений"}
 SETTING_ENV = {"graylog_url": "GRAYLOG_URL", "graylog_token": "GRAYLOG_TOKEN", "gelf": "RT_GELF", "stream": "RT_STREAM",
-               "schedule": "RT_SCHEDULE", "e2e_platforms": "RT_E2E_PLATFORMS", "insecure": "RT_INSECURE",
-               "ca_file": "RT_CA_FILE"}
+               "schedule": "RT_SCHEDULE", "schedule_enabled": "RT_SCHEDULE_ENABLED", "e2e_platforms": "RT_E2E_PLATFORMS",
+               "insecure": "RT_INSECURE", "ca_file": "RT_CA_FILE"}
 OK_STATUS = ("ПРОШЛО", "СОБЫТИЕ ЕСТЬ")
+ADMIN_LOGIN = "admin"  # единственная учётная запись; другие пока не планируются
 
 
 # ------------------------------------------------------------------ настройки, журнал
@@ -501,6 +503,9 @@ def summary():
 def scheduler():
     done = set()
     while True:
+        if cfg("schedule_enabled") == "0":
+            time.sleep(30)
+            continue
         spec = [x.strip() for x in cfg("schedule").split(",") if "@" in x]
         now = datetime.now()
         for item in spec:
@@ -713,15 +718,17 @@ class H(BaseHTTPRequestHandler):
             return self.reply({"error": "нужен JSON"}, 415)
         b = self.body()
         if path == "/api/login":
+            login = str(b.get("login", "")).strip()
             pw = str(b.get("password", ""))
             admin, viewer = os.environ.get("RT_PASSWORD", ""), os.environ.get("RT_VIEWER_PASSWORD", "")
             eq = lambda x, y: bool(y) and hmac.compare_digest(hashlib.sha256(x.encode()).digest(),  # noqa: E731
                                                               hashlib.sha256(y.encode()).digest())
-            role = "admin" if eq(pw, admin) else "viewer" if eq(pw, viewer) else None
+            login_ok = hmac.compare_digest(login.encode(), ADMIN_LOGIN.encode())
+            role = ("admin" if eq(pw, admin) else "viewer" if eq(pw, viewer) else None) if login_ok else None
             if not role:
                 audit("—", self.ip(), "вход не удался")
                 time.sleep(1)
-                return self.reply({"error": "неверный пароль"}, 403)
+                return self.reply({"error": "неверный логин или пароль"}, 403)
             tok = secrets.token_urlsafe(32)
             SESSIONS[tok] = {"role": role, "t": time.time()}
             audit(role, self.ip(), "вход")
