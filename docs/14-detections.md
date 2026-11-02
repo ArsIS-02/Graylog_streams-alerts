@@ -171,7 +171,7 @@ win_event_id:1 AND (message:("reg save hklm sam" OR "reg save hklm security" OR 
 **Windows - Добавление в группу администраторов (4728, 4732, 4756)**
 
 ```
-win_channel:Security AND win_event_id:(4728 OR 4732 OR 4756) AND winlogbeat_winlog_event_data_TargetUserName:(Администраторы OR "Администраторы домена" OR "Администраторы предприятия" OR "Администраторы схемы" OR Administrators OR "Domain Admins" OR "Enterprise Admins" OR "Schema Admins")
+win_channel:Security AND win_event_id:(4728 OR 4732 OR 4756) AND win_target_user_name:(Администраторы OR "Администраторы домена" OR "Администраторы предприятия" OR "Администраторы схемы" OR Administrators OR "Domain Admins" OR "Enterprise Admins" OR "Schema Admins")
 ```
 
 **Windows - Добавление в локальные администраторы (командная строка)**

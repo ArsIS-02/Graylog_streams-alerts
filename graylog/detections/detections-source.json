@@ -4530,7 +4530,7 @@
    ],
    "state": "ENABLED",
    "description": "В привилегированную группу (администраторы, администраторы домена, предприятия, схемы) добавлен участник.",
-   "query": "win_channel:Security AND win_event_id:(4728 OR 4732 OR 4756) AND winlogbeat_winlog_event_data_TargetUserName:(Администраторы OR \"Администраторы домена\" OR \"Администраторы предприятия\" OR \"Администраторы схемы\" OR Administrators OR \"Domain Admins\" OR \"Enterprise Admins\" OR \"Schema Admins\")",
+   "query": "win_channel:Security AND win_event_id:(4728 OR 4732 OR 4756) AND win_target_user_name:(Администраторы OR \"Администраторы домена\" OR \"Администраторы предприятия\" OR \"Администраторы схемы\" OR Administrators OR \"Domain Admins\" OR \"Enterprise Admins\" OR \"Schema Admins\")",
    "group_by": [],
    "condition": null,
    "aggregated": false,
