@@ -1,6 +1,6 @@
 # 16. GraylogRuleTester: проверка всех правил без запуска на хостах
 
-**GraylogRuleTester** (версия 0.7, каталог [`rule-tester/`](../rule-tester/)) проверяет правила Graylog автоматически. Образцы сообщений отправляются прямо на сервер Graylog по GELF HTTP, а потом инструмент смотрит, находят ли их запросы правил и появляются ли события. На хостах ничего запускать не нужно, в отличие от [проверки детектов](15-detection-tests.md) из главы 15.
+**GraylogRuleTester** (версия 0.8, каталог [`rule-tester/`](../rule-tester/)) проверяет правила Graylog автоматически. Образцы сообщений отправляются прямо на сервер Graylog по GELF HTTP, а потом инструмент смотрит, находят ли их запросы правил и появляются ли события. На хостах ничего запускать не нужно, в отличие от [проверки детектов](15-detection-tests.md) из главы 15.
 
 Инструмент работает как контейнер Podman с веб-интерфейсом и как обычный консольный скрипт. Нужен только Python 3.11+ и доступ к Graylog.
 
@@ -277,10 +277,12 @@ python3 rule_tester.py --url … drift                                          
 python3 rule_tester.py --url … fp-check --since 7d                               # ложные срабатывания на «чистом» трафике
 python3 rule_tester.py --url … --gelf … replay --file incident.json --yes-send-alerts   # replay инцидента, настоящие алерты
 python3 rule_tester.py latency --days 30                                         # офлайн: статистика задержки обнаружения
+python3 rule_tester.py --platform Windows caldera-plan                           # список техник MITRE для adversary-профиля CALDERA
+python3 rule_tester.py --url … caldera-verify --techniques T1110,T1021.004 --since 90m   # сверка с Graylog по техникам
 python3 rule_tester.py --version
 ```
 
-Команды: `list`, `selftest`, `generate`, `doctor`, `drift`, `setup`, `harvest`, `run-queries`, `run-e2e`, `fp-check`, `replay`, `latency`, `art-plan`, `art-runner`, `art-verify`, `method-plan`, `method-runner`, `method-verify`. Общие параметры: `--url`, `--token-env`, `--insecure`, `--ca-file`, `--gelf`, `--stream`, `--source {auto,file,live}`, `--rule`, `--platform`. `run-e2e` и `replay` без `--yes-send-alerts` не запустятся. Код возврата 1, если есть провалы, поэтому команду удобно подключать в cron или CI.
+Команды: `list`, `selftest`, `generate`, `doctor`, `drift`, `setup`, `harvest`, `run-queries`, `run-e2e`, `fp-check`, `replay`, `latency`, `art-plan`, `art-runner`, `art-verify`, `method-plan`, `method-runner`, `method-verify`, `caldera-plan`, `caldera-verify`. Общие параметры: `--url`, `--token-env`, `--insecure`, `--ca-file`, `--gelf`, `--stream`, `--source {auto,file,live}`, `--rule`, `--platform`. `run-e2e` и `replay` без `--yes-send-alerts` не запустятся. Код возврата 1, если есть провалы, поэтому команду удобно подключать в cron или CI.
 
 ### Сверка каталога репозитория с живым Graylog (`drift`)
 
@@ -338,6 +340,28 @@ python3 rule_tester.py latency --days 7 --all          # за неделю, вк
 ```
 
 Статус `ИЗМЕРЕНО` (мин/сред/макс по накопленным наблюдениям, в скобках — верхняя граница по конфигурации правила: окно агрегации + периодичность проверки) считается «прошло»; без наблюдений — `ПРОПУЩЕНО`. В веб-интерфейсе — режим «Задержка обнаружения» на странице «Запуск».
+
+### CALDERA (`caldera-plan`, `caldera-verify`, только консоль)
+
+`art-verify`/`method-verify` проверяют тесты по заранее собранному плану (ART-тесты, скрипты главы 15). Для более реалистичной эмуляции атак на своём C2 — [CALDERA](https://github.com/mitre/caldera) (MITRE) — такого плана нет: CALDERA сам решает, какие способности (abilities) и в каком порядке выполнять, а здесь нет ни сервера CALDERA, ни его агентов (Sandcat) — сервер и агентов ты разворачиваешь и запускаешь сам, инструмент только помогает собрать профиль и потом сверяет результат с Graylog.
+
+Готовых файлов adversary-профиля или ability с конкретными UUID этот инструмент не генерирует: идентификаторы способностей в стандартном наборе stockpile могут отличаться между версиями CALDERA, а выдумывать команды, которые реально выполнятся на хосте, без проверенного источника — плохая идея. Вместо этого `caldera-plan` печатает «список покупок» — список техник MITRE ATT&CK (из того же поля `techniques` каталога детектов, что и на странице «Покрытие»), под которые в Graylog уже есть правила, с разбивкой по платформе и названиями покрываемых правил:
+
+```bash
+python3 rule_tester.py caldera-plan                      # по всем платформам
+python3 rule_tester.py --platform Windows caldera-plan    # только для Windows
+```
+
+Дальше это делается руками в самом CALDERA: Adversaries → Create → добавляешь abilities, отфильтровав по нужной технике (у CALDERA есть свой фильтр/поиск по ATT&CK technique) — обычно достаточно одной способности на технику для нужной платформы, покрывать все способности сразу не нужно. Запускаешь профиль на агенте.
+
+После того как профиль отработал, `caldera-verify` сверяет результат с Graylog — так же, как `art-verify`/`method-verify`, только ключ сверки не план тестов, а список T-кодов, которые ты указываешь сам (те, что реально были в запущенном профиле), и окно времени:
+
+```bash
+python3 rule_tester.py --url … caldera-verify --techniques T1110,T1021.004 --since 90m
+python3 rule_tester.py --url … --platform Windows caldera-verify --techniques T1003.001 --since "2026-11-02T18:00:00Z"
+```
+
+Статусы те же, что у `art-verify`: `СОБЫТИЕ ЕСТЬ` / `НЕТ СОБЫТИЯ` / `ПРОПУЩЕНО` (правила нет в Graylog, либо под указанные техники нет вообще ни одного правила в каталоге). Задержка обнаружения считается так же приблизительно, как у `art-verify`/`method-verify` — от начала `--since`, а не от настоящего момента выполнения способности на хосте, и тоже попадает в отчёты `latency`. `--rule` и `--platform` фильтруют так же, как в остальных командах. В веб-интерфейсе кнопки нет (нужны техники и окно времени руками) — только консоль, как `replay`.
 
 ### Матрица покрытия тестами
 
