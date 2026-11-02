@@ -72,8 +72,7 @@ details{border:1px solid var(--ln);border-radius:8px;padding:6px 10px;margin-bot
   <a data-p="rules"><span class="ico">≡</span>Правила</a>
   <a data-p="run"><span class="ico">▶</span>Запуск</a>
   <a data-p="results"><span class="ico">✓</span>Результаты<span class="pill hide" id="pillf"></span></a>
-  <a data-p="art"><span class="ico">⚔</span>Atomic Red Team</a>
-  <a data-p="method"><span class="ico">⛨</span>Проверка детектов</a>
+  <a data-p="detect"><span class="ico">⛨</span>Проверка детектов</a>
   <a data-p="coverage"><span class="ico">◎</span>Покрытие</a>
   <a data-p="quality"><span class="ico">!</span>Качество</a>
   <a data-p="settings"><span class="ico">⚙</span>Настройки</a>
@@ -122,12 +121,14 @@ function showLogin(){$('#app').classList.add('hide');$('#login').classList.remov
 $('#pwgo').onclick=async()=>{try{await api('/api/login',{login:$('#lgname').value,password:$('#pw').value});$('#login').classList.add('hide');boot()}catch(e){$('#pwerr').textContent=e.message}};
 $('#pw').onkeydown=e=>{if(e.key==='Enter')$('#pwgo').click()};
 $('#logout').onclick=async()=>{try{await api('/api/logout',{})}catch(e){}showLogin()};
-const PAGES={home:['Сводка',pHome],rules:['Правила',pRules],run:['Запуск',pRun],art:['Atomic Red Team',pArt],method:['Проверка детектов',pMethod],results:['Результаты',pResults],coverage:['Покрытие',pCoverage],quality:['Качество запросов',pQuality],settings:['Настройки',pSettings],audit:['Журнал действий',pAudit]};
+const PAGES={home:['Сводка',pHome],rules:['Правила',pRules],run:['Запуск',pRun],results:['Результаты',pResults],detect:['Проверка детектов',pDetect],coverage:['Покрытие',pCoverage],quality:['Качество запросов',pQuality],settings:['Настройки',pSettings],audit:['Журнал действий',pAudit]};
 let CUR='',TIMER=null;
-function route(){clearTimeout(TIMER);const[p,qs]=(location.hash.slice(2)||'home').split('?');const page=PAGES[p]?p:'home';CUR=page;
+function route(){clearTimeout(TIMER);const[rawp,qs]=(location.hash.slice(2)||'home').split('?');const sp=new URLSearchParams(qs||'');
+  let p=rawp;if(p==='art'||p==='method'){if(!sp.get('kind'))sp.set('kind',p);p='detect'} // старые ссылки #/art и #/method
+  const page=PAGES[p]?p:'home';CUR=page;
   document.querySelectorAll('aside a').forEach(a=>a.classList.toggle('on',a.dataset.p===page));$('#title').textContent=PAGES[page][0];
   const m=$('#main');m.textContent='';m.append(h('div',{class:'mut'},'Загрузка…'));
-  Promise.resolve(PAGES[page][1](new URLSearchParams(qs||''),m)).catch(e=>{if(e.message!=='auth'){m.textContent='';m.append(h('div',{class:'banner'},e.message))}})}
+  Promise.resolve(PAGES[page][1](sp,m)).catch(e=>{if(e.message!=='auth'){m.textContent='';m.append(h('div',{class:'banner'},e.message))}})}
 window.addEventListener('hashchange',route);
 document.querySelectorAll('aside a').forEach(a=>a.onclick=()=>{location.hash='#/'+a.dataset.p});
 async function chips(){try{const s=await api('/api/summary');const hh=s.health;const box=$('#chips');box.textContent='';
@@ -251,47 +252,44 @@ async function pRun(q,m){m.textContent='';const sum=await api('/api/summary');
     if(j.status==='идёт')TIMER=setTimeout(poll,1500);else{chips()}}
   poll()}
 
-/* ---------- Atomic Red Team ---------- */
-async function pArt(q,m){m.textContent='';const d=await api('/api/art');let os=q.get('os')||'linux';
-  const tabs=h('div',{class:'tabs'});const body=h('div');m.append(h('div',{class:'card'},h('h2',{},'Проверка правил тестами Atomic Red Team'),
+/* ---------- проверка детектов: Atomic Red Team + методика (глава 15) ---------- */
+const DETECT_KINDS={
+  art:{title:'Atomic Red Team',api:'/api/art',runner:'/api/art/runner',mode:'art',defOs:'linux',testWord:'тестов',testCol:'Тест'},
+  method:{title:'Методика (глава 15)',api:'/api/method',runner:'/api/method/runner',mode:'method',defOs:'windows',testWord:'проверок',testCol:'Проверка'}};
+async function pDetect(q,m){m.textContent='';let kind=DETECT_KINDS[q.get('kind')]?q.get('kind'):'method';const cfg=DETECT_KINDS[kind];
+  let os=q.get('os')||cfg.defOs;
+  const ktabs=h('div',{class:'tabs'});Object.entries(DETECT_KINDS).forEach(([k,c])=>ktabs.append(h('button',{class:kind===k?'on':'',onclick:()=>{location.hash='#/detect?kind='+k}},c.title)));
+  const intro=h('div',{class:'card'});const tabs=h('div',{class:'tabs'});const body=h('div');m.append(ktabs,intro,tabs,body);
+  const d=await api(cfg.api);
+  if(kind==='art')intro.append(h('h2',{},'Проверка правил тестами Atomic Red Team'),
     h('div',{class:'mut'},'Тесты Red Canary (MIT) подобраны вручную: только безопасные, с очисткой. Скрипт скачивается и запускается на тестовом хосте, '+
-    'эта страница ничего на хостах не выполняет. Через 10+ минут после теста вернитесь и сверьте: какие правила дали событие, какие нет.')),tabs,body);
+    'эта страница ничего на хостах не выполняет. Через 10+ минут после теста вернитесь и сверьте: какие правила дали событие, какие нет.'));
+  else{const names=Object.values(d).map(v=>v.name).join(', ');const nTests=Object.values(d).reduce((s,v)=>s+v.tests.length,0);const nRules=new Set(Object.values(d).flatMap(v=>v.rules)).size;
+    intro.append(h('h2',{},'Проверка правил на хосте (глава 15)'),
+      h('div',{class:'mut'},`Готовые раннеры: ${names} — ${nTests} проверок на ${nRules} правил каталога. Написаны и проверены вручную, `+
+      'инструмент их только раздаёт и сверяет результат с Graylog; сам на хостах ничего не выполняет.'))}
   function draw(){tabs.textContent='';Object.entries(d).forEach(([k,v])=>tabs.append(h('button',{class:os===k?'on':'',onclick:()=>{os=k;draw()}},v.name+' ('+v.tests.length+')')));
     body.textContent='';const v=d[os];
-    const dl=h('a',{class:'btn pri',href:'/api/art/runner?os='+os,download:v.file,style:'text-decoration:none'},'Скачать '+v.file);
-    const how=os==='windows'?'powershell -File '+v.file+'            (показать план)\npowershell -File '+v.file+' -Run       (выполнить, от администратора)':
-      'bash '+v.file+'            (показать план)\nsudo bash '+v.file+' --run   (выполнить)';
+    const dl=h('a',{class:'btn pri',href:cfg.runner+'?os='+os,download:v.file,style:'text-decoration:none'},'Скачать '+v.file);
+    const how=kind==='art'?(os==='windows'?'powershell -File '+v.file+'            (показать план)\npowershell -File '+v.file+' -Run       (выполнить, от администратора)':
+      'bash '+v.file+'            (показать план)\nsudo bash '+v.file+' --run   (выполнить)'):v.how;
     const since=h('input',{placeholder:'начало окна: 2026-11-01T20:30Z или 90m',style:'flex:1;min-width:240px',value:'90m'});
-    const go=h('button',{class:'btn pri',onclick:async()=>{try{await api('/api/run',{mode:'art',platform:os,since:since.value.trim()});location.hash='#/run'}catch(e){note(e.message)}}},'Сверить события');
+    const go=h('button',{class:'btn pri',onclick:async()=>{try{await api('/api/run',{mode:cfg.mode,platform:os,since:since.value.trim()});location.hash='#/run'}catch(e){note(e.message)}}},'Сверить события');
     if(!isAdmin())go.disabled=true;
-    body.append(h('div',{class:'card'},h('div',{class:'row'},dl,h('span',{class:'mut'},`тестов ${v.tests.length}, правил ожидается ${v.rules.length}`)),h('pre',{},how),
-      h('h2',{},'Сверка с Graylog'),h('div',{class:'row'},since,go),h('div',{class:'mut'},'Время начала скрипт печатает в конце работы (UTC). Правила проверяются раз в 5 минут, подождите 10 минут.')));
-    const t=h('table',{},h('tr',{},h('th',{},'Тест'),h('th',{class:'h'},'Что делает'),h('th',{class:'h'},'Риск'),h('th',{},'Ожидаемые правила')));
-    v.tests.forEach(x=>t.append(h('tr',{},h('td',{},x.name,h('div',{class:'mut mono'},x.id+(x.admin?' · админ':''))),h('td',{class:'h'},x.effect),
-      h('td',{class:'h'},h('span',{class:'badge '+(x.risk.startsWith('нет')?'b-ok':x.risk.startsWith('низкий')?'b-warn':'b-bad')},x.risk.split(':')[0]),h('div',{class:'mut',style:'margin-top:4px'},x.risk.split(':').slice(1).join(':').trim())),
-      h('td',{},...x.expected.map(r=>h('div',{},r))))));
-    body.append(h('div',{class:'card',style:'overflow:auto'},t))}
-  draw()}
-
-/* ---------- проверка детектов (глава 15) ---------- */
-async function pMethod(q,m){m.textContent='';const d=await api('/api/method');let os=q.get('os')||'windows';
-  const names=Object.values(d).map(v=>v.name).join(', ');const nTests=Object.values(d).reduce((s,v)=>s+v.tests.length,0);
-  const nRules=new Set(Object.values(d).flatMap(v=>v.rules)).size;
-  const tabs=h('div',{class:'tabs'});const body=h('div');m.append(h('div',{class:'card'},h('h2',{},'Проверка правил на хосте (глава 15)'),
-    h('div',{class:'mut'},`Готовые раннеры: ${names} — ${nTests} проверок на ${nRules} правил каталога. Написаны и проверены вручную, `+
-    'инструмент их только раздаёт и сверяет результат с Graylog; сам на хостах ничего не выполняет.')),tabs,body);
-  function draw(){tabs.textContent='';Object.entries(d).forEach(([k,v])=>tabs.append(h('button',{class:os===k?'on':'',onclick:()=>{os=k;draw()}},v.name+' ('+v.tests.length+')')));
-    body.textContent='';const v=d[os];
-    const dl=h('a',{class:'btn pri',href:'/api/method/runner?os='+os,download:v.file,style:'text-decoration:none'},'Скачать '+v.file);
-    const since=h('input',{placeholder:'начало окна: 2026-11-01T20:30Z или 90m',style:'flex:1;min-width:240px',value:'90m'});
-    const go=h('button',{class:'btn pri',onclick:async()=>{try{await api('/api/run',{mode:'method',platform:os,since:since.value.trim()});location.hash='#/run'}catch(e){note(e.message)}}},'Сверить события');
-    if(!isAdmin())go.disabled=true;
-    body.append(h('div',{class:'card'},h('div',{class:'row'},dl,h('span',{class:'mut'},`проверок ${v.tests.length}, правил ожидается ${v.rules.length}`)),h('pre',{},v.how),
-      h('h2',{},'Сверка с Graylog'),h('div',{class:'row'},since,go),h('div',{class:'mut'},'Время начала скрипт печатает в конце работы. Правила проверяются раз в 5 минут, подождите 10 минут.')));
-    const t=h('table',{},h('tr',{},h('th',{},'Проверка'),h('th',{class:'h'},'Риск'),h('th',{},'Ожидаемые правила')));
-    v.tests.forEach(x=>t.append(h('tr',{},h('td',{},x.name,h('div',{class:'mut mono'},x.id),x.needs?h('div',{class:'mut',style:'margin-top:2px'},x.needs):''),
-      h('td',{class:'h'},h('span',{class:'badge '+(x.risk==='нет'?'b-ok':x.risk==='низкий'?'b-warn':'b-bad')},x.risk),x.note?h('div',{class:'mut',style:'margin-top:4px'},x.note):''),
-      h('td',{},...x.rules.map(r=>h('div',{},r))))));
+    body.append(h('div',{class:'card'},h('div',{class:'row'},dl,h('span',{class:'mut'},`${cfg.testWord} ${v.tests.length}, правил ожидается ${v.rules.length}`)),h('pre',{},how),
+      h('h2',{},'Сверка с Graylog'),h('div',{class:'row'},since,go),
+      h('div',{class:'mut'},'Время начала скрипт печатает в конце работы'+(kind==='art'?' (UTC)':'')+'. Правила проверяются раз в 5 минут, подождите 10 минут.')));
+    const head=[h('th',{},cfg.testCol)];if(kind==='art')head.push(h('th',{class:'h'},'Что делает'));head.push(h('th',{class:'h'},'Риск'),h('th',{},'Ожидаемые правила'));
+    const t=h('table',{},h('tr',{},...head));
+    v.tests.forEach(x=>{const expected=kind==='art'?x.expected:x.rules;
+      const nameCell=kind==='art'?h('td',{},x.name,h('div',{class:'mut mono'},x.id+(x.admin?' · админ':''))):
+        h('td',{},x.name,h('div',{class:'mut mono'},x.id),x.needs?h('div',{class:'mut',style:'margin-top:2px'},x.needs):'');
+      const cells=[nameCell];if(kind==='art')cells.push(h('td',{class:'h'},x.effect));
+      cells.push(kind==='art'?h('td',{class:'h'},h('span',{class:'badge '+(x.risk.startsWith('нет')?'b-ok':x.risk.startsWith('низкий')?'b-warn':'b-bad')},x.risk.split(':')[0]),
+          h('div',{class:'mut',style:'margin-top:4px'},x.risk.split(':').slice(1).join(':').trim())):
+        h('td',{class:'h'},h('span',{class:'badge '+(x.risk==='нет'?'b-ok':x.risk==='низкий'?'b-warn':'b-bad')},x.risk),x.note?h('div',{class:'mut',style:'margin-top:4px'},x.note):''));
+      cells.push(h('td',{},...expected.map(r=>h('div',{},r))));
+      t.append(h('tr',{},...cells))});
     body.append(h('div',{class:'card',style:'overflow:auto'},t))}
   draw()}
 
