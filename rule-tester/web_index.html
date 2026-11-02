@@ -43,7 +43,7 @@ pre{background:var(--bg);border:1px solid var(--ln);border-radius:8px;padding:10
 .badge{display:inline-flex;gap:4px;align-items:center;border-radius:6px;padding:0 8px;font-size:12px;line-height:20px;white-space:nowrap}
 .b-ok{background:var(--okb);color:var(--ok)}.b-bad{background:var(--badb);color:var(--bad)}.b-warn{background:var(--warnb);color:var(--warn)}.b-mut{background:var(--bg);color:var(--mut);border:1px solid var(--ln)}.b-ac{background:var(--acb);color:var(--ac)}
 .bar{display:flex;height:8px;border-radius:4px;overflow:hidden;background:var(--ln);min-width:90px}.bar i{display:block}.bar .g{background:var(--ok)}.bar .r{background:var(--bad)}.bar .y{background:var(--warn)}
-.banner{border:1px solid var(--bad);background:var(--badb);color:var(--bad);border-radius:12px;padding:12px 16px;margin-bottom:16px}.banner.ok{border-color:var(--ok);background:var(--okb);color:var(--ok)}
+.banner{border:1px solid var(--bad);background:var(--badb);color:var(--bad);border-radius:12px;padding:12px 16px;margin-bottom:16px}.banner.ok{border-color:var(--ok);background:var(--okb);color:var(--ok)}.banner.warn{border-color:var(--warn);background:var(--warnb);color:var(--warn)}
 .drawer{position:fixed;top:0;right:0;bottom:0;width:min(760px,100%);background:var(--card);border-left:1px solid var(--ln);box-shadow:-8px 0 30px rgba(0,0,0,.25);overflow:auto;padding:18px;z-index:20;display:none}.drawer.on{display:block}
 .modal{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;padding:16px;z-index:50}.modal.on{display:flex}
 .modal .box{background:var(--card);border:1px solid var(--ln);border-radius:12px;padding:18px;max-width:480px;width:100%}.modal .act{display:flex;gap:8px;justify-content:flex-end;margin-top:14px}
@@ -142,6 +142,10 @@ async function pHome(q,m){const s=await api('/api/summary');const tr=await api('
   if(L&&L.stats.failed>0)m.append(h('div',{class:'banner'},h('b',{},`Последний прогон (${fmtTime(L.created)}): провалов ${L.stats.failed} из ${L.stats.total}. `),h('a',{href:'#/results?file='+encodeURIComponent(L.file),style:'color:inherit'},'Открыть отчёт')));
   else if(L)m.append(h('div',{class:'banner ok'},`Последний прогон (${fmtTime(L.created)}): все правила прошли (${L.stats.passed} из ${L.stats.total}, пропущено ${L.stats.skipped}).`));
   else m.append(h('div',{class:'banner',style:'border-color:var(--ln);background:var(--card);color:var(--mut)'},'Прогонов ещё не было. Нажмите «Запустить проверку» ниже.'));
+  if(s.field_drift&&s.field_drift.some(d=>d.count>1)){const top=s.field_drift.filter(d=>d.count>1).slice(0,5);
+    m.append(h('div',{class:'banner warn'},h('b',{},'Возможен дрейф схемы данных: '),
+      h('div',{},...top.map(d=>h('div',{style:'margin-top:4px'},`${d.field} — пропало/изменилось в ${d.count} ${d.count===1?'правиле':'правилах'} (${d.platforms.join(', ')})`))),
+      h('div',{class:'mut',style:'margin-top:6px;font-size:12px'},'Одно поле задело сразу несколько правил — похоже, на источнике поменялся пайплайн или маппинг, а не правила сломались. Проверьте настоящие образцы ниже в провалах.')))}
   const stat=(v,t,c)=>h('div',{class:'stat'},h('b',{style:c?`color:var(--${c})`:'',class:(v&&v.nodeType)?'sm':''},v),h('span',{},t));
   m.append(h('div',{class:'grid'},stat(s.rules,'правил в Graylog'),stat(s.known_passed,'прошли по последним результатам','ok'),stat(s.known_failed,'провалов','bad'),stat(s.flagged,'правил с замечаниями','warn'),
     stat(h('span',{class:'sm'},s.next?fmtTime(s.next.at):'—'),'ближайший запуск'+(s.next?': '+s.next.mode.toLowerCase():''))));

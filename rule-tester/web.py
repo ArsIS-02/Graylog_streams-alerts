@@ -453,20 +453,44 @@ def next_run():
     return {"at": best[0].isoformat(timespec="minutes"), "mode": MODE_RU.get(best[1], best[1])} if best else None
 
 
+DRIFT_RE = re.compile(r"расхождения полей: ([^|]+)")
+
+
+def field_drift(rows):
+    """Собирает по всем провалам прогона поля, которые пропали/изменились при индексации
+    (см. rule_tester.diagnose), и группирует по имени поля — чтобы одно изменение пайплайна/маппинга,
+    задевшее сразу много правил, было видно одной строкой, а не разбором каждого провала по отдельности."""
+    by_field = {}
+    for r in rows:
+        m = DRIFT_RE.search(r.get("detail") or "")
+        if not m:
+            continue
+        for part in m.group(1).split(","):
+            name = part.split(":", 1)[0].strip()
+            if not name:
+                continue
+            by_field.setdefault(name, []).append(r["rule"])
+    out = [{"field": f, "count": len(rules), "rules": rules, "platforms": sorted({R.platform_of(t) for t in rules})}
+           for f, rules in by_field.items()]
+    return sorted(out, key=lambda x: -x["count"])
+
+
 def summary():
     rd = rules_data()
     reps = [report_head(d) for d in read_reports(60)]
     queries = [r for r in reps if r["kind"] == "queries"]
     last = queries[0] if queries else None
     fails = []
+    drift = []
     if last:
         full = load_report(last["file"])
-        fails = [{"rule": r["rule"], "status": r["status"], "detail": r["detail"][:200]}
-                 for r in full["rows"] if r["status"] not in OK_STATUS and r["status"] != "ПРОПУЩЕНО"][:30]
+        fail_rows = [r for r in full["rows"] if r["status"] not in OK_STATUS and r["status"] != "ПРОПУЩЕНО"]
+        fails = [{"rule": r["rule"], "status": r["status"], "detail": r["detail"][:200]} for r in fail_rows][:30]
+        drift = field_drift(fail_rows)
     flagged = sum(1 for r in rd["rules"] if r["flags"])
     lr = last_results()
     return {"rules": len(rd["rules"]), "source": rd["source"], "note": rd["note"], "flagged": flagged,
-            "last": last, "fails": fails, "next": next_run(), "health": health(),
+            "last": last, "fails": fails, "field_drift": drift, "next": next_run(), "health": health(),
             "known_failed": sum(1 for v in lr.values() if v["status"] not in OK_STATUS and v["status"] != "ПРОПУЩЕНО"),
             "known_passed": sum(1 for v in lr.values() if v["status"] in OK_STATUS),
             "platforms": sorted({r["platform"] for r in rd["rules"]}), "job": pub_job(JOB["cur"] or JOB["last"])}
