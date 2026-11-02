@@ -13,6 +13,8 @@
   fp-check     офлайн: прогнать запросы правил через недавний «чистый» трафик — ищет слишком широкие запросы
   replay       реальный/анонимизированный инцидент через боевой Graylog (будут настоящие алерты)
   latency      офлайн: статистика задержки обнаружения по уже сохранённым отчётам run-e2e/replay/art/method
+  caldera-plan офлайн: список техник MITRE для adversary-профиля CALDERA (сервер CALDERA — свой)
+  caldera-verify  сверка с Graylog по списку техник и окну времени (как art-verify)
 
 Токен API: переменная окружения GRAYLOG_TOKEN. Адрес: --url или GRAYLOG_URL.
 """
@@ -1120,6 +1122,37 @@ def cmd_method_verify(args):
     return 1 if any(r["status"] == "НЕТ СОБЫТИЯ" for r in rows) else 0
 
 
+# ---------------------------------------------------------------- CALDERA
+
+def cmd_caldera_plan(args):
+    import caldera
+    sys.stdout.write(caldera.build_guide_text(args.platform))
+
+
+def cmd_caldera_verify(args):
+    import art
+    import caldera
+    techniques = [t for t in re.split(r"[,\s]+", args.techniques.strip()) if t]
+    if not techniques:
+        sys.exit("Нужна хотя бы одна техника: --techniques T1110,T1021.004")
+    gl = connect(args)
+    since = art.parse_time(args.since)
+    until = art.parse_time(args.until) if args.until else None
+    run = run_id()
+    log("Запуск %s: сверка CALDERA по техникам %s с %s" % (run, ", ".join(techniques), since.isoformat(timespec="seconds")))
+    rows, summary = caldera.verify(gl, techniques, since, until, platform=args.platform, rule=args.rule)
+    for row in rows:
+        row.setdefault("query", "")
+        row.setdefault("platform", platform_of(row["rule"]))
+        row.setdefault("samples", [])
+    path = write_report(run, "caldera", rows, summary, {"platform": args.platform or "", "source": "CALDERA",
+                                                         "techniques": ",".join(techniques)})
+    for r in rows:
+        log("  %-13s %s" % (r["status"], r["rule"][:90]))
+    log("\n" + summary + "\nОтчёт: " + str(path))
+    return 1 if any(r["status"] == "НЕТ СОБЫТИЯ" for r in rows) else 0
+
+
 # ---------------------------------------------------------------- CLI
 
 def main(argv=None):
@@ -1187,9 +1220,15 @@ def main(argv=None):
     p.add_argument("--os", required=True, choices=["linux", "macos", "windows", "freeipa", "containers", "keenetic"])
     p.add_argument("--since", required=True, help="начало окна: 2026-11-01T20:30, ...Z (UTC) или 90m")
     p.add_argument("--until")
+    sub.add_parser("caldera-plan")
+    p = sub.add_parser("caldera-verify")
+    p.add_argument("--techniques", required=True, help="T-коды через запятую, например T1110,T1021.004")
+    p.add_argument("--since", required=True, help="начало окна: 2026-11-01T20:30, ...Z (UTC) или 90m")
+    p.add_argument("--until")
     args = ap.parse_args(argv)
     fn = {"art-plan": cmd_art_plan, "art-runner": cmd_art_runner, "art-verify": cmd_art_verify,
           "method-plan": cmd_method_plan, "method-runner": cmd_method_runner, "method-verify": cmd_method_verify,
+          "caldera-plan": cmd_caldera_plan, "caldera-verify": cmd_caldera_verify,
           "list": cmd_list, "selftest": cmd_selftest, "generate": cmd_generate, "doctor": cmd_doctor,
           "drift": cmd_drift, "setup": cmd_setup, "harvest": cmd_harvest, "run-queries": cmd_run_queries,
           "run-e2e": cmd_run_e2e, "fp-check": cmd_fp_check, "replay": cmd_replay, "latency": cmd_latency}[args.cmd]
