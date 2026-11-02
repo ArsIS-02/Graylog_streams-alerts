@@ -728,6 +728,50 @@ def cmd_art_verify(args):
     return 1 if any(r["status"] == "НЕТ СОБЫТИЯ" for r in rows) else 0
 
 
+# ---------------------------------------------------------------- Проверка детектов (глава 15)
+
+def cmd_method_plan(args):
+    import methodology as M
+    for plat in M.PLATFORMS:
+        tests = M.load_tests(plat)
+        rules = M.plan_rules(tests)
+        print("%s: проверок %d, правил ожидается %d" % (M.PLATFORM_RU[plat], len(tests), len(rules)))
+        for t in tests:
+            print("  %-10s %s -> %s" % (t["id"], t["name"][:60], "; ".join(t["rules"])[:100]))
+            print("      риск: %s%s" % (t["risk"], (" (" + t["needs"] + ")") if t.get("needs") else ""))
+
+
+def cmd_method_runner(args):
+    import methodology as M
+    raw = M.runner_path(args.os).read_bytes()  # как есть, вместе с BOM у .ps1 — он там не украшение, а нужная кодировка
+    if args.out:
+        Path(args.out).write_bytes(raw)
+        log("Скрипт записан: " + args.out)
+    else:
+        sys.stdout.buffer.write(raw)
+
+
+def cmd_method_verify(args):
+    import art
+    import methodology as M
+    gl = connect(args)
+    since = art.parse_time(args.since)
+    until = art.parse_time(args.until) if args.until else None
+    run = run_id()
+    log("Запуск %s: сверка проверки детектов — глава 15 (%s) с %s" %
+        (run, M.PLATFORM_RU[args.os], since.isoformat(timespec="seconds")))
+    rows, summary = M.verify(gl, args.os, since, until)
+    for row in rows:
+        row.setdefault("query", "")
+        row.setdefault("platform", platform_of(row["rule"]))
+        row.setdefault("samples", [])
+    path = write_report(run, "method", rows, summary, {"platform": args.os, "source": "Проверка детектов (глава 15)"})
+    for r in rows:
+        log("  %-13s %s" % (r["status"], r["rule"][:90]))
+    log("\n" + summary + "\nОтчёт: " + str(path))
+    return 1 if any(r["status"] == "НЕТ СОБЫТИЯ" for r in rows) else 0
+
+
 # ---------------------------------------------------------------- CLI
 
 def main(argv=None):
@@ -773,8 +817,18 @@ def main(argv=None):
     p.add_argument("--os", required=True, choices=["linux", "macos", "windows"])
     p.add_argument("--since", required=True, help="начало окна: 2026-11-01T20:30, ...Z (UTC) или 90m")
     p.add_argument("--until")
+    sub.add_parser("method-plan")
+    p = sub.add_parser("method-runner")
+    p.add_argument("--os", required=True, choices=["linux", "macos", "windows", "freeipa"])
+    p.add_argument("--out")
+    p = sub.add_parser("method-verify")
+    p.add_argument("--os", required=True, choices=["linux", "macos", "windows", "freeipa"])
+    p.add_argument("--since", required=True, help="начало окна: 2026-11-01T20:30, ...Z (UTC) или 90m")
+    p.add_argument("--until")
     args = ap.parse_args(argv)
-    fn = {"art-plan": cmd_art_plan, "art-runner": cmd_art_runner, "art-verify": cmd_art_verify, "list": cmd_list, "selftest": cmd_selftest, "generate": cmd_generate, "doctor": cmd_doctor,
+    fn = {"art-plan": cmd_art_plan, "art-runner": cmd_art_runner, "art-verify": cmd_art_verify,
+          "method-plan": cmd_method_plan, "method-runner": cmd_method_runner, "method-verify": cmd_method_verify,
+          "list": cmd_list, "selftest": cmd_selftest, "generate": cmd_generate, "doctor": cmd_doctor,
           "setup": cmd_setup, "harvest": cmd_harvest, "run-queries": cmd_run_queries, "run-e2e": cmd_run_e2e}[args.cmd]
     try:
         return fn(args) or 0
