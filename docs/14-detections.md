@@ -159,7 +159,7 @@ win_channel:"Microsoft-Windows-Sysmon/Operational" AND win_event_id:3 AND win_im
 **Windows - Вход из неизвестной сети (4624, тип 3 или 10)**
 
 ```
-win_channel:Security AND win_event_id:4624 AND winlogbeat_winlog_event_data_LogonType:(3 OR 10) AND _exists_:winlogbeat_winlog_event_data_IpAddress AND NOT winlogbeat_winlog_event_data_IpAddress:(<белый список>) AND NOT _exists_:src_zone
+win_channel:Security AND win_event_id:4624 AND winlogbeat_winlog_event_data_LogonType:(3 OR 10) AND _exists_:win_ip AND NOT win_ip:(<белый список>) AND NOT _exists_:src_zone
 ```
 
 **Windows - Дамп учётных данных (reg save, comsvcs, ntdsutil)**
@@ -261,7 +261,7 @@ winlogbeat_event_code:4625 AND winlogbeat_event_outcome:failure
 **Windows - Подбор пароля и успешный вход с одного IP (4625 и 4624)**
 
 ```
-winlogbeat_event_code:(4624 OR 4625) AND winlogbeat_winlog_event_data_LogonType:(3 OR 10) AND _exists_:winlogbeat_winlog_event_data_IpAddress AND NOT winlogbeat_winlog_event_data_IpAddress:("-" OR "::1" OR "127.0.0.1" OR "::ffff:127.0.0.1")
+winlogbeat_event_code:(4624 OR 4625) AND winlogbeat_winlog_event_data_LogonType:(3 OR 10) AND _exists_:win_ip AND NOT win_ip:("-" OR "::1" OR "127.0.0.1" OR "::ffff:127.0.0.1")
 ```
 
 **Windows - Подбор пароля на DC по Kerberos (10+ ошибок 4771 за 5 мин)**
@@ -285,7 +285,7 @@ win_channel:"Microsoft-Windows-WMI-Activity/Operational" AND win_event_id:5861
 **Windows - Признаки шифровальщика (расширения и записки)**
 
 ```
-win_channel:"Microsoft-Windows-Sysmon/Operational" AND win_event_id:11 AND winlogbeat_winlog_event_data_TargetFilename:/.*([.](locked|encrypted|crypt|crypted|enc|lockbit|akira|conti|ryuk|wncry|wnry|blackcat|hive|royal|basta|babuk|djvu|zepto|cerber|petya|phobos|mallox|makop)|[\\]([hH][oO][wW]_[tT][oO]_[dD][eE][cC][rR][yY][pP][tT]|[dD][eE][cC][rR][yY][pP][tT]_[iI][nN][sS][tT][rR][uU][cC][tT][iI][oO][nN]|[rR][eE][sS][tT][oO][rR][eE]_[fF][iI][lL][eE][sS]|[rR][eE][aA][dD]_[mM][eE]_[nN][oO][wW]|_[rR][eE][aA][dD][mM][eE]|[hH][oO][wW]_[tT][oO]_[rR][eE][cC][oO][vV][eE][rR]|[rR][eE][cC][oO][vV][eE][rR]_[fF][iI][lL][eE][sS]|[rR][eE][aA][dD][mM][eE]_[tT][oO]_[rR][eE][sS][tT][oO][rR][eE]|@[pP][lL][eE][aA][sS][eE]_[rR][eE][aA][dD]_[mM][eE]@|@[wW][aA][nN][aA][dD][eE][cC][rR][yY][pP][tT][oO][rR]@)[^\\]*)/
+win_channel:"Microsoft-Windows-Sysmon/Operational" AND win_event_id:11 AND winlogbeat_winlog_event_data_TargetFilename:/.*([.](locked|encrypted|crypt|crypted|enc|lockbit|akira|conti|ryuk|wncry|wnry|blackcat|hive|royal|basta|babuk|djvu|zepto|cerber|petya|phobos|mallox|makop)|[\\]([hH][oO][wW]_[tT][oO]_[dD][eE][cC][rR][yY][pP][tT]|[dD][eE][cC][rR][yY][pP][tT]_[iI][nN][sS][tT][rR][uU][cC][tT][iI][oO][nN]|[rR][eE][sS][tT][oO][rR][eE]_[fF][iI][lL][eE][sS]|[rR][eE][aA][dD]_[mM][eE]_[nN][oO][wW]|_[rR][eE][aA][dD][mM][eE]|[hH][oO][wW]_[tT][oO]_[rR][eE][cC][oO][vV][eE][rR]|[rR][eE][cC][oO][vV][eE][rR]_[fF][iI][lL][eE][sS]|[rR][eE][aA][dD][mM][eE]_[tT][oO]_[rR][eE][sS][tT][oO][rR][eE]|\@[pP][lL][eE][aA][sS][eE]_[rR][eE][aA][dD]_[mM][eE]\@|\@[wW][aA][nN][aA][dD][eE][cC][rR][yY][pP][tT][oO][rR]\@)[^\\]*)/
 ```
 
 **Windows - Создание, удаление или изменение доверия домена (4706/4707/4716)**
@@ -351,13 +351,13 @@ win_channel:"Microsoft-Windows-Sysmon/Operational" AND win_event_id:(12 OR 13) A
 **Windows - Запуск утилит удалённого доступа и туннелей**
 
 ```
-win_channel:"Microsoft-Windows-Sysmon/Operational" AND win_event_id:1 AND winlogbeat_winlog_event_data_Image:/.*([nN][gG][rR][oO][kK]|[cC][lL][oO][uU][dD][fF][lL][aA][rR][eE][dD]|[aA][nN][yY][dD][eE][sS][kK]|[tT][eE][aA][mM][vV][iI][eE][wW][eE][rR]|[rR][uU][sS][tT][dD][eE][sS][kK]|[uU][lL][tT][rR][aA][vV][iI][eE][wW][eE][rR]|[sS][cC][rR][eE][eE][nN][cC][oO][nN][nN][eE][cC][tT]|[mM][eE][sS][hH][aA][gG][eE][nN][tT]|[cC][hH][iI][sS][eE][lL]|[tT][aA][iI][lL][sS][cC][aA][lL][eE]|[zZ][eE][rR][oO][tT][iI][eE][rR]|[fF][rR][pP][cC]|[pP][lL][iI][nN][kK]).*/
+win_channel:"Microsoft-Windows-Sysmon/Operational" AND win_event_id:1 AND win_image:/.*([nN][gG][rR][oO][kK]|[cC][lL][oO][uU][dD][fF][lL][aA][rR][eE][dD]|[aA][nN][yY][dD][eE][sS][kK]|[tT][eE][aA][mM][vV][iI][eE][wW][eE][rR]|[rR][uU][sS][tT][dD][eE][sS][kK]|[uU][lL][tT][rR][aA][vV][iI][eE][wW][eE][rR]|[sS][cC][rR][eE][eE][nN][cC][oO][nN][nN][eE][cC][tT]|[mM][eE][sS][hH][aA][gG][eE][nN][tT]|[cC][hH][iI][sS][eE][lL]|[tT][aA][iI][lL][sS][cC][aA][lL][eE]|[zZ][eE][rR][oO][tT][iI][eE][rR]|[fF][rR][pP][cC]|[pP][lL][iI][nN][kK]).*/
 ```
 
 **Windows - Маскировка под системный процесс (svchost, lsass, csrss вне System32)**
 
 ```
-win_channel:"Microsoft-Windows-Sysmon/Operational" AND win_event_id:1 AND winlogbeat_winlog_event_data_Image:/.*[\\](svchost|lsass|csrss|smss|wininit|services|winlogon|spoolsv|lsm|taskhostw|conhost|dllhost|RuntimeBroker|SearchIndexer)[.]exe/ AND NOT winlogbeat_winlog_event_data_Image:/.*[wW][iI][nN][dD][oO][wW][sS][\\]([sS][yY][sS][tT][eE][mM]32|[sS][yY][sS][wW][oO][wW]64|[wW][iI][nN][sS][xX][sS]).*/
+win_channel:"Microsoft-Windows-Sysmon/Operational" AND win_event_id:1 AND win_image:/.*[\\](svchost|lsass|csrss|smss|wininit|services|winlogon|spoolsv|lsm|taskhostw|conhost|dllhost|RuntimeBroker|SearchIndexer)[.]exe/ AND NOT win_image:/.*[wW][iI][nN][dD][oO][wW][sS][\\]([sS][yY][sS][tT][eE][mM]32|[sS][yY][sS][wW][oO][wW]64|[wW][iI][nN][sS][xX][sS]).*/
 ```
 
 **Windows - Новая служба**
@@ -387,13 +387,13 @@ win_channel:"Microsoft-Windows-Sysmon/Operational" AND win_event_id:22 AND (winl
 **Windows - Поиск паролей в файлах (findstr, Select-String)**
 
 ```
-win_channel:"Microsoft-Windows-Sysmon/Operational" AND win_event_id:1 AND winlogbeat_winlog_event_data_CommandLine:/.*(findstr.*[ ]\/[a-zA-Z]*[sS]|[Rr]ecurse.*[Ss]elect-[Ss]tring).*([pP][aA][sS][sS][wW][oO][rR][dD]|[pP][aA][sS][sS][wW][dD]|[sS][eE][cC][rR][eE][tT]|[cC][rR][eE][dD][eE][nN][tT][iI][aA][lL]|[aA][pP][iI][kK][eE][yY]|[iI][dD]_[rR][sS][aA]|[kK][dD][bB][xX]).*/ AND NOT winlogbeat_winlog_event_data_CommandLine:/.*secedit.*/
+win_channel:"Microsoft-Windows-Sysmon/Operational" AND win_event_id:1 AND win_command_line:/.*(findstr.*[ ]\/[a-zA-Z]*[sS]|[Rr]ecurse.*[Ss]elect-[Ss]tring).*([pP][aA][sS][sS][wW][oO][rR][dD]|[pP][aA][sS][sS][wW][dD]|[sS][eE][cC][rR][eE][tT]|[cC][rR][eE][dD][eE][nN][tT][iI][aA][lL]|[aA][pP][iI][kK][eE][yY]|[iI][dD]_[rR][sS][aA]|[kK][dD][bB][xX]).*/ AND NOT win_command_line:/.*secedit.*/
 ```
 
 **Windows - Разведка в домене (nltest, dsquery, AdFind, SharpHound)**
 
 ```
-win_channel:"Microsoft-Windows-Sysmon/Operational" AND win_event_id:1 AND (winlogbeat_winlog_event_data_Image:/.*([nN][lL][tT][eE][sS][tT]|[dD][sS][qQ][uU][eE][rR][yY]|[aA][dD][fF][iI][nN][dD]|[sS][hH][aA][rR][pP][hH][oO][uU][nN][dD]|[bB][lL][oO][oO][dD][hH][oO][uU][nN][dD]|[lL][dD][iI][fF][dD][eE]|[cC][sS][vV][dD][eE]).*/ OR winlogbeat_winlog_event_data_CommandLine:/.*(domain_trusts|dclist|[Gg]et-[Aa][Dd][A-Za-z]+).*/)
+win_channel:"Microsoft-Windows-Sysmon/Operational" AND win_event_id:1 AND (win_image:/.*([nN][lL][tT][eE][sS][tT]|[dD][sS][qQ][uU][eE][rR][yY]|[aA][dD][fF][iI][nN][dD]|[sS][hH][aA][rR][pP][hH][oO][uU][nN][dD]|[bB][lL][oO][oO][dD][hH][oO][uU][nN][dD]|[lL][dD][iI][fF][dD][eE]|[cC][sS][vV][dD][eE]).*/ OR win_command_line:/.*(domain_trusts|dclist|[Gg]et-[Aa][Dd][A-Za-z]+).*/)
 ```
 
 **Windows - Сброс пароля учётной записи (4724)**
@@ -435,7 +435,7 @@ win_channel:Security AND win_event_id:4697 AND NOT winlogbeat_winlog_event_data_
 **Windows - Утилиты выгрузки в облако (rclone, MEGAsync, WinSCP)**
 
 ```
-win_channel:"Microsoft-Windows-Sysmon/Operational" AND win_event_id:1 AND winlogbeat_winlog_event_data_Image:/.*([rR][cC][lL][oO][nN][eE]|[mM][eE][gG][aA][sS][yY][nN][cC]|[mM][eE][gG][aA][cC][mM][dD]|[wW][iI][nN][sS][cC][pP]|[pP][cC][lL][oO][uU][dD]).*/
+win_channel:"Microsoft-Windows-Sysmon/Operational" AND win_event_id:1 AND win_image:/.*([rR][cC][lL][oO][nN][eE]|[mM][eE][gG][aA][sS][yY][nN][cC]|[mM][eE][gG][aA][cC][mM][dD]|[wW][iI][nN][sS][cC][pP]|[pP][cC][lL][oO][uU][dD]).*/
 ```
 
 **Windows - Defender: сигнатуры не обновлялись 7 дней**
@@ -447,7 +447,7 @@ win_channel:"Microsoft-Windows-Windows Defender/Operational" AND win_event_id:20
 **Windows - Архивация не из проводника (7z, WinRAR, Compress-Archive)**
 
 ```
-win_channel:"Microsoft-Windows-Sysmon/Operational" AND win_event_id:1 AND ((winlogbeat_winlog_event_data_Image:/.*(7[zZ]|7[zZ][aA]|7[zZ][gG]|[wW][iI][nN][rR][aA][rR]|[rR][aA][rR]|[zZ][iI][pP])[.]exe/ AND NOT winlogbeat_winlog_event_data_ParentImage:/.*explorer[.]exe/ AND NOT winlogbeat_winlog_event_data_Image:/.*[Tt]emp.*/) OR winlogbeat_winlog_event_data_CommandLine:/.*([Cc]ompress-[Aa]rchive|tar([.]exe)?[ ]+-[a-zA-Z]*c[a-zA-Z]*[ ]).*/)
+win_channel:"Microsoft-Windows-Sysmon/Operational" AND win_event_id:1 AND ((win_image:/.*(7[zZ]|7[zZ][aA]|7[zZ][gG]|[wW][iI][nN][rR][aA][rR]|[rR][aA][rR]|[zZ][iI][pP])[.]exe/ AND NOT winlogbeat_winlog_event_data_ParentImage:/.*explorer[.]exe/ AND NOT win_image:/.*[Tt]emp.*/) OR win_command_line:/.*([Cc]ompress-[Aa]rchive|tar([.]exe)?[ ]+-[a-zA-Z]*c[a-zA-Z]*[ ]).*/)
 ```
 
 **Windows - Вход по RDP**
@@ -592,13 +592,13 @@ audit_type:EXECVE AND message:"/dev/tcp"
 **LNX - Обратная оболочка (bash -i, nc -e, socat exec)**
 
 ```
-audit_type:PROCTITLE AND proctitle:/.*(bash[ ]+-i.*\/dev\/tcp|\/dev\/tcp\/.*0>&1|>&[ ]*\/dev\/tcp|nc[ ]+-[a-z]*e[ ]|ncat[ ].*-e[ ]|socat[ ].*exec|mkfifo[ ].*nc[ ]).*/
+audit_type:PROCTITLE AND proctitle:/.*(bash[ ]+-i.*\/dev\/tcp|\/dev\/tcp\/.*0\>\&1|\>\&[ ]*\/dev\/tcp|nc[ ]+-[a-z]*e[ ]|ncat[ ].*-e[ ]|socat[ ].*exec|mkfifo[ ].*nc[ ]).*/
 ```
 
 **LNX - Обратная оболочка (python, perl, nc, socat, mkfifo)**
 
 ```
-audit_type:PROCTITLE AND proctitle:/.*(python[0-9.]* -c .*socket|perl -e .*socket|nc(at)? .* -e |mkfifo |socat .*exec:|bash -i .*>&).*/
+audit_type:PROCTITLE AND proctitle:/.*(python[0-9.]* -c .*socket|perl -e .*socket|nc(at)? .* -e |mkfifo |socat .*exec:|bash -i .*\>\&).*/
 ```
 
 **LNX - Опасный запуск контейнера (--privileged, -v /:/, docker.sock)**
@@ -1091,7 +1091,7 @@ log_type:macos_osquery AND name:es_process_events AND columns_cmdline:/.*launchc
 **macOS - Передача данных наружу (scp, rsync, nc, socat)**
 
 ```
-name:es_process_events AND ((columns_cmdline:/(.*[ \/])?(scp|rsync)( .*)? [^ ]*@[^ ]*[.][^ ]*:.*/) OR (columns_cmdline:/(.*[ \/])?(nc|ncat|socat)( .*)?/ AND NOT columns_cmdline:/.* -l .*/)) AND NOT columns_cmdline:/.*(--server|192\.168\.|10\.|172\.(1[6-9]|2[0-9]|3[01])\.|localhost|127\.0\.0\.1|monitoring\.test).*/
+name:es_process_events AND ((columns_cmdline:/(.*[ \/])?(scp|rsync)( .*)? [^ ]*\@[^ ]*[.][^ ]*:.*/) OR (columns_cmdline:/(.*[ \/])?(nc|ncat|socat)( .*)?/ AND NOT columns_cmdline:/.* -l .*/)) AND NOT columns_cmdline:/.*(--server|192\.168\.|10\.|172\.(1[6-9]|2[0-9]|3[01])\.|localhost|127\.0\.0\.1|monitoring\.test).*/
 ```
 
 **macOS - Поддельное окно ввода пароля (osascript hidden answer)**
@@ -1115,7 +1115,7 @@ log_type:macos_unified AND processImagePath:\/kernel AND senderImagePath:"\/Syst
 **macOS - Поиск паролей в файлах (grep -r по / и ~)**
 
 ```
-log_type:macos_osquery AND name:es_process_events AND columns_cmdline:/.*(grep|rg|find)[ ]+(-[a-zA-Z]*[rR][a-zA-Z]*[ ]+)+.*([pP][aA][sS][sS][wW][oO][rR][dD]|[pP][aA][sS][sS][wW][dD]|[sS][eE][cC][rR][eE][tT]|[cC][rR][eE][dD][eE][nN][tT][iI][aA][lL]|[aA][pP][iI][kK][eE][yY]|[iI][dD]_[rR][sS][aA]|[kK][dD][bB][xX]).*[ ](\/|~|[$]HOME|\/Users[^ ]*)/ AND NOT columns_cmdline:/.*BatchMode.*/
+log_type:macos_osquery AND name:es_process_events AND columns_cmdline:/.*(grep|rg|find)[ ]+(-[a-zA-Z]*[rR][a-zA-Z]*[ ]+)+.*([pP][aA][sS][sS][wW][oO][rR][dD]|[pP][aA][sS][sS][wW][dD]|[sS][eE][cC][rR][eE][tT]|[cC][rR][eE][dD][eE][nN][tT][iI][aA][lL]|[aA][pP][iI][kK][eE][yY]|[iI][dD]_[rR][sS][aA]|[kK][dD][bB][xX]).*[ ](\/|\~|[$]HOME|\/Users[^ ]*)/ AND NOT columns_cmdline:/.*BatchMode.*/
 ```
 
 **macOS - Сканеры сети (nmap, masscan, arp-scan)**
