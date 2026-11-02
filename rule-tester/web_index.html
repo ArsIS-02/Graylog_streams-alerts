@@ -275,8 +275,10 @@ async function pArt(q,m){m.textContent='';const d=await api('/api/art');let os=q
 
 /* ---------- проверка детектов (глава 15) ---------- */
 async function pMethod(q,m){m.textContent='';const d=await api('/api/method');let os=q.get('os')||'windows';
+  const names=Object.values(d).map(v=>v.name).join(', ');const nTests=Object.values(d).reduce((s,v)=>s+v.tests.length,0);
+  const nRules=new Set(Object.values(d).flatMap(v=>v.rules)).size;
   const tabs=h('div',{class:'tabs'});const body=h('div');m.append(h('div',{class:'card'},h('h2',{},'Проверка правил на хосте (глава 15)'),
-    h('div',{class:'mut'},'Готовые раннеры: Windows, Linux (auditd), macOS, FreeIPA — 103 проверки на 146 правил каталога. Написаны и проверены вручную, '+
+    h('div',{class:'mut'},`Готовые раннеры: ${names} — ${nTests} проверок на ${nRules} правил каталога. Написаны и проверены вручную, `+
     'инструмент их только раздаёт и сверяет результат с Graylog; сам на хостах ничего не выполняет.')),tabs,body);
   function draw(){tabs.textContent='';Object.entries(d).forEach(([k,v])=>tabs.append(h('button',{class:os===k?'on':'',onclick:()=>{os=k;draw()}},v.name+' ('+v.tests.length+')')));
     body.textContent='';const v=d[os];
