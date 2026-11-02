@@ -1,0 +1,74 @@
+name: rule-tester CI
+
+# Офлайн-проверки на каждый push/PR, которые трогают каталог детектов, rule-tester или detection-tests:
+# ничего не ходит в боевой Graylog, алертов и писем не создаётся.
+
+on:
+  push:
+    paths:
+      - "graylog/detections/detections-source.json"
+      - "rule-tester/**"
+      - "detection-tests/**"
+      - ".github/workflows/rule-tester-ci.yml"
+  pull_request:
+    paths:
+      - "graylog/detections/detections-source.json"
+      - "rule-tester/**"
+      - "detection-tests/**"
+      - ".github/workflows/rule-tester-ci.yml"
+  workflow_dispatch:
+
+jobs:
+  selftest:
+    name: Самопроверка запросов (offline)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Синтаксис всех модулей
+        run: python3 -m py_compile rule-tester/*.py detection-tests/*.py
+      - name: rule_tester.py selftest (разбор запросов, образцы, замечания Lucene)
+        run: python3 rule-tester/rule_tester.py selftest
+
+  detection-tests-check:
+    name: Сверка detection-tests с каталогом
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: build_tests.py --check (правила из тестов есть в каталоге, подстрока однозначна, есть реализация в раннере)
+        run: python3 detection-tests/build_tests.py --check
+
+  container-smoke:
+    name: Сборка и запуск контейнера (smoke test)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Сборка образа
+        run: docker build -f rule-tester/Containerfile -t rule-tester:ci .
+      - name: Запуск и проверка, что веб-интерфейс отвечает
+        run: |
+          set -e
+          docker run -d --name rt-ci -p 18080:8080 -e RT_PASSWORD=ci-smoke-test-only rule-tester:ci
+          ok=""
+          for i in $(seq 1 20); do
+            if curl -fs http://127.0.0.1:18080/ >/dev/null 2>&1; then ok=1; break; fi
+            sleep 1
+          done
+          if [ -z "$ok" ]; then
+            echo "Контейнер не ответил за 20 секунд"
+            docker logs rt-ci || true
+            exit 1
+          fi
+          echo "Ответил. Журнал контейнера:"
+          docker logs rt-ci
+      - name: Остановить контейнер
+        if: always()
+        run: docker rm -f rt-ci || true

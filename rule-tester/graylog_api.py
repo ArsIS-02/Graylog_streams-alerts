@@ -153,11 +153,15 @@ class Graylog:
         return sid
 
 
-def send_gelf(gelf_url, doc, timeout=15, ctx=None):
-    """Отправляет одно сообщение GELF HTTP. doc — словарь полей Graylog (message, source, …)."""
+def send_gelf(gelf_url, doc, timeout=15, ctx=None, timestamp=None):
+    """Отправляет одно сообщение GELF HTTP. doc — словарь полей Graylog (message, source, …).
+    timestamp — datetime (с tzinfo), если нужно задать время события явно (например, при replay),
+    вместо времени фактической отправки."""
     host = str(doc.get("source") or "rule-tester")
     msg = {"version": "1.1", "host": host, "short_message": str(doc.get("message") or "rule-tester sample"),
            "level": 6}
+    if timestamp is not None:
+        msg["timestamp"] = timestamp.timestamp()
     for k, v in doc.items():
         if k in ("message", "source", "id", "_id"):
             continue

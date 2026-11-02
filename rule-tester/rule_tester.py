@@ -10,6 +10,8 @@
   harvest      собрать настоящие сообщения по запросам правил, обезличить, сохранить
   run-queries  отправить образцы в тестовый поток и проверить, какие запросы их находят (алертов нет)
   run-e2e      отправить образцы в боевой путь и дождаться событий (будут настоящие алерты)
+  fp-check     офлайн: прогнать запросы правил через недавний «чистый» трафик — ищет слишком широкие запросы
+  replay       реальный/анонимизированный инцидент через боевой Graylog (будут настоящие алерты)
 
 Токен API: переменная окружения GRAYLOG_TOKEN. Адрес: --url или GRAYLOG_URL.
 """
@@ -141,6 +143,17 @@ def filter_rules(rules, args):
         p = args.platform.lower()
         sel = [r for r in sel if platform_of(r["title"]).lower().startswith(p)]
     return sel
+
+
+def parse_minutes(s):
+    """Длина окна в минутах: '7d', '24h', '90m' -> int. В отличие от art.parse_time (абсолютное время начала),
+    здесь нужна именно длительность — окно «чистого» трафика для fp-check."""
+    s = (s or "").strip()
+    m = re.fullmatch(r"(\d+)\s*([mhd])", s)
+    if not m:
+        raise ValueError("длина окна ожидается как 90m, 24h или 7d")
+    n, u = int(m.group(1)), m.group(2)
+    return {"m": 1, "h": 60, "d": 1440}[u] * n
 
 
 # ---------------------------------------------------------------- образцы
@@ -492,7 +505,7 @@ def numeric_fields(args):
     return NUMERIC_DEFAULT | set(x for x in (args.numeric or "").split(",") if x)
 
 
-OKS = ("ПРОШЛО", "СОБЫТИЕ ЕСТЬ")
+OKS = ("ПРОШЛО", "СОБЫТИЕ ЕСТЬ", "ЧИСТО")
 
 
 def stats_of(rows):
@@ -592,6 +605,91 @@ def cmd_run_queries(args):
     summary = "правил %d, прошло %d, провалов %d" % (len(rows), sum(r["status"] == "ПРОШЛО" for r in rows), bad)
     path = write_report(run, "queries", rows, summary, {"platform": getattr(args, "platform", None) or "",
                                                        "rule": ",".join(args.rule or []), "source": src})
+    log("\n" + summary + "\nОтчёт: " + str(path))
+    return 1 if bad else 0
+
+
+# ---------------------------------------------------------------- проверка ложных срабатываний
+
+def load_corpus_file(path):
+    """Доп. корпус «чистых» сообщений из файла: JSON-массив объектов или JSONL (по одному объекту в строке)."""
+    text = Path(path).read_text(encoding="utf-8").strip()
+    if not text:
+        return []
+    if text[0] == "[":
+        return [d for d in json.loads(text) if isinstance(d, dict)]
+    return [json.loads(line) for line in text.splitlines() if line.strip()]
+
+
+def cmd_fp_check(args):
+    """Офлайн-проверка: не слишком ли широкие запросы у правил — прогоняет их через недавний «чистый»
+    трафик (боевые потоки без алертного тестового потока и/или файл) и ищет совпадения. Ничего не
+    отправляет и не создаёт в Graylog — только читает."""
+    if args.no_live and not args.file:
+        sys.exit("Нужен хотя бы один источник трафика: живой Graylog или --file.")
+    if args.no_live and args.source == "live":
+        sys.exit("--no-live и --source live вместе не имеют смысла.")
+    gl = None
+    corpus = []
+    if not args.no_live:
+        gl = connect(args)
+    rules, src = get_rules(args, gl)
+    rules = filter_rules(rules, args)
+    rules = [r for r in rules if r["query"].strip() != "*" and not PLACEHOLDER.search(r["query"])]
+    if not rules:
+        sys.exit("Нет правил под фильтр (после отсева query=* и заглушек).")
+    if gl is not None:
+        test_sid = resolve_stream(gl, args.stream) if args.stream else None
+        stream_ids = [s["id"] for s in gl.streams() if s["id"] != test_sid] or None
+        minutes = parse_minutes(args.since)
+        total, msgs = gl.search_messages("*", stream_ids, minutes=minutes, limit=args.limit)
+        corpus += msgs
+        log("Из Graylog за %s: взято %d сообщений (всего в индексе за окно: %d)." % (args.since, len(msgs), total))
+    if args.file:
+        file_msgs = load_corpus_file(args.file)
+        corpus += file_msgs
+        log("Из файла %s: %d сообщений." % (args.file, len(file_msgs)))
+    if not corpus:
+        sys.exit("Корпус «чистого» трафика пуст — нет сообщений для проверки.")
+    run = run_id()
+    log("Запуск %s: правил %d, сообщений в корпусе %d (проверка ложных срабатываний)." % (run, len(rules), len(corpus)))
+    rows, bad = [], 0
+    for r in rules:
+        try:
+            node, warns = L.parse(r["query"])
+        except L.QueryError as e:
+            rows.append({"rule": r["title"], "status": "ПРОПУЩЕНО", "detail": "запрос не разобран: %s" % e,
+                         "query": r["query"], "platform": platform_of(r["title"]), "priority": r.get("priority"), "samples": []})
+            log("  %-15s %s" % ("ПРОПУЩЕНО", r["title"][:90]))
+            continue
+        total_hits, examples = 0, []
+        for doc in corpus:
+            try:
+                matched = L.evaluate(node, doc)
+            except Exception:
+                continue
+            if matched:
+                total_hits += 1
+                if len(examples) < 5:
+                    examples.append(doc)
+        if total_hits:
+            bad += 1
+            sam = [{"id": "", "expect": "no_match", "src": "harvest", "origin": "", "why": "сообщение из корпуса «чистого» трафика",
+                    "found": True, "ok": False, "doc": d} for d in examples]
+            rows.append({"rule": r["title"], "status": "ЕСТЬ СОВПАДЕНИЯ",
+                         "detail": "запрос совпал с %d из %d сообщений обычного трафика (показаны первые %d)" % (
+                             total_hits, len(corpus), len(examples)),
+                         "query": r["query"], "platform": platform_of(r["title"]), "priority": r.get("priority"), "samples": sam})
+        else:
+            rows.append({"rule": r["title"], "status": "ЧИСТО",
+                         "detail": "совпадений с корпусом (%d сообщений) не найдено" % len(corpus),
+                         "query": r["query"], "platform": platform_of(r["title"]), "priority": r.get("priority"), "samples": []})
+        log("  %-15s %s" % (rows[-1]["status"], r["title"][:90]))
+    summary = "правил %d, чисто %d, с совпадениями %d (корпус: %d сообщений)" % (
+        len(rows), sum(r["status"] == "ЧИСТО" for r in rows), bad, len(corpus))
+    path = write_report(run, "fp", rows, summary, {"platform": getattr(args, "platform", None) or "",
+                                                    "rule": ",".join(args.rule or []), "source": src,
+                                                    "since": args.since, "corpus": len(corpus)})
     log("\n" + summary + "\nОтчёт: " + str(path))
     return 1 if bad else 0
 
@@ -740,6 +838,108 @@ def cmd_drift(args):
     return 1 if diffs else 0
 
 
+# ---------------------------------------------------------------- replay реального инцидента
+
+def load_replay_scenario(path):
+    """Файл сценария: JSON {"title":..., "expected":[...], "events":[{"timestamp":"...", ...поля сообщения}]}
+    либо просто JSON-массив событий (тогда title/expected не заданы — будет информационный режим).
+    У каждого события обязательно поле timestamp (ISO, со смещением или Z; без смещения считается UTC)."""
+    data = json.loads(Path(path).read_text(encoding="utf-8"))
+    if isinstance(data, list):
+        data = {"events": data}
+    events = []
+    for e in data.get("events", []):
+        ts = e.get("timestamp")
+        if not ts:
+            raise ValueError("у события нет поля timestamp: %r" % e)
+        dt = datetime.fromisoformat(str(ts).replace("Z", "+00:00"))
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=timezone.utc)
+        doc = {k: v for k, v in e.items() if k != "timestamp"}
+        events.append((dt.astimezone(timezone.utc), doc))
+    return data.get("title") or Path(path).stem, data.get("expected"), events
+
+
+def cmd_replay(args):
+    """Replay реального (или анонимизированного) инцидента через боевой Graylog: временные метки сдвигаются
+    так, чтобы последнее событие сценария стало «сейчас» (относительные интервалы между событиями сохраняются —
+    это важно для порогов/group_by), затем сообщения отправляются по-настоящему в боевые потоки и может
+    сработать настоящий алерт. Поэтому требуется --yes-send-alerts."""
+    if not args.yes_send_alerts:
+        sys.exit("Режим отправляет НАСТОЯЩИЕ сообщения в боевые потоки и может создать настоящие алерты. "
+                 "Подтвердите флагом --yes-send-alerts.")
+    if not args.gelf:
+        sys.exit("Нужен --gelf: адрес входа, сообщения с которого попадают в боевые потоки.")
+    try:
+        title, expected, events = load_replay_scenario(args.file)
+    except (OSError, ValueError, json.JSONDecodeError) as e:
+        sys.exit("Не удалось прочитать сценарий %s: %s" % (args.file, e))
+    if not events:
+        sys.exit("В сценарии нет событий (events).")
+    events.sort(key=lambda x: x[0])
+    gl = connect(args)
+    offset = G.now_utc() - events[-1][0]
+    run = run_id()
+    log("Запуск %s: replay «%s», событий %d, окно сценария %s — %s (последнее событие станет «сейчас»)." % (
+        run, title, len(events), events[0][0].isoformat(timespec="seconds"),
+        events[-1][0].isoformat(timespec="seconds")))
+    t0 = G.now_utc() - timedelta(minutes=1)
+    for ts, doc in events:
+        d = dict(doc)
+        d.setdefault("source", "rt-replay")
+        d["rt_run"] = run
+        d["rt_replay"] = title
+        G.send_gelf(args.gelf, d, ctx=gl.ctx, timestamp=ts + offset)
+        if args.pace:
+            time.sleep(args.pace)
+    log("Отправлено %d сообщений, жду индексации и срабатывания правил…" % len(events))
+    rules = filter_rules(load_live_rules(gl), args)
+    if expected:
+        watch = [r for r in rules if r["title"] in expected]
+        missing_titles = sorted(set(expected) - {r["title"] for r in watch})
+    else:
+        watch = [r for r in rules if not is_silence(r["cond"]) and r["query"].strip() != "*"]
+        missing_titles = []
+    ids = [r["id"] for r in watch if r.get("id")]
+    log("Сверяю с %d правилами (%s), жду до %d с…" % (
+        len(watch), "ожидаемый список" if expected else "все подходящие под фильтр", args.wait))
+    seen, deadline = {}, time.time() + args.wait
+    while time.time() < deadline:
+        if ids:
+            evs = gl.search_events(ids, t0)
+            for e in evs:
+                did = e.get("event_definition_id")
+                if did and did not in seen:
+                    seen[did] = e
+        if expected and len(seen) >= len(ids):
+            break
+        time.sleep(20)
+    rows = []
+    for t in missing_titles:
+        rows.append({"rule": t, "status": "ПРОПУЩЕНО",
+                     "detail": "правило из списка ожидаемых не найдено среди живых определений событий (переименовано/удалено?)",
+                     "query": "", "platform": platform_of(t), "priority": None, "samples": []})
+    for r in watch:
+        if r["id"] in seen:
+            rows.append({"rule": r["title"], "status": "СОБЫТИЕ ЕСТЬ",
+                         "detail": "событие %s в %s" % (seen[r["id"]].get("id", "")[:12], seen[r["id"]].get("timestamp", "")),
+                         "query": r["query"], "platform": platform_of(r["title"]), "priority": r.get("priority"), "samples": []})
+        elif expected:
+            rows.append({"rule": r["title"], "status": "НЕТ СОБЫТИЯ",
+                         "detail": "ожидалось по сценарию, но за %d с после replay события не было" % args.wait,
+                         "query": r["query"], "platform": platform_of(r["title"]), "priority": r.get("priority"), "samples": []})
+    bad = sum(1 for r in rows if r["status"] in ("НЕТ СОБЫТИЯ", "ПРОПУЩЕНО"))
+    fired = sum(1 for r in rows if r["status"] == "СОБЫТИЕ ЕСТЬ")
+    summary = "сценарий «%s», событий отправлено %d, сработавших правил %d%s" % (
+        title, len(events), fired, (", не хватает %d из ожидаемых" % bad) if expected else "")
+    path = write_report(run, "replay", rows, summary, {"source": "replay: %s" % args.file, "title": title,
+                                                       "expected": bool(expected)})
+    for r in rows:
+        log("  %-13s %s" % (r["status"], r["rule"][:90]))
+    log("\n" + summary + "\nОтчёт: " + str(path))
+    return 1 if (expected and bad) else 0
+
+
 # ---------------------------------------------------------------- Atomic Red Team
 
 def cmd_art_plan(args):
@@ -864,6 +1064,16 @@ def main(argv=None):
     p.add_argument("--wait", type=int, default=720)
     p.add_argument("--all", action="store_true")
     p.add_argument("--yes-send-alerts", action="store_true")
+    p = sub.add_parser("fp-check")
+    p.add_argument("--since", default="7d", help="окно «чистого» трафика из живого Graylog: 90m, 24h, 7d")
+    p.add_argument("--limit", type=int, default=2000, help="макс. сообщений, которые брать из Graylog")
+    p.add_argument("--file", help="доп. корпус: JSON-массив или JSONL с сообщениями (поля как в Graylog)")
+    p.add_argument("--no-live", action="store_true", help="не ходить в Graylog, использовать только --file")
+    p = sub.add_parser("replay")
+    p.add_argument("--file", required=True, help="сценарий: JSON с events[] (у каждого — timestamp), опц. title/expected")
+    p.add_argument("--wait", type=int, default=600)
+    p.add_argument("--pace", type=float, default=0, help="пауза между отправкой событий, секунд")
+    p.add_argument("--yes-send-alerts", action="store_true")
     sub.add_parser("art-plan")
     p = sub.add_parser("art-runner")
     p.add_argument("--os", required=True, choices=["linux", "macos", "windows"])
@@ -885,7 +1095,7 @@ def main(argv=None):
           "method-plan": cmd_method_plan, "method-runner": cmd_method_runner, "method-verify": cmd_method_verify,
           "list": cmd_list, "selftest": cmd_selftest, "generate": cmd_generate, "doctor": cmd_doctor,
           "drift": cmd_drift, "setup": cmd_setup, "harvest": cmd_harvest, "run-queries": cmd_run_queries,
-          "run-e2e": cmd_run_e2e}[args.cmd]
+          "run-e2e": cmd_run_e2e, "fp-check": cmd_fp_check, "replay": cmd_replay}[args.cmd]
     try:
         return fn(args) or 0
     except G.ApiError as e:
