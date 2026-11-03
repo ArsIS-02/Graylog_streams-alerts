@@ -119,6 +119,8 @@ function stepDetail(label,st){
   if(st.got&&st.got.length)line('получено успешно — '+st.got.map(subLabel).join(', '));
   if(st.failed&&Object.keys(st.failed).length)
     line('не получено — '+Object.entries(st.failed).map(([k,v])=>subLabel(k)+': '+v).join('; '),true);
+  if(st.unsupported&&st.unsupported.length)
+    line('недоступно на этом кластере (необязательно) — '+st.unsupported.map(subLabel).join(', '));
   if(st.reason)line(st.reason,st.status==='error');
   return h('div',{},rows)}
 
