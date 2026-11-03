@@ -1,0 +1,19 @@
+services:
+  graylog-backup:
+    build:
+      context: ../..
+      dockerfile: graylog-backup/Containerfile
+    image: localhost/graylog-backup:latest
+    container_name: graylog-backup
+    restart: unless-stopped
+    env_file: ./graylog-backup.env
+    ports:
+      - "8086:8080"
+    volumes:
+      - graylog-backup-data:/data:Z
+    read_only: true
+    tmpfs: [/tmp]
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges"]
+volumes:
+  graylog-backup-data:

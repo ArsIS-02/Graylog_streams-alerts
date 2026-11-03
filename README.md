@@ -79,6 +79,7 @@
 | 🧭 **MITRE ATT&CK** | Каждый детект привязан к тактике и технике v20; слой для Navigator и матрица покрытия | [`graylog/mitre/`](graylog/mitre/) |
 | 📧 **Уведомления** | SMTP через Mail.ru, отдельное письмо для каждой платформы (Windows, Linux, macOS, контейнеры, FreeIPA, Keenetic) с прямой ссылкой на событие; проверка раз в 5 минут, письмо за 1–2 минуты | [глава 2](docs/02-streams-alerts.md) |
 | 🧪 **Проверка правил** | GraylogRuleTester: образцы по GELF на сервер Graylog, проверка запросов и полного пути до события, веб-интерфейс в контейнере Podman | [глава 16](docs/16-rule-tester.md), [`rule-tester/`](rule-tester/) |
+| 💾 **Резервное копирование** | GraylogBackup: конфигурация через REST, полный `mongodump`, шаблоны индексов OpenSearch — для быстрого восстановления сервера при аварии или переносе на другое железо | [глава 18](docs/18-graylog-backup.md), [`graylog-backup/`](graylog-backup/) |
 | 📊 **Дашборды** | Дашборды для доклада и рабочие, отдельные для контейнеров; импорт одним скриптом | [главы 7, 9, 10](#-главы) |
 
 ## 📬 Как выглядят письма
@@ -191,6 +192,7 @@ bash rule-tester/deploy/install.sh        # первый запуск созда
 | 15 | [Проверка детектов](docs/15-detection-tests.md) | Безопасные сценарии для Windows, Linux, macOS и FreeIPA: создают события, похожие на атаки, и показывают, какие алерты должны прийти; отчёт для сверки в Graylog |
 | 16 | [GraylogRuleTester: проверка правил без хостов](docs/16-rule-tester.md) | Образцы сообщений отправляются на сервер Graylog (GELF): проверка запросов всех правил в тестовом потоке и полного пути до события; веб-интерфейс в контейнере Podman, покрытие MITRE, сравнение запусков, роли, установка за Caddy, сверка с настоящими тестами Atomic Red Team |
 | 17 | [GraylogRuleTester: руководство администратора](docs/17-admin-guide-ruletester.md) | Пошаговый маршрут по всему инструменту со скриншотами и пронумерованными указателями последовательности: от подключения к серверу до отчётов покрытия, CALDERA и задержки обнаружения |
+| 18 | [GraylogBackup: резервное копирование сервера](docs/18-graylog-backup.md) | Конфигурация через REST, полный `mongodump` MongoDB, шаблоны индексов OpenSearch/Elasticsearch; веб-интерфейс в контейнере Podman, расписание, хранение с ротацией; пошаговый разбор аварийного восстановления сервера из архива |
 
 ### Дашборды
 
@@ -234,6 +236,7 @@ bash rule-tester/deploy/install.sh        # первый запуск созда
 | MITRE ATT&CK | [`graylog/mitre/`](graylog/mitre/) | Соответствие техникам, поля в событиях, слой Navigator, страница с матрицей |
 | Каталог детектов | [`graylog/detections/`](graylog/detections/) | Выгрузка из Graylog, генератор страницы и таблица CSV |
 | GraylogRuleTester | [`rule-tester/`](rule-tester/) | Проверка всех правил: образцы по GELF в Graylog, проверка запросов и событий, веб-интерфейс (Podman), консоль, заглушка Graylog для самопроверки; версия 0.11 |
+| GraylogBackup | [`graylog-backup/`](graylog-backup/) | Резервное копирование конфигурации Graylog: REST-снимок, `mongodump`, шаблоны OpenSearch; веб-интерфейс (Podman), консоль, аварийное восстановление; версия 0.1 |
 | Проверка детектов | [`detection-tests/`](detection-tests/) | Раннеры для Windows, Linux, macOS и FreeIPA: 103 безопасные проверки, покрывающие 146 правил |
 | Дашборды | [`graylog/dashboards-spec.json`](graylog/dashboards-spec.json), [`import-dashboards.js`](graylog/import-dashboards.js) | Спецификация и импорт дашбордов |
 | Агенты на хостах | [`windows/`](windows/), [`linux/`](linux/), [`macos/`](macos/), [`containers/`](containers/) | Конфиги Winlogbeat, rsyslog, Filebeat, osquery, Fluent Bit |
@@ -264,6 +267,7 @@ Graylog_streams-alerts/
 │   ├── 15-detection-tests.md          ← проверка детектов на хостах (собирается скриптом)
 │   ├── 16-rule-tester.md              ← GraylogRuleTester: проверка правил без хостов
 │   ├── 17-admin-guide-ruletester.md   ← GraylogRuleTester: руководство администратора
+│   ├── 18-graylog-backup.md           ← GraylogBackup: резервное копирование сервера
 │   ├── troubleshooting.md             ← грабли и решения
 │   └── images/                        ← скриншоты и иллюстрации
 ├── graylog/
@@ -280,6 +284,10 @@ Graylog_streams-alerts/
 │   ├── insights.py, mock_graylog.py   ← покрытие и качество; заглушка Graylog
 │   ├── samples/                       ← ручные образцы (git)
 │   └── Containerfile, deploy/         ← контейнер Podman, quadlet, install.sh
+├── graylog-backup/                    ← GraylogBackup: резервное копирование сервера
+│   ├── backup.py, gl_client.py        ← консоль: REST-снимок, mongodump/mongorestore, OpenSearch
+│   ├── web.py, web_index.html         ← веб-интерфейс, расписание, журнал
+│   └── Containerfile, deploy/         ← контейнер Podman (с mongodb-database-tools), quadlet, install.sh
 ├── detection-tests/                   ← проверки детектов: раннеры под ОС и FreeIPA, сборщик
 ├── decoder/                           ← декодер auditd (auditd_decoder.py, systemd-юнит)
 ├── config/                            ← server.conf (SMTP), opensearch.yml

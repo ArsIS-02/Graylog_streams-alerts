@@ -1,0 +1,30 @@
+# Сборка из корня репозитория:  podman build -f graylog-backup/Containerfile -t localhost/graylog-backup:latest .
+FROM docker.io/library/python:3.12-slim
+
+LABEL org.opencontainers.image.title="GraylogBackup" org.opencontainers.image.version="0.1"
+
+# mongodb-database-tools (mongodump/mongorestore) — официальный статический архив, не из apt
+# (в Debian его нет). Версия и ссылка на changelog ниже: перед сборкой стоит свериться, не вышла
+# ли новая — https://www.mongodb.com/docs/database-tools/release-notes/database-tools-changelog/
+ARG MONGO_TOOLS_VERSION=100.20.0
+RUN set -eux; \
+    apt-get update; \
+    apt-get install -y --no-install-recommends ca-certificates curl; \
+    curl -fsSL -o /tmp/mongotools.tgz \
+      "https://fastdl.mongodb.org/tools/db/mongodb-database-tools-debian12-x86_64-${MONGO_TOOLS_VERSION}.tgz"; \
+    tar -xzf /tmp/mongotools.tgz -C /tmp; \
+    cp /tmp/mongodb-database-tools-*/bin/mongodump /tmp/mongodb-database-tools-*/bin/mongorestore /usr/local/bin/; \
+    rm -rf /tmp/mongotools.tgz /tmp/mongodb-database-tools-*; \
+    apt-get purge -y curl; apt-get autoremove -y; rm -rf /var/lib/apt/lists/*; \
+    mongodump --version; mongorestore --version
+
+ENV PYTHONUNBUFFERED=1 GB_DATA=/data GB_PORT=8080
+RUN useradd -r -u 10002 -d /app gb && mkdir -p /data && chown gb /data
+WORKDIR /app/graylog-backup
+COPY graylog-backup/backup.py graylog-backup/gl_client.py graylog-backup/version.py graylog-backup/web.py \
+     graylog-backup/web_index.html graylog-backup/favicon.svg ./
+USER gb
+VOLUME /data
+EXPOSE 8080
+HEALTHCHECK --interval=60s --timeout=5s CMD python3 -c "import urllib.request;urllib.request.urlopen('http://127.0.0.1:8080/',timeout=3)"
+CMD ["python3", "web.py"]
