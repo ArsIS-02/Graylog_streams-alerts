@@ -1,6 +1,6 @@
 # Сборка из корня репозитория:  podman build -f rule-tester/Containerfile -t localhost/rule-tester:latest .
 FROM docker.io/library/python:3.12-slim
-LABEL org.opencontainers.image.title="GraylogRuleTester" org.opencontainers.image.version="0.10"
+LABEL org.opencontainers.image.title="GraylogRuleTester" org.opencontainers.image.version="0.11"
 ENV PYTHONUNBUFFERED=1 RT_DATA=/data RT_PORT=8080 TZ=Asia/Yekaterinburg
 RUN useradd -r -u 10001 -d /app rt && mkdir -p /data && chown rt /data
 WORKDIR /app/rule-tester
