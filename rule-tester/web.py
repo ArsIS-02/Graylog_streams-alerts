@@ -42,7 +42,7 @@ import rule_tester as R  # noqa: E402
 from version import NAME, VERSION  # noqa: E402
 
 HERE = Path(__file__).resolve().parent
-GUIDE_MD = HERE.parent / "docs" / "17-admin-guide.md"
+GUIDE_MD = HERE.parent / "docs" / "17-admin-guide-ruletester.md"
 GUIDE_IMAGES = HERE.parent / "docs" / "images"
 GUIDE_IMAGE_RE = re.compile(r"17-[\w-]+\.png")
 SESSIONS = {}
@@ -497,11 +497,11 @@ _GUIDE_CACHE = {"mtime": None, "html": ""}
 
 
 def guide_html():
-    """Руководство администратора (docs/17-admin-guide.md), пересобирается, только когда файл меняется."""
+    """Руководство администратора (docs/17-admin-guide-ruletester.md), пересобирается, только когда файл меняется."""
     try:
         mtime = GUIDE_MD.stat().st_mtime
     except OSError:
-        return "<p>Файл docs/17-admin-guide.md не найден в образе контейнера.</p>"
+        return "<p>Файл docs/17-admin-guide-ruletester.md не найден в образе контейнера.</p>"
     if _GUIDE_CACHE["mtime"] != mtime:
         md = GUIDE_MD.read_text(encoding="utf-8")
         _GUIDE_CACHE["html"] = mdlite.convert(md)

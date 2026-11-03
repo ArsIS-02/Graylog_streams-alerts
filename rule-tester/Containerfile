@@ -8,7 +8,7 @@ COPY rule-tester/lucene.py rule-tester/graylog_api.py rule-tester/rule_tester.py
 COPY rule-tester/samples/manual.json samples/manual.json
 COPY rule-tester/art/plan.json rule-tester/art/NOTICE.md art/
 COPY graylog/detections/detections-source.json /app/graylog/detections/detections-source.json
-COPY docs/17-admin-guide.md /app/docs/17-admin-guide.md
+COPY docs/17-admin-guide-ruletester.md /app/docs/17-admin-guide-ruletester.md
 COPY docs/images/17-*.png /app/docs/images/
 COPY detection-tests/tests.json /app/detection-tests/tests.json
 COPY detection-tests/windows/Invoke-DetectionTests.ps1 /app/detection-tests/windows/Invoke-DetectionTests.ps1
