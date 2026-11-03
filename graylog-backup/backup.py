@@ -1,34 +1,44 @@
 #!/usr/bin/env python3
 """GraylogBackup: резервное копирование конфигурации Graylog (не самих логов).
 
-Пять источников, каждый — отдельным шагом, неудача одного не останавливает остальные:
+Семь источников, каждый — отдельным шагом, неудача одного не останавливает остальные:
 
-  config       снимок конфигурации через REST API Graylog (потоки, определения событий,
-               уведомления, index sets, outputs/inputs, pipeline-правила и связи,
-               lookup-таблицы, grok-паттерны, dashboards) — только для чтения и diff'а
-               в git, НЕ предназначен для восстановления: это читаемый JSON, а не
-               content pack, который Graylog умеет импортировать обратно одной кнопкой.
-  mongo        полный `mongodump` базы Graylog (основной источник восстановления «один
-               в один»: пользователи, роли, index sets, sidecar-конфигурация — всё,
-               что есть в MongoDB; бóльшая часть entity-конфигурации хранится здесь).
-  server_conf  файл server.conf самого graylog-server (путь — GB_SERVER_CONF, монтируется
-               в контейнер только для чтения). Нужен для полного восстановления: именно
-               тут лежит password_secret, которым в MongoDB зашифрована часть значений
-               (секреты некоторых inputs, lookup-адаптеров) — если на новом сервере
-               password_secret будет другим, эти значения после restore-mongo не
-               расшифруются. Здесь же root_password_sha2 и остальные настройки сервера,
-               не хранящиеся в MongoDB.
-  plugins      содержимое каталога плагинов graylog-server (путь — GB_PLUGIN_DIR,
-               тоже монтируется только для чтения), архивируется в plugins.tar.gz —
-               mongodump сохраняет то, что плагин записал в базу, но не сам .jar.
-  search       структура индексов OpenSearch/Elasticsearch: шаблоны индексов, component
-               templates, настройки кластера, политики ISM (если есть) — САМИ ЛОГИ
-               (данные индексов) сюда не попадают, это задача ротации/снапшотов самого
-               кластера, не этого инструмента.
+  config          снимок конфигурации через REST API Graylog (потоки, определения
+                  событий, уведомления, index sets, outputs/inputs, pipeline-правила
+                  и связи, lookup-таблицы, grok-паттерны, dashboards) — только для
+                  чтения и diff'а в git, НЕ предназначен для восстановления: это
+                  читаемый JSON, а не content pack, который Graylog умеет импортировать
+                  обратно одной кнопкой.
+  mongo           полный `mongodump` базы Graylog (основной источник восстановления
+                  «один в один»: пользователи, роли, index sets, sidecar-конфигурация —
+                  всё, что есть в MongoDB; бóльшая часть entity-конфигурации хранится
+                  здесь).
+  server_conf     файл server.conf самого graylog-server (путь — GB_SERVER_CONF,
+                  монтируется в контейнер только для чтения). Нужен для полного
+                  восстановления: именно тут лежит password_secret, которым в MongoDB
+                  зашифрована часть значений (секреты некоторых inputs, lookup-
+                  адаптеров) — если на новом сервере password_secret будет другим, эти
+                  значения после restore-mongo не расшифруются. Здесь же
+                  root_password_sha2 и остальные настройки сервера, не хранящиеся
+                  в MongoDB.
+  mongod_conf     файл конфигурации самой MongoDB (путь — GB_MONGOD_CONF) — bind-адрес,
+                  аутентификация, storage engine, keyFile, репликация: то, с чем нужно
+                  поднять MongoDB на новом сервере ДО restore-mongo, иначе он просто
+                  не будет слушать там, где его ждут, или не примет то же подключение.
+  opensearch_conf файл конфигурации OpenSearch/Elasticsearch (путь — GB_OPENSEARCH_CONF) —
+                  имя кластера, узел, discovery, пути к сертификатам. Это сам файл
+                  конфигурации, а не структура индексов (см. search ниже).
+  plugins         содержимое каталога плагинов graylog-server (путь — GB_PLUGIN_DIR,
+                  тоже монтируется только для чтения), архивируется в plugins.tar.gz —
+                  mongodump сохраняет то, что плагин записал в базу, но не сам .jar.
+  search          структура индексов OpenSearch/Elasticsearch: шаблоны индексов,
+                  component templates, настройки кластера, политики ISM (если есть) —
+                  САМИ ЛОГИ (данные индексов) сюда не попадают, это задача ротации/
+                  снапшотов самого кластера, не этого инструмента.
 
 Режимы:
-  doctor   проверить доступ к Graylog REST, MongoDB (mongodump), server.conf, каталог
-           плагинов и OpenSearch/ES
+  doctor   проверить доступ к Graylog REST, MongoDB (mongodump), все файлы конфигурации
+           с хоста, каталог плагинов и OpenSearch/ES
   run      сделать резервную копию, разом или выборочно (--skip-mongo и т.п.)
   list     список уже сделанных архивов на диске
   prune    удалить архивы старше --days
@@ -36,9 +46,10 @@
 
 Адрес и токен Graylog — те же переменные, что у rule-tester (GRAYLOG_URL, GRAYLOG_TOKEN),
 можно использовать общий read-only токен. Остальное — переменные с префиксом GB_
-(см. deploy/env.example). server.conf и каталог плагинов из архива восстанавливаются
-простым копированием на нужное место на новом сервере (с сохранением прав доступа) —
-отдельной команды для этого нет, см. главу 18 (раздел «Аварийное восстановление»).
+(см. deploy/env.example). server.conf, mongod.conf, opensearch.yml/elasticsearch.yml
+и каталог плагинов из архива восстанавливаются простым копированием на нужное место
+на новом сервере (с сохранением прав доступа) — отдельной команды для этого нет,
+см. главу 18 (раздел «Аварийное восстановление»).
 """
 import argparse
 import json
@@ -54,6 +65,7 @@ import urllib.error
 import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
+from urllib.parse import urlsplit
 
 import gl_client as G
 from version import NAME, VERSION
@@ -139,6 +151,16 @@ def mongorestore_bin():
     return os.environ.get("GB_MONGORESTORE_BIN", "mongorestore")
 
 
+def uri_has_db(uri):
+    """True, если строка подключения уже называет базу (mongodb://host/graylog?...) — тогда
+    mongodump/mongorestore берут её сами, и явный --db конфликтует с ней (Invalid Options:
+    Cannot specify different database in connection URI and command-line option)."""
+    try:
+        return bool(urlsplit(uri).path.lstrip("/"))
+    except ValueError:
+        return False
+
+
 def step_mongo(uri, workdir, timeout=1800):
     t0 = time.time()
     if not uri:
@@ -171,27 +193,50 @@ def mongo_restore(uri, archive_path, drop=True, yes=False):
     return r.returncode == 0
 
 
-# ------------------------------------------------------------------ шаг 3: server.conf
+# ------------------------------------------------------------------ шаги 3-5: отдельные файлы конфигурации с хоста
 
-def step_server_conf(path, workdir):
+def step_host_file(path, workdir, dest_name, env_name, sanity_marker=None, sanity_hint=None):
+    """Копирует один файл конфигурации с хоста (смонтирован в контейнер только для чтения, см.
+    install.sh и HOST_*/GB_* в deploy/env.example) в архив как есть. sanity_marker — байтовая
+    строка, которую ожидаем встретить внутри; её отсутствие не прерывает шаг, но помечает его
+    partial — подстраховка от того, что в переменной случайно указали не тот файл."""
     t0 = time.time()
     if not path:
-        return {"status": "skipped", "reason": "GB_SERVER_CONF не задан"}
+        return {"status": "skipped", "reason": "%s не задан" % env_name}
     try:
         data = Path(path).read_bytes()
     except OSError as e:
         return {"status": "error", "reason": "не удалось прочитать %s: %s" % (path, e)}
-    (workdir / "server.conf").write_bytes(data)
-    has_secret = b"password_secret" in data
-    result = {"status": "ok" if has_secret else "partial",
-              "duration_s": round(time.time() - t0, 1), "bytes": len(data),
-              "password_secret_present": has_secret}
-    if not has_secret:
-        result["reason"] = "в файле не нашлось password_secret — похоже, это не server.conf Graylog"
+    (workdir / dest_name).write_bytes(data)
+    result = {"status": "ok", "duration_s": round(time.time() - t0, 1), "bytes": len(data)}
+    if sanity_marker is not None:
+        has_marker = sanity_marker in data
+        result["sanity_ok"] = has_marker
+        if not has_marker:
+            result["status"] = "partial"
+            result["reason"] = sanity_hint or "в файле не нашлось ожидаемого содержимого — похоже, не тот файл"
     return result
 
 
-# ------------------------------------------------------------------ шаг 4: каталог плагинов
+def step_server_conf(path, workdir):
+    return step_host_file(path, workdir, "server.conf", "GB_SERVER_CONF",
+                           sanity_marker=b"password_secret",
+                           sanity_hint="в файле не нашлось password_secret — похоже, это не server.conf Graylog")
+
+
+def step_mongod_conf(path, workdir):
+    return step_host_file(path, workdir, "mongod.conf", "GB_MONGOD_CONF",
+                           sanity_marker=b"storage:",
+                           sanity_hint="в файле не нашлось раздела storage: — похоже, это не mongod.conf")
+
+
+def step_opensearch_conf(path, workdir):
+    return step_host_file(path, workdir, "opensearch.yml", "GB_OPENSEARCH_CONF",
+                           sanity_marker=b"cluster.name",
+                           sanity_hint="в файле не нашлось cluster.name — похоже, это не opensearch.yml/elasticsearch.yml")
+
+
+# ------------------------------------------------------------------ шаг 6: каталог плагинов
 
 def step_plugins(path, workdir):
     t0 = time.time()
@@ -221,7 +266,7 @@ def step_plugins(path, workdir):
             "files": count, "failed": failed, "bytes": out.stat().st_size}
 
 
-# ------------------------------------------------------------------ шаг 5: структура индексов OpenSearch/ES
+# ------------------------------------------------------------------ шаг 7: структура индексов OpenSearch/ES
 
 def _os_get(base, path, insecure, ca_file, timeout=30):
     ctx = ssl.create_default_context()
@@ -268,7 +313,9 @@ def step_search(url, workdir, insecure=False, ca_file=None):
 def run_backup(gl_url, gl_token, mongo_uri, os_url, out_dir, insecure=False, ca_file=None,
                 skip_config=False, skip_mongo=False, skip_search=False,
                 server_conf_path=None, skip_server_conf=False,
-                plugin_dir=None, skip_plugins=False):
+                plugin_dir=None, skip_plugins=False,
+                mongod_conf_path=None, skip_mongod_conf=False,
+                opensearch_conf_path=None, skip_opensearch_conf=False):
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
     stamp = now_stamp()
@@ -288,6 +335,10 @@ def run_backup(gl_url, gl_token, mongo_uri, os_url, out_dir, insecure=False, ca_
             {"status": "skipped", "reason": "--skip-mongo"}
         steps["server_conf"] = step_server_conf(server_conf_path, workdir) if not skip_server_conf else \
             {"status": "skipped", "reason": "--skip-server-conf"}
+        steps["mongod_conf"] = step_mongod_conf(mongod_conf_path, workdir) if not skip_mongod_conf else \
+            {"status": "skipped", "reason": "--skip-mongod-conf"}
+        steps["opensearch_conf"] = step_opensearch_conf(opensearch_conf_path, workdir) if not skip_opensearch_conf else \
+            {"status": "skipped", "reason": "--skip-opensearch-conf"}
         steps["plugins"] = step_plugins(plugin_dir, workdir) if not skip_plugins else \
             {"status": "skipped", "reason": "--skip-plugins"}
         steps["search"] = step_search(os_url, workdir, insecure, ca_file) if not skip_search else \
@@ -342,8 +393,26 @@ def prune_backups(out_dir, days):
 
 # ------------------------------------------------------------------ doctor
 
+def _doctor_check_file(label, path, env_name, sanity_marker=None, sanity_hint=None, ok_detail=""):
+    """Общая часть doctor для одного файла конфигурации с хоста. Возвращает True/False (ok)."""
+    if not path:
+        log("[ - ] %s: %s не задан, этот шаг будет пропущен" % (label, env_name))
+        return True
+    try:
+        data = Path(path).read_bytes()
+    except OSError as e:
+        log("[FAIL] %s: %s — %s" % (label, path, e))
+        return False
+    if sanity_marker is not None and sanity_marker not in data:
+        log("[FAIL] %s: %s читается, но %s" % (label, path, sanity_hint or "похоже, не тот файл"))
+        return False
+    log("[ OK ] %s: %s читается%s" % (label, path, (", " + ok_detail) if ok_detail else ""))
+    return True
+
+
 def doctor(gl_url, gl_token, mongo_uri, os_url, insecure=False, ca_file=None,
-           server_conf_path=None, plugin_dir=None):
+           server_conf_path=None, plugin_dir=None,
+           mongod_conf_path=None, opensearch_conf_path=None):
     ok = True
     if gl_url and gl_token:
         try:
@@ -370,7 +439,11 @@ def doctor(gl_url, gl_token, mongo_uri, os_url, insecure=False, ca_file=None,
             with tempfile.TemporaryDirectory(prefix="gb-doctor-") as tmp:
                 probe_out = Path(tmp) / "probe.archive.gz"
                 cmd = [mongodump_bin(), "--uri=%s" % mongo_uri, "--archive=%s" % probe_out, "--gzip",
-                       "--db=admin", "--collection=__graylog_backup_doctor_probe__"]
+                       "--collection=__graylog_backup_doctor_probe__"]
+                # --db конфликтует с базой, уже указанной в URI (mongodump это проверяет и
+                # отказывается стартовать) — добавляем его, только если URI базу не называет.
+                if not uri_has_db(mongo_uri):
+                    cmd.insert(1, "--db=admin")
                 try:
                     r = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
                     if r.returncode == 0:
@@ -384,21 +457,21 @@ def doctor(gl_url, gl_token, mongo_uri, os_url, insecure=False, ca_file=None,
     else:
         log("[ - ] MongoDB: GB_MONGO_URI не задан, этот шаг будет пропущен при резервном копировании")
 
-    if server_conf_path:
-        try:
-            data = Path(server_conf_path).read_bytes()
-            if b"password_secret" in data:
-                log("[ OK ] server.conf: %s читается, password_secret на месте" % server_conf_path)
-            else:
-                ok = False
-                log("[FAIL] server.conf: %s читается, но password_secret не найден — похоже, не тот файл"
-                    % server_conf_path)
-        except OSError as e:
-            ok = False
-            log("[FAIL] server.conf: %s — %s" % (server_conf_path, e))
-    else:
-        log("[ - ] server.conf: GB_SERVER_CONF не задан, этот шаг будет пропущен (password_secret и "
-            "root_password_sha2 в копию не попадут)")
+    if not _doctor_check_file("server.conf", server_conf_path, "GB_SERVER_CONF",
+                               sanity_marker=b"password_secret",
+                               sanity_hint="password_secret не найден — похоже, не тот файл",
+                               ok_detail="password_secret на месте"):
+        ok = False
+
+    if not _doctor_check_file("mongod.conf", mongod_conf_path, "GB_MONGOD_CONF",
+                               sanity_marker=b"storage:",
+                               sanity_hint="раздел storage: не найден — похоже, не тот файл"):
+        ok = False
+
+    if not _doctor_check_file("opensearch.yml/elasticsearch.yml", opensearch_conf_path, "GB_OPENSEARCH_CONF",
+                               sanity_marker=b"cluster.name",
+                               sanity_hint="cluster.name не найден — похоже, не тот файл"):
+        ok = False
 
     if plugin_dir:
         d = Path(plugin_dir)
@@ -446,6 +519,8 @@ def main(argv=None):
     p.add_argument("--skip-config", action="store_true")
     p.add_argument("--skip-mongo", action="store_true")
     p.add_argument("--skip-server-conf", action="store_true")
+    p.add_argument("--skip-mongod-conf", action="store_true")
+    p.add_argument("--skip-opensearch-conf", action="store_true")
     p.add_argument("--skip-plugins", action="store_true")
     p.add_argument("--skip-search", action="store_true")
 
@@ -466,15 +541,22 @@ def main(argv=None):
     os_url = os.environ.get("GB_OPENSEARCH_URL", "")
     server_conf_path = os.environ.get("GB_SERVER_CONF", "")
     plugin_dir = os.environ.get("GB_PLUGIN_DIR", "")
+    mongod_conf_path = os.environ.get("GB_MONGOD_CONF", "")
+    opensearch_conf_path = os.environ.get("GB_OPENSEARCH_CONF", "")
 
     if args.cmd == "doctor":
-        return doctor(gl_url, gl_token, mongo_uri, os_url, args.insecure, args.ca_file,
-                      server_conf_path, plugin_dir)
+        return doctor(gl_url, gl_token, mongo_uri, os_url, insecure=args.insecure, ca_file=args.ca_file,
+                      server_conf_path=server_conf_path, plugin_dir=plugin_dir,
+                      mongod_conf_path=mongod_conf_path, opensearch_conf_path=opensearch_conf_path)
 
     if args.cmd == "run":
-        meta = run_backup(gl_url, gl_token, mongo_uri, os_url, args.out_dir, args.insecure, args.ca_file,
-                           args.skip_config, args.skip_mongo, args.skip_search,
-                           server_conf_path, args.skip_server_conf, plugin_dir, args.skip_plugins)
+        meta = run_backup(gl_url, gl_token, mongo_uri, os_url, args.out_dir, insecure=args.insecure,
+                           ca_file=args.ca_file, skip_config=args.skip_config, skip_mongo=args.skip_mongo,
+                           skip_search=args.skip_search,
+                           server_conf_path=server_conf_path, skip_server_conf=args.skip_server_conf,
+                           plugin_dir=plugin_dir, skip_plugins=args.skip_plugins,
+                           mongod_conf_path=mongod_conf_path, skip_mongod_conf=args.skip_mongod_conf,
+                           opensearch_conf_path=opensearch_conf_path, skip_opensearch_conf=args.skip_opensearch_conf)
         print(json.dumps(meta, ensure_ascii=False, indent=1))
         bad = [k for k, v in meta["steps"].items() if v.get("status") == "error"]
         return 2 if bad else 0

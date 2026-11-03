@@ -13,6 +13,11 @@
   GB_PLUGIN_DIR                 путь к каталогу плагинов graylog-server внутри контейнера
                                 (монтируется только для чтения, см. HOST_PLUGIN_DIR); пусто —
                                 шаг пропускается
+  GB_MONGOD_CONF                путь к mongod.conf внутри контейнера (монтируется только для
+                                чтения, см. HOST_MONGOD_CONF); пусто — шаг пропускается
+  GB_OPENSEARCH_CONF            путь к opensearch.yml/elasticsearch.yml внутри контейнера
+                                (монтируется только для чтения, см. HOST_OPENSEARCH_CONF);
+                                пусто — шаг пропускается
   GB_OPENSEARCH_URL            адрес OpenSearch/Elasticsearch (пусто — шаг search пропускается)
   GB_PASSWORD                  пароль администратора (обязателен, роль одна — других не бывает:
                                 инструмент только читает и архивирует, ничего в Graylog не пишет)
@@ -197,7 +202,9 @@ def summary():
             "graylog_url_set": bool(cfg("graylog_url")), "mongo_set": bool(cfg("mongo_uri")),
             "opensearch_set": bool(cfg("opensearch_url")),
             "server_conf_set": bool(os.environ.get("GB_SERVER_CONF")),
-            "plugin_dir_set": bool(os.environ.get("GB_PLUGIN_DIR"))}
+            "plugin_dir_set": bool(os.environ.get("GB_PLUGIN_DIR")),
+            "mongod_conf_set": bool(os.environ.get("GB_MONGOD_CONF")),
+            "opensearch_conf_set": bool(os.environ.get("GB_OPENSEARCH_CONF"))}
 
 
 def scheduler():
@@ -308,6 +315,8 @@ class H(BaseHTTPRequestHandler):
             s["token_set"] = bool(cfg("graylog_token"))
             s["server_conf_set"] = bool(os.environ.get("GB_SERVER_CONF"))
             s["plugin_dir_set"] = bool(os.environ.get("GB_PLUGIN_DIR"))
+            s["mongod_conf_set"] = bool(os.environ.get("GB_MONGOD_CONF"))
+            s["opensearch_conf_set"] = bool(os.environ.get("GB_OPENSEARCH_CONF"))
             return self.reply({"settings": s})
         if path == "/api/audit":
             p = DATA / "audit.jsonl"
