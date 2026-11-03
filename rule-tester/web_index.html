@@ -28,6 +28,20 @@ aside .sp{flex:1}aside .ver{font-size:12px;padding:8px;color:#7d8aa0}
 main{padding:20px;max-width:1280px;width:100%}
 .card{background:var(--card);border:1px solid var(--ln);border-radius:12px;padding:16px;margin-bottom:16px;box-shadow:var(--sh)}
 .card h2{font-size:14px;margin:0 0 12px;color:var(--mut);font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+.guide{max-width:880px;line-height:1.55}
+.guide h1{font-size:22px;margin:0 0 16px}
+.guide h2{font-size:17px;margin:28px 0 10px;padding-top:12px;border-top:1px solid var(--ln);color:var(--tx);text-transform:none;letter-spacing:normal;font-weight:700}
+.guide h2:first-child{border-top:none;padding-top:0}
+.guide h3{font-size:14px;margin:18px 0 8px}
+.guide p{margin:0 0 12px}
+.guide p img{display:block;max-width:100%;border:1px solid var(--ln);border-radius:8px;margin:10px 0 4px}
+.guide p em{display:block;color:var(--mut);font-size:13px;font-style:normal;margin-top:4px}
+.guide ul,.guide ol{margin:0 0 12px;padding-left:22px}
+.guide li{margin-bottom:4px}
+.guide code{background:var(--acb);color:var(--ac);padding:1px 5px;border-radius:4px;font-size:.92em}
+.guide pre{background:var(--side);color:#cdd5e3;padding:12px 14px;border-radius:8px;overflow:auto;margin:0 0 12px}
+.guide pre code{background:none;color:inherit;padding:0}
+.guide a{color:var(--ac)}
 .grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));margin-bottom:16px}
 .stat{background:var(--card);border:1px solid var(--ln);border-radius:12px;padding:14px;box-shadow:var(--sh)}.stat b{display:block;font-size:26px;line-height:1.2}.stat b.sm{font-size:16px;line-height:1.9}.stat span{color:var(--mut);font-size:12px}
 .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
@@ -77,6 +91,7 @@ details{border:1px solid var(--ln);border-radius:8px;padding:6px 10px;margin-bot
   <a data-p="quality"><span class="ico">!</span>Качество</a>
   <a data-p="settings"><span class="ico">⚙</span>Настройки</a>
   <a data-p="audit" id="navaudit"><span class="ico">☰</span>Журнал</a>
+  <a data-p="guide"><span class="ico">📘</span>Руководство</a>
   <div class="sp"></div>
   <div class="ver" id="who"></div>
 </aside>
@@ -121,7 +136,7 @@ function showLogin(){$('#app').classList.add('hide');$('#login').classList.remov
 $('#pwgo').onclick=async()=>{try{await api('/api/login',{login:$('#lgname').value,password:$('#pw').value});$('#login').classList.add('hide');boot()}catch(e){$('#pwerr').textContent=e.message}};
 $('#pw').onkeydown=e=>{if(e.key==='Enter')$('#pwgo').click()};
 $('#logout').onclick=async()=>{try{await api('/api/logout',{})}catch(e){}showLogin()};
-const PAGES={home:['Сводка',pHome],rules:['Правила',pRules],run:['Запуск',pRun],results:['Результаты',pResults],detect:['Проверка детектов',pDetect],coverage:['Покрытие',pCoverage],quality:['Качество запросов',pQuality],settings:['Настройки',pSettings],audit:['Журнал действий',pAudit]};
+const PAGES={home:['Сводка',pHome],rules:['Правила',pRules],run:['Запуск',pRun],results:['Результаты',pResults],detect:['Проверка детектов',pDetect],coverage:['Покрытие',pCoverage],quality:['Качество запросов',pQuality],settings:['Настройки',pSettings],audit:['Журнал действий',pAudit],guide:['Руководство администратора',pGuide]};
 let CUR='',TIMER=null;
 function route(){clearTimeout(TIMER);const[rawp,qs]=(location.hash.slice(2)||'home').split('?');const sp=new URLSearchParams(qs||'');
   let p=rawp;if(p==='art'||p==='method'){if(!sp.get('kind'))sp.set('kind',p);p='detect'} // старые ссылки #/art и #/method
@@ -378,6 +393,9 @@ async function pSettings(q,m){const d=await api('/api/settings');m.textContent='
 /* ---------- журнал ---------- */
 async function pAudit(q,m){const d=await api('/api/audit');m.textContent='';const t=h('table',{},h('tr',{},h('th',{},'Время'),h('th',{},'Роль'),h('th',{class:'h'},'Адрес'),h('th',{},'Действие'),h('th',{class:'h'},'Подробности')));
   d.audit.forEach(a=>t.append(h('tr',{},h('td',{},fmtTime(a.t)),h('td',{},a.role),h('td',{class:'h mut'},a.ip),h('td',{},a.action),h('td',{class:'h mut'},a.detail))));m.append(h('div',{class:'card',style:'overflow:auto'},d.audit.length?t:'Пусто'))}
+
+async function pGuide(q,m){const d=await api('/api/guide');m.textContent='';
+  const box=h('div',{class:'card guide'});box.innerHTML=d.html;m.append(box)}
 
 (async()=>{try{await boot()}catch(e){if(e.message!=='auth')note(e.message)}})();
 const MODE_RU={art:'Сверка Atomic Red Team',method:'Сверка проверки детектов (глава 15)',queries:'Запросы в тестовом потоке',e2e:'До алерта',doctor:'Проверка доступа',selftest:'Самопроверка запросов',harvest:'Сбор настоящих сообщений',drift:'Сверка каталога с Graylog',fp:'Проверка ложных срабатываний',latency:'Задержка обнаружения'};

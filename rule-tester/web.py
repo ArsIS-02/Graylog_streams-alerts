@@ -37,10 +37,14 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import graylog_api as G  # noqa: E402
 import insights  # noqa: E402
 import lucene as L  # noqa: E402
+import mdlite  # noqa: E402
 import rule_tester as R  # noqa: E402
 from version import NAME, VERSION  # noqa: E402
 
 HERE = Path(__file__).resolve().parent
+GUIDE_MD = HERE.parent / "docs" / "17-admin-guide.md"
+GUIDE_IMAGES = HERE.parent / "docs" / "images"
+GUIDE_IMAGE_RE = re.compile(r"17-[\w-]+\.png")
 SESSIONS = {}
 JOB = {"lock": threading.Lock(), "cur": None, "last": None}
 CACHE = {}
@@ -489,6 +493,22 @@ def field_drift(rows):
     return sorted(out, key=lambda x: -x["count"])
 
 
+_GUIDE_CACHE = {"mtime": None, "html": ""}
+
+
+def guide_html():
+    """Руководство администратора (docs/17-admin-guide.md), пересобирается, только когда файл меняется."""
+    try:
+        mtime = GUIDE_MD.stat().st_mtime
+    except OSError:
+        return "<p>Файл docs/17-admin-guide.md не найден в образе контейнера.</p>"
+    if _GUIDE_CACHE["mtime"] != mtime:
+        md = GUIDE_MD.read_text(encoding="utf-8")
+        _GUIDE_CACHE["html"] = mdlite.convert(md)
+        _GUIDE_CACHE["mtime"] = mtime
+    return _GUIDE_CACHE["html"]
+
+
 def summary():
     rd = rules_data()
     reps = [report_head(d) for d in read_reports(60)]
@@ -627,6 +647,14 @@ class H(BaseHTTPRequestHandler):
         role = self.role()
         if not role:
             return self.reply({"error": "нужен вход"}, 401)
+        if path.startswith("/guide-images/"):
+            name = path[len("/guide-images/"):]
+            if not GUIDE_IMAGE_RE.fullmatch(name):
+                return self.reply({"error": "не найдено"}, 404)
+            img = GUIDE_IMAGES / name
+            if not img.is_file():
+                return self.reply({"error": "не найдено"}, 404)
+            return self.reply(img.read_bytes(), ctype="image/png")
         try:
             return self.get_api(path, q, role)
         except G.ApiError as e:
@@ -637,6 +665,8 @@ class H(BaseHTTPRequestHandler):
             return self.reply({"name": NAME, "version": VERSION, "role": role})
         if path == "/api/summary":
             return self.reply(summary())
+        if path == "/api/guide":
+            return self.reply({"html": guide_html()})
         if path == "/api/rules":
             d = rules_data(force="refresh" in q)
             lr, live = last_results(), LIVE["data"]
