@@ -60,7 +60,7 @@ MODE_RU = {"queries": "Запросы в тестовом потоке", "e2e": 
            "latency": "Задержка обнаружения", "replay": "Replay инцидента", "caldera": "Сверка CALDERA"}
 SETTING_ENV = {"graylog_url": "GRAYLOG_URL", "graylog_token": "GRAYLOG_TOKEN", "gelf": "RT_GELF", "stream": "RT_STREAM",
                "schedule": "RT_SCHEDULE", "schedule_enabled": "RT_SCHEDULE_ENABLED", "e2e_platforms": "RT_E2E_PLATFORMS",
-               "insecure": "RT_INSECURE", "ca_file": "RT_CA_FILE"}
+               "insecure": "RT_INSECURE", "ca_file": "RT_CA_FILE", "retention_days": "RT_RETENTION_DAYS"}
 OK_STATUS = ("ПРОШЛО", "СОБЫТИЕ ЕСТЬ", "ЧИСТО", "ИЗМЕРЕНО")
 ADMIN_LOGIN = "admin"  # логин один для всех ролей — роль определяется паролем (RT_PASSWORD/RT_RUNNER_PASSWORD/RT_VIEWER_PASSWORD)
 RUNNER_ALLOWED = ("/api/run", "/api/live/refresh")  # роль «запуск»: может запускать проверки, настроек не меняет
@@ -388,6 +388,37 @@ def write_vol_manual(data):
     CACHE.pop("rules", None)
 
 
+def import_manual(data):
+    """Принимает объект в формате «Экспорт образцов для git» ({правило: {positive:[...], negative:[...]}},
+    без origin) и объединяет его с образцами на томе. Образец, один в один (по why+doc) совпадающий с тем, что
+    уже есть в каталоге репозитория, пропускается — иначе при повторном импорте того же экспорта репозиторные
+    образцы задваивались бы на томе. Возвращает (добавлено, пропущено)."""
+    if not isinstance(data, dict):
+        raise ValueError("нужен объект {правило: {positive:[...], negative:[...]}}")
+    repo = R.load_json(R.MANUAL, {})
+    cur = vol_manual()
+    added, skipped = 0, 0
+    for title, kinds in data.items():
+        if not isinstance(title, str) or not isinstance(kinds, dict):
+            skipped += 1
+            continue
+        for kind in ("positive", "negative"):
+            for item in (kinds.get(kind) or []):
+                if not isinstance(item, dict) or doc_error(item.get("doc")):
+                    skipped += 1
+                    continue
+                why = str(item.get("why", ""))[:200] or "импортировано"
+                already = repo.get(title, {}).get(kind, []) + cur.get(title, {}).get(kind, [])
+                if any(x.get("doc") == item["doc"] for x in already):
+                    skipped += 1
+                    continue
+                cur.setdefault(title, {"positive": [], "negative": []}).setdefault(kind, []).append(
+                    {"why": why, "doc": item["doc"]})
+                added += 1
+    write_vol_manual(cur)
+    return added, skipped
+
+
 def rule_detail(title):
     r = rule_by_title(title)
     if not r:
@@ -412,17 +443,26 @@ def rule_detail(title):
             "live": LIVE["data"].get(title)}
 
 
+def doc_error(doc):
+    """Проверка формы образца (общая для ручного добавления и импорта): объект с не более чем 60 полями,
+    имена — идентификаторы, значения — строка/число/булево до 4000 знаков. None — форма в порядке."""
+    if not isinstance(doc, dict) or not doc or len(doc) > 60:
+        return "образец: объект с полями (до 60)"
+    for k, v in doc.items():
+        if not isinstance(k, str) or not re.fullmatch(r"[A-Za-z_][\w.\-]{0,120}", k):
+            return "недопустимое имя поля: %r" % k[:40] if isinstance(k, str) else "недопустимое имя поля"
+        if not isinstance(v, (str, int, float, bool)) or len(str(v)) > 4000:
+            return "значение поля %s: строка или число до 4000 знаков" % k
+    return None
+
+
 def check_sample(title, kind, doc):
     r = rule_by_title(title)
     if not r:
         return {"error": "нет такого правила"}
-    if not isinstance(doc, dict) or not doc or len(doc) > 60:
-        return {"error": "образец: объект с полями (до 60)"}
-    for k, v in doc.items():
-        if not isinstance(k, str) or not re.fullmatch(r"[A-Za-z_][\w.\-]{0,120}", k):
-            return {"error": "недопустимое имя поля: %r" % k[:40] if isinstance(k, str) else "недопустимое имя поля"}
-        if not isinstance(v, (str, int, float, bool)) or len(str(v)) > 4000:
-            return {"error": "значение поля %s: строка или число до 4000 знаков" % k}
+    de = doc_error(doc)
+    if de:
+        return {"error": de}
     if any("заглушка" in f for f in r["flags"]):
         return {"match": None, "note": "в запросе каталога заглушка, проверка возможна только на живом Graylog"}
     try:
@@ -499,6 +539,37 @@ def next_run():
     return {"at": best[0].isoformat(timespec="minutes"), "mode": MODE_RU.get(best[1], best[1])} if best else None
 
 
+def missed_schedule():
+    """Для каждого режима из RT_SCHEDULE — когда он в последний раз реально выполнялся (неважно, вручную или
+    по расписанию): если прошло заметно больше суток с последнего запуска, это обычно значит, что контейнер
+    был выключен/перезапущен и плановый запуск пропал, а не просто «ещё не наступило время» — такое иначе
+    видно только по пустому месту в «Результатах»."""
+    if cfg("schedule_enabled") == "0":
+        return []
+    spec = [x.strip() for x in cfg("schedule").split(",") if "@" in x]
+    modes = sorted({item.split("@", 1)[0] for item in spec if item.split("@", 1)[0] in MODES})
+    if not modes:
+        return []
+    last = {}
+    hist = R.DATA / "history.jsonl"
+    if hist.exists():
+        for line in hist.read_text(encoding="utf-8").splitlines()[-2000:]:
+            try:
+                j = json.loads(line)
+            except ValueError:
+                continue
+            if j.get("mode") in modes:
+                last[j["mode"]] = max(last.get(j["mode"], ""), j.get("started", ""))
+    out = []
+    now = datetime.now()
+    for mode in modes:
+        ts = last.get(mode)
+        hours = (now - datetime.fromisoformat(ts)).total_seconds() / 3600 if ts else None
+        if hours is None or hours > 36:
+            out.append({"mode": mode, "mode_ru": MODE_RU.get(mode, mode), "hours_ago": hours})
+    return out
+
+
 DRIFT_RE = re.compile(r"расхождения полей: ([^|]+)")
 
 
@@ -554,7 +625,7 @@ def summary():
     return {"rules": len(rd["rules"]), "source": rd["source"], "note": rd["note"], "flagged": flagged,
             "last": last, "fails": fails, "field_drift": drift, "next": next_run(), "health": health(),
             "known_failed": sum(1 for v in lr.values() if v["status"] not in OK_STATUS and v["status"] != "ПРОПУЩЕНО"),
-            "known_passed": sum(1 for v in lr.values() if v["status"] in OK_STATUS),
+            "known_passed": sum(1 for v in lr.values() if v["status"] in OK_STATUS), "missed_schedule": missed_schedule(),
             "platforms": sorted({r["platform"] for r in rd["rules"]}), "job": pub_job(JOB["cur"] or JOB["last"])}
 
 
@@ -562,7 +633,19 @@ def summary():
 
 def scheduler():
     done = set()
+    last_cleanup_day = None
     while True:
+        days = cfg("retention_days")
+        if days:
+            today = datetime.now().strftime("%Y-%m-%d")
+            if last_cleanup_day != today:
+                last_cleanup_day = today
+                try:
+                    n = cleanup_old(days)
+                    if n:
+                        audit("—", "—", "автоочистка старых файлов", "удалено %d, хранить %s дн." % (n, days))
+                except OSError:
+                    pass
         if cfg("schedule_enabled") == "0":
             time.sleep(30)
             continue
@@ -588,6 +671,57 @@ def _plus(hhmm, minutes):
     h, m = map(int, hhmm.split(":"))
     t = min(h * 60 + m + minutes, 23 * 60 + 59)
     return "%02d:%02d" % (t // 60, t % 60)
+
+
+# ------------------------------------------------------------------ сценарии replay
+
+def list_scenarios():
+    sdir = R.DATA / "scenarios"
+    out = []
+    for p in sorted(sdir.glob("*.json"), reverse=True)[:100] if sdir.is_dir() else []:
+        try:
+            d = json.loads(p.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            continue
+        out.append({"file": p.name, "title": d.get("title") or p.stem, "events": len(d.get("events") or []),
+                   "expected": bool(d.get("expected")), "mtime": datetime.fromtimestamp(p.stat().st_mtime).isoformat(timespec="seconds")})
+    return out
+
+
+def load_scenario(name):
+    name = Path(name).name
+    p = R.DATA / "scenarios" / name
+    if not name.endswith(".json") or not p.is_file():
+        return None
+    return p.read_text(encoding="utf-8")
+
+
+# ------------------------------------------------------------------ хранение: очистка старых файлов
+
+def cleanup_old(days):
+    """Удаляет отчёты (reports/*) и сохранённые сценарии replay (scenarios/*) старше `days` дней по времени
+    изменения файла. Журнал (audit.jsonl), историю запусков (history.jsonl), настройки и ручные образцы
+    не трогает — они нужны всегда, независимо от срока хранения."""
+    try:
+        days = int(days)
+    except (TypeError, ValueError):
+        return 0
+    if days <= 0:
+        return 0
+    cutoff = time.time() - days * 86400
+    removed = 0
+    for d in (R.REPORTS, R.DATA / "scenarios"):
+        if not d.is_dir():
+            continue
+        for p in d.glob("*"):
+            try:
+                if p.is_file() and p.stat().st_mtime < cutoff:
+                    p.unlink()
+                    removed += 1
+            except OSError:
+                continue
+    CACHE.pop("results", None)
+    return removed
 
 
 # ------------------------------------------------------------------ резервная копия тома
@@ -798,9 +932,21 @@ class H(BaseHTTPRequestHandler):
         if path == "/api/quality":
             rd = rules_data()
             return self.reply({"issues": insights.quality(rd["rules"], rd["_first_pos"])})
+        if path == "/api/techniques":
+            import caldera
+            by_tech, names = caldera.techniques_by_rule()
+            out = sorted(({"id": t, "name": names.get(t, ""), "rules": len(v)} for t, v in by_tech.items()),
+                        key=lambda x: x["id"])
+            return self.reply({"techniques": out})
         if path == "/api/live":
             return self.reply({"age": LIVE["t"], "running": LIVE["running"], "done": LIVE["done"],
                                "total": LIVE["total"], "error": LIVE["error"]})
+        if path == "/api/scenarios":
+            return self.reply({"scenarios": list_scenarios()})
+        if path == "/api/scenario":
+            raw = load_scenario(q.get("file", ""))
+            return self.reply({"json": raw} if raw is not None else {"error": "нет такого сценария"},
+                              200 if raw is not None else 404)
         if path == "/api/samples/export":
             m = R.load_manual()
             clean = {k: {kk: [{"why": it.get("why", ""), "doc": it["doc"]} for it in v[kk]]
@@ -905,6 +1051,20 @@ class H(BaseHTTPRequestHandler):
             write_vol_manual(data)
             audit(role, ip, "образец добавлен", "%s / %s" % (title, kind))
             return self.reply(dict(chk, saved=True))
+        if path == "/api/samples/import":
+            raw = b.get("json")
+            if not isinstance(raw, str) or not raw.strip():
+                return self.reply({"error": "вставьте содержимое manual.json"}, 400)
+            try:
+                data = json.loads(raw)
+            except ValueError as e:
+                return self.reply({"error": "не разобран JSON (%s)" % e}, 400)
+            try:
+                added, skipped = import_manual(data)
+            except ValueError as e:
+                return self.reply({"error": str(e)}, 400)
+            audit(role, ip, "импорт образцов", "добавлено %d, пропущено %d" % (added, skipped))
+            return self.reply({"ok": True, "added": added, "skipped": skipped})
         if path == "/api/samples/delete":
             title, kind, idx = str(b.get("rule", "")), str(b.get("kind", "")), b.get("index")
             data = vol_manual()
@@ -927,6 +1087,17 @@ class H(BaseHTTPRequestHandler):
                 threading.Thread(target=live_worker, daemon=True).start()
             audit(role, ip, "обновление счётчиков срабатываний")
             return self.reply({"ok": True})
+        if path == "/api/cleanup":
+            days = b.get("days", cfg("retention_days"))
+            try:
+                days = int(days)
+            except (TypeError, ValueError):
+                return self.reply({"error": "укажите число дней хранения (больше нуля)"}, 400)
+            if days <= 0:
+                return self.reply({"error": "укажите число дней хранения (больше нуля)"}, 400)
+            n = cleanup_old(days)
+            audit(role, ip, "очистка старых файлов", "удалено %d, хранить %d дн." % (n, days))
+            return self.reply({"ok": True, "removed": n})
         self.reply({"error": "не найдено"}, 404)
 
 

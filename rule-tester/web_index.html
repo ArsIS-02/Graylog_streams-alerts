@@ -163,6 +163,12 @@ async function pHome(q,m){const s=await api('/api/summary');const tr=await api('
   if(L&&L.stats.failed>0)m.append(h('div',{class:'banner'},h('b',{},`Последний прогон (${fmtTime(L.created)}): провалов ${L.stats.failed} из ${L.stats.total}. `),h('a',{href:'#/results?file='+encodeURIComponent(L.file),style:'color:inherit'},'Открыть отчёт')));
   else if(L)m.append(h('div',{class:'banner ok'},`Последний прогон (${fmtTime(L.created)}): все правила прошли (${L.stats.passed} из ${L.stats.total}, пропущено ${L.stats.skipped}).`));
   else m.append(h('div',{class:'banner',style:'border-color:var(--ln);background:var(--card);color:var(--mut)'},'Прогонов ещё не было. Нажмите «Запустить проверку» ниже.'));
+  if(s.missed_schedule&&s.missed_schedule.length){
+    m.append(h('div',{class:'banner warn'},h('b',{},'Плановый запуск пропущен: '),
+      h('div',{},...s.missed_schedule.map(x=>h('div',{style:'margin-top:4px'},
+        `${x.mode_ru} — ${x.hours_ago==null?'ещё не выполнялся ни разу':'последний раз '+Math.round(x.hours_ago/24*10)/10+' дн. назад'}`))),
+      h('div',{class:'mut',style:'margin-top:6px;font-size:12px'},'Расписание задано в «Настройках», но режим давно не запускался — обычно значит, что контейнер был выключен или перезапущен дольше суток. Проверьте, запущен ли контейнер постоянно, или запустите вручную ниже.')));
+  }
   if(s.field_drift&&s.field_drift.some(d=>d.count>1)){const top=s.field_drift.filter(d=>d.count>1).slice(0,5);
     m.append(h('div',{class:'banner warn'},h('b',{},'Возможен дрейф схемы данных: '),
       h('div',{},...top.map(d=>h('div',{style:'margin-top:4px'},`${d.field} — пропало/изменилось в ${d.count} ${d.count===1?'правиле':'правилах'} (${d.platforms.join(', ')})`))),
@@ -190,6 +196,13 @@ function trendChart(items){const W=720,H=150,P=28,svgNS='http://www.w3.org/2000/
   return svg}
 
 /* ---------- правила ---------- */
+function importSamplesBtn(q,m){
+  const file=h('input',{type:'file',accept:'application/json,.json',style:'display:none',onchange:async()=>{
+    const f=file.files[0];if(!f)return;const text=await f.text();file.value='';
+    if(!await ask('Импортировать образцы?',`Файл «${f.name}» будет объединён с образцами на томе (совпадающие с каталогом репозитория — пропущены, остальные — добавлены). Продолжить?`,true))return;
+    try{const r=await api('/api/samples/import',{json:text});await note(`Добавлено: ${r.added}. Пропущено (уже есть или некорректны): ${r.skipped}.`);RULES=null;pRules(q,m)}catch(e){note(e.message)}}});
+  return h('span',{},file,h('button',{class:'btn',title:'Загрузить manual.json (например, из экспорта на другом хосте)',onclick:()=>file.click()},'Импорт образцов'))}
+
 let RULES=null,RF={plat:'',kind:'',st:'',flag:false,q:''},RS={key:'title',dir:1};
 async function pRules(q,m){const d=await api('/api/rules');RULES=d;m.textContent='';
   const plats=[...new Set(d.rules.map(r=>r.platform))].sort();
@@ -200,7 +213,8 @@ async function pRules(q,m){const d=await api('/api/rules');RULES=d;m.textContent
     bar.append(h('div',{class:'row'},h('input',{placeholder:'Поиск по названию, запросу, технике',value:RF.q,style:'flex:1;min-width:220px',oninput:e=>{RF.q=e.target.value;drawTable()}}),
       h('label',{},h('input',{type:'checkbox',checked:RF.flag,onchange:e=>{RF.flag=e.target.checked;drawTable()}}),' только с замечаниями'),
       h('button',{class:'btn',onclick:async()=>{await api('/api/rules?refresh=1');pRules(q,m)}},'Обновить из Graylog'),
-      h('a',{class:'btn',href:'/api/samples/export',title:'Ручные образцы (репозиторий + том) для samples/manual.json'},'Экспорт образцов для git')));
+      h('a',{class:'btn',href:'/api/samples/export',title:'Ручные образцы (репозиторий + том) для samples/manual.json'},'Экспорт образцов для git'),
+      isAdmin()?importSamplesBtn(q,m):''));
     bar.append(h('div',{class:'row'},chipSet('Платформа:','plat',[['','все'],...plats.map(p=>[p,p])]),chipSet('Результат:','st',[['','все'],['ok','прошли'],['bad','провалы'],['none','нет данных']])));
     bar.append(info);drawTable()}
   function drawTable(){const f=RF;let rows=d.rules.filter(r=>(!f.plat||r.platform===f.plat)&&(!f.flag||r.flags.length)&&(!f.q||(r.title+' '+r.query+' '+r.techniques.join(' ')).toLowerCase().includes(f.q.toLowerCase()))
@@ -256,16 +270,32 @@ async function pRun(q,m){m.textContent='';const sum=await api('/api/summary');
     ['latency','Задержка обнаружения','Офлайн: статистика по уже сохранённым отчётам «до алерта», replay и сверки Atomic Red Team/методики — сколько времени проходит от отправки до события. В Graylog не ходит, только читает локальные отчёты за 30 дней.']];
   let mode=q.get('mode')||'queries';
   const plat=h('select',{},h('option',{value:''},'Все платформы'),...sum.platforms.map(p=>h('option',{value:p},p)));const rule=h('input',{placeholder:'Часть названия правила',style:'flex:1;min-width:200px'});
-  const tech=h('input',{placeholder:'Техники MITRE через запятую: T1110,T1021.004',style:'flex:1;min-width:260px'});
+  const techList=h('datalist',{id:'mitre-techs'});
+  const tech=h('input',{placeholder:'Техники MITRE через запятую: T1110,T1021.004',style:'flex:1;min-width:260px',list:'mitre-techs'});
+  let techsLoaded=false;
+  async function loadTechniques(){if(techsLoaded)return;techsLoaded=true;
+    try{const d=await api('/api/techniques');techList.textContent='';
+      d.techniques.forEach(t=>techList.append(h('option',{value:t.id},`${t.id}${t.name?' — '+t.name:''} (${t.rules} ${t.rules===1?'правило':'правил'})`)))}
+    catch(e){}}
   const since=h('input',{placeholder:'начало окна: 2026-11-01T20:30Z или 90m',style:'flex:1;min-width:220px',value:'90m'});
   const until=h('input',{placeholder:'конец окна (необязательно)',style:'flex:1;min-width:200px'});
   const scenario=h('textarea',{placeholder:'{"title":"...","events":[{"timestamp":"2026-11-01T20:30:00Z", ...поля сообщения, как в Graylog}]}',style:'width:100%;min-height:160px;font-family:monospace;font-size:13px'});
   const wait=h('input',{placeholder:'ожидание, сек (по умолчанию 600)',style:'min-width:220px'});
   const pace=h('input',{placeholder:'пауза между событиями, сек (по умолчанию 0)',style:'min-width:240px'});
+  const scenSelect=h('select',{style:'flex:1;min-width:280px'},h('option',{value:''},'Загрузка списка…'));
+  const scenLoadBtn=h('button',{class:'btn sm',onclick:async()=>{if(!scenSelect.value)return;
+    try{const d=await api('/api/scenario?file='+encodeURIComponent(scenSelect.value));scenario.value=d.json}catch(e){note(e.message)}}},'Загрузить в поле');
+  let scenariosLoaded=false;
+  async function loadScenarios(){if(scenariosLoaded)return;scenariosLoaded=true;
+    try{const d=await api('/api/scenarios');scenSelect.textContent='';
+      if(!d.scenarios.length){scenSelect.append(h('option',{value:''},'(сохранённых сценариев ещё нет)'));return}
+      scenSelect.append(h('option',{value:''},'— выбрать сохранённый сценарий —'));
+      d.scenarios.forEach(s=>scenSelect.append(h('option',{value:s.file},`${s.title} — ${s.events} событий${s.expected?', с ожидаемыми правилами':''}, ${fmtTime(s.mtime)}`)))}
+    catch(e){scenSelect.textContent='';scenSelect.append(h('option',{value:''},'не удалось получить список'))}}
   const hint=h('div',{class:'mut'});const modeBox=h('div',{class:'row'});const stdRow=h('div',{class:'row'});const extraRow=h('div',{});
   function drawExtra(){stdRow.textContent='';extraRow.textContent='';
-    if(mode==='caldera'){stdRow.append(plat,rule);extraRow.append(h('div',{class:'row'},tech,since,until))}
-    else if(mode==='replay'){extraRow.append(scenario,h('div',{class:'row',style:'margin-top:6px'},wait,pace))}
+    if(mode==='caldera'){loadTechniques();stdRow.append(plat,rule);extraRow.append(h('div',{class:'row'},tech,techList,since,until))}
+    else if(mode==='replay'){loadScenarios();extraRow.append(h('div',{class:'row'},scenSelect,scenLoadBtn),scenario,h('div',{class:'row',style:'margin-top:6px'},wait,pace))}
     else{stdRow.append(plat,rule)}}
   function drawModes(){modeBox.textContent='';modes.forEach(([k,t,d])=>modeBox.append(h('span',{class:'chip act'+(mode===k?' sel':''),onclick:()=>{mode=k;hint.textContent=d;drawModes();drawExtra()},title:d},t)));hint.textContent=modes.find(x=>x[0]===mode)[2]}
   drawModes();drawExtra();
@@ -405,6 +435,9 @@ async function pSettings(q,m){const d=await api('/api/settings');m.textContent='
     h('label',{class:'f'},schedOn,' запускать по расписанию'),
     f('schedule','Запуски по расписанию','text','queries@02:30,selftest@03:00,drift@03:30,e2e@04:00'),f('e2e_platforms','Платформы для ночного «до алерта»','text','пусто: не запускать'),
     h('div',{class:'mut'},'Время по часовому поясу контейнера. «До алерта» по расписанию создаёт настоящие алерты, включайте осознанно. Снимите галочку выше, чтобы приостановить все запуски по расписанию, не стирая настроенное время.')));
+  m.append(h('div',{class:'card'},h('h2',{},'Хранение'),
+    f('retention_days','Хранить отчёты и сценарии replay (дней)','text','пусто: бессрочно'),
+    h('div',{class:'mut'},'Раз в сутки удаляются отчёты и сценарии replay старше указанного числа дней. Журнал, история запусков, настройки и ручные образцы не трогаются. То же самое — кнопкой «Очистить сейчас» в «Журнале».')));
   const act=h('div',{class:'row'});
   if(isAdmin()){act.append(h('button',{class:'btn pri',onclick:async()=>{const b={};Object.entries(inputs).forEach(([k,i])=>b[k]=i.value.trim());b.insecure=ins.checked?'1':'';b.schedule_enabled=schedOn.checked?'1':'0';try{await api('/api/settings/save',b);await note('Настройки сохранены на томе.');pSettings(q,m);chips()}catch(e){note(e.message)}}},'Сохранить'),
     h('button',{class:'btn',onclick:async()=>{try{await api('/api/run',{mode:'doctor'});location.hash='#/run'}catch(e){note(e.message)}}},'Проверить соединение'))}
@@ -416,7 +449,13 @@ async function pAudit(q,m){const d=await api('/api/audit');m.textContent='';cons
   const bk=h('div',{class:'card'},h('div',{class:'row'},h('div',{style:'flex:1'},h('h2',{},'Резервная копия'),
     h('div',{class:'mut'},'Отчёты, история запусков, журнал, ручные образцы, настройки и сохранённые сценарии replay — архивом с тома. Настройки хранят токен Graylog в открытом виде, поэтому архив храните так же бережно, как сам том.')),
     isAdmin()?h('a',{class:'btn pri',href:'/api/backup'},'Скачать архив'):h('span',{class:'badge b-warn'},'Доступно только администратору')));
-  m.append(bk,h('div',{class:'card',style:'overflow:auto'},d.audit.length?t:'Пусто'))}
+  const s=(await api('/api/settings')).settings;
+  const cl=h('div',{class:'card'},h('div',{class:'row'},h('div',{style:'flex:1'},h('h2',{},'Очистка старых файлов'),
+    h('div',{class:'mut'},s.retention_days?`Хранить отчёты и сценарии replay ${s.retention_days} дн. (настраивается в «Настройках» → «Хранение»; выполняется автоматически раз в сутки).`:'Срок хранения не задан (бессрочно) — настройте его в «Настройках» → «Хранение», чтобы включить и ручную, и автоматическую очистку.')),
+    isAdmin()&&s.retention_days?h('button',{class:'btn dng',onclick:async()=>{
+      if(!await ask('Очистить старые файлы?',`Будут удалены отчёты и сценарии replay старше ${s.retention_days} дн. Журнал, история и настройки не затрагиваются.`,true))return;
+      try{const r=await api('/api/cleanup',{});await note(`Удалено файлов: ${r.removed}.`);pAudit(q,m)}catch(e){note(e.message)}}},'Очистить сейчас'):''));
+  m.append(bk,cl,h('div',{class:'card',style:'overflow:auto'},d.audit.length?t:'Пусто'))}
 
 async function pGuide(q,m){const d=await api('/api/guide');m.textContent='';
   const box=h('div',{class:'card guide'});box.innerHTML=d.html;m.append(box)}
