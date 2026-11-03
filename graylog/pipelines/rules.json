@@ -20,6 +20,11 @@
     "source": "rule \"containers: normalize fields\"\nwhen\n  has_field(\"CONTAINER_NAME\")\nthen\n  set_field(\"container_name\", to_string($message.CONTAINER_NAME));\n  set_field(\"image_name\", to_string($message.IMAGE_NAME));\n  set_field(\"container_id\", to_string($message.CONTAINER_ID));\nend"
   },
   {
+    "title": "keenetic: lockout ban IP",
+    "description": "Keenetic банит внешние адреса, подбирающие пароль к веб-интерфейсу (Netfilter::Lockout::Manager). Достаёт из текста сервис, действие (ban/unban) и IP в kn_lockout_service, kn_lockout_action, kn_ban_ip. По kn_ban_ip Geo-Location Processor добавляет координаты, страну и город (глава 19).",
+    "source": "rule \"keenetic: lockout ban IP\"\nwhen\n  contains(to_string($message.message), \"Netfilter::Lockout::Manager\")\n  AND regex(\"Lockout::Manager: .([A-Za-z]+).: (ban|unban) remote host ([0-9a-fA-F:.]*[0-9a-fA-F])\", to_string($message.message)).matches == true\nthen\n  let m = regex(\"Lockout::Manager: .([A-Za-z]+).: (ban|unban) remote host ([0-9a-fA-F:.]*[0-9a-fA-F])\", to_string($message.message));\n  set_field(\"kn_lockout_service\", to_string(m[\"0\"]));\n  set_field(\"kn_lockout_action\", to_string(m[\"1\"]));\n  set_field(\"kn_ban_ip\", to_string(m[\"2\"]));\nend"
+  },
+  {
     "title": "homelab: auditd type_name",
     "description": "Добавляет type_name по типу записи auditd (поле type) из Lookup Table homelab-auditd-types.",
     "source": "rule \"homelab: auditd type_name\"\nwhen\n  has_field(\"type\")\n  AND lookup_has_value(\"homelab-auditd-types\", to_string($message.type))\nthen\n  set_field(\"type_name\", lookup_value(\"homelab-auditd-types\", to_string($message.type)));\nend"
@@ -43,6 +48,16 @@
     "title": "homelab: keenetic kn_event_name",
     "description": "Добавляет kn_event_name (русское название события Keenetic) по kn_event_type из Lookup Table homelab-keenetic-events.",
     "source": "rule \"homelab: keenetic kn_event_name\"\nwhen\n  has_field(\"kn_event_type\")\n  AND lookup_has_value(\"homelab-keenetic-events\", to_string($message.kn_event_type))\nthen\n  set_field(\"kn_event_name\", lookup_value(\"homelab-keenetic-events\", to_string($message.kn_event_type)));\nend"
+  },
+  {
+    "title": "homelab: linux login src_ip",
+    "description": "auditd кладёт в addr только первый октет (192), настоящий адрес есть лишь в тексте. Достаёт IP из addr= в src_ip.",
+    "source": "rule \"homelab: linux login src_ip\"\nwhen\n  (to_string($message.audit_type) == \"USER_LOGIN\" OR to_string($message.audit_type) == \"USER_AUTH\")\n  AND regex(\"addr=([0-9a-fA-F:.]+)\", to_string($message.message)).matches == true\nthen\n  let m = regex(\"addr=([0-9a-fA-F:.]+)\", to_string($message.message));\n  set_field(\"src_ip\", to_string(m[\"0\"]));\nend"
+  },
+  {
+    "title": "homelab: linux login src_zone",
+    "description": "Добавляет src_zone (сеть адреса источника входа) по CIDR-таблице homelab-subnets. Работает после правила src_ip (следующая стадия).",
+    "source": "rule \"homelab: linux login src_zone\"\nwhen\n  has_field(\"src_ip\")\n  AND lookup_has_value(\"homelab-subnets\", to_string($message.src_ip))\nthen\n  set_field(\"src_zone\", lookup_value(\"homelab-subnets\", to_string($message.src_ip)));\nend"
   },
   {
     "title": "homelab: level_name",
@@ -88,15 +103,5 @@
     "title": "macos: обрезать слишком длинный eventMessage",
     "description": "Значение eventMessage длиннее 32766 байт отбрасывается индексом (immense term). Обрезаем до 6000 символов — запас на UTF-8.",
     "source": "rule \"macos: обрезать слишком длинный eventMessage\"\nwhen\n  has_field(\"eventMessage\")\n  AND length(to_string($message.eventMessage)) > 6000\nthen\n  set_field(\"eventMessage\", abbreviate(to_string($message.eventMessage), 6000));\n  set_field(\"eventMessage_truncated\", true);\nend"
-  },
-  {
-    "title": "homelab: linux login src_ip",
-    "description": "auditd кладёт в addr только первый октет (192), настоящий адрес есть лишь в тексте. Достаёт IP из addr= в src_ip.",
-    "source": "rule \"homelab: linux login src_ip\"\nwhen\n  (to_string($message.audit_type) == \"USER_LOGIN\" OR to_string($message.audit_type) == \"USER_AUTH\")\n  AND regex(\"addr=([0-9a-fA-F:.]+)\", to_string($message.message)).matches == true\nthen\n  let m = regex(\"addr=([0-9a-fA-F:.]+)\", to_string($message.message));\n  set_field(\"src_ip\", to_string(m[\"0\"]));\nend"
-  },
-  {
-    "title": "homelab: linux login src_zone",
-    "description": "Добавляет src_zone (сеть адреса источника входа) по CIDR-таблице homelab-subnets. Работает после правила src_ip (следующая стадия).",
-    "source": "rule \"homelab: linux login src_zone\"\nwhen\n  has_field(\"src_ip\")\n  AND lookup_has_value(\"homelab-subnets\", to_string($message.src_ip))\nthen\n  set_field(\"src_zone\", lookup_value(\"homelab-subnets\", to_string($message.src_ip)));\nend"
   }
 ]

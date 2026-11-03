@@ -193,6 +193,7 @@ bash rule-tester/deploy/install.sh        # первый запуск созда
 | 16 | [GraylogRuleTester: проверка правил без хостов](docs/16-rule-tester.md) | Образцы сообщений отправляются на сервер Graylog (GELF): проверка запросов всех правил в тестовом потоке и полного пути до события; веб-интерфейс в контейнере Podman, покрытие MITRE, сравнение запусков, роли, установка за Caddy, сверка с настоящими тестами Atomic Red Team |
 | 17 | [GraylogRuleTester: руководство администратора](docs/17-admin-guide-ruletester.md) | Пошаговый маршрут по всему инструменту со скриншотами и пронумерованными указателями последовательности: от подключения к серверу до отчётов покрытия, CALDERA и задержки обнаружения |
 | 18 | [GraylogBackup: резервное копирование сервера](docs/18-graylog-backup.md) | Конфигурация через REST, полный `mongodump` MongoDB, `server.conf` (`password_secret`), `mongod.conf`, `opensearch.yml`/`elasticsearch.yml`, плагины, шаблоны индексов OpenSearch/Elasticsearch; веб-интерфейс в контейнере Podman, расписание, хранение с ротацией; пошаговый разбор аварийного восстановления сервера из архива |
+| 19 | [Keenetic: блокировки внешних адресов на карте](docs/19-keenetic-geo-bans.md) | Баны роутера при подборе пароля к веб-интерфейсу: pipeline-правило, GeoIP (MaxMind), дашборд с картой мира, странами, городами и динамикой. Сканирование портов роутер в журнал не пишет: что с этим делать, описано в главе |
 
 ### Дашборды
 
@@ -268,6 +269,7 @@ Graylog_streams-alerts/
 │   ├── 16-rule-tester.md              ← GraylogRuleTester: проверка правил без хостов
 │   ├── 17-admin-guide-ruletester.md   ← GraylogRuleTester: руководство администратора
 │   ├── 18-graylog-backup.md           ← GraylogBackup: резервное копирование сервера
+│   ├── 19-keenetic-geo-bans.md        ← Keenetic: блокировки внешних адресов на карте мира
 │   ├── troubleshooting.md             ← грабли и решения
 │   └── images/                        ← скриншоты и иллюстрации
 ├── graylog/

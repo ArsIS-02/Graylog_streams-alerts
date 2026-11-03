@@ -1,0 +1,11 @@
+// description: Keenetic банит внешние адреса, подбирающие пароль к веб-интерфейсу (Netfilter::Lockout::Manager). Достаёт из текста сервис, действие (ban/unban) и IP в kn_lockout_service, kn_lockout_action, kn_ban_ip. По kn_ban_ip Geo-Location Processor добавляет координаты, страну и город (глава 19).
+rule "keenetic: lockout ban IP"
+when
+  contains(to_string($message.message), "Netfilter::Lockout::Manager")
+  AND regex("Lockout::Manager: .([A-Za-z]+).: (ban|unban) remote host ([0-9a-fA-F:.]*[0-9a-fA-F])", to_string($message.message)).matches == true
+then
+  let m = regex("Lockout::Manager: .([A-Za-z]+).: (ban|unban) remote host ([0-9a-fA-F:.]*[0-9a-fA-F])", to_string($message.message));
+  set_field("kn_lockout_service", to_string(m["0"]));
+  set_field("kn_lockout_action", to_string(m["1"]));
+  set_field("kn_ban_ip", to_string(m["2"]));
+end
