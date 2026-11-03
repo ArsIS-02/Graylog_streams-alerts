@@ -306,10 +306,17 @@ def step_search(url, workdir, insecure=False, ca_file=None):
     ):
         try:
             out[key] = _os_get(url, path, insecure, ca_file, body=body)
-        except (urllib.error.HTTPError, urllib.error.URLError) as e:
+        except urllib.error.HTTPError as e:
+            # str(e) — это только "HTTP Error 400: Bad Request" без тела ответа, а тело обычно и
+            # содержит настоящую причину (OpenSearch/Elasticsearch кладут её в JSON-поле reason) —
+            # без него диагностировать ошибку можно только вслепую.
+            try:
+                detail = e.read().decode("utf-8", "replace").strip()
+            except Exception:
+                detail = ""
+            errors[key] = str(e) + (": " + detail[:500] if detail else "")
+        except urllib.error.URLError as e:
             errors[key] = str(e)
-            if required and key not in ("legacy_templates",):
-                pass  # не required-блокирующая: пишем ошибку и продолжаем остальные ключи
     (workdir / "opensearch-templates.json").write_text(
         json.dumps({"templates": out, "errors": errors}, ensure_ascii=False, indent=1), encoding="utf-8")
     status = "ok" if out else "error"
