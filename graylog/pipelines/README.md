@@ -13,6 +13,7 @@
 | `collectors-hostname-as-source.rule` | `collectors: hostname as source` | Короткое имя хоста вместо IP в `source` (глава 11) | `Collector logs`, стадия 1 |
 | `containers-normalize-fields.rule` | `containers: normalize fields` | `CONTAINER_NAME` → `container_name`, `container_id`, `image_name` (глава 8) | `Container logs`, стадия 0 |
 | `containers-log-new-expiration-text.rule` | `containers: log_new_expiration в строку` | Caddy шлёт дату строкой, а в индексе поле `long`: документ отбрасывается ([troubleshooting, п. 12](../../docs/troubleshooting.md)) | `Container logs`, стадия 1 |
+| `keenetic-lockout-ban-ip.rule` | `keenetic: lockout ban IP` | Достаёт IP, действие и службу из бана Keenetic (`kn_ban_ip`, `kn_lockout_action`, `kn_lockout_service`), глава 19 | pipeline разбора Keenetic, до Geo-Location Processor |
 | `lookup-trusted-hosts-flag.rule` | `homelab: пометить доверенные хосты` | Ставит `trusted_host=true`, если хост есть в Lookup Table (см. ниже) | отдельный pipeline `homelab: trusted hosts`, стадия 2, поток Collectors |
 | `macos-truncate-cmdline.rule` | `macos: обрезать слишком длинный cmdline` | Командная строка osquery длиннее 32766 байт отбрасывается индексом ([п. 20](../../docs/troubleshooting.md)) | `macOS Log Processing`, стадия 0 |
 | `macos-truncate-eventmessage.rule` | `macos: обрезать слишком длинный eventMessage` | То же для `eventMessage` ([п. 20](../../docs/troubleshooting.md)) | `macOS Log Processing`, стадия 2, в конце |
