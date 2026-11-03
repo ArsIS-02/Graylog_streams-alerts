@@ -116,7 +116,7 @@ window.addEventListener('hashchange',route);
 document.querySelectorAll('aside a').forEach(a=>a.onclick=()=>{location.hash='#/'+a.dataset.p});
 async function chips(){try{const s=await api('/api/summary');const box=$('#chips');box.textContent='';
   const c=(ok,t)=>h('span',{class:'chip '+(ok?'ok':'bad')},h('i'),t);
-  box.append(c(s.graylog_url_set,'Graylog'+(s.graylog_url_set?'':': не настроен')),c(s.mongo_set,'MongoDB'+(s.mongo_set?'':': не настроен')),c(s.opensearch_set,'OpenSearch'+(s.opensearch_set?'':': не настроен (необязательно)')))}catch(e){}}
+  box.append(c(s.graylog_url_set,'Graylog'+(s.graylog_url_set?'':': не настроен')),c(s.mongo_set,'MongoDB'+(s.mongo_set?'':': не настроен')),c(s.server_conf_set,'server.conf'+(s.server_conf_set?'':': не смонтирован')),c(s.opensearch_set,'OpenSearch'+(s.opensearch_set?'':': не настроен (необязательно)')))}catch(e){}}
 async function boot(){ME=await api('/api/status');ROLE=ME.role;$('#ver').textContent='версия '+ME.version;
   $('#who').textContent='Администратор · v'+ME.version;$('#app').classList.remove('hide');chips();route()}
 
@@ -153,10 +153,10 @@ async function pBackups(m){const d=await api('/api/backups');m.textContent='';
     await runNow(j=>{run.disabled=false;prog.classList.add('hide');pBackups(m)})}},'Бэкап сейчас');
   const prog=h('div',{class:'mut hide',style:'margin-top:8px'});
   bar.append(h('div',{class:'row'},run),prog);m.append(bar);
-  const t=h('table',{},h('tr',{},h('th',{},'Время'),h('th',{},'Размер'),h('th',{},'Конфигурация'),h('th',{},'MongoDB'),h('th',{},'OpenSearch'),h('th',{},'')));
+  const t=h('table',{},h('tr',{},h('th',{},'Время'),h('th',{},'Размер'),h('th',{},'Конфигурация'),h('th',{},'MongoDB'),h('th',{},'server.conf'),h('th',{},'Плагины'),h('th',{},'OpenSearch'),h('th',{},'')));
   d.backups.forEach(r=>{const steps=r.steps||{};
     t.append(h('tr',{},h('td',{},fmtTime(r.mtime)),h('td',{},fmtBytes(r.bytes)),
-      h('td',{},stepBadge(steps.config)),h('td',{},stepBadge(steps.mongo)),h('td',{},stepBadge(steps.search)),
+      h('td',{},stepBadge(steps.config)),h('td',{},stepBadge(steps.mongo)),h('td',{},stepBadge(steps.server_conf)),h('td',{},stepBadge(steps.plugins)),h('td',{},stepBadge(steps.search)),
       h('td',{},h('div',{class:'row',style:'margin:0'},
         h('a',{class:'btn sm',href:'/api/backup/download?file='+encodeURIComponent(r.file)},'Скачать'),
         h('button',{class:'btn sm dng',onclick:async()=>{if(!await ask('Удалить архив?',r.file+' — отменить нельзя.',true))return;
@@ -174,6 +174,11 @@ async function pSettings(m){const s=(await api('/api/settings')).settings;m.text
   m.append(h('div',{class:'card'},h('h2',{},'MongoDB'),
     f('mongo_uri','Строка подключения','text','mongodb://host.containers.internal:27017/graylog'),
     h('div',{class:'mut',style:'font-size:12px;margin-top:-4px'},'Нужен mongodump внутри образа (есть в Containerfile). Без этого поля шаг пропускается.')));
+  m.append(h('div',{class:'card'},h('h2',{},'server.conf и плагины'),
+    h('div',{class:'mut',style:'font-size:12px'},'Путь задаётся только переменными окружения (GB_SERVER_CONF, GB_PLUGIN_DIR) — это файлы с хоста, монтируются в контейнер только для чтения при установке (см. главу 18, HOST_SERVER_CONF/HOST_PLUGIN_DIR в install.sh). Здесь не редактируются.'),
+    h('div',{class:'row',style:'margin-top:8px'},
+      h('span',{class:'chip '+(s.server_conf_set?'ok':'bad')},h('i'),'server.conf'+(s.server_conf_set?'':': не смонтирован')),
+      h('span',{class:'chip '+(s.plugin_dir_set?'ok':'bad')},h('i'),'Плагины'+(s.plugin_dir_set?'':': не смонтированы (необязательно)')))));
   m.append(h('div',{class:'card'},h('h2',{},'OpenSearch / Elasticsearch'),
     f('opensearch_url','Адрес (REST)','text','http://host.containers.internal:9200'),
     h('div',{class:'mut',style:'font-size:12px;margin-top:-4px'},'Необязательно: сохраняются только шаблоны индексов и настройки кластера, не сами логи. Пусто — шаг пропускается.')));

@@ -7,10 +7,18 @@ services:
     container_name: graylog-backup
     restart: unless-stopped
     env_file: ./graylog-backup.env
+    # environment:  # добавьте эти две строки, если раскомментировали volumes ниже
+    #   GB_SERVER_CONF: /mnt/host/server.conf
+    #   GB_PLUGIN_DIR: /mnt/host/plugins
     ports:
       - "8086:8080"
     volumes:
       - graylog-backup-data:/data:Z
+      # Для полного бэкапа (аварийное восстановление) — раскомментируйте и подставьте
+      # настоящие пути на хосте; install.sh для quadlet делает то же самое автоматически
+      # по HOST_SERVER_CONF/HOST_PLUGIN_DIR из graylog-backup.env, здесь — вручную:
+      # - /etc/graylog/server/server.conf:/mnt/host/server.conf:ro,Z
+      # - /usr/share/graylog-server/plugin:/mnt/host/plugins:ro,Z
     read_only: true
     tmpfs: [/tmp]
     cap_drop: [ALL]

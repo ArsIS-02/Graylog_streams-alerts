@@ -6,6 +6,13 @@
   GRAYLOG_URL, GRAYLOG_TOKEN   доступ к Graylog REST (тот же токен, что у rule-tester, подходит)
   GB_MONGO_URI                 строка подключения к MongoDB Graylog, например
                                 mongodb://host.containers.internal:27017/graylog
+  GB_SERVER_CONF                путь к server.conf graylog-server внутри контейнера (монтируется
+                                только для чтения, см. deploy/env.example HOST_SERVER_CONF);
+                                пусто — шаг пропускается, password_secret/root_password_sha2 в
+                                копию не попадут
+  GB_PLUGIN_DIR                 путь к каталогу плагинов graylog-server внутри контейнера
+                                (монтируется только для чтения, см. HOST_PLUGIN_DIR); пусто —
+                                шаг пропускается
   GB_OPENSEARCH_URL            адрес OpenSearch/Elasticsearch (пусто — шаг search пропускается)
   GB_PASSWORD                  пароль администратора (обязателен, роль одна — других не бывает:
                                 инструмент только читает и архивирует, ничего в Graylog не пишет)
@@ -188,7 +195,9 @@ def summary():
     return {"last": last, "count": len(rows), "schedule": cfg("schedule"),
             "schedule_enabled": cfg("schedule_enabled") != "0", "retention_days": cfg("retention_days"),
             "graylog_url_set": bool(cfg("graylog_url")), "mongo_set": bool(cfg("mongo_uri")),
-            "opensearch_set": bool(cfg("opensearch_url"))}
+            "opensearch_set": bool(cfg("opensearch_url")),
+            "server_conf_set": bool(os.environ.get("GB_SERVER_CONF")),
+            "plugin_dir_set": bool(os.environ.get("GB_PLUGIN_DIR"))}
 
 
 def scheduler():
@@ -297,6 +306,8 @@ class H(BaseHTTPRequestHandler):
         if path == "/api/settings":
             s = {k: cfg(k) for k in SETTING_ENV if k != "graylog_token"}
             s["token_set"] = bool(cfg("graylog_token"))
+            s["server_conf_set"] = bool(os.environ.get("GB_SERVER_CONF"))
+            s["plugin_dir_set"] = bool(os.environ.get("GB_PLUGIN_DIR"))
             return self.reply({"settings": s})
         if path == "/api/audit":
             p = DATA / "audit.jsonl"

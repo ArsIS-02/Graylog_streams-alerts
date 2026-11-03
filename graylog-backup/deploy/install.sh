@@ -22,6 +22,21 @@ done
 echo "Сборка образа…"
 podman build -f graylog-backup/Containerfile -t localhost/graylog-backup:latest .
 install -m 644 graylog-backup/deploy/graylog-backup.container "$UNIT_DIR/graylog-backup.container"
+
+# Для полного бэкапа (аварийное восстановление): если в .env заданы HOST_SERVER_CONF/HOST_PLUGIN_DIR,
+# примонтировать эти файлы/каталоги с хоста в контейнер только для чтения и прописать туда же
+# соответствующие GB_SERVER_CONF/GB_PLUGIN_DIR — сами эти строки руками в .env заполнять не нужно.
+HOST_SERVER_CONF="$(sed -n 's/^HOST_SERVER_CONF=//p' "$ENV" | head -1)"
+HOST_PLUGIN_DIR="$(sed -n 's/^HOST_PLUGIN_DIR=//p' "$ENV" | head -1)"
+if [ -n "$HOST_SERVER_CONF" ]; then
+  [ -r "$HOST_SERVER_CONF" ] || echo "Внимание: $HOST_SERVER_CONF не читается этим пользователем — server.conf в копию не попадёт, пока не поправите права"
+  sed -i "/^\[Container\]/a Volume=${HOST_SERVER_CONF}:/mnt/host/server.conf:ro,Z\nEnvironment=GB_SERVER_CONF=/mnt/host/server.conf" "$UNIT_DIR/graylog-backup.container"
+fi
+if [ -n "$HOST_PLUGIN_DIR" ]; then
+  [ -r "$HOST_PLUGIN_DIR" ] || echo "Внимание: $HOST_PLUGIN_DIR не читается этим пользователем — плагины в копию не попадут, пока не поправите права"
+  sed -i "/^\[Container\]/a Volume=${HOST_PLUGIN_DIR}:/mnt/host/plugins:ro,Z\nEnvironment=GB_PLUGIN_DIR=/mnt/host/plugins" "$UNIT_DIR/graylog-backup.container"
+fi
+
 systemctl --user daemon-reload
 systemctl --user restart graylog-backup.service
 loginctl enable-linger "$USER" 2>/dev/null || true

@@ -1,23 +1,34 @@
 #!/usr/bin/env python3
 """GraylogBackup: резервное копирование конфигурации Graylog (не самих логов).
 
-Три источника, каждый — отдельным шагом, неудача одного не останавливает остальные:
+Пять источников, каждый — отдельным шагом, неудача одного не останавливает остальные:
 
-  config   снимок конфигурации через REST API Graylog (потоки, определения событий,
-           уведомления, index sets, outputs/inputs, pipeline-правила и связи,
-           lookup-таблицы, grok-паттерны, dashboards) — только для чтения и diff'а в git,
-           НЕ предназначен для восстановления: это читаемый JSON, а не content pack,
-           который Graylog умеет импортировать обратно одной кнопкой.
-  mongo    полный `mongodump` базы Graylog (единственный источник, из которого можно
-           реально восстановиться «один в один»: пользователи, роли, index sets,
-           sidecar-конфигурация — всё, что есть в MongoDB).
-  search   структура индексов OpenSearch/Elasticsearch: шаблоны индексов, component
-           templates, настройки кластера, политики ISM (если есть) — САМИ ЛОГИ (данные
-           индексов) сюда не попадают, это задача ротации/снапшотов самого кластера,
-           не этого инструмента.
+  config       снимок конфигурации через REST API Graylog (потоки, определения событий,
+               уведомления, index sets, outputs/inputs, pipeline-правила и связи,
+               lookup-таблицы, grok-паттерны, dashboards) — только для чтения и diff'а
+               в git, НЕ предназначен для восстановления: это читаемый JSON, а не
+               content pack, который Graylog умеет импортировать обратно одной кнопкой.
+  mongo        полный `mongodump` базы Graylog (основной источник восстановления «один
+               в один»: пользователи, роли, index sets, sidecar-конфигурация — всё,
+               что есть в MongoDB; бóльшая часть entity-конфигурации хранится здесь).
+  server_conf  файл server.conf самого graylog-server (путь — GB_SERVER_CONF, монтируется
+               в контейнер только для чтения). Нужен для полного восстановления: именно
+               тут лежит password_secret, которым в MongoDB зашифрована часть значений
+               (секреты некоторых inputs, lookup-адаптеров) — если на новом сервере
+               password_secret будет другим, эти значения после restore-mongo не
+               расшифруются. Здесь же root_password_sha2 и остальные настройки сервера,
+               не хранящиеся в MongoDB.
+  plugins      содержимое каталога плагинов graylog-server (путь — GB_PLUGIN_DIR,
+               тоже монтируется только для чтения), архивируется в plugins.tar.gz —
+               mongodump сохраняет то, что плагин записал в базу, но не сам .jar.
+  search       структура индексов OpenSearch/Elasticsearch: шаблоны индексов, component
+               templates, настройки кластера, политики ISM (если есть) — САМИ ЛОГИ
+               (данные индексов) сюда не попадают, это задача ротации/снапшотов самого
+               кластера, не этого инструмента.
 
 Режимы:
-  doctor   проверить доступ к Graylog REST, MongoDB (mongodump) и OpenSearch/ES
+  doctor   проверить доступ к Graylog REST, MongoDB (mongodump), server.conf, каталог
+           плагинов и OpenSearch/ES
   run      сделать резервную копию, разом или выборочно (--skip-mongo и т.п.)
   list     список уже сделанных архивов на диске
   prune    удалить архивы старше --days
@@ -25,7 +36,9 @@
 
 Адрес и токен Graylog — те же переменные, что у rule-tester (GRAYLOG_URL, GRAYLOG_TOKEN),
 можно использовать общий read-only токен. Остальное — переменные с префиксом GB_
-(см. deploy/env.example).
+(см. deploy/env.example). server.conf и каталог плагинов из архива восстанавливаются
+простым копированием на нужное место на новом сервере (с сохранением прав доступа) —
+отдельной команды для этого нет, см. главу 18 (раздел «Аварийное восстановление»).
 """
 import argparse
 import json
@@ -158,7 +171,57 @@ def mongo_restore(uri, archive_path, drop=True, yes=False):
     return r.returncode == 0
 
 
-# ------------------------------------------------------------------ шаг 3: структура индексов OpenSearch/ES
+# ------------------------------------------------------------------ шаг 3: server.conf
+
+def step_server_conf(path, workdir):
+    t0 = time.time()
+    if not path:
+        return {"status": "skipped", "reason": "GB_SERVER_CONF не задан"}
+    try:
+        data = Path(path).read_bytes()
+    except OSError as e:
+        return {"status": "error", "reason": "не удалось прочитать %s: %s" % (path, e)}
+    (workdir / "server.conf").write_bytes(data)
+    has_secret = b"password_secret" in data
+    result = {"status": "ok" if has_secret else "partial",
+              "duration_s": round(time.time() - t0, 1), "bytes": len(data),
+              "password_secret_present": has_secret}
+    if not has_secret:
+        result["reason"] = "в файле не нашлось password_secret — похоже, это не server.conf Graylog"
+    return result
+
+
+# ------------------------------------------------------------------ шаг 4: каталог плагинов
+
+def step_plugins(path, workdir):
+    t0 = time.time()
+    if not path:
+        return {"status": "skipped", "reason": "GB_PLUGIN_DIR не задан"}
+    d = Path(path)
+    if not d.is_dir():
+        return {"status": "error", "reason": "каталог не найден или недоступен: %s" % path}
+    out = workdir / "plugins.tar.gz"
+    failed = {}
+    count = 0
+    with tarfile.open(out, "w:gz") as tar:
+        for f in sorted(d.rglob("*")):
+            if not f.is_file():
+                continue
+            try:
+                tar.add(f, arcname=str(f.relative_to(d)))
+                count += 1
+            except OSError as e:
+                failed[str(f.relative_to(d))] = str(e)
+    if count == 0:
+        out.unlink(missing_ok=True)
+        status = "error" if failed else "skipped"
+        return {"status": status, "reason": "каталог плагинов пуст" if not failed else "ни один файл не прочитан",
+                "failed": failed}
+    return {"status": "ok" if not failed else "partial", "duration_s": round(time.time() - t0, 1),
+            "files": count, "failed": failed, "bytes": out.stat().st_size}
+
+
+# ------------------------------------------------------------------ шаг 5: структура индексов OpenSearch/ES
 
 def _os_get(base, path, insecure, ca_file, timeout=30):
     ctx = ssl.create_default_context()
@@ -203,7 +266,9 @@ def step_search(url, workdir, insecure=False, ca_file=None):
 # ------------------------------------------------------------------ сборка архива, список, ротация
 
 def run_backup(gl_url, gl_token, mongo_uri, os_url, out_dir, insecure=False, ca_file=None,
-                skip_config=False, skip_mongo=False, skip_search=False):
+                skip_config=False, skip_mongo=False, skip_search=False,
+                server_conf_path=None, skip_server_conf=False,
+                plugin_dir=None, skip_plugins=False):
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
     stamp = now_stamp()
@@ -221,6 +286,10 @@ def run_backup(gl_url, gl_token, mongo_uri, os_url, out_dir, insecure=False, ca_
             steps["config"] = {"status": "skipped", "reason": "--skip-config"}
         steps["mongo"] = step_mongo(mongo_uri, workdir) if not skip_mongo else \
             {"status": "skipped", "reason": "--skip-mongo"}
+        steps["server_conf"] = step_server_conf(server_conf_path, workdir) if not skip_server_conf else \
+            {"status": "skipped", "reason": "--skip-server-conf"}
+        steps["plugins"] = step_plugins(plugin_dir, workdir) if not skip_plugins else \
+            {"status": "skipped", "reason": "--skip-plugins"}
         steps["search"] = step_search(os_url, workdir, insecure, ca_file) if not skip_search else \
             {"status": "skipped", "reason": "--skip-search"}
 
@@ -273,7 +342,8 @@ def prune_backups(out_dir, days):
 
 # ------------------------------------------------------------------ doctor
 
-def doctor(gl_url, gl_token, mongo_uri, os_url, insecure=False, ca_file=None):
+def doctor(gl_url, gl_token, mongo_uri, os_url, insecure=False, ca_file=None,
+           server_conf_path=None, plugin_dir=None):
     ok = True
     if gl_url and gl_token:
         try:
@@ -314,6 +384,33 @@ def doctor(gl_url, gl_token, mongo_uri, os_url, insecure=False, ca_file=None):
     else:
         log("[ - ] MongoDB: GB_MONGO_URI не задан, этот шаг будет пропущен при резервном копировании")
 
+    if server_conf_path:
+        try:
+            data = Path(server_conf_path).read_bytes()
+            if b"password_secret" in data:
+                log("[ OK ] server.conf: %s читается, password_secret на месте" % server_conf_path)
+            else:
+                ok = False
+                log("[FAIL] server.conf: %s читается, но password_secret не найден — похоже, не тот файл"
+                    % server_conf_path)
+        except OSError as e:
+            ok = False
+            log("[FAIL] server.conf: %s — %s" % (server_conf_path, e))
+    else:
+        log("[ - ] server.conf: GB_SERVER_CONF не задан, этот шаг будет пропущен (password_secret и "
+            "root_password_sha2 в копию не попадут)")
+
+    if plugin_dir:
+        d = Path(plugin_dir)
+        if d.is_dir():
+            n = sum(1 for _ in d.rglob("*") if _.is_file())
+            log("[ OK ] Каталог плагинов: %s читается, файлов: %d" % (plugin_dir, n))
+        else:
+            ok = False
+            log("[FAIL] Каталог плагинов: %s не найден или недоступен" % plugin_dir)
+    else:
+        log("[ - ] Каталог плагинов: GB_PLUGIN_DIR не задан, этот шаг будет пропущен")
+
     if os_url:
         try:
             info = _os_get(os_url, "/", insecure, ca_file, timeout=10)
@@ -348,6 +445,8 @@ def main(argv=None):
     p = sub.add_parser("run")
     p.add_argument("--skip-config", action="store_true")
     p.add_argument("--skip-mongo", action="store_true")
+    p.add_argument("--skip-server-conf", action="store_true")
+    p.add_argument("--skip-plugins", action="store_true")
     p.add_argument("--skip-search", action="store_true")
 
     sub.add_parser("list")
@@ -365,13 +464,17 @@ def main(argv=None):
     gl_token = os.environ.get("GRAYLOG_TOKEN", "")
     mongo_uri = os.environ.get("GB_MONGO_URI", "")
     os_url = os.environ.get("GB_OPENSEARCH_URL", "")
+    server_conf_path = os.environ.get("GB_SERVER_CONF", "")
+    plugin_dir = os.environ.get("GB_PLUGIN_DIR", "")
 
     if args.cmd == "doctor":
-        return doctor(gl_url, gl_token, mongo_uri, os_url, args.insecure, args.ca_file)
+        return doctor(gl_url, gl_token, mongo_uri, os_url, args.insecure, args.ca_file,
+                      server_conf_path, plugin_dir)
 
     if args.cmd == "run":
         meta = run_backup(gl_url, gl_token, mongo_uri, os_url, args.out_dir, args.insecure, args.ca_file,
-                           args.skip_config, args.skip_mongo, args.skip_search)
+                           args.skip_config, args.skip_mongo, args.skip_search,
+                           server_conf_path, args.skip_server_conf, plugin_dir, args.skip_plugins)
         print(json.dumps(meta, ensure_ascii=False, indent=1))
         bad = [k for k, v in meta["steps"].items() if v.get("status") == "error"]
         return 2 if bad else 0
