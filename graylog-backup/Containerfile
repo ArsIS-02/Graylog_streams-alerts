@@ -1,11 +1,18 @@
 # Сборка из корня репозитория:  podman build -f graylog-backup/Containerfile -t localhost/graylog-backup:latest .
 FROM docker.io/library/python:3.12-slim
 
-LABEL org.opencontainers.image.title="GraylogBackup" org.opencontainers.image.version="0.1"
+LABEL org.opencontainers.image.title="GraylogBackup" org.opencontainers.image.version="0.2"
 
-# mongodb-database-tools (mongodump/mongorestore) — официальный статический архив, не из apt
+# mongodb-database-tools (mongodump/mongorestore) — официальный архив с бинарниками, не из apt
 # (в Debian его нет). Версия и ссылка на changelog ниже: перед сборкой стоит свериться, не вышла
 # ли новая — https://www.mongodb.com/docs/database-tools/release-notes/database-tools-changelog/
+# Важно: эти бинарники НЕ статические — им нужны libgssapi_krb5.so.2 и другие библиотеки Kerberos/
+# LDAP/SSL (их приносит curl как зависимости). Раньше здесь были `apt-get purge -y curl` и
+# `apt-get autoremove -y` для экономии места — autoremove вместе с curl выносил и эти библиотеки,
+# и mongodump падал в рантайме с «error while loading shared libraries: libgssapi_krb5.so.2:
+# cannot open shared object file» (поймано на этой же строке mongodump --version при сборке —
+# ради этого она тут и стоит). Поэтому curl и его зависимости теперь остаются в образе: несколько
+# лишних мегабайт лучше рабочего mongodump.
 ARG MONGO_TOOLS_VERSION=100.20.0
 RUN set -eux; \
     apt-get update; \
@@ -15,7 +22,7 @@ RUN set -eux; \
     tar -xzf /tmp/mongotools.tgz -C /tmp; \
     cp /tmp/mongodb-database-tools-*/bin/mongodump /tmp/mongodb-database-tools-*/bin/mongorestore /usr/local/bin/; \
     rm -rf /tmp/mongotools.tgz /tmp/mongodb-database-tools-*; \
-    apt-get purge -y curl; apt-get autoremove -y; rm -rf /var/lib/apt/lists/*; \
+    rm -rf /var/lib/apt/lists/*; \
     mongodump --version; mongorestore --version
 
 ENV PYTHONUNBUFFERED=1 GB_DATA=/data GB_PORT=8080
