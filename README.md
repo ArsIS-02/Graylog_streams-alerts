@@ -103,7 +103,7 @@
 ## 🧪 Проверка правил: GraylogRuleTester
 
 Правил много (сейчас 218), запросы сложные: регулярки, исключения, группировка. Опечатка или лишний символ делает правило
-«молчащим», а узнаёшь об этом, когда пропускаешь настоящую атаку. **GraylogRuleTester** (версия 0.1) проверяет все
+«молчащим», а узнаёшь об этом, когда пропускаешь настоящую атаку. **GraylogRuleTester** (версия 0.10) проверяет все
 правила автоматически, **без запуска чего-либо на хостах**: образцы сообщений отправляются на сервер Graylog по GELF HTTP.
 
 <p align="center">
@@ -233,7 +233,7 @@ bash rule-tester/deploy/install.sh        # первый запуск созда
 | Pipeline и справочники | [`graylog/pipelines/`](graylog/pipelines/) | Правила, CSV-справочники, импортёры, пример на вымышленных данных |
 | MITRE ATT&CK | [`graylog/mitre/`](graylog/mitre/) | Соответствие техникам, поля в событиях, слой Navigator, страница с матрицей |
 | Каталог детектов | [`graylog/detections/`](graylog/detections/) | Выгрузка из Graylog, генератор страницы и таблица CSV |
-| GraylogRuleTester | [`rule-tester/`](rule-tester/) | Проверка всех правил: образцы по GELF в Graylog, проверка запросов и событий, веб-интерфейс (Podman), консоль, заглушка Graylog для самопроверки; версия 0.1 |
+| GraylogRuleTester | [`rule-tester/`](rule-tester/) | Проверка всех правил: образцы по GELF в Graylog, проверка запросов и событий, веб-интерфейс (Podman), консоль, заглушка Graylog для самопроверки; версия 0.10 |
 | Проверка детектов | [`detection-tests/`](detection-tests/) | Раннеры для Windows, Linux, macOS и FreeIPA: 103 безопасные проверки, покрывающие 146 правил |
 | Дашборды | [`graylog/dashboards-spec.json`](graylog/dashboards-spec.json), [`import-dashboards.js`](graylog/import-dashboards.js) | Спецификация и импорт дашбордов |
 | Агенты на хостах | [`windows/`](windows/), [`linux/`](linux/), [`macos/`](macos/), [`containers/`](containers/) | Конфиги Winlogbeat, rsyslog, Filebeat, osquery, Fluent Bit |

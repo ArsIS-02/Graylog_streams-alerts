@@ -6,6 +6,7 @@
   GRAYLOG_URL, GRAYLOG_TOKEN   доступ к Graylog (токен только на чтение)
   RT_GELF, RT_STREAM           вход GELF HTTP и тестовый поток
   RT_PASSWORD                  пароль администратора (обязателен)
+  RT_RUNNER_PASSWORD           пароль роли «запуск»: может запускать проверки, настроек не меняет (необязателен)
   RT_VIEWER_PASSWORD           пароль наблюдателя: только просмотр (необязателен)
   RT_INSECURE=1, RT_CA_FILE    проверка сертификата Graylog
   RT_DATA                      каталог тома: история, отчёты, образцы, настройки, журнал
@@ -25,6 +26,7 @@ import re
 import secrets
 import subprocess
 import sys
+import tarfile
 import threading
 import time
 from concurrent.futures import ThreadPoolExecutor
@@ -50,16 +52,18 @@ JOB = {"lock": threading.Lock(), "cur": None, "last": None}
 CACHE = {}
 LIVE = {"t": 0, "data": {}, "running": False, "done": 0, "total": 0, "error": ""}
 MODES = {"queries": "run-queries", "e2e": "run-e2e", "doctor": "doctor", "selftest": "selftest", "harvest": "harvest",
-         "art": "art-verify", "method": "method-verify", "drift": "drift", "fp": "fp-check", "latency": "latency"}
+         "art": "art-verify", "method": "method-verify", "drift": "drift", "fp": "fp-check", "latency": "latency",
+         "replay": "replay", "caldera": "caldera-verify"}
 MODE_RU = {"queries": "Запросы в тестовом потоке", "e2e": "До алерта", "doctor": "Проверка доступа",
            "selftest": "Самопроверка запросов", "harvest": "Сбор настоящих сообщений",
            "drift": "Сверка каталога с Graylog", "fp": "Проверка ложных срабатываний",
-           "latency": "Задержка обнаружения"}
+           "latency": "Задержка обнаружения", "replay": "Replay инцидента", "caldera": "Сверка CALDERA"}
 SETTING_ENV = {"graylog_url": "GRAYLOG_URL", "graylog_token": "GRAYLOG_TOKEN", "gelf": "RT_GELF", "stream": "RT_STREAM",
                "schedule": "RT_SCHEDULE", "schedule_enabled": "RT_SCHEDULE_ENABLED", "e2e_platforms": "RT_E2E_PLATFORMS",
                "insecure": "RT_INSECURE", "ca_file": "RT_CA_FILE"}
 OK_STATUS = ("ПРОШЛО", "СОБЫТИЕ ЕСТЬ", "ЧИСТО", "ИЗМЕРЕНО")
-ADMIN_LOGIN = "admin"  # единственная учётная запись; другие пока не планируются
+ADMIN_LOGIN = "admin"  # логин один для всех ролей — роль определяется паролем (RT_PASSWORD/RT_RUNNER_PASSWORD/RT_VIEWER_PASSWORD)
+RUNNER_ALLOWED = ("/api/run", "/api/live/refresh")  # роль «запуск»: может запускать проверки, настроек не меняет
 
 
 # ------------------------------------------------------------------ настройки, журнал
@@ -132,7 +136,8 @@ def base_cmd():
 
 # ------------------------------------------------------------------ запуски
 
-def start_job(mode, platform="", rule="", confirm=False, who="вручную", since=""):
+def start_job(mode, platform="", rule="", confirm=False, who="вручную", since="", until="",
+              scenario="", techniques="", wait=0, pace=0):
     if mode not in MODES:
         return None, "неизвестный режим"
     if mode == "art":
@@ -151,6 +156,19 @@ def start_job(mode, platform="", rule="", confirm=False, who="вручную", s
             art.parse_time(since)
         except ValueError as e:
             return None, str(e)
+    if mode == "caldera":
+        if not techniques:
+            return None, "укажите хотя бы одну технику MITRE через запятую (например T1110,T1021.004)"
+        import art
+        try:
+            art.parse_time(since)
+        except ValueError as e:
+            return None, str(e)
+    if mode == "replay":
+        if not scenario:
+            return None, "нужен сценарий (JSON с events[])"
+        if not confirm:
+            return None, "режим replay отправляет настоящие сообщения в боевые потоки и может создать настоящие алерты — нужно подтверждение"
     if mode == "e2e" and not confirm:
         return None, "для режима «до алерта» нужно подтверждение"
     if mode == "e2e" and not (platform or rule):
@@ -168,6 +186,16 @@ def start_job(mode, platform="", rule="", confirm=False, who="вручную", s
             cmd += ["--os", platform, "--since", since]
         if mode == "e2e":
             cmd.append("--yes-send-alerts")
+        if mode == "caldera":
+            cmd += ["--techniques", techniques, "--since", since]
+            if until:
+                cmd += ["--until", until]
+        if mode == "replay":
+            cmd += ["--file", scenario, "--yes-send-alerts"]
+            if wait:
+                cmd += ["--wait", str(wait)]
+            if pace:
+                cmd += ["--pace", str(pace)]
         job = {"id": datetime.now().strftime("%Y%m%d-%H%M%S"), "mode": mode, "platform": platform,
                "rule": rule.lstrip("="), "who": who, "started": datetime.now().isoformat(timespec="seconds"),
                "status": "идёт", "log": "", "total": 0, "passed": 0, "failed": 0, "skipped": 0}
@@ -562,6 +590,20 @@ def _plus(hhmm, minutes):
     return "%02d:%02d" % (t // 60, t % 60)
 
 
+# ------------------------------------------------------------------ резервная копия тома
+
+def backup_archive():
+    """tar.gz всего тома RT_DATA (отчёты, история, журнал, образцы, настройки, сохранённые сценарии replay) —
+    на случай переноса на другой хост или перед пересборкой образа. Настройки содержат токен Graylog в открытом
+    виде (как и на самом томе), поэтому архив — только для администратора и хранить его стоит так же бережно,
+    как сам том."""
+    buf = io.BytesIO()
+    with tarfile.open(fileobj=buf, mode="w:gz") as tar:
+        if R.DATA.is_dir():
+            tar.add(R.DATA, arcname="rule-tester-data")
+    return buf.getvalue()
+
+
 # ------------------------------------------------------------------ вывод отчётов
 
 def report_csv(d):
@@ -769,13 +811,21 @@ class H(BaseHTTPRequestHandler):
             s = {k: cfg(k) for k in SETTING_ENV if k != "graylog_token"}
             s["token_set"] = bool(cfg("graylog_token"))
             s["has_viewer"] = bool(os.environ.get("RT_VIEWER_PASSWORD"))
-            return self.reply({"settings": s, "env_only": ["RT_PASSWORD", "RT_VIEWER_PASSWORD"]})
+            s["has_runner"] = bool(os.environ.get("RT_RUNNER_PASSWORD"))
+            return self.reply({"settings": s, "env_only": ["RT_PASSWORD", "RT_RUNNER_PASSWORD", "RT_VIEWER_PASSWORD"]})
         if path == "/api/audit":
             if role != "admin":
                 return self.reply({"error": "только администратор"}, 403)
             p = R.DATA / "audit.jsonl"
             rows = [json.loads(x) for x in p.read_text(encoding="utf-8").splitlines()[-300:]][::-1] if p.exists() else []
             return self.reply({"audit": rows})
+        if path == "/api/backup":
+            if role != "admin":
+                return self.reply({"error": "только администратор"}, 403)
+            audit(role, self.ip(), "резервная копия выгружена")
+            name = "rule-tester-backup-%s.tar.gz" % datetime.now().strftime("%Y%m%d-%H%M%S")
+            return self.reply(backup_archive(), ctype="application/gzip",
+                              headers={"Content-Disposition": 'attachment; filename="%s"' % name})
         return self.reply({"error": "не найдено"}, 404)
 
     def do_POST(self):
@@ -786,11 +836,14 @@ class H(BaseHTTPRequestHandler):
         if path == "/api/login":
             login = str(b.get("login", "")).strip()
             pw = str(b.get("password", ""))
-            admin, viewer = os.environ.get("RT_PASSWORD", ""), os.environ.get("RT_VIEWER_PASSWORD", "")
+            admin = os.environ.get("RT_PASSWORD", "")
+            runner = os.environ.get("RT_RUNNER_PASSWORD", "")
+            viewer = os.environ.get("RT_VIEWER_PASSWORD", "")
             eq = lambda x, y: bool(y) and hmac.compare_digest(hashlib.sha256(x.encode()).digest(),  # noqa: E731
                                                               hashlib.sha256(y.encode()).digest())
             login_ok = hmac.compare_digest(login.encode(), ADMIN_LOGIN.encode())
-            role = ("admin" if eq(pw, admin) else "viewer" if eq(pw, viewer) else None) if login_ok else None
+            role = (("admin" if eq(pw, admin) else "runner" if eq(pw, runner) else
+                    "viewer" if eq(pw, viewer) else None) if login_ok else None)
             if not role:
                 audit("—", self.ip(), "вход не удался")
                 time.sleep(1)
@@ -807,12 +860,36 @@ class H(BaseHTTPRequestHandler):
             return self.reply({"ok": True}, headers={"Set-Cookie": "rt_session=; Max-Age=0; Path=/"})
         if path == "/api/samples/check":
             return self.reply(check_sample(str(b.get("rule", "")), str(b.get("kind", "positive")), b.get("doc")))
-        if role != "admin":
+        if role == "viewer":
             return self.reply({"error": "у роли «наблюдатель» только просмотр"}, 403)
+        if role == "runner" and path not in RUNNER_ALLOWED:
+            return self.reply({"error": "у роли «запуск» доступны только запуски проверок"}, 403)
         ip = self.ip()
         if path == "/api/run":
             mode, platform, rule = str(b.get("mode", "")), str(b.get("platform", ""))[:40], str(b.get("rule", ""))[:200]
-            job, err = start_job(mode, platform, rule, bool(b.get("confirm")), since=str(b.get("since", ""))[:40])
+            since, until = str(b.get("since", ""))[:40], str(b.get("until", ""))[:40]
+            techniques = re.sub(r"[^\w,.\s-]", "", str(b.get("techniques", "")))[:300]
+            scenario = ""
+            if mode == "replay":
+                raw = b.get("scenario_json")
+                if not isinstance(raw, str) or not raw.strip():
+                    return self.reply({"error": "вставьте сценарий (JSON с events[], у каждого поле timestamp)"}, 400)
+                try:
+                    data = json.loads(raw)
+                except ValueError as e:
+                    return self.reply({"error": "сценарий: не разобран JSON (%s)" % e}, 400)
+                if isinstance(data, list):
+                    data = {"events": data}
+                if not isinstance(data, dict) or not isinstance(data.get("events"), list) or not data["events"]:
+                    return self.reply({"error": "сценарий: нужен объект с events[] (или просто массив событий)"}, 400)
+                sdir = R.DATA / "scenarios"
+                sdir.mkdir(parents=True, exist_ok=True)
+                slug = re.sub(r"[^\w-]+", "_", str(data.get("title") or "сценарий")).strip("_")[:40] or "сценарий"
+                scenario = str(sdir / ("%s-%s.json" % (datetime.now().strftime("%Y%m%d-%H%M%S"), slug)))
+                Path(scenario).write_text(json.dumps(data, ensure_ascii=False, indent=1), encoding="utf-8")
+            job, err = start_job(mode, platform, rule, bool(b.get("confirm")), since=since, until=until,
+                                 scenario=scenario, techniques=techniques,
+                                 wait=int(str(b.get("wait") or 0) or 0), pace=float(str(b.get("pace") or 0) or 0))
             audit(role, ip, "запуск: %s" % mode, "платформа=%s правило=%s%s" % (platform, rule, "" if not err else " ОТКАЗ: " + err))
             return self.reply({"error": err} if err else {"job": pub_job(job)}, 400 if err else 200)
         if path == "/api/samples/save":
