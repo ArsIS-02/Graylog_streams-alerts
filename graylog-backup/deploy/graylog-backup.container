@@ -1,0 +1,22 @@
+# Quadlet: положите в ~/.config/containers/systemd/ (rootless) или /etc/containers/systemd/,
+# затем: systemctl --user daemon-reload && systemctl --user start graylog-backup
+[Unit]
+Description=Резервное копирование конфигурации Graylog (graylog-backup)
+After=network-online.target
+
+[Container]
+Image=localhost/graylog-backup:latest
+ContainerName=graylog-backup
+EnvironmentFile=%h/graylog-backup/graylog-backup.env
+PublishPort=8086:8080
+Volume=graylog-backup-data:/data:Z
+ReadOnly=true
+Tmpfs=/tmp
+DropCapability=ALL
+NoNewPrivileges=true
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=default.target
