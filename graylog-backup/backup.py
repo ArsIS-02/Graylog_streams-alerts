@@ -289,19 +289,34 @@ def _os_get(base, path, insecure, ca_file, timeout=30, body=None):
         return json.loads(r.read() or b"{}")
 
 
+def _os_endpoint_missing(e, detail):
+    """True, если ручки для этого пути на кластере точно нет (а не временная ошибка сервера) —
+    так бывает, когда нужный плагин не установлен/не включён (например, Index State Management)
+    или ручки нет в этой версии. На Elasticsearch это обычный 404. На OpenSearch для пути, который
+    вообще ни с каким REST-хендлером не совпал, сервер неожиданно отвечает не 404, а 400 с телом
+    {"error": "no handler found for uri [...] and method [...]"} — поймано на реальном кластере
+    пользователя (ISM-плагин не установлен), раньше такой ответ ошибочно считался обычной ошибкой
+    шага и портил его статус, хотя для необязательных источников это ожидаемо."""
+    if e.code == 404:
+        return True
+    return "no handler found for uri" in (detail or "")
+
+
 def step_search(url, workdir, insecure=False, ca_file=None):
     t0 = time.time()
     if not url:
         return {"status": "skipped", "reason": "GB_OPENSEARCH_URL не задан"}
     out = {}
     errors = {}
+    unsupported = []
     for key, path, required, body in (
         ("index_templates", "/_index_template", True, None),
         ("component_templates", "/_component_template", True, None),
         ("legacy_templates", "/_template", False, None),
         ("cluster_settings", "/_cluster/settings?include_defaults=false&flat_settings=true", True, None),
-        # только OpenSearch (на Elasticsearch — 404); листинг всех политик — поисковая ручка,
-        # без JSON-тела (даже пустого {}) часть версий отвечает 400 Bad Request.
+        # только OpenSearch с установленным плагином Index State Management; листинг всех
+        # политик — поисковая ручка, без JSON-тела (даже пустого {}) часть версий отвечает
+        # 400 Bad Request вместо пустого списка.
         ("ism_policies", "/_plugins/_ism/policies", False, {}),
     ):
         try:
@@ -314,15 +329,25 @@ def step_search(url, workdir, insecure=False, ca_file=None):
                 detail = e.read().decode("utf-8", "replace").strip()
             except Exception:
                 detail = ""
+            if not required and _os_endpoint_missing(e, detail):
+                # Источник необязательный, и ручки для него на этом кластере нет вовсе — не
+                # ошибка бэкапа, а свойство кластера (плагин не установлен/не та версия); не
+                # портим статус шага, просто отмечаем как недоступный.
+                unsupported.append(key)
+                continue
             errors[key] = str(e) + (": " + detail[:500] if detail else "")
         except urllib.error.URLError as e:
             errors[key] = str(e)
     (workdir / "opensearch-templates.json").write_text(
-        json.dumps({"templates": out, "errors": errors}, ensure_ascii=False, indent=1), encoding="utf-8")
+        json.dumps({"templates": out, "errors": errors, "unsupported": unsupported}, ensure_ascii=False, indent=1),
+        encoding="utf-8")
     status = "ok" if out else "error"
     if out and errors:
         status = "partial"
-    return {"status": status, "duration_s": round(time.time() - t0, 1), "got": list(out), "failed": errors}
+    result = {"status": status, "duration_s": round(time.time() - t0, 1), "got": list(out), "failed": errors}
+    if unsupported:
+        result["unsupported"] = unsupported
+    return result
 
 
 # ------------------------------------------------------------------ сборка архива, список, ротация
