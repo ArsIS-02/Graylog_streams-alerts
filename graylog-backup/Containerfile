@@ -1,7 +1,7 @@
 # Сборка из корня репозитория:  podman build -f graylog-backup/Containerfile -t localhost/graylog-backup:latest .
 FROM docker.io/library/python:3.12-slim
 
-LABEL org.opencontainers.image.title="GraylogBackup" org.opencontainers.image.version="0.3"
+LABEL org.opencontainers.image.title="GraylogBackup" org.opencontainers.image.version="0.3.1"
 
 # mongodb-database-tools (mongodump/mongorestore) — официальный архив с бинарниками, не из apt
 # (в Debian его нет). Версия и ссылка на changelog ниже: перед сборкой стоит свериться, не вышла

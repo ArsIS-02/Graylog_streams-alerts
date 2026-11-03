@@ -268,7 +268,7 @@ def step_plugins(path, workdir):
 
 # ------------------------------------------------------------------ шаг 7: структура индексов OpenSearch/ES
 
-def _os_get(base, path, insecure, ca_file, timeout=30):
+def _os_get(base, path, insecure, ca_file, timeout=30, body=None):
     ctx = ssl.create_default_context()
     if insecure:
         ctx.check_hostname = False
@@ -277,6 +277,14 @@ def _os_get(base, path, insecure, ca_file, timeout=30):
         ctx = ssl.create_default_context(cafile=ca_file)
     req = urllib.request.Request(base.rstrip("/") + path, method="GET")
     req.add_header("Accept", "application/json")
+    if body is not None:
+        # GET с телом: нужен некоторым поисковым ручкам (например, листинг политик ISM) —
+        # без тела (даже пустого) OpenSearch у части версий отвечает 400 Bad Request
+        # ("Required content body is missing"), трактуя запрос как поиск без параметров.
+        data = json.dumps(body).encode("utf-8")
+        req.data = data
+        req.add_header("Content-Type", "application/json")
+        req.add_header("Content-Length", str(len(data)))
     with urllib.request.urlopen(req, timeout=timeout, context=ctx) as r:
         return json.loads(r.read() or b"{}")
 
@@ -287,15 +295,17 @@ def step_search(url, workdir, insecure=False, ca_file=None):
         return {"status": "skipped", "reason": "GB_OPENSEARCH_URL не задан"}
     out = {}
     errors = {}
-    for key, path, required in (
-        ("index_templates", "/_index_template", True),
-        ("component_templates", "/_component_template", True),
-        ("legacy_templates", "/_template", False),
-        ("cluster_settings", "/_cluster/settings?include_defaults=false&flat_settings=true", True),
-        ("ism_policies", "/_plugins/_ism/policies", False),  # только OpenSearch, на Elasticsearch — 404
+    for key, path, required, body in (
+        ("index_templates", "/_index_template", True, None),
+        ("component_templates", "/_component_template", True, None),
+        ("legacy_templates", "/_template", False, None),
+        ("cluster_settings", "/_cluster/settings?include_defaults=false&flat_settings=true", True, None),
+        # только OpenSearch (на Elasticsearch — 404); листинг всех политик — поисковая ручка,
+        # без JSON-тела (даже пустого {}) часть версий отвечает 400 Bad Request.
+        ("ism_policies", "/_plugins/_ism/policies", False, {}),
     ):
         try:
-            out[key] = _os_get(url, path, insecure, ca_file)
+            out[key] = _os_get(url, path, insecure, ca_file, body=body)
         except (urllib.error.HTTPError, urllib.error.URLError) as e:
             errors[key] = str(e)
             if required and key not in ("legacy_templates",):
