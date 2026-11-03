@@ -130,6 +130,30 @@ bash graylog-backup/deploy/install.sh      # собирает образ, ста
 
 Если файл или каталог на хосте читается не для всех (обычный случай для `server.conf`: владелец `root`/`graylog`, права `0640`), `install.sh` предупредит об этом при установке, но юнит всё равно поставит — внутри контейнер работает от непривилегированного пользователя (`uid 10002`), и если он не сможет прочитать примонтированный файл, соответствующий шаг будет падать с `error`, а не тихо пропускаться. Проще всего добавить группе, под которой работает контейнер, право на чтение (`setfacl` или общая группа), не ослабляя права сверх необходимого.
 
+### Если SELinux enforcing
+
+На хостах с SELinux в режиме `Enforcing` (проверить: `getenforce`) контейнер при старте может упасть ещё до запуска Python, с ошибкой вроде:
+
+```
+Error: lsetxattr(label=system_u:object_r:container_file_t:s0:cXXX,cYYY) /usr/share/graylog-server/plugin: operation not permitted
+```
+
+Это не ошибка самого GraylogBackup — так себя ведёт rootless Podman при попытке примонтировать `server.conf`/каталог плагинов/`mongod.conf`/`opensearch.yml` с автоматическим relabel (раньше в `install.sh` эти монтирования шли с суффиксом `:Z`). Relabel — это `lsetxattr` на security-атрибут файла, а его может выполнить только владелец файла или процесс с `CAP_FOWNER`; эти пути почти всегда принадлежат `root`/`graylog`/другой системной учётке, а не пользователю, под которым крутится rootless-контейнер (в примере выше — `redos`), поэтому ядро отказывает с `operation not permitted` ещё до того, как успевает включиться сам SELinux.
+
+`install.sh`, начиная с версии 0.3, монтирует эти пути **без** `:Z` — relabel при каждом старте контейнеру больше не нужен. Но раз контейнер читает файл со своим штатным SELinux-типом хоста (например, `usr_t` для `/usr/share/...`, `etc_t` для `/etc/...`), а не с типом `container_file_t`, то при enforcing-политике сам доступ на чтение изнутри контейнера будет запрещён тоже — просто с другой ошибкой (`Permission denied` внутри контейнера, а не при старте). Поэтому тип нужно выставить **один раз от root**, постоянно (переживает `restorecon`/перезагрузки), под каждый путь, который вы монтируете:
+
+```bash
+sudo semanage fcontext -a -t container_file_t "/usr/share/graylog-server/plugin(/.*)?"
+sudo restorecon -Rv /usr/share/graylog-server/plugin
+
+sudo semanage fcontext -a -t container_file_t "/etc/graylog/server/server.conf"
+sudo restorecon -v /etc/graylog/server/server.conf
+
+# аналогично для HOST_MONGOD_CONF/HOST_OPENSEARCH_CONF, если задавали их в .env
+```
+
+`install.sh` сам определяет `getenforce` и печатает эти команды с подставленным путём для каждого заданного `HOST_*`, если видит `Enforcing` — остаётся скопировать и выполнить их от root один раз, затем переустановить (`bash graylog-backup/deploy/install.sh`) или просто `systemctl --user restart graylog-backup.service`. Если `semanage` не установлен (пакет `policycoreutils-python-utils` или аналог для вашего дистрибутива), `sudo` его поставит через пакетный менеджер.
+
 ### Доступ по адресу через Caddy
 
 Интерфейс слушает порт **8086** хоста (у rule-tester — 8085). В `deploy/graylog-backup.container` и `podman-compose.yaml` стоит `8086:8080`, опубликован не только на loopback — так же, как у rule-tester (см. [главу 16](16-rule-tester.md#доступ-по-адресу-через-caddy) про то, почему это важно для Caddy в отдельном контейнере). В панели сервисов карточка:
