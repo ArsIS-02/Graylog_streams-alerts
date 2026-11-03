@@ -96,6 +96,32 @@ function stepBadge(st){if(!st)return h('span',{class:'badge b-mut'},'нет да
   if(s==='skipped')return h('span',{class:'badge b-mut',title:st.reason||''},'– пропущено');
   return h('span',{class:'badge b-bad',title:st.reason||JSON.stringify(st.failed||{})},'✕ ошибка')}
 
+/* ---------- детализация шага бэкапа (разворот строки) ---------- */
+const SUBKEY_LBL={streams:'потоки',event_definitions:'определения событий',event_notifications:'уведомления о событиях',
+  index_sets:'наборы индексов',outputs:'выходы',inputs:'входы',pipelines:'конвейеры',pipeline_rules:'правила конвейеров',
+  pipeline_connections:'привязки конвейеров',lookup_tables:'таблицы поиска',lookup_caches:'кэши поиска',
+  lookup_adapters:'адаптеры поиска',grok_patterns:'grok-шаблоны',dashboards:'дашборды',
+  index_templates:'шаблоны индексов',component_templates:'component-шаблоны',legacy_templates:'legacy-шаблоны',
+  cluster_settings:'настройки кластера',ism_policies:'политики ISM'};
+const subLabel=k=>SUBKEY_LBL[k]||k;
+function stepDetail(label,st){
+  const rows=[h('div',{style:'display:flex;gap:8px;align-items:center'},h('b',{},label),stepBadge(st))];
+  if(!st){rows.push(h('div',{class:'mut',style:'font-size:12px'},'нет данных'));return h('div',{},rows)}
+  const line=(t,bad)=>rows.push(h('div',{class:bad?'':'mut',style:'font-size:12px'+(bad?';color:var(--bad)':'')},t));
+  if(st.duration_s!=null)line('время выполнения: '+st.duration_s+' с');
+  if(st.bytes!=null)line('размер: '+fmtBytes(st.bytes));
+  if(st.graylog_version)line('версия Graylog: '+st.graylog_version);
+  if(st.files!=null)line('файлов: '+st.files);
+  if(st.sanity_ok===true)line('✓ проверка содержимого файла пройдена');
+  if(st.sanity_ok===false)line('✕ проверка содержимого файла не пройдена',true);
+  if(st.counts&&Object.keys(st.counts).length)
+    line('скопировано — '+Object.entries(st.counts).map(([k,v])=>subLabel(k)+': '+(v==null?'?':v)).join(', '));
+  if(st.got&&st.got.length)line('получено успешно — '+st.got.map(subLabel).join(', '));
+  if(st.failed&&Object.keys(st.failed).length)
+    line('не получено — '+Object.entries(st.failed).map(([k,v])=>subLabel(k)+': '+v).join('; '),true);
+  if(st.reason)line(st.reason,st.status==='error');
+  return h('div',{},rows)}
+
 /* ---------- тема ---------- */
 function applyTheme(){const t=localStorage.getItem('gb_theme')||'auto';if(t==='auto')document.documentElement.removeAttribute('data-theme');else document.documentElement.setAttribute('data-theme',t);$('#theme').textContent={auto:'Тема: авто',light:'Тема: светлая',dark:'Тема: тёмная'}[t]}
 $('#theme').onclick=()=>{const o=['auto','light','dark'];const t=localStorage.getItem('gb_theme')||'auto';localStorage.setItem('gb_theme',o[(o.indexOf(t)+1)%3]);applyTheme()};
@@ -153,14 +179,22 @@ async function pBackups(m){const d=await api('/api/backups');m.textContent='';
     await runNow(j=>{run.disabled=false;prog.classList.add('hide');pBackups(m)})}},'Бэкап сейчас');
   const prog=h('div',{class:'mut hide',style:'margin-top:8px'});
   bar.append(h('div',{class:'row'},run),prog);m.append(bar);
-  const t=h('table',{},h('tr',{},h('th',{},'Время'),h('th',{},'Размер'),h('th',{},'Конфигурация'),h('th',{},'MongoDB'),h('th',{},'server.conf'),h('th',{},'mongod.conf'),h('th',{},'Плагины'),h('th',{},'OpenSearch'),h('th',{},'opensearch.yml'),h('th',{},'')));
+  const STEP_COLS=[['config','Конфигурация'],['mongo','MongoDB'],['server_conf','server.conf'],['mongod_conf','mongod.conf'],
+    ['plugins','Плагины'],['search','OpenSearch'],['opensearch_conf','opensearch.yml']];
+  const t=h('table',{},h('tr',{},h('th',{},''),h('th',{},'Время'),h('th',{},'Размер'),h('th',{},'Конфигурация'),h('th',{},'MongoDB'),h('th',{},'server.conf'),h('th',{},'mongod.conf'),h('th',{},'Плагины'),h('th',{},'OpenSearch'),h('th',{},'opensearch.yml'),h('th',{},'')));
   d.backups.forEach(r=>{const steps=r.steps||{};
-    t.append(h('tr',{},h('td',{},fmtTime(r.mtime)),h('td',{},fmtBytes(r.bytes)),
+    const detailTr=h('tr',{class:'hide'},h('td',{colspan:'11',style:'background:var(--bg)'},
+      h('div',{style:'display:flex;flex-direction:column;gap:10px;padding:4px 2px'},
+        STEP_COLS.map(([k,label])=>stepDetail(label,steps[k])))));
+    const toggle=h('button',{class:'btn sm',title:'Подробнее — что скопировано, а что нет',onclick:()=>{
+      detailTr.classList.toggle('hide');toggle.textContent=detailTr.classList.contains('hide')?'▸':'▾'}},'▸');
+    t.append(h('tr',{},h('td',{},toggle),h('td',{},fmtTime(r.mtime)),h('td',{},fmtBytes(r.bytes)),
       h('td',{},stepBadge(steps.config)),h('td',{},stepBadge(steps.mongo)),h('td',{},stepBadge(steps.server_conf)),h('td',{},stepBadge(steps.mongod_conf)),h('td',{},stepBadge(steps.plugins)),h('td',{},stepBadge(steps.search)),h('td',{},stepBadge(steps.opensearch_conf)),
       h('td',{},h('div',{class:'row',style:'margin:0'},
         h('a',{class:'btn sm',href:'/api/backup/download?file='+encodeURIComponent(r.file)},'Скачать'),
         h('button',{class:'btn sm dng',onclick:async()=>{if(!await ask('Удалить архив?',r.file+' — отменить нельзя.',true))return;
-          try{await api('/api/backup/delete',{file:r.file});pBackups(m)}catch(e){note(e.message)}}},'Удалить')))));});
+          try{await api('/api/backup/delete',{file:r.file});pBackups(m)}catch(e){note(e.message)}}},'Удалить')))));
+    t.append(detailTr);});
   m.append(h('div',{class:'card',style:'overflow:auto'},d.backups.length?t:h('div',{class:'mut'},'Архивов пока нет.')));
   if(d.backups.length)m.append(h('div',{class:'mut',style:'font-size:12px'},'Восстановление (mongorestore) — только из консоли, см. главу 18: это редкая и необратимая операция, в веб-интерфейс она намеренно не вынесена.'))}
 
