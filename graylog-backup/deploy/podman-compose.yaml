@@ -19,13 +19,16 @@ services:
       # Для полного бэкапа (аварийное восстановление) — раскомментируйте и подставьте
       # настоящие пути на хосте; install.sh для quadlet делает то же самое автоматически
       # по HOST_SERVER_CONF/HOST_MONGOD_CONF/HOST_OPENSEARCH_CONF/HOST_PLUGIN_DIR из
-      # graylog-backup.env, здесь — вручную:
-      # - /etc/graylog/server/server.conf:/mnt/host/server.conf:ro,Z
-      # - /usr/share/graylog-server/plugin:/mnt/host/plugins:ro,Z
+      # graylog-backup.env, здесь — вручную. БЕЗ суффикса :Z — эти файлы обычно принадлежат
+      # не тому пользователю, что запускает rootless Podman, и relabel падает с
+      # «lsetxattr: operation not permitted»; если SELinux enforcing, метку на хост-пути
+      # нужно один раз выставить от root (semanage fcontext + restorecon, см. главу 18):
+      # - /etc/graylog/server/server.conf:/mnt/host/server.conf:ro
+      # - /usr/share/graylog-server/plugin:/mnt/host/plugins:ro
       # mongod.conf и opensearch.yml обычно лежат на ДРУГИХ хостах, чем graylog-server —
       # раскомментируйте только там, где реально запущен этот контейнер:
-      # - /etc/mongod.conf:/mnt/host/mongod.conf:ro,Z
-      # - /etc/opensearch/opensearch.yml:/mnt/host/opensearch.yml:ro,Z
+      # - /etc/mongod.conf:/mnt/host/mongod.conf:ro
+      # - /etc/opensearch/opensearch.yml:/mnt/host/opensearch.yml:ro
     read_only: true
     tmpfs: [/tmp]
     cap_drop: [ALL]
