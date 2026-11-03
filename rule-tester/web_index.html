@@ -117,6 +117,8 @@ function ask(title,text,danger,okText){return new Promise(res=>{$('#mt').textCon
 function note(text,title){return new Promise(res=>{$('#mt').textContent=title||'Сообщение';$('#mb').textContent=text;const y=$('#myes');y.textContent='Понятно';y.className='btn pri';$('#mno').classList.add('hide');
   $('#modal').classList.add('on');y.onclick=()=>{$('#modal').classList.remove('on');res()}})}
 const isAdmin=()=>ROLE==='admin';
+const isRunner=()=>ROLE==='runner';
+const canRun=()=>ROLE==='admin'||ROLE==='runner';
 const OK=['ПРОШЛО','СОБЫТИЕ ЕСТЬ','ЧИСТО','ИЗМЕРЕНО'];
 function statusBadge(s){if(!s)return h('span',{class:'badge b-mut'},'нет данных');
   if(OK.includes(s))return h('span',{class:'badge b-ok'},'✓ '+s.toLowerCase());if(s==='ПРОПУЩЕНО')return h('span',{class:'badge b-warn'},'– пропущено');return h('span',{class:'badge b-bad'},'✕ '+s.toLowerCase())}
@@ -150,7 +152,8 @@ async function chips(){try{const s=await api('/api/summary');const hh=s.health;c
   const c=(ok,t)=>h('span',{class:'chip '+(ok?'ok':'bad')},h('i'),t);
   box.append(c(hh.graylog.ok,hh.graylog.ok?hh.graylog.text:'Graylog недоступен'),c(hh.stream.ok,'Поток: '+hh.stream.text),c(hh.gelf.ok,'GELF: '+(hh.gelf.ok?'задан':'не задан')));
   const f=s.known_failed;const pl=$('#pillf');pl.textContent=f;pl.classList.toggle('hide',!f)}catch(e){}}
-async function boot(){ME=await api('/api/status');ROLE=ME.role;$('#ver').textContent='версия '+ME.version;$('#who').textContent='Роль: '+(ROLE==='admin'?'администратор':'наблюдатель')+' · v'+ME.version;
+async function boot(){ME=await api('/api/status');ROLE=ME.role;$('#ver').textContent='версия '+ME.version;
+  $('#who').textContent='Роль: '+(ROLE==='admin'?'администратор':ROLE==='runner'?'запуск':'наблюдатель')+' · v'+ME.version;
   $('#navaudit').classList.toggle('hide',!isAdmin());$('#app').classList.remove('hide');chips();route()}
 
 /* ---------- сводка ---------- */
@@ -168,7 +171,7 @@ async function pHome(q,m){const s=await api('/api/summary');const tr=await api('
   m.append(h('div',{class:'grid'},stat(s.rules,'правил в Graylog'),stat(s.known_passed,'прошли по последним результатам','ok'),stat(s.known_failed,'провалов','bad'),stat(s.flagged,'правил с замечаниями','warn'),
     stat(h('span',{class:'sm'},s.next?fmtTime(s.next.at):'—'),'ближайший запуск'+(s.next?': '+s.next.mode.toLowerCase():''))));
   const act=h('div',{class:'row'});
-  if(isAdmin()){act.append(h('button',{class:'btn pri',onclick:async()=>{try{await api('/api/run',{mode:'queries'});location.hash='#/run'}catch(e){note(e.message)}}},'Запустить проверку по всем правилам'),
+  if(canRun()){act.append(h('button',{class:'btn pri',onclick:async()=>{try{await api('/api/run',{mode:'queries'});location.hash='#/run'}catch(e){note(e.message)}}},'Запустить проверку по всем правилам'),
     h('button',{class:'btn',onclick:()=>location.hash='#/run'},'Другие режимы'))}
   m.append(h('div',{class:'card'},h('h2',{},'Действия'),act));
   const full=tr.items.filter(i=>i.full);
@@ -248,22 +251,39 @@ async function pRun(q,m){m.textContent='';const sum=await api('/api/summary');
     ['doctor','Проверка доступа и входа GELF','Токен, определения, поток, отправка тестового сообщения.'],['selftest','Самопроверка запросов','Офлайн: разбор запросов, образцы, замечания.'],['harvest','Сбор настоящих сообщений','Берёт из Graylog реальные сообщения по запросам правил, обезличивает.'],
     ['drift','Сверка каталога с Graylog','Сравнивает detections-source.json с живыми определениями событий: запрос, условие, group_by, приоритет, потоки. Ничего не меняет, только показывает расхождения.'],
     ['fp','Проверка ложных срабатываний','Берёт недавний «чистый» трафик из боевых потоков (7 дней) и прогоняет через него все запросы правил офлайн — ищет слишком широкие запросы. Ничего не отправляет, алертов и писем нет.'],
+    ['caldera','Сверка CALDERA','Сверяет список техник MITRE (свой сервер CALDERA) с живыми определениями событий Graylog за окно времени. Ничего не отправляет, только читает Graylog.'],
+    ['replay','Replay инцидента','Проигрывает сценарий (JSON с событиями) через боевой вход GELF со сдвигом времени на «сейчас». Создаёт настоящие алерты.'],
     ['latency','Задержка обнаружения','Офлайн: статистика по уже сохранённым отчётам «до алерта», replay и сверки Atomic Red Team/методики — сколько времени проходит от отправки до события. В Graylog не ходит, только читает локальные отчёты за 30 дней.']];
   let mode=q.get('mode')||'queries';
   const plat=h('select',{},h('option',{value:''},'Все платформы'),...sum.platforms.map(p=>h('option',{value:p},p)));const rule=h('input',{placeholder:'Часть названия правила',style:'flex:1;min-width:200px'});
-  const hint=h('div',{class:'mut'});const modeBox=h('div',{class:'row'});
-  function drawModes(){modeBox.textContent='';modes.forEach(([k,t,d])=>modeBox.append(h('span',{class:'chip act'+(mode===k?' sel':''),onclick:()=>{mode=k;hint.textContent=d;drawModes()},title:d},t)));hint.textContent=modes.find(x=>x[0]===mode)[2]}
-  drawModes();
-  const go=h('button',{class:'btn pri',onclick:async()=>{if(mode==='e2e'){if(!plat.value&&!rule.value.trim())return note('Для режима «до алерта» выберите платформу или введите часть названия правила.');
+  const tech=h('input',{placeholder:'Техники MITRE через запятую: T1110,T1021.004',style:'flex:1;min-width:260px'});
+  const since=h('input',{placeholder:'начало окна: 2026-11-01T20:30Z или 90m',style:'flex:1;min-width:220px',value:'90m'});
+  const until=h('input',{placeholder:'конец окна (необязательно)',style:'flex:1;min-width:200px'});
+  const scenario=h('textarea',{placeholder:'{"title":"...","events":[{"timestamp":"2026-11-01T20:30:00Z", ...поля сообщения, как в Graylog}]}',style:'width:100%;min-height:160px;font-family:monospace;font-size:13px'});
+  const wait=h('input',{placeholder:'ожидание, сек (по умолчанию 600)',style:'min-width:220px'});
+  const pace=h('input',{placeholder:'пауза между событиями, сек (по умолчанию 0)',style:'min-width:240px'});
+  const hint=h('div',{class:'mut'});const modeBox=h('div',{class:'row'});const stdRow=h('div',{class:'row'});const extraRow=h('div',{});
+  function drawExtra(){stdRow.textContent='';extraRow.textContent='';
+    if(mode==='caldera'){stdRow.append(plat,rule);extraRow.append(h('div',{class:'row'},tech,since,until))}
+    else if(mode==='replay'){extraRow.append(scenario,h('div',{class:'row',style:'margin-top:6px'},wait,pace))}
+    else{stdRow.append(plat,rule)}}
+  function drawModes(){modeBox.textContent='';modes.forEach(([k,t,d])=>modeBox.append(h('span',{class:'chip act'+(mode===k?' sel':''),onclick:()=>{mode=k;hint.textContent=d;drawModes();drawExtra()},title:d},t)));hint.textContent=modes.find(x=>x[0]===mode)[2]}
+  drawModes();drawExtra();
+  const go=h('button',{class:'btn pri',onclick:async()=>{
+    if(mode==='e2e'){if(!plat.value&&!rule.value.trim())return note('Для режима «до алерта» выберите платформу или введите часть названия правила.');
       if(!await ask('Создать настоящие алерты?','Сообщения пойдут в боевые потоки, сработают события и уведомления по почте. Продолжить?',true))return}
-    try{await api('/api/run',{mode,platform:plat.value,rule:rule.value.trim(),confirm:mode==='e2e'});poll()}catch(e){note(e.message)}}},'Запустить');
-  if(!isAdmin())go.disabled=true;
-  m.append(h('div',{class:'card'},h('h2',{},'Новый запуск'),modeBox,h('div',{class:'row'},plat,rule,go),hint,!isAdmin()?h('div',{class:'badge b-warn'},'Роль «наблюдатель»: запуск недоступен'):''));
+    if(mode==='caldera'&&!tech.value.trim())return note('Укажите хотя бы одну технику MITRE.');
+    if(mode==='replay'){if(!scenario.value.trim())return note('Вставьте сценарий (JSON с events[]).');
+      if(!await ask('Создать настоящие алерты?','Replay отправит сообщения сценария в боевые потоки (временные метки сдвинутся на «сейчас»). Могут сработать настоящие события и письма. Продолжить?',true))return}
+    try{await api('/api/run',{mode,platform:plat.value,rule:rule.value.trim(),since:since.value.trim(),until:until.value.trim(),
+      techniques:tech.value.trim(),scenario_json:scenario.value,wait:wait.value.trim(),pace:pace.value.trim(),confirm:mode==='e2e'||mode==='replay'});poll()}catch(e){note(e.message)}}},'Запустить');
+  if(!canRun())go.disabled=true;
+  m.append(h('div',{class:'card'},h('h2',{},'Новый запуск'),modeBox,stdRow,extraRow,hint,h('div',{class:'row',style:'margin-top:8px'},go),!canRun()?h('div',{class:'badge b-warn'},'Роль «наблюдатель»: запуск недоступен'):''));
   const jc=h('div',{class:'card'});m.append(jc);
   async function poll(){clearTimeout(TIMER);if(CUR!=='run')return;const j=(await api('/api/job')).job;jc.textContent='';if(!j){jc.append(h('div',{class:'mut'},'Запусков в этой сессии сервера ещё не было.'));return}
     const done=j.passed+j.failed+j.skipped;const pct=j.total?Math.min(100,Math.round(done/j.total*100)):(j.status==='идёт'?5:100);
     jc.append(h('div',{class:'row'},h('b',{},`${MODE_RU[j.mode]||j.mode}${j.platform?' · '+j.platform:''}${j.rule?' · '+j.rule:''}`),h('span',{class:'badge '+(j.status==='успешно'?'b-ok':j.status==='идёт'?'b-ac':'b-bad')},j.status),h('span',{class:'mut'},`запуск ${j.id}, ${j.who}`)));
-    if(j.total||j.mode==='queries'||j.mode==='e2e'||j.mode==='art'||j.mode==='method'||j.mode==='drift')jc.append(h('div',{class:'row'},h('div',{class:'bar',style:'flex:1;height:10px'},h('i',{class:'g',style:`width:${j.total?j.passed/j.total*100:0}%`}),h('i',{class:'r',style:`width:${j.total?j.failed/j.total*100:0}%`}),h('i',{class:'y',style:`width:${j.total?j.skipped/j.total*100:0}%`})),
+    if(j.total||j.mode==='queries'||j.mode==='e2e'||j.mode==='art'||j.mode==='method'||j.mode==='drift'||j.mode==='caldera'||j.mode==='replay')jc.append(h('div',{class:'row'},h('div',{class:'bar',style:'flex:1;height:10px'},h('i',{class:'g',style:`width:${j.total?j.passed/j.total*100:0}%`}),h('i',{class:'r',style:`width:${j.total?j.failed/j.total*100:0}%`}),h('i',{class:'y',style:`width:${j.total?j.skipped/j.total*100:0}%`})),
       h('span',{class:'mut'},`${done} из ${j.total||'?'}: ✓ ${j.passed}, ✕ ${j.failed}, – ${j.skipped}`)));
     const pre=h('pre',{},j.log||'');jc.append(pre);pre.scrollTop=pre.scrollHeight;
     if(j.status==='идёт')TIMER=setTimeout(poll,1500);else{chips()}}
@@ -292,7 +312,7 @@ async function pDetect(q,m){m.textContent='';let kind=DETECT_KINDS[q.get('kind')
       'bash '+v.file+'            (показать план)\nsudo bash '+v.file+' --run   (выполнить)'):v.how;
     const since=h('input',{placeholder:'начало окна: 2026-11-01T20:30Z или 90m',style:'flex:1;min-width:240px',value:'90m'});
     const go=h('button',{class:'btn pri',onclick:async()=>{try{await api('/api/run',{mode:cfg.mode,platform:os,since:since.value.trim()});location.hash='#/run'}catch(e){note(e.message)}}},'Сверить события');
-    if(!isAdmin())go.disabled=true;
+    if(!canRun())go.disabled=true;
     body.append(h('div',{class:'card'},h('div',{class:'row'},dl,h('span',{class:'mut'},`${cfg.testWord} ${v.tests.length}, правил ожидается ${v.rules.length}`)),h('pre',{},how),
       h('h2',{},'Сверка с Graylog'),h('div',{class:'row'},since,go),
       h('div',{class:'mut'},'Время начала скрипт печатает в конце работы'+(kind==='art'?' (UTC)':'')+'. Правила проверяются раз в 5 минут, подождите 10 минут.')));
@@ -351,7 +371,7 @@ async function pCoverage(q,m){const c=await api('/api/coverage');m.textContent='
   m.append(h('div',{class:'grid'},stat(c.total,'правил'),stat(c.with_manual,'с ручными или настоящими образцами','ok'),stat(c.no_manual.length,'только с автообразцами','warn'),stat(c.quiet.length,'без событий за 30 дней'),
     stat(c.with_art,'покрыты Atomic Red Team','ok'),stat(c.with_method,'покрыты методиками тестирования','ok'),stat(c.uncovered.length,'совсем без тестов',c.uncovered.length?'bad':'ok')));
   const live=h('div',{class:'row'});
-  if(isAdmin())live.append(h('button',{class:'btn',disabled:c.live.running,onclick:async()=>{await api('/api/live/refresh',{});setTimeout(()=>pCoverage(q,m),800)}},c.live.running?`Считаю… ${c.live.done}/${c.live.total}`:'Обновить счётчики событий'));
+  if(canRun())live.append(h('button',{class:'btn',disabled:c.live.running,onclick:async()=>{await api('/api/live/refresh',{});setTimeout(()=>pCoverage(q,m),800)}},c.live.running?`Считаю… ${c.live.done}/${c.live.total}`:'Обновить счётчики событий'));
   live.append(h('span',{class:'mut'},c.live.age?'Счётчики обновлены '+ago(c.live.age):'Счётчики событий ещё не собирались'+(c.live.error?': '+c.live.error:'')));
   m.append(h('div',{class:'card'},h('h2',{},'Данные из Graylog'),live));
   if(c.live.running)TIMER=setTimeout(()=>CUR==='coverage'&&pCoverage(q,m),2500);
@@ -388,11 +408,15 @@ async function pSettings(q,m){const d=await api('/api/settings');m.textContent='
   const act=h('div',{class:'row'});
   if(isAdmin()){act.append(h('button',{class:'btn pri',onclick:async()=>{const b={};Object.entries(inputs).forEach(([k,i])=>b[k]=i.value.trim());b.insecure=ins.checked?'1':'';b.schedule_enabled=schedOn.checked?'1':'0';try{await api('/api/settings/save',b);await note('Настройки сохранены на томе.');pSettings(q,m);chips()}catch(e){note(e.message)}}},'Сохранить'),
     h('button',{class:'btn',onclick:async()=>{try{await api('/api/run',{mode:'doctor'});location.hash='#/run'}catch(e){note(e.message)}}},'Проверить соединение'))}
-  m.append(act,h('div',{class:'mut',style:'margin-top:10px'},`Пароли (RT_PASSWORD, RT_VIEWER_PASSWORD) задаются только переменными окружения. Роль «наблюдатель»: ${s.has_viewer?'включена':'выключена (нет RT_VIEWER_PASSWORD)'}.`))}
+  m.append(act,h('div',{class:'mut',style:'margin-top:10px'},`Пароли (RT_PASSWORD, RT_RUNNER_PASSWORD, RT_VIEWER_PASSWORD) задаются только переменными окружения. Роль «запуск»: ${s.has_runner?'включена':'выключена (нет RT_RUNNER_PASSWORD)'}. Роль «наблюдатель»: ${s.has_viewer?'включена':'выключена (нет RT_VIEWER_PASSWORD)'}.`))}
 
 /* ---------- журнал ---------- */
 async function pAudit(q,m){const d=await api('/api/audit');m.textContent='';const t=h('table',{},h('tr',{},h('th',{},'Время'),h('th',{},'Роль'),h('th',{class:'h'},'Адрес'),h('th',{},'Действие'),h('th',{class:'h'},'Подробности')));
-  d.audit.forEach(a=>t.append(h('tr',{},h('td',{},fmtTime(a.t)),h('td',{},a.role),h('td',{class:'h mut'},a.ip),h('td',{},a.action),h('td',{class:'h mut'},a.detail))));m.append(h('div',{class:'card',style:'overflow:auto'},d.audit.length?t:'Пусто'))}
+  d.audit.forEach(a=>t.append(h('tr',{},h('td',{},fmtTime(a.t)),h('td',{},a.role),h('td',{class:'h mut'},a.ip),h('td',{},a.action),h('td',{class:'h mut'},a.detail))));
+  const bk=h('div',{class:'card'},h('div',{class:'row'},h('div',{style:'flex:1'},h('h2',{},'Резервная копия'),
+    h('div',{class:'mut'},'Отчёты, история запусков, журнал, ручные образцы, настройки и сохранённые сценарии replay — архивом с тома. Настройки хранят токен Graylog в открытом виде, поэтому архив храните так же бережно, как сам том.')),
+    isAdmin()?h('a',{class:'btn pri',href:'/api/backup'},'Скачать архив'):h('span',{class:'badge b-warn'},'Доступно только администратору')));
+  m.append(bk,h('div',{class:'card',style:'overflow:auto'},d.audit.length?t:'Пусто'))}
 
 async function pGuide(q,m){const d=await api('/api/guide');m.textContent='';
   const box=h('div',{class:'card guide'});box.innerHTML=d.html;m.append(box)}
