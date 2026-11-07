@@ -12,7 +12,7 @@
 ```
 TrafficLens (Podman, redos-server)
   │
-  ├─ GELF UDP ──▶ вход GELF UDP :12201 ──▶ поток «TrafficLens» (tl_source = trafficlens)
+  ├─ GELF UDP ──▶ вход GELF UDP :12205 ──▶ поток «TrafficLens» (tl_source = trafficlens)
   │                                           ├─ TRAFFICLENS - Компрометация по итогам анализа трафика
   │                                           ├─ TRAFFICLENS - Обращение к индикатору компрометации
   │                                           ├─ TRAFFICLENS - Ретропроверка: прошлый трафик совпал с новым IOC
@@ -27,7 +27,17 @@ TrafficLens (Podman, redos-server)
 
 ## Шаг 1. Вход GELF
 
-Подойдёт существующий вход **GELF UDP** на порту `12201`: System → Inputs. Если его нет, создайте: GELF UDP, порт `12201`, Bind address `0.0.0.0`. Отдельный вход не нужен, сообщения TrafficLens отличаются полем `tl_source`.
+Для TrafficLens заведён отдельный вход: в лаборатории порты 12201–12203 уже заняты другими входами (12203 — GraylogRuleTester, глава 16), поэтому выбран **12205**. Так по счётчику входа сразу видно, приходит ли что-то от TrafficLens.
+
+System → Inputs → **GELF UDP** → Launch new input:
+
+- Title: `TrafficLens`;
+- Bind address: `0.0.0.0`;
+- Port: `12205`.
+
+Свободен ли порт, проверьте до создания: `ss -ulnp | grep 12205` ничего не должен вывести. Открывать порт в firewalld не нужно, если TrafficLens работает на том же хосте: из rootless-контейнера с сетью pasta пакеты на `host.containers.internal` приходят на хост как локальные. Если TrafficLens на другой машине, откройте порт: `firewall-cmd --permanent --add-port=12205/udp && firewall-cmd --reload`.
+
+Можно отправлять и на уже существующий вход GELF UDP: сообщения TrafficLens отличаются полем `tl_source`, поток из шага 3 их отделит.
 
 ## Шаг 2. TrafficLens: отправка и выгрузка
 
@@ -35,7 +45,7 @@ TrafficLens (Podman, redos-server)
 
 ```bash
 TL_GELF_HOST=host.containers.internal   # Graylog на том же хосте; иначе его адрес
-TL_GELF_PORT=12201
+TL_GELF_PORT=12205
 TL_BASE_URL=https://trafficlens.example # ссылки на отчёт в сообщениях
 TL_EXPORT_TOKEN=<токен>                 # python3 -c "import secrets; print(secrets.token_urlsafe(24))"
 ```
@@ -119,7 +129,7 @@ Streams → Create stream:
 - Адаптер DSV сравнивает ключи точно, без CIDR. Подсети из базы (Spamhaus DROP и т. п.) в таблицу не выгружаются: их проверяет сам TrafficLens при анализе трафика.
 - Домены в выгрузке есть, но правил для DNS-логов в этой главе нет: в лаборатории DNS-запросы в Graylog не собираются. Если собираете (FreeIPA bind, AdGuard, Pi-hole), добавьте такое же правило на поле с именем запроса.
 - Токен выгрузки виден в настройках адаптера всем администраторам Graylog. Это токен только на чтение базы IOC, но не используйте его повторно для других целей.
-- Отправка по UDP может терять сообщения при перегрузке входа. Для TrafficLens это десятки сообщений в день, но если важна гарантия доставки, создайте вход GELF TCP и задайте `gelf.protocol: tcp`.
+- Отправка по UDP может терять сообщения при перегрузке входа. Для TrafficLens это десятки сообщений в день, но если важна гарантия доставки, создайте вход GELF TCP (например, тоже на `12205`: TCP и UDP на одном номере не конфликтуют) и задайте `gelf.protocol: tcp`.
 
 ## Что дальше
 
