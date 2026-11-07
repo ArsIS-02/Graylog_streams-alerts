@@ -195,7 +195,7 @@ bash rule-tester/deploy/install.sh        # первый запуск созда
 | 17 | [GraylogRuleTester: руководство администратора](docs/17-admin-guide-ruletester.md) | Пошаговый маршрут по всему инструменту со скриншотами и пронумерованными указателями последовательности: от подключения к серверу до отчётов покрытия, CALDERA и задержки обнаружения |
 | 18 | [GraylogBackup: резервное копирование сервера](docs/18-graylog-backup.md) | Конфигурация через REST, полный `mongodump` MongoDB, `server.conf` (`password_secret`), `mongod.conf`, `opensearch.yml`/`elasticsearch.yml`, плагины, шаблоны индексов OpenSearch/Elasticsearch; веб-интерфейс в контейнере Podman, расписание, хранение с ротацией; пошаговый разбор аварийного восстановления сервера из архива |
 | 19 | [Keenetic: блокировки внешних адресов на карте](docs/19-keenetic-geo-bans.md) | Баны роутера при подборе пароля к веб-интерфейсу: pipeline-правило, GeoIP (MaxMind), дашборд с картой мира, странами, городами и динамикой. Сканирование портов роутер в журнал не пишет: что с этим делать, описано в главе |
-| 20 | [TrafficLens: анализ трафика и база IOC](docs/20-trafficlens.md) | Итоги анализа трафика, совпадения с IOC и ретропроверка по GELF в поток «TrafficLens» с алертами; база IOC TrafficLens как Lookup Table по HTTP, сверка адресов из банов Keenetic и входов в Linux и Windows |
+| 20 | [TrafficLens: анализ трафика и база IOC](docs/20-trafficlens.md) | Зачем связывать сеть и хосты; итоги анализа трафика, совпадения с IOC и ретропроверка по GELF в поток «TrafficLens» с алертами и отдельным письмом «IoC» 🦠; база IOC TrafficLens как Lookup Table по HTTP, сверка адресов из банов Keenetic и входов в Linux и Windows; грабли REST Graylog 7 |
 
 ### Дашборды
 
@@ -278,6 +278,7 @@ Graylog_streams-alerts/
 ├── graylog/
 │   ├── content-pack-homelab-alerts.json
 │   ├── {windows,linux,macos,keenetic,freeipa,container,health,trafficlens}-event-definitions.json
+│   ├── trafficlens-notification-ioc.json ← уведомление «Mail.ru Alert IoC» (глава 20)
 │   ├── backup-definitions.js          ← резервная копия определений
 │   ├── dashboards-spec.json, import-dashboards.js
 │   ├── pipelines/                     ← правила, CSV-справочники, импортёры, пример
@@ -313,7 +314,7 @@ Graylog_streams-alerts/
   отражают мою сеть. Подсети описаны в CSV, сам справочник `homelab-subnets` замени на свой.
 - **Имена потоков и pipeline.** Названия вроде `RedOS auditd Logs`, `Syslog Logs`, `homelab: windows enrichment`
   используются в правилах и описаниях, переименуй везде одинаково.
-- **Уведомления.** Письма платформ (`Mail.ru Alert Linux`, `…Windows`, `…MacOS`, `…Containers`, `…FreeIPA`, `…Keenetic`)
+- **Уведомления.** Письма платформ (`Mail.ru Alert Linux`, `…Windows`, `…MacOS`, `…Containers`, `…FreeIPA`, `…Keenetic`, `…IoC`)
   это копии одного шаблона с разными эмодзи и полями исходных сообщений. Адрес отправителя, получатель и ссылки на
   Graylog в них замени на свои.
 - **Проверка правил.** В GraylogRuleTester пропиши адрес Graylog, токен (только чтение) и вход GELF HTTP; свободный
