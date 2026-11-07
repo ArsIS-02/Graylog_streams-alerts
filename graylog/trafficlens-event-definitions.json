@@ -1,0 +1,780 @@
+[
+  {
+    "title": "TRAFFICLENS - Компрометация по итогам анализа трафика",
+    "description": "TrafficLens разобрал запись трафика (загрузка или живой захват) и выставил итог «Компрометация»: есть совпадение с IOC, сигнатура Suricata высокой важности или файл из базы. Причины и ссылка на отчёт в полях tl_reasons и tl_report.",
+    "priority": 3,
+    "alert": true,
+    "config": {
+      "type": "aggregation-v1",
+      "query": "tl_event:verdict AND tl_level:critical",
+      "query_parameters": [],
+      "filters": [],
+      "streams": [
+        "<TRAFFICLENS_STREAM_ID>"
+      ],
+      "stream_categories": [],
+      "group_by": [],
+      "series": [],
+      "conditions": {
+        "expression": null
+      },
+      "search_within_ms": 60000,
+      "execute_every_ms": 60000,
+      "use_cron_scheduling": false,
+      "cron_expression": null,
+      "cron_timezone": null,
+      "event_limit": 100
+    },
+    "field_spec": {
+      "host": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.tl_hosts}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "host_name": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.tl_host_names}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "event": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.message}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "tl_report": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.tl_report}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "tl_file": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.tl_file}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "job": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.tl_job}",
+            "require_values": true,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "reasons": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.tl_reasons}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      }
+    },
+    "key_spec": [
+      "job"
+    ],
+    "notification_settings": {
+      "grace_period_ms": 0,
+      "backlog_size": 5
+    },
+    "notifications": [
+      {
+        "notification_id": "<NOTIFICATION_ID>",
+        "notification_parameters": null
+      }
+    ],
+    "storage": [
+      {
+        "type": "persist-to-streams-v1",
+        "streams": [
+          "000000000000000000000002"
+        ]
+      }
+    ],
+    "tags": [
+      "detection",
+      "trafficlens",
+      "high"
+    ]
+  },
+  {
+    "title": "TRAFFICLENS - Обращение к индикатору компрометации",
+    "description": "В трафике найдено обращение к индикатору из базы TrafficLens с уверенностью не ниже 70: адрес, домен, URL, хэш файла или отпечаток JA3/JA4. Где найдено — поле tl_contexts, какие хосты — tl_hosts.\nMITRE ATT&CK. Тактики: Command and Control. Техники: T1071 Application Layer Protocol.",
+    "priority": 3,
+    "alert": true,
+    "config": {
+      "type": "aggregation-v1",
+      "query": "tl_event:ioc_hit AND tl_ioc_conf:>=70",
+      "query_parameters": [],
+      "filters": [],
+      "streams": [
+        "<TRAFFICLENS_STREAM_ID>"
+      ],
+      "stream_categories": [],
+      "group_by": [],
+      "series": [],
+      "conditions": {
+        "expression": null
+      },
+      "search_within_ms": 60000,
+      "execute_every_ms": 60000,
+      "use_cron_scheduling": false,
+      "cron_expression": null,
+      "cron_timezone": null,
+      "event_limit": 100
+    },
+    "field_spec": {
+      "host": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.tl_hosts}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "host_name": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.tl_host_names}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "event": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.message}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "tl_report": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.tl_report}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "tl_file": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.tl_file}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "ioc": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.tl_ioc_value}",
+            "require_values": true,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "ioc_type": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.tl_ioc_type}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "ioc_source": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.tl_ioc_source}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "ioc_info": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.tl_ioc_info}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "mitre_tactic": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "Command and Control",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_technique": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1071 Application Layer Protocol",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_techniques": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1071",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      }
+    },
+    "key_spec": [
+      "ioc"
+    ],
+    "notification_settings": {
+      "grace_period_ms": 3600000,
+      "backlog_size": 5
+    },
+    "notifications": [
+      {
+        "notification_id": "<NOTIFICATION_ID>",
+        "notification_parameters": null
+      }
+    ],
+    "storage": [
+      {
+        "type": "persist-to-streams-v1",
+        "streams": [
+          "000000000000000000000002"
+        ]
+      }
+    ],
+    "tags": [
+      "detection",
+      "trafficlens",
+      "high"
+    ]
+  },
+  {
+    "title": "TRAFFICLENS - Ретропроверка: прошлый трафик совпал с новым IOC",
+    "description": "Индикатор появился в базе после анализа, а трафик с ним уже был: TrafficLens перепроверил прошлые задачи после обновления IOC. Когда это было в трафике — поле tl_seen_ts.\nMITRE ATT&CK. Тактики: Command and Control. Техники: T1071 Application Layer Protocol.",
+    "priority": 3,
+    "alert": true,
+    "config": {
+      "type": "aggregation-v1",
+      "query": "tl_event:retro_hit",
+      "query_parameters": [],
+      "filters": [],
+      "streams": [
+        "<TRAFFICLENS_STREAM_ID>"
+      ],
+      "stream_categories": [],
+      "group_by": [],
+      "series": [],
+      "conditions": {
+        "expression": null
+      },
+      "search_within_ms": 60000,
+      "execute_every_ms": 60000,
+      "use_cron_scheduling": false,
+      "cron_expression": null,
+      "cron_timezone": null,
+      "event_limit": 100
+    },
+    "field_spec": {
+      "host": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.tl_hosts}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "host_name": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.tl_host_names}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "event": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.message}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "tl_report": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.tl_report}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "tl_file": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.tl_file}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "ioc": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.tl_ioc_value}",
+            "require_values": true,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "ioc_type": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.tl_ioc_type}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "ioc_source": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.tl_ioc_source}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "ioc_info": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.tl_ioc_info}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "seen": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.tl_seen_ts}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "mitre_tactic": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "Command and Control",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_technique": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1071 Application Layer Protocol",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_techniques": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1071",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      }
+    },
+    "key_spec": [
+      "ioc"
+    ],
+    "notification_settings": {
+      "grace_period_ms": 0,
+      "backlog_size": 5
+    },
+    "notifications": [
+      {
+        "notification_id": "<NOTIFICATION_ID>",
+        "notification_parameters": null
+      }
+    ],
+    "storage": [
+      {
+        "type": "persist-to-streams-v1",
+        "streams": [
+          "000000000000000000000002"
+        ]
+      }
+    ],
+    "tags": [
+      "detection",
+      "trafficlens",
+      "high"
+    ]
+  },
+  {
+    "title": "TRAFFICLENS - Подозрительный трафик",
+    "description": "Итог анализа «Подозрительно»: эвристики (маячки, крупные выгрузки, невалидный TLS, нестандартные порты) без сильных признаков. Событие без уведомления, для разбора на странице Alerts & Events.",
+    "priority": 1,
+    "alert": false,
+    "config": {
+      "type": "aggregation-v1",
+      "query": "tl_event:verdict AND tl_level:suspicious",
+      "query_parameters": [],
+      "filters": [],
+      "streams": [
+        "<TRAFFICLENS_STREAM_ID>"
+      ],
+      "stream_categories": [],
+      "group_by": [],
+      "series": [],
+      "conditions": {
+        "expression": null
+      },
+      "search_within_ms": 60000,
+      "execute_every_ms": 60000,
+      "use_cron_scheduling": false,
+      "cron_expression": null,
+      "cron_timezone": null,
+      "event_limit": 100
+    },
+    "field_spec": {
+      "host": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.tl_hosts}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "host_name": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.tl_host_names}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "event": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.message}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "tl_report": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.tl_report}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "tl_file": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.tl_file}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "job": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.tl_job}",
+            "require_values": true,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "reasons": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.tl_reasons}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      }
+    },
+    "key_spec": [
+      "job"
+    ],
+    "notification_settings": {
+      "grace_period_ms": 0,
+      "backlog_size": 5
+    },
+    "notifications": [],
+    "storage": [
+      {
+        "type": "persist-to-streams-v1",
+        "streams": [
+          "000000000000000000000002"
+        ]
+      }
+    ],
+    "tags": [
+      "detection",
+      "trafficlens",
+      "low"
+    ]
+  },
+  {
+    "title": "TRAFFICLENS - Адрес из базы IOC в логах хостов",
+    "description": "Правило pipeline сверило адрес из логов (бан Keenetic, вход в Linux, вход в Windows) с lookup table trafficlens-iocs, которую TrafficLens отдаёт по HTTP, и поставило tl_ioc_hit=true. Описание индикатора — поле tl_ioc_info.\nMITRE ATT&CK. Тактики: Command and Control. Техники: T1071 Application Layer Protocol.",
+    "priority": 3,
+    "alert": true,
+    "config": {
+      "type": "aggregation-v1",
+      "query": "tl_ioc_hit:true",
+      "query_parameters": [],
+      "filters": [],
+      "streams": [
+        "<SYSLOG_STREAM_ID>",
+        "<AUDITD_STREAM_ID>",
+        "<WINDOWS_STREAM_ID>"
+      ],
+      "stream_categories": [],
+      "group_by": [],
+      "series": [],
+      "conditions": {
+        "expression": null
+      },
+      "search_within_ms": 300000,
+      "execute_every_ms": 300000,
+      "use_cron_scheduling": false,
+      "cron_expression": null,
+      "cron_timezone": null,
+      "event_limit": 100
+    },
+    "field_spec": {
+      "host": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.source}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "event": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.message}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "ioc": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.tl_ioc_ip}",
+            "require_values": true,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "ioc_info": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.tl_ioc_info}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "mitre_tactic": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "Command and Control",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_technique": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1071 Application Layer Protocol",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_techniques": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1071",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      }
+    },
+    "key_spec": [
+      "ioc"
+    ],
+    "notification_settings": {
+      "grace_period_ms": 3600000,
+      "backlog_size": 5
+    },
+    "notifications": [
+      {
+        "notification_id": "<NOTIFICATION_ID>",
+        "notification_parameters": null
+      }
+    ],
+    "storage": [
+      {
+        "type": "persist-to-streams-v1",
+        "streams": [
+          "000000000000000000000002"
+        ]
+      }
+    ],
+    "tags": [
+      "detection",
+      "trafficlens",
+      "high"
+    ]
+  }
+]

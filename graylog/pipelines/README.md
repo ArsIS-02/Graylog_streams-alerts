@@ -14,6 +14,7 @@
 | `containers-normalize-fields.rule` | `containers: normalize fields` | `CONTAINER_NAME` → `container_name`, `container_id`, `image_name` (глава 8) | `Container logs`, стадия 0 |
 | `containers-log-new-expiration-text.rule` | `containers: log_new_expiration в строку` | Caddy шлёт дату строкой, а в индексе поле `long`: документ отбрасывается ([troubleshooting, п. 12](../../docs/troubleshooting.md)) | `Container logs`, стадия 1 |
 | `keenetic-lockout-ban-ip.rule` | `keenetic: lockout ban IP` | Достаёт IP, действие и службу из бана Keenetic (`kn_ban_ip`, `kn_lockout_action`, `kn_lockout_service`), глава 19 | pipeline разбора Keenetic, до Geo-Location Processor |
+| `trafficlens-ioc-keenetic-ban-ip.rule`, `trafficlens-ioc-linux-login-src-ip.rule`, `trafficlens-ioc-windows-src-ip.rule` | `trafficlens: ioc …` | Сверяют `kn_ban_ip`, `src_ip` и `IpAddress` с базой IOC TrafficLens (таблица `trafficlens-iocs`, адаптер DSV по HTTP), ставят `tl_ioc_hit`, `tl_ioc_ip`, `tl_ioc_info`; глава 20 | отдельный pipeline `trafficlens: ioc match`, стадия после разбора полей; потоки `Syslog Logs`, `RedOS auditd Logs`, `WindowsLogs` |
 | `lookup-trusted-hosts-flag.rule` | `homelab: пометить доверенные хосты` | Ставит `trusted_host=true`, если хост есть в Lookup Table (см. ниже) | отдельный pipeline `homelab: trusted hosts`, стадия 2, поток Collectors |
 | `macos-truncate-cmdline.rule` | `macos: обрезать слишком длинный cmdline` | Командная строка osquery длиннее 32766 байт отбрасывается индексом ([п. 20](../../docs/troubleshooting.md)) | `macOS Log Processing`, стадия 0 |
 | `macos-truncate-eventmessage.rule` | `macos: обрезать слишком длинный eventMessage` | То же для `eventMessage` ([п. 20](../../docs/troubleshooting.md)) | `macOS Log Processing`, стадия 2, в конце |
@@ -157,6 +158,7 @@ IP и не срабатывало ни разу: метрики показали
 | `homelab-auditd-types` | `type` → описание записи | `homelab: auditd type_name` (`type_name`) | `RedOS auditd Logs` |
 | `homelab-keenetic-events` | `kn_event_type` → название | `homelab: keenetic kn_event_name` (`kn_event_name`) | `Syslog Logs` |
 | `homelab-collector-agents` | `agent_id` → имя хоста | `collectors: source from agent_id` | **не подключено** (см. ниже) |
+| `trafficlens-iocs` | адрес или домен → описание IOC (DSV по HTTP из TrafficLens, раз в час) | `trafficlens: ioc …` (`tl_ioc_hit`, `tl_ioc_info`) | `Syslog Logs`, `RedOS auditd Logs`, `WindowsLogs`; глава 20 |
 
 **Три отдельных pipeline**, чтобы не трогать существующие (запись pipeline через API заменяет его
 целиком и стирает стадии):

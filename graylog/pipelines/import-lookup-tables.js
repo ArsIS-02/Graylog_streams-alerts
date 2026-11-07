@@ -15,6 +15,11 @@
  *    Только часть таблиц: {only: ['homelab-windows-events']}.
  *
  * Таблицы подключаются к сообщениям правилами pipeline (rules/lookup-windows-*.rule), см. README.
+ *
+ * Таблица trafficlens-iocs берёт данные не из файла, а по HTTP из TrafficLens (глава 20). Она создаётся,
+ * только если передан адрес выгрузки; сам адрес сначала добавьте в System → Configurations → URL Whitelist:
+ *      await importLookupTables({only: ['trafficlens-iocs'],
+ *        trafficlensUrl: 'http://127.0.0.1:8095/export/iocs.csv?token=<токен>&types=ip,domain&header=0'})
  */
 const LOOKUP_TABLES = [
   {name: 'homelab-windows-events', file: 'windows-events.csv',
@@ -42,6 +47,8 @@ const LOOKUP_TABLES = [
    title: 'homelab: события Keenetic', description: 'kn_event_type → русское название'},
   {name: 'homelab-collector-agents', file: 'homelab-collector-agents.csv',
    title: 'homelab: агенты Collectors', description: 'agent_id → имя хоста'},
+  {name: 'trafficlens-iocs', http: 'trafficlensUrl', key_column: 0, value_column: 3, refresh: 3600,
+   title: 'TrafficLens: база IOC', description: 'Адрес или домен из базы IOC TrafficLens → описание индикатора (DSV по HTTP)'},
 ];
 
 async function importLookupTables(opts = {}) {
@@ -67,15 +74,25 @@ async function importLookupTables(opts = {}) {
 
   for (const t of LOOKUP_TABLES) {
     if (only && !only.includes(t.name)) continue;
+    if (t.http && !opts[t.http]) {
+      report.push({объект: 'таблица ' + t.name, действие: 'пропущено: нет {' + t.http + ': ...}'});
+      continue;
+    }
     const cache = await ensure('кэш', '/api/system/lookup/caches', 'caches', t.name + '-cache', () => ({
       name: t.name + '-cache', title: t.title + ' (кэш)', description: 'Кэш таблицы ' + t.name,
       config: {type: 'guava_cache', max_size: 1000, expire_after_access: 60, expire_after_access_unit: 'SECONDS',
                expire_after_write: 0, expire_after_write_unit: null}}));
-    const adapter = await ensure('адаптер', '/api/system/lookup/adapters', 'data_adapters', t.name + '-csv', () => ({
-      name: t.name + '-csv', title: t.title + ' (CSV)', description: 'Файл ' + dir + '/' + t.file,
-      config: {type: 'csvfile', path: dir + '/' + t.file, separator: ',', quotechar: '"',
-               key_column: 'key', value_column: 'value', check_interval: 60,
-               case_insensitive_lookup: true, cidr_lookup: !!t.cidr, multi_value_lookup: false}}));
+    const adapter = t.http
+      ? await ensure('адаптер', '/api/system/lookup/adapters', 'data_adapters', t.name + '-http', () => ({
+          name: t.name + '-http', title: t.title + ' (HTTP)', description: 'Выгрузка ' + opts[t.http].replace(/token=[^&]*/, 'token=…'),
+          config: {type: 'dsvhttp', url: opts[t.http], refresh_interval: t.refresh, separator: ',',
+                   line_separator: '\n', quotechar: '"', ignorechar: '#', key_column: t.key_column,
+                   value_column: t.value_column, check_presence_only: false, case_insensitive_lookup: true}}))
+      : await ensure('адаптер', '/api/system/lookup/adapters', 'data_adapters', t.name + '-csv', () => ({
+          name: t.name + '-csv', title: t.title + ' (CSV)', description: 'Файл ' + dir + '/' + t.file,
+          config: {type: 'csvfile', path: dir + '/' + t.file, separator: ',', quotechar: '"',
+                   key_column: 'key', value_column: 'value', check_interval: 60,
+                   case_insensitive_lookup: true, cidr_lookup: !!t.cidr, multi_value_lookup: false}}));
     await ensure('таблица', '/api/system/lookup/tables', 'lookup_tables', t.name, () => ({
       name: t.name, title: t.title, description: t.description,
       cache_id: cache.id, data_adapter_id: adapter.id,

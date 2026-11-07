@@ -1,0 +1,10 @@
+// description: Сверяет адрес источника входа в Linux (src_ip из auditd) с базой IOC TrafficLens (lookup table trafficlens-iocs). При совпадении ставит tl_ioc_hit, tl_ioc_ip и tl_ioc_info (глава 20).
+rule "trafficlens: ioc linux login src_ip"
+when
+  has_field("src_ip")
+  AND lookup_has_value("trafficlens-iocs", to_string($message.src_ip))
+then
+  set_field("tl_ioc_hit", true);
+  set_field("tl_ioc_ip", to_string($message.src_ip));
+  set_field("tl_ioc_info", lookup_value("trafficlens-iocs", to_string($message.src_ip)));
+end

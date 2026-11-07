@@ -103,5 +103,20 @@
     "title": "macos: обрезать слишком длинный eventMessage",
     "description": "Значение eventMessage длиннее 32766 байт отбрасывается индексом (immense term). Обрезаем до 6000 символов — запас на UTF-8.",
     "source": "rule \"macos: обрезать слишком длинный eventMessage\"\nwhen\n  has_field(\"eventMessage\")\n  AND length(to_string($message.eventMessage)) > 6000\nthen\n  set_field(\"eventMessage\", abbreviate(to_string($message.eventMessage), 6000));\n  set_field(\"eventMessage_truncated\", true);\nend"
+  },
+  {
+    "title": "trafficlens: ioc keenetic ban IP",
+    "description": "Сверяет адрес, забаненный Keenetic (kn_ban_ip), с базой IOC TrafficLens (lookup table trafficlens-iocs). При совпадении ставит tl_ioc_hit, tl_ioc_ip и tl_ioc_info (глава 20).",
+    "source": "rule \"trafficlens: ioc keenetic ban IP\"\nwhen\n  has_field(\"kn_ban_ip\")\n  AND lookup_has_value(\"trafficlens-iocs\", to_string($message.kn_ban_ip))\nthen\n  set_field(\"tl_ioc_hit\", true);\n  set_field(\"tl_ioc_ip\", to_string($message.kn_ban_ip));\n  set_field(\"tl_ioc_info\", lookup_value(\"trafficlens-iocs\", to_string($message.kn_ban_ip)));\nend"
+  },
+  {
+    "title": "trafficlens: ioc linux login src_ip",
+    "description": "Сверяет адрес источника входа в Linux (src_ip из auditd) с базой IOC TrafficLens (lookup table trafficlens-iocs). При совпадении ставит tl_ioc_hit, tl_ioc_ip и tl_ioc_info (глава 20).",
+    "source": "rule \"trafficlens: ioc linux login src_ip\"\nwhen\n  has_field(\"src_ip\")\n  AND lookup_has_value(\"trafficlens-iocs\", to_string($message.src_ip))\nthen\n  set_field(\"tl_ioc_hit\", true);\n  set_field(\"tl_ioc_ip\", to_string($message.src_ip));\n  set_field(\"tl_ioc_info\", lookup_value(\"trafficlens-iocs\", to_string($message.src_ip)));\nend"
+  },
+  {
+    "title": "trafficlens: ioc windows src IP",
+    "description": "Сверяет адрес источника входа в Windows (IpAddress из событий Security) с базой IOC TrafficLens (lookup table trafficlens-iocs). При совпадении ставит tl_ioc_hit, tl_ioc_ip и tl_ioc_info (глава 20).",
+    "source": "rule \"trafficlens: ioc windows src IP\"\nwhen\n  has_field(\"winlogbeat_winlog_event_data_IpAddress\")\n  AND lookup_has_value(\"trafficlens-iocs\", to_string($message.winlogbeat_winlog_event_data_IpAddress))\nthen\n  set_field(\"tl_ioc_hit\", true);\n  set_field(\"tl_ioc_ip\", to_string($message.winlogbeat_winlog_event_data_IpAddress));\n  set_field(\"tl_ioc_info\", lookup_value(\"trafficlens-iocs\", to_string($message.winlogbeat_winlog_event_data_IpAddress)));\nend"
   }
 ]
