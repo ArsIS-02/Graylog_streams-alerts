@@ -1,0 +1,10 @@
+// description: Сверяет адрес, забаненный Keenetic (kn_ban_ip), с базой IOC TrafficLens (lookup table trafficlens-iocs). При совпадении ставит tl_ioc_hit, tl_ioc_ip и tl_ioc_info (глава 20).
+rule "trafficlens: ioc keenetic ban IP"
+when
+  has_field("kn_ban_ip")
+  AND lookup_has_value("trafficlens-iocs", to_string($message.kn_ban_ip))
+then
+  set_field("tl_ioc_hit", true);
+  set_field("tl_ioc_ip", to_string($message.kn_ban_ip));
+  set_field("tl_ioc_info", lookup_value("trafficlens-iocs", to_string($message.kn_ban_ip)));
+end

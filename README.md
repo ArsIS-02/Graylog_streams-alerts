@@ -149,7 +149,8 @@ bash rule-tester/deploy/install.sh        # первый запуск созда
 2. Остальные определения лежат отдельными файлами по платформам: [Windows](graylog/windows-event-definitions.json),
    [Linux](graylog/linux-event-definitions.json), [macOS](graylog/macos-event-definitions.json),
    [Keenetic](graylog/keenetic-event-definitions.json), [FreeIPA](graylog/freeipa-event-definitions.json),
-   [контейнеры](graylog/container-event-definitions.json), [здоровье пайплайна](graylog/health-event-definitions.json).
+   [контейнеры](graylog/container-event-definitions.json), [здоровье пайплайна](graylog/health-event-definitions.json),
+   [TrafficLens](graylog/trafficlens-event-definitions.json).
 3. Замени плейсхолдеры (`<…_STREAM_ID>`, `<NOTIFICATION_ID>`) и белые списки, см. [ниже](#-что-адаптировать-под-себя).
 4. Привяжи тактики и техники скриптом [`graylog/mitre/import-mitre.js`](graylog/mitre/README.md).
 5. Проверь, что правила работают, через [GraylogRuleTester](docs/16-rule-tester.md).
@@ -194,6 +195,7 @@ bash rule-tester/deploy/install.sh        # первый запуск созда
 | 17 | [GraylogRuleTester: руководство администратора](docs/17-admin-guide-ruletester.md) | Пошаговый маршрут по всему инструменту со скриншотами и пронумерованными указателями последовательности: от подключения к серверу до отчётов покрытия, CALDERA и задержки обнаружения |
 | 18 | [GraylogBackup: резервное копирование сервера](docs/18-graylog-backup.md) | Конфигурация через REST, полный `mongodump` MongoDB, `server.conf` (`password_secret`), `mongod.conf`, `opensearch.yml`/`elasticsearch.yml`, плагины, шаблоны индексов OpenSearch/Elasticsearch; веб-интерфейс в контейнере Podman, расписание, хранение с ротацией; пошаговый разбор аварийного восстановления сервера из архива |
 | 19 | [Keenetic: блокировки внешних адресов на карте](docs/19-keenetic-geo-bans.md) | Баны роутера при подборе пароля к веб-интерфейсу: pipeline-правило, GeoIP (MaxMind), дашборд с картой мира, странами, городами и динамикой. Сканирование портов роутер в журнал не пишет: что с этим делать, описано в главе |
+| 20 | [TrafficLens: анализ трафика и база IOC](docs/20-trafficlens.md) | Итоги анализа трафика, совпадения с IOC и ретропроверка по GELF в поток «TrafficLens» с алертами; база IOC TrafficLens как Lookup Table по HTTP, сверка адресов из банов Keenetic и входов в Linux и Windows |
 
 ### Дашборды
 
@@ -231,7 +233,7 @@ bash rule-tester/deploy/install.sh        # первый запуск созда
 | Что | Где | Зачем |
 |---|---|---|
 | Content pack | [`graylog/content-pack-homelab-alerts.json`](graylog/content-pack-homelab-alerts.json) | Потоки, уведомления и первая партия алертов одним импортом |
-| Определения алертов | [`graylog/*-event-definitions.json`](graylog/) | Windows, Linux, macOS, Keenetic, FreeIPA, контейнеры и здоровье сбора отдельными файлами, с плейсхолдерами |
+| Определения алертов | [`graylog/*-event-definitions.json`](graylog/) | Windows, Linux, macOS, Keenetic, FreeIPA, контейнеры, TrafficLens и здоровье сбора отдельными файлами, с плейсхолдерами |
 | Резервная копия | [`graylog/backup-definitions.js`](graylog/backup-definitions.js) | Скрипт для консоли браузера: сохраняет определения событий в один JSON (только чтение) |
 | Pipeline и справочники | [`graylog/pipelines/`](graylog/pipelines/) | Правила, CSV-справочники, импортёры, пример на вымышленных данных |
 | MITRE ATT&CK | [`graylog/mitre/`](graylog/mitre/) | Соответствие техникам, поля в событиях, слой Navigator, страница с матрицей |
@@ -270,11 +272,12 @@ Graylog_streams-alerts/
 │   ├── 17-admin-guide-ruletester.md   ← GraylogRuleTester: руководство администратора
 │   ├── 18-graylog-backup.md           ← GraylogBackup: резервное копирование сервера
 │   ├── 19-keenetic-geo-bans.md        ← Keenetic: блокировки внешних адресов на карте мира
+│   ├── 20-trafficlens.md              ← TrafficLens: анализ трафика по GELF, база IOC как Lookup Table
 │   ├── troubleshooting.md             ← грабли и решения
 │   └── images/                        ← скриншоты и иллюстрации
 ├── graylog/
 │   ├── content-pack-homelab-alerts.json
-│   ├── {windows,linux,macos,keenetic,freeipa,container,health}-event-definitions.json
+│   ├── {windows,linux,macos,keenetic,freeipa,container,health,trafficlens}-event-definitions.json
 │   ├── backup-definitions.js          ← резервная копия определений
 │   ├── dashboards-spec.json, import-dashboards.js
 │   ├── pipelines/                     ← правила, CSV-справочники, импортёры, пример
