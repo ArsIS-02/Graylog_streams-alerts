@@ -2,7 +2,7 @@
 
 Каталог детектов в [HomeWiki](https://github.com/ArsIS-02/homewiki) давно хранит страницу на каждое правило: описание, поисковый запрос, привязку к MITRE ATT&CK и примеры срабатываний из логов. Но чтобы попасть туда из письма о тревоге, нужно было вручную искать правило по названию. Теперь в каждом письме-алерте рядом с кнопкой «Открыть в Graylog» есть вторая — **«📖 Разбор в HomeWiki»**, которая ведёт прямо на страницу сработавшего правила.
 
-> **Статус проверки.** На Graylog 7.2.1 (ноябрь 2026) обновлены все 9 уведомлений; живой GET каждого уведомления через API подтверждает наличие кнопки в HTML- и plain-шаблоне. Тестовое письмо (`POST /api/events/notifications/{id}/test`) ушло без ошибок шаблона. Страницы новых правил (HOMEREPO, LOGATLAS, TRAFFICLENS и др.) открываются в HomeWiki по ссылке из письма.
+> **Статус проверки.** На Graylog 7.2.1 (ноябрь 2026) обновлены все 9 уведомлений; живой GET каждого уведомления через API подтверждает наличие кнопки в HTML- и plain-шаблоне. Тестовое письмо (`POST /api/events/notifications/{id}/test`) проверено на десктопе и в мобильном почтовике: кнопки не накладываются, на узком экране переносятся друг под друга. Страницы новых правил (HOMEREPO, LOGATLAS, TRAFFICLENS и др.) открываются в HomeWiki по ссылке из письма.
 
 ## Схема URL — по ID определения
 
@@ -21,10 +21,19 @@ https://homewiki.apps.monitoring.test/rules/${event_definition_id}
 - в HTML-шаблон после кнопки «Открыть в Graylog» добавлена вторая кнопка (зелёная, `#a6e3a1` в той же Catppuccin-палитре письма):
 
   ```html
+  <p style="margin-top:22px;line-height:2.8;">
+  <span style="display:inline-block;margin:0 10px 10px 0;">
+  <a href="https://redos-server.monitoring.test/graylog/alerts/${event.id}/replay-search"
+     style="background:#89b4fa;color:#11111b;padding:9px 16px;border-radius:6px;
+            text-decoration:none;font-weight:bold;font-size:14px;display:inline-block;">Открыть в Graylog</a></span>
+  <span style="display:inline-block;margin:0 10px 10px 0;">
   <a href="https://homewiki.apps.monitoring.test/rules/${event_definition_id}"
      style="background:#a6e3a1;color:#11111b;padding:9px 16px;border-radius:6px;
-            text-decoration:none;font-weight:bold;font-size:14px;">📖 Разбор в HomeWiki</a>
+            text-decoration:none;font-weight:bold;font-size:14px;display:inline-block;">📖 Разбор в HomeWiki</a></span>
+  </p>
   ```
+
+  Обёртки `inline-block` с внешним отступом и `line-height` у абзаца — это адаптация под мобильные почтовики: inline-ссылки с `&nbsp;` между ними при переносе на узком экране накладывались друг на друга (паддинги не влияют на высоту строки). Теперь на десктопе кнопки стоят в ряд, на телефоне переносятся друг под друга без наложений — даже там, где почтовик игнорирует `inline-block`, спасает высота строки.
 
 - в plain-текст шаблон после строки «Открыть в Graylog: …» добавлена строка:
 
