@@ -200,6 +200,7 @@ bash rule-tester/deploy/install.sh        # первый запуск созда
 | 22 | [HomeRepo: алерт «агент молчит больше суток»](docs/22-homerepo-agent-watchdog.md) | Сторож в панели HomeRepo следит за `last_poll` агентов и шлёт в Graylog `hr_event:agent_silent`: настройка правила, поля события, реакция на алерт, проверка без реального простоя |
 | 23 | [Кнопка «Разбор в HomeWiki» в письмах-алертах](docs/23-runbook-links-homewiki.md) | Во все 9 уведомлений добавлена кнопка со ссылкой на страницу правила в HomeWiki по `${event_definition_id}`; синхронизация каталога правил в живую базу HomeWiki (240 детектов) |
 | 24 | [Пульс экосистемы: дашборд живости своих инструментов](docs/24-pulse-dashboard.md) | Дашборд с heartbeat HomeRepo и активностью потоков HostDeck, ZaSlon, TrafficLens, LogAtlas; питоновский импортёр дашбордов через REST, грабли строгих DTO Graylog 7.2.1 |
+| 25 | [Пульс панелей HostDeck и ZaSlon + алерты «Тишина»](docs/25-panel-heartbeats.md) | Heartbeat раз в час из обеих панелей (`hd_event`/`zs_event`), новые алерты тишины, обновление дашборда через PUT, грабля SELinux + rootless podman на РЕД ОС |
 
 ### Дашборды
 
@@ -281,6 +282,7 @@ Graylog_streams-alerts/
 │   ├── 22-homerepo-agent-watchdog.md  ← HomeRepo: алерт «агент молчит больше суток»
 │   ├── 23-runbook-links-homewiki.md   ← кнопка «Разбор в HomeWiki» в письмах-алертах
 │   ├── 24-pulse-dashboard.md          ← пульс экосистемы: дашборд живости своих инструментов
+│   ├── 25-panel-heartbeats.md         ← heartbeat панелей HostDeck и ZaSlon, алерты «Тишина»
 │   ├── troubleshooting.md             ← грабли и решения
 │   └── images/                        ← скриншоты и иллюстрации
 ├── graylog/

@@ -142,6 +142,8 @@ def main() -> None:
     ap.add_argument("--spec", default="dashboards-spec.json")
     ap.add_argument("--title", default=None, help="подстрока названия дашборда")
     ap.add_argument("--dry-run", action="store_true")
+    ap.add_argument("--update-existing", action="store_true",
+                    help="обновить существующий дашборд с тем же названием (PUT), не создавая дубль")
     args = ap.parse_args()
 
     spec = json.load(open(args.spec, encoding="utf-8"))
@@ -153,18 +155,32 @@ def main() -> None:
                 return s["id"]
         raise SystemExit(f"Нет потока: {title}")
 
+    existing: dict[str, str] = {}
+    if args.update_existing:
+        views = api("GET", "/api/views?per_page=200")
+        for v in views.get("views", []):
+            if v.get("type") == "DASHBOARD":
+                existing[v["title"]] = v["id"]
+
     for D in spec:
         if args.title and args.title not in D["title"]:
             continue
         search, view = build(D, sid)
         if args.dry_run:
+            mark = " (обновлю " + existing[D["title"]] + ")" if D["title"] in existing else ""
             print(f"[dry] {D['title']}: страниц {len(D['pages'])}, "
-                  f"виджетов {sum(len(p['widgets']) for p in D['pages'])}")
+                  f"виджетов {sum(len(p['widgets']) for p in D['pages'])}{mark}")
             continue
         s = api("POST", "/api/views/search", search)
         view["search_id"] = s["id"]
-        v = api("POST", "/api/views", {"entity": view})
-        print(f"OK  {D['title']}  →  {v['id']}")
+        vid = existing.get(D["title"])
+        if vid:
+            view["id"] = vid
+            api("PUT", f"/api/views/{vid}", {"entity": view})
+            print(f"UPD {D['title']}  →  {vid}")
+        else:
+            v = api("POST", "/api/views", {"entity": view})
+            print(f"OK  {D['title']}  →  {v['id']}")
 
 
 if __name__ == "__main__":
