@@ -1783,5 +1783,148 @@
       "logatlas",
       "high"
     ]
+  },
+  {
+    "title": "HOMEREPO - Агент молчит больше суток",
+    "description": "Сторож HomeRepo: устройство не выходило на связь с панелью дольше суток — агент остановлен, хост выключен или сеть недоступна. Пока устройство молчит, напоминание приходит раз в сутки; возвращение на связь — событие hr_event=agent_recovered в журнале.\nMITRE ATT&CK. Тактики: Defense Evasion. Техники: T1562.001 Impair Defenses: Disable or Modify Tools (возможная трактовка: мониторинг на хосте отключён).",
+    "priority": 2,
+    "alert": true,
+    "config": {
+      "type": "aggregation-v1",
+      "query": "hr_event:agent_silent",
+      "query_parameters": [],
+      "filters": [],
+      "streams": [
+        "<HOMEREPO_STREAM_ID>"
+      ],
+      "stream_categories": [],
+      "group_by": [],
+      "series": [],
+      "conditions": {
+        "expression": null
+      },
+      "search_within_ms": 60000,
+      "execute_every_ms": 60000,
+      "use_cron_scheduling": false,
+      "cron_expression": null,
+      "cron_timezone": null,
+      "event_limit": 100
+    },
+    "field_spec": {
+      "event": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.message}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "host": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.hr_agent_name}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "ip": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.hr_ip}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "hours_silent": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.hr_hours_silent}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "last_seen": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.hr_last_seen}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "mitre_tactic": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "Defense Evasion",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_technique": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1562.001 Disable or Modify Tools",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_techniques": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1562.001",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      }
+    },
+    "key_spec": [
+      "host"
+    ],
+    "notification_settings": {
+      "grace_period_ms": 0,
+      "backlog_size": 5
+    },
+    "notifications": [
+      {
+        "notification_id": "<NOTIFICATION_ID>",
+        "notification_parameters": null
+      }
+    ],
+    "storage": [
+      {
+        "type": "persist-to-streams-v1",
+        "streams": [
+          "000000000000000000000002"
+        ]
+      }
+    ],
+    "tags": [
+      "detection",
+      "homerepo",
+      "medium"
+    ]
   }
 ]

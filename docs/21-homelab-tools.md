@@ -9,7 +9,7 @@
 
 Эта глава подключает их к Graylog так же, как TrafficLens в главе 20: события по GELF в свои потоки с алертами, а инвентарь по HTTP в справочники.
 
-> **Статус проверки.** Отправка GELF и выгрузки проверены тестами в каждом репозитории. В лаборатории на Graylog 7.2.1 (ноябрь 2026) собрано всё: вход «Homelab tools» на UDP 12206, потоки ZaSlon, HomeRepo, HostDeck и LogAtlas, уведомление «Mail.ru Alert Homelab tools», 14 определений событий, пять таблиц инвентаря и pipeline `inventory: fallback` на восьми потоках. В потоки уже пришли тестовые сообщения, входы в панели, импорт плейбуков HomeRepo и находки LogAtlas; симулятор подтверждает, что `inventory: fallback` добавляет `host_profile` из HostDeck и не трогает `host_os` из ручного справочника.
+> **Статус проверки.** Отправка GELF и выгрузки проверены тестами в каждом репозитории. В лаборатории на Graylog 7.2.1 (ноябрь 2026) собрано всё: вход «Homelab tools» на UDP 12206, потоки ZaSlon, HomeRepo, HostDeck и LogAtlas, уведомление «Mail.ru Alert Homelab tools», 15 определений событий, пять таблиц инвентаря и pipeline `inventory: fallback` на восьми потоках. В потоки уже пришли тестовые сообщения, входы в панели, импорт плейбуков HomeRepo и находки LogAtlas; симулятор подтверждает, что `inventory: fallback` добавляет `host_profile` из HostDeck и не трогает `host_os` из ручного справочника.
 
 ## Зачем
 
@@ -151,6 +151,7 @@ LogAtlas работает офлайн и сам ничего не отправ�
 | HOMEREPO - Переподпись, удаление пакетов или смена ключа | `hr_action:(package_resign OR resign_foreign OR package_delete OR repo_key)` | high | да |
 | HOMEREPO - Пользователи, роли и токены | `hr_action:(user_create OR … OR ansible_access)` | medium | да |
 | HOMEREPO - Новое устройство в сети | `hr_event:device_new` | medium | да |
+| HOMEREPO - Агент молчит больше суток | `hr_event:agent_silent` | medium | да, не чаще раза в сутки на устройство (глава 22) |
 | HOSTDECK - Проверка безопасности перешла в fail | `hd_event:check_changed AND hd_effective:fail` | high | да, не чаще раза в час на хост и проверку |
 | HOSTDECK - Проверка безопасности перешла в warn | `hd_event:check_changed AND hd_effective:warn` | low | нет |
 | HOSTDECK - Открыта консоль root в браузере | `hd_action:(term-open OR term-denied)` | medium | да |
@@ -245,7 +246,7 @@ end
 
 | Файл | Зачем |
 |---|---|
-| [`graylog/homelab-tools-event-definitions.json`](../graylog/homelab-tools-event-definitions.json) | 14 определений событий для четырёх инструментов |
+| [`graylog/homelab-tools-event-definitions.json`](../graylog/homelab-tools-event-definitions.json) | 15 определений событий для четырёх инструментов |
 | [`graylog/pipelines/rules/inventory-*.rule`](../graylog/pipelines/rules/) | обогащение из инвентаря, когда ручные справочники молчат |
 | [`graylog/pipelines/rules.json`](../graylog/pipelines/rules.json) | все правила для `import-rules.js` |
 | [`graylog/pipelines/import-lookup-tables.js`](../graylog/pipelines/import-lookup-tables.js) | таблицы `hostdeck-*` и `homerepo-*` с адаптером «DSV File from HTTP» |
