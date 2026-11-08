@@ -199,6 +199,7 @@ bash rule-tester/deploy/install.sh        # первый запуск созда
 | 21 | [Свои инструменты в Graylog: ZaSlon, HomeRepo, HostDeck, LogAtlas](docs/21-homelab-tools.md) | Журналы действий панелей, находки разбора архивов LogAtlas, смены статуса проверок HostDeck и новые устройства из сканера HomeRepo по GELF в свои потоки с алертами (подбор пароля, ослабление защиты, переподпись пакетов, консоль root); инвентарь HostDeck и HomeRepo как Lookup Tables по HTTP вместо ручных справочников |
 | 22 | [HomeRepo: алерт «агент молчит больше суток»](docs/22-homerepo-agent-watchdog.md) | Сторож в панели HomeRepo следит за `last_poll` агентов и шлёт в Graylog `hr_event:agent_silent`: настройка правила, поля события, реакция на алерт, проверка без реального простоя |
 | 23 | [Кнопка «Разбор в HomeWiki» в письмах-алертах](docs/23-runbook-links-homewiki.md) | Во все 9 уведомлений добавлена кнопка со ссылкой на страницу правила в HomeWiki по `${event_definition_id}`; синхронизация каталога правил в живую базу HomeWiki (240 детектов) |
+| 24 | [Пульс экосистемы: дашборд живости своих инструментов](docs/24-pulse-dashboard.md) | Дашборд с heartbeat HomeRepo и активностью потоков HostDeck, ZaSlon, TrafficLens, LogAtlas; питоновский импортёр дашбордов через REST, грабли строгих DTO Graylog 7.2.1 |
 
 ### Дашборды
 
@@ -279,6 +280,7 @@ Graylog_streams-alerts/
 │   ├── 21-homelab-tools.md            ← ZaSlon, HomeRepo, HostDeck, LogAtlas: события по GELF, инвентарь в справочниках
 │   ├── 22-homerepo-agent-watchdog.md  ← HomeRepo: алерт «агент молчит больше суток»
 │   ├── 23-runbook-links-homewiki.md   ← кнопка «Разбор в HomeWiki» в письмах-алертах
+│   ├── 24-pulse-dashboard.md          ← пульс экосистемы: дашборд живости своих инструментов
 │   ├── troubleshooting.md             ← грабли и решения
 │   └── images/                        ← скриншоты и иллюстрации
 ├── graylog/
