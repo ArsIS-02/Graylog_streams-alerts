@@ -2062,5 +2062,85 @@
       "medium"
     ],
     "title": "HOSTDECK - Деградация: провалов проверок 3+"
+  },
+  {
+    "alert": true,
+    "config": {
+      "type": "aggregation-v1",
+      "query": "dg_event:digest",
+      "query_parameters": [],
+      "filters": [],
+      "streams": [],
+      "stream_categories": [],
+      "group_by": [],
+      "series": [],
+      "conditions": {
+        "expression": null
+      },
+      "search_within_ms": 60000,
+      "execute_every_ms": 60000,
+      "use_cron_scheduling": false,
+      "cron_expression": null,
+      "cron_timezone": null,
+      "event_limit": 1
+    },
+    "description": "Скрипт morning-digest.py на redos-server (systemd-таймер, 08:47 YEKT) присылает GELF-сообщение dg_event=digest с пульсами инструментов и сводкой алертов за сутки; это правило превращает его в письмо «Mail.ru Daily Digest». Текст дайджеста — в исходном сообщении события.",
+    "field_spec": {
+      "dg_alerts_total": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.dg_alerts_total}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "dg_silent": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.dg_silent_tools}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "dg_status": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.dg_status}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      }
+    },
+    "key_spec": [],
+    "notification_settings": {
+      "grace_period_ms": 0,
+      "backlog_size": 1
+    },
+    "notifications": [
+      {
+        "notification_id": "<NOTIFICATION_ID>",
+        "notification_parameters": null
+      }
+    ],
+    "priority": 1,
+    "storage": [
+      {
+        "type": "persist-to-streams-v1",
+        "streams": [
+          "000000000000000000000002"
+        ]
+      }
+    ],
+    "tags": [],
+    "title": "DIGEST - Утренний дайджест экосистемы"
   }
 ]
