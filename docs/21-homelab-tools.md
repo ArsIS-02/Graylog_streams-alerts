@@ -9,7 +9,7 @@
 
 Эта глава подключает их к Graylog так же, как TrafficLens в главе 20: события по GELF в свои потоки с алертами, а инвентарь по HTTP в справочники.
 
-> **Статус проверки.** Отправка GELF и выгрузки проверены тестами в каждом репозитории: локальный UDP-приёмник получает сообщения с нужными полями и уровнями, выгрузка отдаёт CSV по токену. В лаборатории на Graylog 7.2.1 созданы (ноябрь 2026): вход «Homelab tools» на UDP 12206, потоки ZaSlon, HomeRepo, HostDeck и LogAtlas, уведомление «Mail.ru Alert Homelab tools» и все 14 определений событий. Сообщений от инструментов ещё не было: их нужно обновить на серверах и включить отправку (шаг 2). Таблицы инвентаря и pipeline `inventory: fallback` (шаги 5–6) создаются после того, как у HostDeck и HomeRepo появятся токены выгрузки.
+> **Статус проверки.** Отправка GELF и выгрузки проверены тестами в каждом репозитории. В лаборатории на Graylog 7.2.1 (ноябрь 2026) собрано всё: вход «Homelab tools» на UDP 12206, потоки ZaSlon, HomeRepo, HostDeck и LogAtlas, уведомление «Mail.ru Alert Homelab tools», 14 определений событий, пять таблиц инвентаря и pipeline `inventory: fallback` на восьми потоках. В потоки уже пришли тестовые сообщения, входы в панели, импорт плейбуков HomeRepo и находки LogAtlas; симулятор подтверждает, что `inventory: fallback` добавляет `host_profile` из HostDeck и не трогает `host_os` из ручного справочника.
 
 ## Зачем
 
@@ -44,9 +44,9 @@ HomeRepo /api/export/inventory.csv ──▶ homerepo-host-os, homerepo-ip-names
 | ZaSlon | redos-server | rootless-контейнер, порт 8585 | `host.containers.internal:12206` | — |
 | LogAtlas | redos-server | rootless-контейнер, порт 8484 | `host.containers.internal:12206` | — |
 | HostDeck | redos-server | rootless-контейнер в сети Caddy, порт 8080 на 127.0.0.1 | `host.containers.internal:12206` | `http://127.0.0.1:8080/api/export/hosts.csv?token=…` |
-| HomeRepo | redosrp16 | службы systemd за nginx (HTTPS) | `redos-server.monitoring.test:12206` | `https://redosrp16.monitoring.test/api/export/inventory.csv?token=…` |
+| HomeRepo | redosrp16 | службы systemd за nginx (HTTPS) | `redos-server.monitoring.test:12206` | `https://homerepo.apps.monitoring.test/api/export/inventory.csv?token=…` (через Caddy) |
 
-Три инструмента живут на одном сервере с Graylog, поэтому им не нужен ни открытый порт, ни TLS: из rootless-контейнера Podman хост виден как `host.containers.internal`, а свой IP хоста в сети pasta указывает на сам контейнер. HomeRepo — на другой машине, ему нужен открытый порт 12206/udp на redos-server (шаг 1), а Graylog должен доверять сертификату nginx на redosrp16. Если сертификат выпущен центром сертификации FreeIPA, а Java Graylog ему не доверяет, адаптер не скачает файл: в таком случае либо добавьте корневой сертификат FreeIPA в хранилище Java Graylog, либо берите выгрузку через Caddy (`https://homerepo.apps.monitoring.test/...`) при том же условии для корня Caddy.
+Три инструмента живут на одном сервере с Graylog, поэтому им не нужен ни открытый порт, ни TLS: из rootless-контейнера Podman хост виден как `host.containers.internal`, а свой IP хоста в сети pasta указывает на сам контейнер. HomeRepo — на другой машине, ему нужен открытый порт 12206/udp на redos-server (шаг 1), а выгрузку Graylog забирает через Caddy. Для этого Java в Graylog должна доверять внутреннему центру сертификации Caddy (см. «Доверие к корню Caddy» в шаге 5).
 
 ## Шаг 1. Вход GELF
 
@@ -179,6 +179,29 @@ LogAtlas работает офлайн и сам ничего не отправ�
 | `homerepo-ip-names` | адрес устройства с агентом или найденного сканером | имя | 1 |
 
 Выгрузки перечитываются раз в 15 минут. HostDeck отдаёт адреса, только если на хосте включён сбор сети (`HOSTDECK_NETWORK=1`).
+
+### Доверие к корню Caddy
+
+Браузеры в лаборатории доверяют внутреннему центру сертификации Caddy, а Java внутри Graylog — нет. Адаптер по HTTPS тогда ничего не скачивает, а в журнале Graylog (`/var/log/graylog-server/server.log`) появляется `PKIX path building failed`. При этом в веб-интерфейсе ошибки у адаптера не видно: таблица просто отвечает пусто.
+
+Решение — отдельное хранилище сертификатов: стандартные корни из Java Graylog плюс корень Caddy. Отдельное, чтобы его не затёрло обновлением пакета:
+
+```bash
+J=/usr/share/graylog-server/jvm
+podman exec caddy cat /data/caddy/pki/authorities/local/root.crt > /tmp/caddy-root.crt
+sudo cp $J/lib/security/cacerts /etc/graylog/server/cacerts.jks
+sudo $J/bin/keytool -importcert -noprompt -alias caddy-local-root -file /tmp/caddy-root.crt \
+  -keystore /etc/graylog/server/cacerts.jks -storepass changeit
+sudo chown root:graylog /etc/graylog/server/cacerts.jks && sudo chmod 640 /etc/graylog/server/cacerts.jks
+```
+
+Затем в **первую** строку `GRAYLOG_SERVER_JAVA_OPTS=` файла `/etc/sysconfig/graylog-server` допишите `-Djavax.net.ssl.trustStore=/etc/graylog/server/cacerts.jks -Djavax.net.ssl.trustStorePassword=changeit` и перезапустите `graylog-server`. В этом файле несколько строк вида `GRAYLOG_SERVER_JAVA_OPTS="$GRAYLOG_SERVER_JAVA_OPTS …"`, параметры нужны только в первой. Хранилище скопировано один раз, поэтому новые общедоступные корни из обновлений Java в него сами не попадут; если Graylog начнёт ходить по HTTPS на внешние сайты и упираться в PKIX, повторите копирование и импорт.
+
+### Повторяющиеся ключи
+
+Адаптер «DSV File from HTTP» при повторяющемся ключе не загружает таблицу целиком и тоже ничего не показывает в интерфейсе. Так было с подписями устройств сканера HomeRepo: два телефона с подписью «Android» и два Mac с одинаковой подписью. Выгрузки HostDeck и HomeRepo теперь отдают каждый ключ один раз (без учёта регистра), а при совпадении оставляют строку агента. Свою выгрузку для такой таблицы проверяйте так: `curl -s '<адрес>&header=0' | cut -d, -f1 | tr A-Z a-z | sort | uniq -d` ничего не должен выводить.
+
+Подписи из сканера HomeRepo попадают в справочник «адрес → имя» как есть. Если устройства подписаны по типу («Windows», «Android»), в Graylog они так и будут называться; лучше дать им имена хостов.
 
 ## Шаг 6. Pipeline «inventory: fallback»
 
