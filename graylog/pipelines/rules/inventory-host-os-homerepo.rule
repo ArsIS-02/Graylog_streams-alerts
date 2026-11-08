@@ -1,0 +1,10 @@
+// description: Если ни ручной справочник, ни HostDeck не знают хост, добавляет host_os по source из инвентаря HomeRepo (Lookup Table homerepo-host-os, глава 21).
+rule "inventory: host_os from HomeRepo"
+when
+  has_field("source")
+  AND NOT has_field("host_os")
+  AND lookup_has_value("homerepo-host-os", to_string($message.source))
+then
+  set_field("host_os", lookup_value("homerepo-host-os", to_string($message.source)));
+  set_field("host_os_from", "homerepo");
+end

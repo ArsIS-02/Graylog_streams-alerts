@@ -20,6 +20,31 @@
     "source": "rule \"containers: normalize fields\"\nwhen\n  has_field(\"CONTAINER_NAME\")\nthen\n  set_field(\"container_name\", to_string($message.CONTAINER_NAME));\n  set_field(\"image_name\", to_string($message.IMAGE_NAME));\n  set_field(\"container_id\", to_string($message.CONTAINER_ID));\nend"
   },
   {
+    "title": "inventory: host_os from HomeRepo",
+    "description": "Если ни ручной справочник, ни HostDeck не знают хост, добавляет host_os по source из инвентаря HomeRepo (Lookup Table homerepo-host-os, глава 21).",
+    "source": "rule \"inventory: host_os from HomeRepo\"\nwhen\n  has_field(\"source\")\n  AND NOT has_field(\"host_os\")\n  AND lookup_has_value(\"homerepo-host-os\", to_string($message.source))\nthen\n  set_field(\"host_os\", lookup_value(\"homerepo-host-os\", to_string($message.source)));\n  set_field(\"host_os_from\", \"homerepo\");\nend"
+  },
+  {
+    "title": "inventory: host_os from HostDeck",
+    "description": "Если ручной справочник homelab-host-os не знает хост, добавляет host_os по source из инвентаря HostDeck (Lookup Table hostdeck-host-os, глава 21).",
+    "source": "rule \"inventory: host_os from HostDeck\"\nwhen\n  has_field(\"source\")\n  AND NOT has_field(\"host_os\")\n  AND lookup_has_value(\"hostdeck-host-os\", to_string($message.source))\nthen\n  set_field(\"host_os\", lookup_value(\"hostdeck-host-os\", to_string($message.source)));\n  set_field(\"host_os_from\", \"hostdeck\");\nend"
+  },
+  {
+    "title": "inventory: host_profile",
+    "description": "Добавляет host_profile (профиль HostDeck: server, laptop, lab) по source из Lookup Table hostdeck-host-profile (глава 21).",
+    "source": "rule \"inventory: host_profile\"\nwhen\n  has_field(\"source\")\n  AND lookup_has_value(\"hostdeck-host-profile\", to_string($message.source))\nthen\n  set_field(\"host_profile\", lookup_value(\"hostdeck-host-profile\", to_string($message.source)));\nend"
+  },
+  {
+    "title": "inventory: windows src_host from HomeRepo",
+    "description": "Если ни homelab-ip-names, ни HostDeck не знают адрес источника входа в Windows, добавляет src_host из инвентаря HomeRepo (Lookup Table homerepo-ip-names, глава 21).",
+    "source": "rule \"inventory: windows src_host from HomeRepo\"\nwhen\n  has_field(\"winlogbeat_winlog_event_data_IpAddress\")\n  AND NOT has_field(\"src_host\")\n  AND lookup_has_value(\"homerepo-ip-names\", to_string($message.winlogbeat_winlog_event_data_IpAddress))\nthen\n  set_field(\"src_host\", lookup_value(\"homerepo-ip-names\", to_string($message.winlogbeat_winlog_event_data_IpAddress)));\nend"
+  },
+  {
+    "title": "inventory: windows src_host from HostDeck",
+    "description": "Если homelab-ip-names не знает адрес источника входа в Windows, добавляет src_host из инвентаря HostDeck (Lookup Table hostdeck-ip-names, глава 21).",
+    "source": "rule \"inventory: windows src_host from HostDeck\"\nwhen\n  has_field(\"winlogbeat_winlog_event_data_IpAddress\")\n  AND NOT has_field(\"src_host\")\n  AND lookup_has_value(\"hostdeck-ip-names\", to_string($message.winlogbeat_winlog_event_data_IpAddress))\nthen\n  set_field(\"src_host\", lookup_value(\"hostdeck-ip-names\", to_string($message.winlogbeat_winlog_event_data_IpAddress)));\nend"
+  },
+  {
     "title": "keenetic: lockout ban IP",
     "description": "Keenetic банит внешние адреса, подбирающие пароль к веб-интерфейсу (Netfilter::Lockout::Manager). Достаёт из текста сервис, действие (ban/unban) и IP в kn_lockout_service, kn_lockout_action, kn_ban_ip. По kn_ban_ip Geo-Location Processor добавляет координаты, страну и город (глава 19).",
     "source": "rule \"keenetic: lockout ban IP\"\nwhen\n  contains(to_string($message.message), \"Netfilter::Lockout::Manager\")\n  AND regex(\"Lockout::Manager: .([A-Za-z]+).: (ban|unban) remote host ([0-9a-fA-F:.]*[0-9a-fA-F])\", to_string($message.message)).matches == true\nthen\n  let m = regex(\"Lockout::Manager: .([A-Za-z]+).: (ban|unban) remote host ([0-9a-fA-F:.]*[0-9a-fA-F])\", to_string($message.message));\n  set_field(\"kn_lockout_service\", to_string(m[\"0\"]));\n  set_field(\"kn_lockout_action\", to_string(m[\"1\"]));\n  set_field(\"kn_ban_ip\", to_string(m[\"2\"]));\nend"

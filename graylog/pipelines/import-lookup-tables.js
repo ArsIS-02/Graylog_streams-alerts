@@ -49,6 +49,16 @@ const LOOKUP_TABLES = [
    title: 'homelab: агенты Collectors', description: 'agent_id → имя хоста'},
   {name: 'trafficlens-iocs', http: 'trafficlensUrl', key_column: 0, value_column: 3, refresh: 3600,
    title: 'TrafficLens: база IOC', description: 'Адрес или домен из базы IOC TrafficLens → описание индикатора (DSV по HTTP)'},
+  {name: 'hostdeck-host-os', http: 'hostdeckUrl', query: 'key=name&header=0', key_column: 0, value_column: 2, refresh: 900,
+   title: 'HostDeck: ОС хоста', description: 'Имя хоста (полное и короткое) → ОС из HostDeck (DSV по HTTP)'},
+  {name: 'hostdeck-host-profile', http: 'hostdeckUrl', query: 'key=name&header=0', key_column: 0, value_column: 3, refresh: 900,
+   title: 'HostDeck: профиль хоста', description: 'Имя хоста → профиль HostDeck: server, laptop, lab (DSV по HTTP)'},
+  {name: 'hostdeck-ip-names', http: 'hostdeckUrl', query: 'key=ip&header=0', key_column: 0, value_column: 1, refresh: 900,
+   title: 'HostDeck: адрес → имя', description: 'Адреса хостов из снимка сети и подписи с карты HostDeck → имя (DSV по HTTP)'},
+  {name: 'homerepo-host-os', http: 'homerepoUrl', query: 'key=name&header=0', key_column: 0, value_column: 3, refresh: 900,
+   title: 'HomeRepo: ОС устройства', description: 'Имя устройства (полное и короткое) → ОС из HomeRepo (DSV по HTTP)'},
+  {name: 'homerepo-ip-names', http: 'homerepoUrl', query: 'key=ip&header=0', key_column: 0, value_column: 1, refresh: 900,
+   title: 'HomeRepo: адрес → имя', description: 'Адреса устройств с агентом и найденных сканером → имя (DSV по HTTP)'},
 ];
 
 async function importLookupTables(opts = {}) {
@@ -82,10 +92,11 @@ async function importLookupTables(opts = {}) {
       name: t.name + '-cache', title: t.title + ' (кэш)', description: 'Кэш таблицы ' + t.name,
       config: {type: 'guava_cache', max_size: 1000, expire_after_access: 60, expire_after_access_unit: 'SECONDS',
                expire_after_write: 0, expire_after_write_unit: null}}));
+    const url = t.http ? opts[t.http] + (t.query ? (opts[t.http].includes('?') ? '&' : '?') + t.query : '') : '';
     const adapter = t.http
       ? await ensure('адаптер', '/api/system/lookup/adapters', 'data_adapters', t.name + '-http', () => ({
-          name: t.name + '-http', title: t.title + ' (HTTP)', description: 'Выгрузка ' + opts[t.http].replace(/token=[^&]*/, 'token=…'),
-          config: {type: 'dsvhttp', url: opts[t.http], refresh_interval: t.refresh, separator: ',',
+          name: t.name + '-http', title: t.title + ' (HTTP)', description: 'Выгрузка ' + url.replace(/token=[^&]*/, 'token=…'),
+          config: {type: 'dsvhttp', url: url, refresh_interval: t.refresh, separator: ',',
                    line_separator: '\n', quotechar: '"', ignorechar: '#', key_column: t.key_column,
                    value_column: t.value_column, check_presence_only: false, case_insensitive_lookup: true}}))
       : await ensure('адаптер', '/api/system/lookup/adapters', 'data_adapters', t.name + '-csv', () => ({

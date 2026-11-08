@@ -1,0 +1,10 @@
+// description: Если ручной справочник homelab-host-os не знает хост, добавляет host_os по source из инвентаря HostDeck (Lookup Table hostdeck-host-os, глава 21).
+rule "inventory: host_os from HostDeck"
+when
+  has_field("source")
+  AND NOT has_field("host_os")
+  AND lookup_has_value("hostdeck-host-os", to_string($message.source))
+then
+  set_field("host_os", lookup_value("hostdeck-host-os", to_string($message.source)));
+  set_field("host_os_from", "hostdeck");
+end
