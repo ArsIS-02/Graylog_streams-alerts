@@ -1,10 +1,11 @@
-# 21. Свои инструменты в Graylog: ZaSlon, HomeRepo, HostDeck
+# 21. Свои инструменты в Graylog: ZaSlon, HomeRepo, HostDeck, LogAtlas
 
 В лаборатории есть три самописных инструмента, которые знают то, чего нет в журналах хостов:
 
 - **[ZaSlon](https://github.com/ArsIS-02/zaslon)** — панель управления firewalld и SELinux на хостах RED OS;
 - **[HomeRepo](https://github.com/ArsIS-02/HomeRepo)** — домашний репозиторий RPM с подписью пакетов, менеджером устройств и сканером сети;
-- **[HostDeck](https://github.com/ArsIS-02/HostDeck)** — инвентарь и проверки безопасности хостов (macOS и Linux).
+- **[HostDeck](https://github.com/ArsIS-02/HostDeck)** — инвентарь и проверки безопасности хостов (macOS и Linux);
+- **[LogAtlas](https://github.com/ArsIS-02/logatlas)** — офлайн-разбор архивов журналов с правилами обнаружения и Sigma.
 
 Эта глава подключает их к Graylog так же, как TrafficLens в главе 20: события по GELF в свои потоки с алертами, а инвентарь по HTTP в справочники.
 
@@ -15,14 +16,16 @@
 1. **Действия администратора видны рядом с их следами.** ZaSlon переводит SELinux в permissive через `setenforce 0`, и алерт «Отключение SELinux или аудита» из главы 14 сработает на это так же, как на атаку. Событие ZaSlon в ту же минуту с тем же хостом показывает, что это было действие из панели и кто его подтвердил.
 2. **Журналы самих инструментов защищены алертами.** У ZaSlon нет ограничения частоты входа, у HostDeck есть консоль root в браузере, а ключу HomeRepo доверяют все устройства. Подбор пароля к любой из панелей, переподпись пакетов, новые пользователи и токены теперь видны в Graylog.
 3. **То, чего нет в логах.** HostDeck видит выключенное шифрование диска, выпадение хоста из домена, лишний открытый порт, ожидающие обновления безопасности. HomeRepo видит новое устройство в сети. Ни один журнал хоста об этом не пишет.
-4. **Инвентарь вместо ручных справочников.** `homelab-ip-names`, `homelab-host-os` и `homelab-host-roles` из главы 13 ведутся руками. HostDeck и HomeRepo знают хосты, их адреса и ОС сами, поэтому справочники пополняются из них: новый хост получает ОС и имя в Graylog без правки CSV.
+4. **Разбор архива становится частью SIEM.** Находки LogAtlas по архиву хоста кнопкой уходят в Graylog рядом с живыми журналами того же хоста. Правило Sigma, которое нашло что-то в архиве, LogAtlas отдаёт файлом: его можно провести через sigma2graylog и получить постоянный детект на живом потоке.
+5. **Инвентарь вместо ручных справочников.** `homelab-ip-names`, `homelab-host-os` и `homelab-host-roles` из главы 13 ведутся руками. HostDeck и HomeRepo знают хосты, их адреса и ОС сами, поэтому справочники пополняются из них: новый хост получает ОС и имя в Graylog без правки CSV.
 
 ## Как это устроено
 
 ```
 ZaSlon   ──┐                                        ┌─ поток «ZaSlon»   (homelab_app = zaslon)   ─ 4 алерта
 HomeRepo ──┼─ GELF UDP ─▶ вход «Homelab tools» :12206 ┼─ поток «HomeRepo» (homelab_app = homerepo) ─ 4 алерта
-HostDeck ──┘                                        └─ поток «HostDeck» (homelab_app = hostdeck) ─ 5 алертов
+HostDeck ──┤                                        ├─ поток «HostDeck» (homelab_app = hostdeck) ─ 5 алертов
+LogAtlas ──┘ (по кнопке)                            └─ поток «LogAtlas» (homelab_app = logatlas) ─ 1 алерт
                                                                            │
                                                                      письмо «Mail.ru Alert Homelab tools» 🧰
 
@@ -34,7 +37,7 @@ HomeRepo /api/export/inventory.csv ──▶ homerepo-host-os, homerepo-ip-names
 
 ## Шаг 1. Вход GELF
 
-Один вход на все три инструмента: потоки разделяют их по полю `homelab_app`.
+Один вход на все четыре инструмента: потоки разделяют их по полю `homelab_app`.
 
 System → Inputs → **GELF UDP** → Launch new input: Title `Homelab tools`, Bind address `0.0.0.0`, Port `12206`.
 
@@ -82,7 +85,16 @@ Environment=HOSTDECK_EXPORT_TOKEN=<токен>
 
 Проверка: карточка «Оповещения в Graylog» на главной → «Тестовое сообщение», в Graylog `hd_event:test`.
 
-Отправка во всех трёх идёт из фонового потока: если Graylog недоступен, инструмент работает как обычно, а журнал в его собственной базе остаётся полным.
+**LogAtlas** — в `.env` рядом с `docker-compose.yml`, затем `docker compose up -d`:
+
+```bash
+LOGATLAS_GELF_HOST=redos-server.example
+LOGATLAS_GELF_PORT=12206
+```
+
+LogAtlas работает офлайн и сам ничего не отправляет: на вкладке «Находки» сбора появляется блок «Graylog» с порогом важности и кнопкой «Отправить находки в Graylog». В Graylog находки сбора ищутся запросом `la_case:<id сбора>`.
+
+Отправка в ZaSlon, HomeRepo и HostDeck идёт из фонового потока: если Graylog недоступен, инструмент работает как обычно, а журнал в его собственной базе остаётся полным.
 
 ## Шаг 3. Потоки
 
@@ -93,6 +105,7 @@ Environment=HOSTDECK_EXPORT_TOKEN=<токен>
 | `ZaSlon` | `zaslon` | да |
 | `HomeRepo` | `homerepo` | да |
 | `HostDeck` | `hostdeck` | да |
+| `LogAtlas` | `logatlas` | да |
 
 ### Что приходит
 
@@ -103,6 +116,7 @@ Environment=HOSTDECK_EXPORT_TOKEN=<токен>
 | HomeRepo | новое устройство в сети (`hr_event=device_new`) | `hr_ip`, `hr_mac`, `hr_vendor`, `hr_hostname`, `hr_ports`, `hr_os_family`, `hr_network` |
 | HostDeck | смена статуса проверки (`hd_event=check_changed`) | `hd_host`, `hd_os`, `hd_profile`, `hd_check`, `hd_from`, `hd_to`, `hd_effective`, `hd_value`, `hd_detail`, `hd_exception`, `hd_recovered` |
 | HostDeck | запись журнала (`hd_event=audit`) | `hd_action`, `hd_actor`, `hd_host`, `hd_detail` |
+| LogAtlas | находка сбора, одно сообщение на сработавшее правило (`la_event=finding`) | `la_case`, `la_host`, `la_rule`, `la_rule_title`, `la_severity`, `la_mitre`, `la_sigma`, `la_count`, `la_top`, `la_first`, `la_last` |
 
 Уровень `level` в сообщениях уже расставлен самими инструментами: 3 (error) — проверка HostDeck в `fail`; 4 (warning) — неудачные входы, изменения доверия, ослабление защиты, переподпись пакетов, новые устройства; 5 — прочие изменения; 6 — входы, восстановление проверок, исключённое.
 
@@ -112,7 +126,7 @@ Environment=HOSTDECK_EXPORT_TOKEN=<токен>
 
 Уведомление «Mail.ru Alert Homelab tools» сделайте копией «Mail.ru Alert Linux» (глава 2) с эмодзи 🧰 в теме и шапке. Поле `host` в событиях заполнено у всех определений: имя хоста, а для подбора пароля — адрес, с которого подбирают.
 
-Определения — [graylog/homelab-tools-event-definitions.json](../graylog/homelab-tools-event-definitions.json). Плейсхолдеры: `<ZASLON_STREAM_ID>`, `<HOMEREPO_STREAM_ID>`, `<HOSTDECK_STREAM_ID>` и `<NOTIFICATION_ID>`.
+Определения — [graylog/homelab-tools-event-definitions.json](../graylog/homelab-tools-event-definitions.json). Плейсхолдеры: `<ZASLON_STREAM_ID>`, `<HOMEREPO_STREAM_ID>`, `<HOSTDECK_STREAM_ID>`, `<LOGATLAS_STREAM_ID>` и `<NOTIFICATION_ID>`.
 
 | Определение | Запрос | Важность | Письмо |
 |---|---|---|---|
@@ -129,6 +143,7 @@ Environment=HOSTDECK_EXPORT_TOKEN=<токен>
 | HOSTDECK - Открыта консоль root в браузере | `hd_action:(term-open OR term-denied)` | medium | да |
 | HOSTDECK - Подбор пароля | `hd_action:login-failed`, ≥ 5 за 10 мин по адресу | high | да |
 | HOSTDECK - Риск принят: добавлено исключение | `hd_action:exception-set` | low | нет |
+| LOGATLAS - Находка высокой важности в разборе журналов | `la_event:finding AND la_severity:(critical OR high)` | high | да, по хосту и правилу |
 
 ## Шаг 5. Инвентарь в справочниках
 
@@ -187,17 +202,18 @@ end
 - **Автоматически погасить алерт auditd на `setenforce` из ZaSlon нельзя.** Запись PROCTITLE с `setenforce 0` не содержит пользователя, а сопоставлять разные записи и разные потоки Graylog Open не умеет: корреляция событий есть только в Enterprise. Поэтому алерт главы 14 приходит, а событие ZaSlon в ту же минуту объясняет его. Если `setenforce 0` есть, а события ZaSlon нет — это и есть повод разбираться.
 - В HostDeck смена статуса считается по сырому статусу агента. Если вы поменяли профиль хоста или исключение без смены статуса, события не будет: оно придёт при следующей смене.
 - HomeRepo пишет о новых устройствах только после второго сканирования подсети: первое — перепись.
+- У сообщений LogAtlas время — момент отправки, а не время событий в архиве (иначе алерты, которые смотрят последние минуты, их бы не увидели). Время событий — в `la_first` и `la_last`.
 - Токены выгрузок видны в настройках адаптеров всем администраторам Graylog. Это токены только на чтение инвентаря.
 
 ## Файлы
 
 | Файл | Зачем |
 |---|---|
-| [`graylog/homelab-tools-event-definitions.json`](../graylog/homelab-tools-event-definitions.json) | 13 определений событий для трёх инструментов |
+| [`graylog/homelab-tools-event-definitions.json`](../graylog/homelab-tools-event-definitions.json) | 14 определений событий для четырёх инструментов |
 | [`graylog/pipelines/rules/inventory-*.rule`](../graylog/pipelines/rules/) | обогащение из инвентаря, когда ручные справочники молчат |
 | [`graylog/pipelines/rules.json`](../graylog/pipelines/rules.json) | все правила для `import-rules.js` |
 | [`graylog/pipelines/import-lookup-tables.js`](../graylog/pipelines/import-lookup-tables.js) | таблицы `hostdeck-*` и `homerepo-*` с адаптером «DSV File from HTTP» |
 
-Код отправки и выгрузок — в самих инструментах: `panel/gelf.py` в ZaSlon, `lib/homerepo/gelf.py` и `/api/export/inventory.csv` в HomeRepo, `server/app/gelf.py` и `/api/export/hosts.csv` в HostDeck.
+Код отправки и выгрузок — в самих инструментах: `panel/gelf.py` в ZaSlon, `lib/homerepo/gelf.py` и `/api/export/inventory.csv` в HomeRepo, `server/app/gelf.py` и `/api/export/hosts.csv` в HostDeck, `app/gelf.py` и `/api/cases/{id}/graylog` в LogAtlas.
 
 Лицензия: GPL-3.0, как и весь репозиторий.

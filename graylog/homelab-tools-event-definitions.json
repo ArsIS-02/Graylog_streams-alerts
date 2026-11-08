@@ -1639,5 +1639,149 @@
       "hostdeck",
       "low"
     ]
+  },
+  {
+    "title": "LOGATLAS - Находка высокой важности в разборе журналов",
+    "description": "LogAtlas разобрал архив журналов хоста, и сработало правило критичной или высокой важности (встроенное или импортированное правило Sigma). Хост — la_host, правило — la_rule_title, когда это было в журналах — la_first и la_last. Сообщение отправлено из LogAtlas кнопкой, поэтому его время — момент отправки.",
+    "priority": 3,
+    "alert": true,
+    "config": {
+      "type": "aggregation-v1",
+      "query": "la_event:finding AND la_severity:(critical OR high)",
+      "query_parameters": [],
+      "filters": [],
+      "streams": [
+        "<LOGATLAS_STREAM_ID>"
+      ],
+      "stream_categories": [],
+      "group_by": [],
+      "series": [],
+      "conditions": {
+        "expression": null
+      },
+      "search_within_ms": 60000,
+      "execute_every_ms": 60000,
+      "use_cron_scheduling": false,
+      "cron_expression": null,
+      "cron_timezone": null,
+      "event_limit": 100
+    },
+    "field_spec": {
+      "host": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.la_host}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "event": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.message}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "rule": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.la_rule_title}",
+            "require_values": true,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "mitre": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.la_mitre}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "count": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.la_count}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "first": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.la_first}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "last": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.la_last}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "case": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.la_case}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      }
+    },
+    "key_spec": [
+      "host",
+      "rule"
+    ],
+    "notification_settings": {
+      "grace_period_ms": 0,
+      "backlog_size": 5
+    },
+    "notifications": [
+      {
+        "notification_id": "<NOTIFICATION_ID>",
+        "notification_parameters": null
+      }
+    ],
+    "storage": [
+      {
+        "type": "persist-to-streams-v1",
+        "streams": [
+          "000000000000000000000002"
+        ]
+      }
+    ],
+    "tags": [
+      "detection",
+      "logatlas",
+      "high"
+    ]
   }
 ]
