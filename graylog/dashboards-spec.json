@@ -6077,7 +6077,7 @@
  },
  {
   "title": "💓 Пульс экосистемы",
-  "summary": "Живость своих инструментов: пульсы панелей HomeRepo, HostDeck и ZaSlon и активность потоков TrafficLens и LogAtlas",
+  "summary": "Живость своих инструментов: пульсы HomeRepo, HostDeck, ZaSlon, TrafficLens, активность потоков и сработки алертов за 7 дней",
   "description": "Если инструмент молчит — видно за секунду: нули в счётчиках и пустой график. Нормы — в текстовом блоке внизу.",
   "pages": [
    {
@@ -6085,9 +6085,9 @@
     "timerange": 86400,
     "widgets": [
      {
-      "t": "💓 Heartbeat HomeRepo · 24 ч",
+      "t": "💓 HomeRepo · пульс 24 ч",
       "v": "numeric",
-      "w": 4,
+      "w": 3,
       "h": 2,
       "pos": [
        1,
@@ -6106,12 +6106,12 @@
       "sort": []
      },
      {
-      "t": "💓 Heartbeat HostDeck · 24 ч",
+      "t": "💓 HostDeck · пульс 24 ч",
       "v": "numeric",
-      "w": 4,
+      "w": 3,
       "h": 2,
       "pos": [
-       5,
+       4,
        1
       ],
       "q": "hd_event:heartbeat",
@@ -6127,17 +6127,38 @@
       "sort": []
      },
      {
-      "t": "💓 Heartbeat ZaSlon · 24 ч",
+      "t": "💓 ZaSlon · пульс 24 ч",
       "v": "numeric",
-      "w": 4,
+      "w": 3,
       "h": 2,
       "pos": [
-       9,
+       7,
        1
       ],
       "q": "zs_event:heartbeat",
       "s": [
        "ZaSlon"
+      ],
+      "r": 86400,
+      "rows": [],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": []
+     },
+     {
+      "t": "💓 TrafficLens · пульс 24 ч",
+      "v": "numeric",
+      "w": 3,
+      "h": 2,
+      "pos": [
+       10,
+       1
+      ],
+      "q": "tl_event:heartbeat",
+      "s": [
+       "TrafficLens"
       ],
       "r": 86400,
       "rows": [],
@@ -6349,15 +6370,63 @@
       "lim": 10
      },
      {
+      "t": "🚨 Алерты инструментов по дням · 7 дней",
+      "v": "bar",
+      "w": 6,
+      "h": 5,
+      "pos": [
+       1,
+       15
+      ],
+      "q": "message:homerepo OR message:hostdeck OR message:zaslon OR message:trafficlens OR message:logatlas",
+      "s": [
+       "All events"
+      ],
+      "r": 604800,
+      "rows": [
+       [
+        "t",
+        "timestamp",
+        "1days"
+       ]
+      ],
+      "cols": [],
+      "m": [
+       "count()"
+      ],
+      "sort": [],
+      "bm": "stack"
+     },
+     {
+      "t": "🚨 Последние алерты инструментов · 7 дней",
+      "v": "messages",
+      "w": 6,
+      "h": 5,
+      "pos": [
+       7,
+       15
+      ],
+      "q": "message:homerepo OR message:hostdeck OR message:zaslon OR message:trafficlens OR message:logatlas",
+      "s": [
+       "All events"
+      ],
+      "r": 604800,
+      "f": [
+       "timestamp",
+       "message"
+      ],
+      "lim": 12
+     },
+     {
       "t": "ℹ️ Нормы",
       "v": "text",
       "w": 12,
       "h": 2,
       "pos": [
        1,
-       15
+       20
       ],
-      "txt": "Норма: пульс каждой панели — раз в час (~24 в сутки). Тишина дольше 3 ч ловится алертами «Тишина: HomeRepo / HostDeck / ZaSlon (3 часа)» — разборы: https://homewiki.apps.monitoring.test/rules/6af04f3361b983feab674560 · https://homewiki.apps.monitoring.test/rules/6af07d3861b983feab685e49 · https://homewiki.apps.monitoring.test/rules/6af07d3861b983feab685e53 . TrafficLens — разборы pcap, совпадения IoC и ретропроверки; LogAtlas — находки разборов архивов: у них пульса нет, ноль за сутки — не авария. Молчание агентов HomeRepo дольше суток ловит алерт «Агент молчит больше суток» (разбор: https://homewiki.apps.monitoring.test/rules/6af042ae61b983feab67004c)."
+      "txt": "Норма: пульс каждого сервиса — раз в час (~24 в сутки). Тишина дольше 3 ч ловится алертами «Тишина: HomeRepo / HostDeck / ZaSlon / TrafficLens (3 часа)». Деградация без тишины: «молчат 3+ агентов HomeRepo» (hr_hosts_silent) и «провалов проверок 3+» (hd_checks_failing) — пороги по известной базовой линии, при изменении парка обновить. LogAtlas — находки разборов архивов: событийно, пульса нет, ноль за сутки — не авария. Молчание агентов HomeRepo дольше суток ловит алерт «Агент молчит больше суток». Разборы правил — в HomeWiki: https://homewiki.apps.monitoring.test/"
      }
     ]
    }
