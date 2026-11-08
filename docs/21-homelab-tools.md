@@ -35,6 +35,19 @@ HomeRepo /api/export/inventory.csv ──▶ homerepo-host-os, homerepo-ip-names
                                                                                                    │  если ручные справочники молчат
 ```
 
+## Где что работает в лаборатории
+
+Все четыре инструмента открываются через Caddy на redos-server (`*.apps.monitoring.test`), а сами работают так:
+
+| Инструмент | Сервер | Как запущен | Куда слать GELF | Адрес выгрузки для Graylog |
+|---|---|---|---|---|
+| ZaSlon | redos-server | rootless-контейнер, порт 8585 | `host.containers.internal:12206` | — |
+| LogAtlas | redos-server | rootless-контейнер, порт 8484 | `host.containers.internal:12206` | — |
+| HostDeck | redos-server | rootless-контейнер в сети Caddy, порт 8080 на 127.0.0.1 | `host.containers.internal:12206` | `http://127.0.0.1:8080/api/export/hosts.csv?token=…` |
+| HomeRepo | redosrp16 | службы systemd за nginx (HTTPS) | `redos-server.monitoring.test:12206` | `https://redosrp16.monitoring.test/api/export/inventory.csv?token=…` |
+
+Три инструмента живут на одном сервере с Graylog, поэтому им не нужен ни открытый порт, ни TLS: из rootless-контейнера Podman хост виден как `host.containers.internal`, а свой IP хоста в сети pasta указывает на сам контейнер. HomeRepo — на другой машине, ему нужен открытый порт 12206/udp на redos-server (шаг 1), а Graylog должен доверять сертификату nginx на redosrp16. Если сертификат выпущен центром сертификации FreeIPA, а Java Graylog ему не доверяет, адаптер не скачает файл: в таком случае либо добавьте корневой сертификат FreeIPA в хранилище Java Graylog, либо берите выгрузку через Caddy (`https://homerepo.apps.monitoring.test/...`) при том же условии для корня Caddy.
+
 ## Шаг 1. Вход GELF
 
 Один вход на все четыре инструмента: потоки разделяют их по полю `homelab_app`.
@@ -112,7 +125,7 @@ LogAtlas работает офлайн и сам ничего не отправ�
 | Инструмент | Событие | Поля |
 |---|---|---|
 | ZaSlon | каждая запись журнала действий: порт, служба, firewalld, SELinux, подтверждение и откат, хосты, пароль, вход | `zs_op`, `zs_host`, `zs_host_address`, `zs_arg_*`, `zs_ok`, `zs_error`, `zs_tx`, `zs_who`, `zs_login`, `zs_client_ip` |
-| HomeRepo | запись журнала (`hr_event=audit`) из панели, подписывателя, исполнителя и командной строки | `hr_action`, `hr_action_name`, `hr_user`, `hr_client_ip`, `hr_agent`, `hr_detail`, `hr_detail_*` |
+| HomeRepo | запись журнала (`hr_event=audit`) из панели, исполнителя и командной строки (подписыватель изолирован от сети, переподпись записывает панель) | `hr_action`, `hr_action_name`, `hr_user`, `hr_client_ip`, `hr_agent`, `hr_detail`, `hr_detail_*` |
 | HomeRepo | новое устройство в сети (`hr_event=device_new`) | `hr_ip`, `hr_mac`, `hr_vendor`, `hr_hostname`, `hr_ports`, `hr_os_family`, `hr_network` |
 | HostDeck | смена статуса проверки (`hd_event=check_changed`) | `hd_host`, `hd_os`, `hd_profile`, `hd_check`, `hd_from`, `hd_to`, `hd_effective`, `hd_value`, `hd_detail`, `hd_exception`, `hd_recovered` |
 | HostDeck | запись журнала (`hd_event=audit`) | `hd_action`, `hd_actor`, `hd_host`, `hd_detail` |
