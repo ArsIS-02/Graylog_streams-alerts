@@ -8,12 +8,20 @@
  *   await exportCatalog({base: '/graylog'})   // Graylog под префиксом https://host/graylog/
  *   await exportCatalog({download: false})    // вернуть объект, ничего не скачивать
  *
- * Очистка: в запросах и описаниях IP-адреса заменяются на <IP>, MAC на <MAC>, отпечатки SHA256 на <отпечаток>,
- * а длинные списки исключений (NOT поле:("…" OR "…")) с адресами или из шести и более значений — на <белый список>.
- * Всё равно просмотрите файл глазами перед публикацией: одиночные значения вроде имён хостов скрипт не угадает.
+ * Очистка: в названиях, запросах и описаниях IP-адреса заменяются на <IP>, MAC на <MAC>, отпечатки SHA256 на <отпечаток>,
+ * внутренние домены и известные имена хостов — на <домен> и <хост>, а длинные списки исключений
+ * (NOT поле:("…" OR "…")) с адресами или из шести и более значений — на <белый список>.
+ * Всё равно просмотрите файл глазами перед публикацией: новые имена хостов скрипт не угадает.
  *
  * Дальше: положите файл в graylog/detections/ и запустите  python3 build_catalog.py
  */
+function sanitizePrivate(t) {
+  return t
+    .replace(/\b[\w-]+(\.[\w-]+)*\.monitoring\.test\b/g, '<домен>')
+    .replace(/\bmonitoring\\?\.test\b/g, '<домен>')
+    .replace(/\b(redos-server|redosrp16|MacBook-Pro|MacMiniM2)\b/g, '<хост>');
+}
+
 function sanitizeQuery(q) {
   if (!q) return '';
   q = q.replace(/NOT ([\w.@]+):\(([^()]*)\)/g, (m, field, body) => {
@@ -21,16 +29,18 @@ function sanitizeQuery(q) {
     const sens = /\d+\.\d+\.\d+\.\d+|[0-9a-fA-F]{2}(:[0-9a-fA-F]{2}){5}|SHA256:/.test(body);
     return (sens || n >= 6) ? 'NOT ' + field + ':(<белый список>)' : m;
   });
-  return q
+  q = q
     .replace(/SHA256:[A-Za-z0-9+\/=]+/g, 'SHA256:<отпечаток>')
     .replace(/[0-9a-fA-F]{2}(:[0-9a-fA-F]{2}){5}/g, '<MAC>')
     .replace(/\b\d{1,3}(\.\d{1,3}){3}\b/g, '<IP>');
+  return sanitizePrivate(q);
 }
 
 function sanitizeText(t) {
-  return (t || '').split('\nMITRE ATT&CK')[0].trim()
+  t = (t || '').split('\nMITRE ATT&CK')[0].trim()
     .replace(/[0-9a-fA-F]{2}(:[0-9a-fA-F]{2}){5}/g, '<MAC>')
     .replace(/\b\d{1,3}(\.\d{1,3}){3}\b/g, '<IP>');
+  return sanitizePrivate(t);
 }
 
 async function exportCatalog(opts = {}) {
@@ -51,7 +61,7 @@ async function exportCatalog(opts = {}) {
     const ex = (c.conditions || {}).expression;
     const cond = ex && ex.right ? {op: ex.expr, value: ex.right.value} : null;
     return {
-      title: d.title,
+      title: sanitizeText(d.title),
       priority: d.priority,
       streams: (c.streams || []).map(id => streams[id] || id),
       notifications: (d.notifications || []).map(n => notifs[n.notification_id] || n.notification_id),

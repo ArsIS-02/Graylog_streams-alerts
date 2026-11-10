@@ -107,9 +107,10 @@
 
 ## 🧪 Проверка правил: GraylogRuleTester
 
-Правил много (сейчас 218), запросы сложные: регулярки, исключения, группировка. Опечатка или лишний символ делает правило
-«молчащим», а узнаёшь об этом, когда пропускаешь настоящую атаку. **GraylogRuleTester** (версия 0.11) проверяет все
-правила автоматически, **без запуска чего-либо на хостах**: образцы сообщений отправляются на сервер Graylog по GELF HTTP.
+Правил много (сейчас 263 пользовательских правила и одно встроенное системное уведомление), запросы сложные: регулярки,
+исключения, группировка. Опечатка или лишний символ делает правило «молчащим», а узнаёшь об этом, когда пропускаешь
+настоящую атаку. **GraylogRuleTester** (версия 0.11) проверяет все правила автоматически,
+**без запуска чего-либо на хостах**: образцы сообщений отправляются на сервер Graylog по GELF HTTP.
 
 <p align="center">
   <img src="docs/images/16-home.png" alt="Сводка GraylogRuleTester" width="820"/>
@@ -202,7 +203,7 @@ bash rule-tester/deploy/install.sh        # первый запуск созда
 | 20 | [TrafficLens: анализ трафика и база IOC](docs/20-trafficlens.md) | Зачем связывать сеть и хосты; итоги анализа трафика, совпадения с IOC и ретропроверка по GELF в поток «TrafficLens» с алертами и отдельным письмом «IoC» 🦠; база IOC TrafficLens как Lookup Table по HTTP, сверка адресов из банов Keenetic и входов в Linux и Windows; грабли REST Graylog 7 |
 | 21 | [Свои инструменты в Graylog: ZaSlon, HomeRepo, HostDeck, LogAtlas](docs/21-homelab-tools.md) | Журналы действий панелей, находки разбора архивов LogAtlas, смены статуса проверок HostDeck и новые устройства из сканера HomeRepo по GELF в свои потоки с алертами (подбор пароля, ослабление защиты, переподпись пакетов, консоль root); инвентарь HostDeck и HomeRepo как Lookup Tables по HTTP вместо ручных справочников |
 | 22 | [HomeRepo: алерт «агент молчит больше суток»](docs/22-homerepo-agent-watchdog.md) | Сторож в панели HomeRepo следит за `last_poll` агентов и шлёт в Graylog `hr_event:agent_silent`: настройка правила, поля события, реакция на алерт, проверка без реального простоя |
-| 23 | [Кнопка «Разбор в HomeWiki» в письмах-алертах](docs/23-runbook-links-homewiki.md) | Во все 9 уведомлений добавлена кнопка со ссылкой на страницу правила в HomeWiki по `${event_definition_id}`; синхронизация каталога правил в живую базу HomeWiki (240 детектов) |
+| 23 | [Кнопка «Разбор в HomeWiki» в письмах-алертах](docs/23-runbook-links-homewiki.md) | Во все 9 уведомлений добавлена кнопка со ссылкой на страницу правила в HomeWiki по `${event_definition_id}`; синхронизация каталога правил в живую базу HomeWiki (264 определения событий) |
 | 24 | [Пульс экосистемы: дашборд живости своих инструментов](docs/24-pulse-dashboard.md) | Дашборд с heartbeat HomeRepo и активностью потоков HostDeck, ZaSlon, TrafficLens, LogAtlas; питоновский импортёр дашбордов через REST, грабли строгих DTO Graylog 7.2.1 |
 | 25 | [Пульс панелей HostDeck и ZaSlon + алерты «Тишина»](docs/25-panel-heartbeats.md) | Heartbeat раз в час из обеих панелей (`hd_event`/`zs_event`), новые алерты тишины, обновление дашборда через PUT, грабля SELinux + rootless podman на РЕД ОС |
 | 26 | [Пульс TrafficLens, алерты деградации и ряд алертов на дашборде](docs/26-trafficlens-pulse-degradation.md) | Heartbeat TrafficLens (`tl_event`), алерты «Тишина: TrafficLens» и деградации парка (молчат 3+ агентов, провалов 3+), виджеты срабатываний за 7 дней, грабли terms-агрегации по `message` и пересборки образа |
@@ -225,10 +226,16 @@ bash rule-tester/deploy/install.sh        # первый запуск созда
 
 ## 🎯 Покрытие детектов
 
-Всего 218 правил: Windows 59, macOS 59, Linux 50, контейнеры 18, FreeIPA 16, Keenetic 9 и 7 служебных проверок
-здоровья сбора. Точные условия лежат в [каталоге](docs/14-detections.md), там же матрица «тактики × платформы»: она
-показывает, где покрытие плотное, а где пока пусто. Покрытие по техникам MITRE ATT&CK и правила, у которых нет
-ручных образцов, видны в [GraylogRuleTester](docs/16-rule-tester.md) на странице «Покрытие».
+По живому API Graylog на 10 ноября 2026 года: **264 включённых определения событий** — **263 пользовательских правила**
+(`aggregation-v1`) и одно встроенное системное уведомление. У **259** правил включены уведомления; ещё **4** пользовательских
+правила и системное событие работают без них (`alert=false`). К MITRE ATT&CK привязаны **203 правила**, охватывающие
+**118 уникальных техник**.
+
+Разбивка пользовательских правил по префиксам названий: Windows 59, macOS 59, LNX 50, контейнеры 18, FreeIPA 16,
+HEALTH 11, Keenetic 9; HOMEREPO 7, AUDIT 6, HOSTDECK 6, TRAFFICLENS 5, ZASLON 4, CANARY/COWRIE/DIFFWATCH по 3,
+DIGEST/LABSCORE/LOGATLAS/SANDBOX по 1. Точные условия лежат в [каталоге](docs/14-detections.md), там же матрица
+«тактики × платформы»: она показывает, где покрытие плотное, а где пока пусто. Покрытие по техникам MITRE ATT&CK и
+правила, у которых нет ручных образцов, видны в [GraylogRuleTester](docs/16-rule-tester.md) на странице «Покрытие».
 
 | Платформа | Откуда логи | Что ловят правила (примеры) |
 |---|---|---|
@@ -251,7 +258,7 @@ bash rule-tester/deploy/install.sh        # первый запуск созда
 | Каталог детектов | [`graylog/detections/`](graylog/detections/) | Выгрузка из Graylog, генератор страницы и таблица CSV |
 | GraylogRuleTester | [`rule-tester/`](rule-tester/) | Проверка всех правил: образцы по GELF в Graylog, проверка запросов и событий, веб-интерфейс (Podman), консоль, заглушка Graylog для самопроверки; версия 0.11 |
 | GraylogBackup | [`graylog-backup/`](graylog-backup/) | Резервное копирование конфигурации Graylog: REST-снимок, `mongodump`, `server.conf`, `mongod.conf`, `opensearch.yml`, плагины, шаблоны OpenSearch; веб-интерфейс (Podman), консоль, аварийное восстановление; версия 0.3.3 |
-| Проверка детектов | [`detection-tests/`](detection-tests/) | Раннеры для Windows, Linux, macOS и FreeIPA: 103 безопасные проверки, покрывающие 146 правил |
+| Проверка детектов | [`detection-tests/`](detection-tests/) | Раннеры для Windows, Linux, macOS, FreeIPA, контейнеров и Keenetic: 121 безопасная проверка, покрывающая 164 правила |
 | Дашборды | [`graylog/dashboards-spec.json`](graylog/dashboards-spec.json), [`import-dashboards.js`](graylog/import-dashboards.js) | Спецификация и импорт дашбордов |
 | Агенты на хостах | [`windows/`](windows/), [`linux/`](linux/), [`macos/`](macos/), [`containers/`](containers/) | Конфиги Winlogbeat, rsyslog, Filebeat, osquery, Fluent Bit |
 | Декодер auditd | [`decoder/`](decoder/) | Python-демон и systemd-юнит |

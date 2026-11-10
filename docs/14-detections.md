@@ -1,6 +1,8 @@
 # Каталог детектов Graylog
 
-> Все правила (event definitions) лаборатории в одном месте: какой лог проверяется, по какому условию, как коррелируются события, к какой тактике и технике MITRE ATT&CK относятся. Всего **218** правил, из них **188** привязаны к технике ATT&CK v20 (116 разных техник). Остальные описывают здоровье сервисов и тишину в логах: атак они не ловят.
+> Все правила (event definitions) лаборатории в одном месте: какой лог проверяется, по какому условию, как коррелируются события, к какой тактике и технике MITRE ATT&CK относятся. Всего **263** правил, из них **203** привязаны к технике ATT&CK v20 (118 разных техник). Остальные описывают здоровье сервисов и тишину в логах: атак они не ловят.
+
+Встроенное определение `System notification events` (`system-notifications-v1`) в каталог не входит: это не пользовательское правило детектирования. Поэтому при 264 определениях в API здесь 263 пользовательских правила.
 
 Страница собирается скриптом из выгрузки Graylog и руками не правится: [как обновить](#как-обновить-каталог). Запросы очищены: IP, MAC, отпечатки ключей и белые списки заменены на `<IP>`, `<MAC>`, `<белый список>`. Готовые определения для импорта лежат в `graylog/*-event-definitions.json`, соответствие техникам подробно описано в [graylog/mitre](../graylog/mitre/README.md).
 
@@ -12,8 +14,9 @@
 - [macOS (osquery и unified log)](#macos-osquery-и-unified-log) — 50
 - [macOS (BI.ZONE Triage)](#macos-bizone-triage) — 9
 - [Keenetic](#keenetic) — 9
-- [FreeIPA и здоровье сервисов](#freeipa-и-здоровье-сервисов) — 23
+- [FreeIPA и здоровье сервисов](#freeipa-и-здоровье-сервисов) — 27
 - [Контейнеры](#контейнеры) — 18
+- [Экосистема и служебные правила](#экосистема-и-служебные-правила) — 41
 - [Как читать таблицы](#как-читать-таблицы)
 - [Как обновить каталог](#как-обновить-каталог)
 
@@ -21,24 +24,25 @@
 
 Основная тактика правила — первая из записанных в событии (поле `mitre_tactic`). Пустая ячейка означает, что правил на эту тактику на платформе нет.
 
-| Тактика | Windows | Linux | macOS | Keenetic | FreeIPA | Контейнеры | Всего |
-|---|---|---|---|---|---|---|---|
-| Reconnaissance (Разведка) |  |  |  | 1 |  |  | **1** |
-| Initial Access (Первоначальный доступ) | 2 | 3 | 3 | 1 | 2 | 1 | **12** |
-| Execution (Выполнение) | 6 | 4 | 7 |  |  |  | **17** |
-| Persistence (Закрепление) | 14 | 9 | 12 | 1 | 3 |  | **39** |
-| Privilege Escalation (Повышение привилегий) | 2 | 7 | 6 |  | 2 |  | **17** |
-| Stealth (Скрытность) | 4 | 4 | 4 |  |  |  | **12** |
-| Defense Impairment (Подавление защиты) | 6 | 6 | 6 | 1 | 1 |  | **20** |
-| Credential Access (Доступ к учётным данным) | 11 | 4 | 8 | 3 | 5 | 1 | **32** |
-| Discovery (Исследование среды) | 2 | 2 | 1 |  | 1 |  | **6** |
-| Lateral Movement (Перемещение) | 3 | 1 | 2 | 1 |  |  | **7** |
-| Collection (Сбор данных) | 1 | 1 | 2 |  |  |  | **4** |
-| Command and Control (управление, C2) | 3 | 3 | 2 |  |  |  | **8** |
-| Exfiltration (Вывод данных) | 1 | 2 | 2 |  |  |  | **5** |
-| Impact (Воздействие) | 2 | 3 | 2 |  |  |  | **7** |
-| Без техники (служебные) | 1 | 1 | 2 | 1 | 9 | 16 | **30** |
-| **Всего** | **58** | **50** | **59** | **9** | **23** | **18** | **218** |
+| Тактика | Windows | Linux | macOS | Keenetic | FreeIPA | Контейнеры | Экосистема | Всего |
+|---|---|---|---|---|---|---|---|---|
+| Reconnaissance (Разведка) |  |  |  | 1 |  |  |  | **1** |
+| Initial Access (Первоначальный доступ) | 2 | 3 | 3 | 1 | 2 | 1 | 2 | **14** |
+| Execution (Выполнение) | 6 | 4 | 7 |  |  |  | 1 | **18** |
+| Persistence (Закрепление) | 14 | 9 | 12 | 1 | 3 |  | 2 | **41** |
+| Privilege Escalation (Повышение привилегий) | 2 | 7 | 6 |  | 2 |  |  | **17** |
+| Defense Evasion (Обход защиты) | 1 |  |  |  |  |  | 1 | **2** |
+| Stealth (Скрытность) | 4 | 4 | 4 |  |  |  |  | **12** |
+| Defense Impairment (Подавление защиты) | 6 | 6 | 6 | 1 | 1 |  | 3 | **23** |
+| Credential Access (Доступ к учётным данным) | 11 | 4 | 8 | 3 | 5 | 1 | 3 | **35** |
+| Discovery (Исследование среды) | 2 | 2 | 1 |  | 1 |  |  | **6** |
+| Lateral Movement (Перемещение) | 3 | 1 | 2 | 1 |  |  |  | **7** |
+| Collection (Сбор данных) | 1 | 1 | 2 |  |  |  |  | **4** |
+| Command and Control (управление, C2) | 3 | 3 | 2 |  |  |  | 3 | **11** |
+| Exfiltration (Вывод данных) | 1 | 2 | 2 |  |  |  |  | **5** |
+| Impact (Воздействие) | 2 | 3 | 2 |  |  |  |  | **7** |
+| Без техники (служебные) | 1 | 1 | 2 | 1 | 13 | 16 | 26 | **60** |
+| **Всего** | **59** | **50** | **59** | **9** | **27** | **18** | **41** | **263** |
 
 ## Windows
 
@@ -67,11 +71,11 @@ Sysmon, Security, PowerShell, Defender; поток WindowsLogs. Правил: 59
 | Исключения или отключение защиты Defender | высокий | WindowsLogs<br>канал Microsoft-Windows-Sysmon/Operational, EventID 1, EventID 13 | Команда Add-/Set-MpPreference с исключениями или отключением мониторинга, либо запись в ключ Windows Defender\Exclusions (Sysmon 13). | каждое событие | Defense Impairment | `T1685` Disable or Modify Tools |
 | Командная оболочка запущена через WMI | высокий | WindowsLogs<br>канал Microsoft-Windows-Sysmon/Operational, EventID 1 | Sysmon 1: WmiPrvSE.exe породил cmd, powershell, wscript, cscript, mshta или rundll32. Так работает удалённое выполнение через WMI (wmic /node, Impacket wmiexec). | каждое событие | Execution | `T1047` Windows Management Instrumentation |
 | Обход UAC через реестр (fodhelper, eventvwr, ms-settings) | высокий | WindowsLogs<br>канал Microsoft-Windows-Sysmon/Operational, EventID 13 | Запись в ветки реестра, через которые обходят UAC и получают высокие права без запроса (ms-settings, mscfile, exefile, подмена windir и SystemRoot). Sysmon 13. | каждое событие; повтор не чаще раза в 1 ч | Privilege Escalation | `T1548.002` Bypass User Account Control |
-| Отключение Firewall (netsh или PS) | высокий | WindowsLogs<br>EventID 1 | Запуск «netsh advfirewall … disable» или PowerShell «Disable-NetFirewall…». Атакующий отключает брандмауэр, чтобы открыть сетевые соединения. | каждое событие | Defense Impairment | `T1686.003` Windows Host Firewall |
+| Отключение Firewall (netsh или PS) | высокий | WindowsLogs<br>EventID 1 | Запуск "netsh advfirewall ... disable" или PowerShell "Disable-NetFirewall...". Атакующий отключает брандмауэр, чтобы открыть сетевые соединения. | каждое событие | Defense Impairment | `T1686.003` Windows Host Firewall |
 | Офисное приложение запустило оболочку | высокий | WindowsLogs<br>EventID 1 | Word/Excel/Outlook/PowerPoint запустили cmd, powershell, wscript, cscript или mshta. Характерно для вредоносных макросов. | каждое событие | Execution | `T1204.002` Malicious File<br>`T1059` |
 | Очистка журнала событий | высокий | WindowsLogs<br>EventID 1102, 104 | Журнал Security (1102) или System (104) очищен. Почти всегда признак заметания следов. | каждое событие | Defense Impairment | `T1685.005` Clear Windows Event Logs |
 | Подбор пароля (5+ ошибок входа 4625 за 5 мин) | высокий | WindowsLogs<br>EventID 4625 | 5 и более неудачных входов (Event ID 4625) на одном хосте за 5 минут. Возможен брутфорс, в том числе учётной записи администратора. | число событий ≥ 5 за 5 мин, группировка по source | Credential Access | `T1110` Brute Force |
-| Подбор пароля и успешный вход с одного IP (4625 и 4624) | высокий | WindowsLogs<br>EventID 4624, 4625 | С одного адреса за 15 минут 5 и более сетевых или RDP-входов, среди которых есть и неудачные (4625), и успешные (4624). Так выглядит подбор пароля, закончившийся успехом. | число событий ≥ 5 за 15 мин, группировка по IpAddress | Credential Access | `T1110` Brute Force<br>`T1078` |
+| Подбор пароля и успешный вход с одного IP (4625 и 4624) | высокий | WindowsLogs<br>EventID 4624, 4625 | С одного адреса за 15 минут 5 и более сетевых или RDP-входов, среди которых есть и неудачные (4625), и успешные (4624). Так выглядит подбор пароля, закончившийся успехом. | число событий && None за 15 мин, группировка по IpAddress | Credential Access | `T1110` Brute Force<br>`T1078` |
 | Подбор пароля на DC по Kerberos (10+ ошибок 4771 за 5 мин) | высокий | WindowsLogs<br>канал Security, EventID 4771 | Десять и более ошибок предварительной проверки Kerberos (4771) с одного адреса за 5 минут. Подбор пароля к доменным учётным записям. | число событий ≥ 10 за 5 мин, группировка по IpAddress | Credential Access | `T1110.001` Password Guessing<br>`T1110.003` |
 | Подбор пароля на DC по NTLM (10+ ошибок 4776 за 5 мин) | высокий | WindowsLogs<br>канал Security, EventID 4776 | Десять и более неудачных проверок NTLM (4776) с одного рабочего места за 5 минут. Подбор пароля или забытый пароль в службе. | число событий ≥ 10 за 5 мин, группировка по Workstation | Credential Access | `T1110.001` Password Guessing<br>`T1110.003` |
 | Постоянная подписка WMI (5861) | высокий | WindowsLogs<br>канал Microsoft-Windows-WMI-Activity/Operational, EventID 5861 | Создана постоянная подписка на события WMI. Этим способом закрепляются без файлов. | каждое событие; повтор не чаще раза в 1 ч | Persistence | `T1546.003` Windows Management Instrumentation Event Subscription |
@@ -261,7 +265,7 @@ winlogbeat_event_code:4625 AND winlogbeat_event_outcome:failure
 **Windows - Подбор пароля и успешный вход с одного IP (4625 и 4624)**
 
 ```
-winlogbeat_event_code:(4624 OR 4625) AND winlogbeat_winlog_event_data_LogonType:(3 OR 10) AND _exists_:win_ip AND NOT win_ip:("-" OR "::1" OR "127.0.0.1" OR "::ffff:127.0.0.1")
+winlogbeat_event_code:(4624 OR 4625) AND winlogbeat_winlog_event_data_LogonType:(3 OR 10) AND _exists_:win_ip AND NOT win_ip:(<белый список>)
 ```
 
 **Windows - Подбор пароля на DC по Kerberos (10+ ошибок 4771 за 5 мин)**
@@ -285,7 +289,7 @@ win_channel:"Microsoft-Windows-WMI-Activity/Operational" AND win_event_id:5861
 **Windows - Признаки шифровальщика (расширения и записки)**
 
 ```
-win_channel:"Microsoft-Windows-Sysmon/Operational" AND win_event_id:11 AND winlogbeat_winlog_event_data_TargetFilename:/.*([.](locked|encrypted|crypt|crypted|enc|lockbit|akira|conti|ryuk|wncry|wnry|blackcat|hive|royal|basta|babuk|djvu|zepto|cerber|petya|phobos|mallox|makop)|[\\]([hH][oO][wW]_[tT][oO]_[dD][eE][cC][rR][yY][pP][tT]|[dD][eE][cC][rR][yY][pP][tT]_[iI][nN][sS][tT][rR][uU][cC][tT][iI][oO][nN]|[rR][eE][sS][tT][oO][rR][eE]_[fF][iI][lL][eE][sS]|[rR][eE][aA][dD]_[mM][eE]_[nN][oO][wW]|_[rR][eE][aA][dD][mM][eE]|[hH][oO][wW]_[tT][oO]_[rR][eE][cC][oO][vV][eE][rR]|[rR][eE][cC][oO][vV][eE][rR]_[fF][iI][lL][eE][sS]|[rR][eE][aA][dD][mM][eE]_[tT][oO]_[rR][eE][sS][tT][oO][rR][eE]|\@[pP][lL][eE][aA][sS][eE]_[rR][eE][aA][dD]_[mM][eE]\@|\@[wW][aA][nN][aA][dD][eE][cC][rR][yY][pP][tT][oO][rR]\@)[^\\]*)/
+win_channel:"Microsoft-Windows-Sysmon/Operational" AND win_event_id:11 AND winlogbeat_winlog_event_data_TargetFilename:/.*([.](locked|encrypted|crypt|crypted|enc|lockbit|akira|conti|ryuk|wncry|wnry|blackcat|hive|royal|basta|babuk|djvu|zepto|cerber|petya|phobos|mallox|makop)|[\\]([hH][oO][wW]_[tT][oO]_[dD][eE][cC][rR][yY][pP][tT]|[dD][eE][cC][rR][yY][pP][tT]_[iI][nN][sS][tT][rR][uU][cC][tT][iI][oO][nN]|[rR][eE][sS][tT][oO][rR][eE]_[fF][iI][lL][eE][sS]|[rR][eE][aA][dD]_[mM][eE]_[nN][oO][wW]|_[rR][eE][aA][dD][mM][eE]|[hH][oO][wW]_[tT][oO]_[rR][eE][cC][oO][vV][eE][rR]|[rR][eE][cC][oO][vV][eE][rR]_[fF][iI][lL][eE][sS]|[rR][eE][aA][dD][mM][eE]_[tT][oO]_[rR][eE][sS][tT][oO][rR][eE]|@[pP][lL][eE][aA][sS][eE]_[rR][eE][aA][dD]_[mM][eE]@|@[wW][aA][nN][aA][dD][eE][cC][rR][yY][pP][tT][oO][rR]@)[^\\]*)/
 ```
 
 **Windows - Создание, удаление или изменение доверия домена (4706/4707/4716)**
@@ -333,7 +337,7 @@ win_channel:Security AND win_event_id:4740
 **Windows - Вход по сети или RDP ночью (00:00-06:00)**
 
 ```
-winlogbeat_event_code:4624 AND winlogbeat_winlog_event_data_LogonType:(3 OR 10) AND NOT winlogbeat_winlog_event_data_TargetUserName:/.*[$]/ AND NOT winlogbeat_winlog_event_data_IpAddress:("-" OR "::1" OR "127.0.0.1")
+winlogbeat_event_code:4624 AND winlogbeat_winlog_event_data_LogonType:(3 OR 10) AND NOT winlogbeat_winlog_event_data_TargetUserName:/.*[$]/ AND NOT winlogbeat_winlog_event_data_IpAddress:(<белый список>)
 ```
 
 **Windows - Задание планировщика с Temp, AppData или Public (4698)**
@@ -487,11 +491,11 @@ auditd на RED OS; поток RedOS auditd Logs. Правил: 50. Сортир
 | Отключение SELinux или аудита (setenforce 0, auditctl -e 0) | высокий | RedOS auditd Logs<br>auditd PROCTITLE | SELinux переведён в разрешающий режим или отключён аудит ядра. | каждое событие; повтор не чаще раза в 1 ч | Defense Impairment | `T1685` Disable or Modify Tools |
 | Отключение аудита или удаление правил auditd | высокий | RedOS auditd Logs<br>auditd CONFIG_CHANGE | Удалено правило auditd или аудит отключён (audit_enabled=0). Атакующий может ослеплять мониторинг. | каждое событие | Defense Impairment | `T1685.004` Disable or Modify Linux Audit System Log |
 | Подбор пароля sudo или su (5+ ошибок за 5 мин) | высокий | RedOS auditd Logs<br>auditd USER_AUTH | Пять и более неудачных вводов пароля для sudo или su на одном хосте за 5 минут. | число событий ≥ 5 за 5 мин, группировка по source | Credential Access | `T1110` Brute Force |
-| Подбор пароля и успешный вход по SSH (6+ событий за 15 мин) | высокий | RedOS auditd Logs<br>auditd USER_LOGIN | На одном хосте за 15 минут 6 и более событий входа по SSH, среди которых есть и неудачные, и успешные. Похоже на подбор пароля, закончившийся входом. | число событий ≥ 6 за 15 мин, группировка по source | Credential Access | `T1110` Brute Force<br>`T1078` |
+| Подбор пароля и успешный вход по SSH (6+ событий за 15 мин) | высокий | RedOS auditd Logs<br>auditd USER_LOGIN | На одном хосте за 15 минут 6 и более событий входа по SSH, среди которых есть и неудачные, и успешные. Похоже на подбор пароля, закончившийся входом. | число событий && None за 15 мин, группировка по source | Credential Access | `T1110` Brute Force<br>`T1078` |
 | Привилегированный контейнер или docker.sock | высокий | RedOS auditd Logs<br>auditd EXECVE | Запуск docker или podman с флагом --privileged или с монтированием docker.sock. Это путь к root на хосте. | каждое событие | Privilege Escalation | `T1611` Escape to Host<br>`T1610` |
 | Успешный вход root по SSH | высокий | RedOS auditd Logs<br>auditd USER_LOGIN | Успешный вход по SSH под root. Прямой вход под root обычно отключают, повод проверить. | каждое событие; повтор не чаще раза в 1 ч | Lateral Movement | `T1021.004` SSH<br>`T1078.003` |
 | Установка setuid или setgid | высокий | RedOS auditd Logs<br>auditd SYSCALL, ключ perm_modification | chmod, fchmod, fchmodat с битом setuid (04000) или setgid (02000). Исключены systemd-tmpfiles, rpm и dnf: их установки штатно выставляют такие права. | каждое событие | Privilege Escalation | `T1548.001` Setuid and Setgid |
-| Участник добавлен в группу wheel, sudo, root, adm или docker | высокий | RedOS auditd Logs<br>auditd USER_MGMT | Пользователь добавлен в привилегированную группу. Группа docker равна root. Служебные учётные записи исключены. | каждое событие; повтор не чаще раза в 1 ч | Privilege Escalation | `T1098` Account Manipulation |
+| Участник добавлен в группу wheel, sudo, root, adm или docker | высокий | RedOS auditd Logs<br>auditd USER_MGMT | Пользователь добавлен в привилегированную группу. Группа docker равна root. Служебный beszel исключён. | каждое событие; повтор не чаще раза в 1 ч | Privilege Escalation | `T1098` Account Manipulation |
 | SSH-туннель (-R, -L, -D) | средний | RedOS auditd Logs<br>auditd PROCTITLE | Запуск ssh с пробросом портов (-R, -L, -D). Так выводят внутренние сервисы наружу или строят прокси. | каждое событие | Command and Control | `T1572` Protocol Tunneling<br>`T1090` |
 | Вход по SSH ночью (00:00-06:00) | средний | RedOS auditd Logs | Успешный вход по SSH ночью (с 00:00 до 06:00 по Екатеринбургу). Правило проверяется только в ночные часы. Часы подгоните под свой распорядок. | каждое событие; повтор не чаще раза в 1 ч | Initial Access | `T1078` Valid Accounts<br>`T1021.004` |
 | Загрузка или выгрузка модуля ядра (insmod, modprobe, rmmod) | средний | RedOS auditd Logs<br>auditd EXECVE | Загружен или выгружен модуль ядра. Так ставят руткиты. | каждое событие; повтор не чаще раза в 1 ч | Persistence | `T1547.006` Kernel Modules and Extensions |
@@ -509,13 +513,13 @@ auditd на RED OS; поток RedOS auditd Logs. Правил: 50. Сортир
 | Подозрительные утилиты (base64, nc, socat, scp) | средний | RedOS auditd Logs<br>auditd SYSCALL, ключ susp_activity | Запуск утилит, часто используемых для передачи и кодирования данных: base64, nc, socat, scp. | каждое событие | Command and Control | `T1105` Ingress Tool Transfer<br>`T1140` |
 | Поиск паролей в файлах (grep -r, find) | средний | RedOS auditd Logs<br>auditd EXECVE | Рекурсивный поиск слов password, secret, id_rsa, api_key и подобных по файлам (grep -r, find, rg). | каждое событие; повтор не чаще раза в 1 ч | Credential Access | `T1552.001` Credentials In Files |
 | Сканеры сети (nmap, masscan, arp-scan) | средний | RedOS auditd Logs<br>auditd EXECVE | Запущен сканер сети (nmap, masscan, arp-scan, netdiscover, nbtscan, fping, zmap). | каждое событие; повтор не чаще раза в 1 ч | Discovery | `T1046` Network Service Discovery<br>`T1018` |
-| Создана локальная учётная запись (useradd) | средний | RedOS auditd Logs<br>auditd ADD_USER | Создана новая локальная учётная запись. Нужно для закрепления. Исключены служебные учётные записи, которые разворачиваются штатно: beszel, node_exporter, graylog-collector,… | каждое событие; повтор не чаще раза в 1 ч | Persistence | `T1136.001` Local Account |
+| Создана локальная учётная запись (useradd) | средний | RedOS auditd Logs<br>auditd ADD_USER | Создана новая локальная учётная запись. Нужно для закрепления. Исключены служебные учётные записи, которые ты разворачиваешь сам: beszel, node_exporter, graylog-collector,… | каждое событие; повтор не чаще раза в 1 ч | Persistence | `T1136.001` Local Account |
 | Установка бита setuid или setgid (chmod u+s) | средний | RedOS auditd Logs<br>auditd EXECVE | Файлу выставлен бит setuid или setgid. Так готовят повышение прав. | каждое событие; повтор не чаще раза в 1 ч | Privilege Escalation | `T1548.001` Setuid and Setgid |
 | Утилиты выгрузки в облако (rclone, MEGAcmd) | средний | RedOS auditd Logs<br>auditd EXECVE | Запущена утилита выгрузки в облако (rclone, MEGAcmd, megatools). | каждое событие; повтор не чаще раза в 1 ч | Exfiltration | `T1567.002` Exfiltration to Cloud Storage<br>`T1048` |
 | Архивация данных пользователем (tar, zip, 7z) | низкий | RedOS auditd Logs<br>auditd SYSCALL, ключ Data_Compressed | Пользователь запустил архиватор (tar, zip и аналоги). Частая подготовка к выгрузке данных. gzip и pigz исключены, их запускают logrotate и системные задачи. | каждое событие | Collection | `T1560.001` Archive via Utility |
 | Изменение правил firewall (iptables, nft) | низкий | RedOS auditd Logs<br>auditd SYSCALL, ключ sbin_susp | Запуск iptables/nft. Обычно Docker или firewalld, но так же отключают защиту. | каждое событие | Defense Impairment | `T1686` Disable or Modify System Firewall |
 | Изменение сетевых настроек и /etc/hosts | низкий | RedOS auditd Logs<br>auditd SYSCALL, ключ network_modifications | Правка сетевых файлов (hosts, resolv.conf и аналогов) не NetworkManager и не рантаймом контейнеров. Так подменяют DNS или перенаправляют трафик. | каждое событие | Impact | `T1565.001` Stored Data Manipulation |
-| Использование sudo | низкий | RedOS auditd Logs<br>auditd EXECVE | Выполнение команды через sudo (кроме служебного пользователя). Команда собирается из аргументов a0 a1 a2 a3 в исходных сообщениях. | число событий > 0 за 5 мин, группировка по source | Privilege Escalation | `T1548.003` Sudo and Sudo Caching |
+| Использование sudo | низкий | RedOS auditd Logs<br>auditd EXECVE | Выполнение команды через sudo (кроме uid 1001). Команда собирается из аргументов a0 a1 a2 a3 в исходных сообщениях. | число событий > 0 за 5 мин, группировка по source | Privilege Escalation | `T1548.003` Sudo and Sudo Caching |
 | Отказ SELinux (AVC) | низкий | RedOS auditd Logs<br>auditd AVC | SELinux запретил действие процессу. Может указывать на попытку обхода политики или на ошибку настройки. | каждое событие | — | — |
 | Правка crontab (crontab -e) | низкий | RedOS auditd Logs<br>auditd PROCTITLE | Пользователь открыл редактирование своего crontab. Закрепление через планировщик. | каждое событие; повтор не чаще раза в 1 ч | Persistence | `T1053.003` Cron |
 | Разведка (id, whoami) | низкий | RedOS auditd Logs<br>auditd SYSCALL, ключ recon | Запуск команд разведки системы. Сами по себе безобидны, важны в связке с другими событиями. | каждое событие | Discovery | `T1033` System Owner/User Discovery |
@@ -796,13 +800,13 @@ key:network_modifications AND audit_type:SYSCALL AND NOT exe:("/usr/sbin/Network
 **LNX - Использование sudo**
 
 ```
-audit_type:EXECVE AND a0:"sudo" AND NOT uid:<служебный> AND NOT a2="<служебный агент>"
+audit_type:EXECVE AND a0:"sudo" AND NOT uid:"1001" AND NOT a2="/usr/local/libexec/zaslon/agent"
 ```
 
 **LNX - Отказ SELinux (AVC)**
 
 ```
-audit_type:AVC AND NOT comm:(<исключения>)
+audit_type:AVC AND NOT comm:ftdc AND NOT comm:"flb-pipeline" AND NOT comm:portainer
 ```
 
 **LNX - Правка crontab (crontab -e)**
@@ -814,7 +818,7 @@ audit_type:PROCTITLE AND proctitle:/.*crontab[ ]+-e.*/
 **LNX - Разведка (id, whoami)**
 
 ```
-key:recon AND audit_type:SYSCALL AND NOT exe:(<белый список>)
+key:recon AND audit_type:SYSCALL AND NOT exe:("/usr/bin/uname" OR "/usr/bin/hostname" OR "/usr/lib/systemd/systemd-hostnamed" OR "/usr/bin/id")
 ```
 
 **LNX - Ручная смена системного времени**
@@ -865,7 +869,7 @@ osquery Endpoint Security и unified log; поток MacOS Logs. Правил: 5
 | Запуск утилит удалённого доступа и туннелей | средний | MacOS Logs<br>osquery es_process_events | В командной строке процесса есть утилита удалённого доступа или туннелирования (ngrok, cloudflared, AnyDesk, TeamViewer, RustDesk, chisel, tailscale, zerotier, frpc). | каждое событие; повтор не чаще раза в 1 ч | Command and Control | `T1219` Remote Access Tools<br>`T1572` |
 | Неудачная попытка sudo (неверный пароль) | средний | MacOS Logs<br>журнал macos_unified | При выполнении sudo введён неверный пароль. Возможен подбор пароля. | число событий > 0 за 5 мин, группировка по source | Privilege Escalation | `T1548.003` Sudo and Sudo Caching |
 | Остановка агентов сбора логов и защиты (launchctl) | средний | MacOS Logs<br>osquery es_process_events | launchctl остановил или отключил агент сбора логов или защиты (osquery, filebeat, Graylog collector, Bi.Zone, Velociraptor, HostDeck, firewall). Плановое обслуживание тоже срабатывает,… | каждое событие; повтор не чаще раза в 1 ч | Defense Impairment | `T1685` Disable or Modify Tools |
-| Передача данных наружу (scp, rsync, nc, socat) | средний | MacOS Logs<br>osquery es_process_events | scp или rsync на user@host с точкой в имени, а также nc, ncat, socat без -l, если адрес не из частных сетей и не в monitoring.test. | каждое событие | Exfiltration | `T1048` Exfiltration Over Alternative Protocol |
+| Передача данных наружу (scp, rsync, nc, socat) | средний | MacOS Logs<br>osquery es_process_events | scp или rsync на user@host с точкой в имени, а также nc, ncat, socat без -l, если адрес не из частных сетей и не в <домен>. | каждое событие | Exfiltration | `T1048` Exfiltration Over Alternative Protocol |
 | Поддельное окно ввода пароля (osascript hidden answer) | средний | MacOS Logs<br>osquery es_process_events | AppleScript показывает окно со скрытым вводом. Так выманивают пароль. | каждое событие; повтор не чаще раза в 1 ч | Credential Access | `T1056.002` GUI Input Capture |
 | Подключено Apple-устройство (iPhone/iPad/iPod) | средний | MacOS Logs<br>журнал macos_wifi_usb | По USB подключено и распознано Apple-устройство (wifi.log, hostNotificationUSBDeviceInserted). | каждое событие | Initial Access | `T1200` Hardware Additions |
 | Подключён USB-накопитель | средний | MacOS Logs<br>журнал macos_unified | Ядро распознало USB-накопитель (IOUSBMassStorageDriver): флешку или внешний диск. | число событий > 0 за 5 мин, группировка по source | Initial Access | `T1200` Hardware Additions<br>`T1052.001` |
@@ -1091,7 +1095,7 @@ log_type:macos_osquery AND name:es_process_events AND columns_cmdline:/.*launchc
 **macOS - Передача данных наружу (scp, rsync, nc, socat)**
 
 ```
-name:es_process_events AND ((columns_cmdline:/(.*[ \/])?(scp|rsync)( .*)? [^ ]*\@[^ ]*[.][^ ]*:.*/) OR (columns_cmdline:/(.*[ \/])?(nc|ncat|socat)( .*)?/ AND NOT columns_cmdline:/.* -l .*/)) AND NOT columns_cmdline:/.*(--server|192\.168\.|10\.|172\.(1[6-9]|2[0-9]|3[01])\.|localhost|127\.0\.0\.1|monitoring\.test).*/
+name:es_process_events AND ((columns_cmdline:/(.*[ \/])?(scp|rsync)( .*)? [^ ]*@[^ ]*[.][^ ]*:.*/) OR (columns_cmdline:/(.*[ \/])?(nc|ncat|socat)( .*)?/ AND NOT columns_cmdline:/.* -l .*/)) AND NOT columns_cmdline:/.*(--server|192\.168\.|10\.|172\.(1[6-9]|2[0-9]|3[01])\.|localhost|127\.0\.0\.1|<домен>).*/
 ```
 
 **macOS - Поддельное окно ввода пароля (osascript hidden answer)**
@@ -1115,7 +1119,7 @@ log_type:macos_unified AND processImagePath:\/kernel AND senderImagePath:"\/Syst
 **macOS - Поиск паролей в файлах (grep -r по / и ~)**
 
 ```
-log_type:macos_osquery AND name:es_process_events AND columns_cmdline:/.*(grep|rg|find)[ ]+(-[a-zA-Z]*[rR][a-zA-Z]*[ ]+)+.*([pP][aA][sS][sS][wW][oO][rR][dD]|[pP][aA][sS][sS][wW][dD]|[sS][eE][cC][rR][eE][tT]|[cC][rR][eE][dD][eE][nN][tT][iI][aA][lL]|[aA][pP][iI][kK][eE][yY]|[iI][dD]_[rR][sS][aA]|[kK][dD][bB][xX]).*[ ](\/|\~|[$]HOME|\/Users[^ ]*)/ AND NOT columns_cmdline:/.*BatchMode.*/
+log_type:macos_osquery AND name:es_process_events AND columns_cmdline:/.*(grep|rg|find)[ ]+(-[a-zA-Z]*[rR][a-zA-Z]*[ ]+)+.*([pP][aA][sS][sS][wW][oO][rR][dD]|[pP][aA][sS][sS][wW][dD]|[sS][eE][cC][rR][eE][tT]|[cC][rR][eE][dD][eE][nN][tT][iI][aA][lL]|[aA][pP][iI][kK][eE][yY]|[iI][dD]_[rR][sS][aA]|[kK][dD][bB][xX]).*[ ](\/|~|[$]HOME|\/Users[^ ]*)/ AND NOT columns_cmdline:/.*BatchMode.*/
 ```
 
 **macOS - Сканеры сети (nmap, masscan, arp-scan)**
@@ -1192,14 +1196,14 @@ name:es_process_events AND columns_path:"/usr/bin/xattr" AND message:"com.apple.
 
 | Правило | Приоритет | Источник логов | Что проверяет | Корреляция | Тактика | Техника |
 |---|---|---|---|---|---|---|
-| Bi.Zone: неизвестный SSH-ключ в authorized_keys | высокий | BiZone_macOS<br>BI.ZONE SSHKeyInfo | В authorized_keys появился ключ, отпечатка которого нет в белом списке (подставь отпечатки своих ключей). Возможен бэкдор-доступ по SSH. | каждое событие; повтор не чаще раза в 7 сут | Persistence | `T1098.004` SSH Authorized Keys |
-| Bi.Zone: новое правило в sudoers | высокий | BiZone_macOS<br>BI.ZONE SudoersInfo | В sudoers появилось правило не из белого списка (root, %admin и свои служебные правила). Возможна эскалация привилегий. | каждое событие; повтор не чаще раза в 7 сут | Privilege Escalation | `T1548.003` Sudo and Sudo Caching |
-| Bi.Zone: новый пользователь | высокий | BiZone_macOS<br>BI.ZONE UserInfo | В системе появился пользователь с uid ≥ 500, которого нет в белом списке (подставь своих пользователей). | каждое событие; повтор не чаще раза в 7 сут | Persistence | `T1136.001` Local Account |
+| Bi.Zone: неизвестный SSH-ключ в authorized_keys | высокий | BiZone_macOS<br>BI.ZONE SSHKeyInfo | В authorized_keys появился ключ, отпечатка которого нет в белом списке (14 ключей на 17.10.2026). Возможен бэкдор-доступ по SSH. | каждое событие; повтор не чаще раза в 7 сут | Persistence | `T1098.004` SSH Authorized Keys |
+| Bi.Zone: новое правило в sudoers | высокий | BiZone_macOS<br>BI.ZONE SudoersInfo | В sudoers появилось правило не из белого списка (root, %admin, logatlas-collect). Возможна эскалация привилегий. | каждое событие; повтор не чаще раза в 7 сут | Privilege Escalation | `T1548.003` Sudo and Sudo Caching |
+| Bi.Zone: новый пользователь | высокий | BiZone_macOS<br>BI.ZONE UserInfo | В системе появился пользователь с uid ≥ 500, которого нет в белом списке (igor, logatlas-collect, nobody). | каждое событие; повтор не чаще раза в 7 сут | Persistence | `T1136.001` Local Account |
 | Bi.Zone: подозрительная запись в hosts | высокий | BiZone_macOS<br>BI.ZONE NetworkHostsFileInfo | В /etc/hosts появилась запись не из белого списка. Так перенаправляют обновления, антивирус или банк на чужой адрес. | каждое событие; повтор не чаще раза в 7 сут | Impact | `T1565.001` Stored Data Manipulation |
 | Bi.Zone: процесс из /tmp или /Users/Shared | высокий | BiZone_macOS<br>BI.ZONE ProcessInfo | Работает процесс, исполняемый файл которого лежит во временном или общем каталоге (кроме Bi.Zone Triage). Типично для загрузчиков. | каждое событие; повтор не чаще раза в 7 сут | Execution | `T1059` Command and Scripting Interpreter |
 | Bi.Zone: смена DNS-серверов | высокий | BiZone_macOS | В resolv.conf появился DNS-сервер не из белого списка. Возможна подмена DNS (перехват трафика, фишинг). | каждое событие; повтор не чаще раза в 7 сут | — | — |
 | Bi.Zone: новый элемент автозагрузки | средний | BiZone_macOS<br>BI.ZONE AsepInfo | LaunchAgent/LaunchDaemon или другой элемент автозагрузки создан менее суток назад (кроме служб com.homelab.bzt-*). Классический способ закрепления. | каждое событие; повтор не чаще раза в 7 сут | Persistence | `T1543.004` Launch Daemon<br>`T1543.001` |
-| Bi.Zone: опасная команда в истории оболочки | средний | BiZone_macOS<br>BI.ZONE ConsoleCommandInfo | В истории zsh/bash появилась новая опасная команда: curl \| sh, base64 -d, nc -l, csrutil/spctl disable, dump-keychain, dscl -create, /dev/tcp, снятие карантина, launchctl load. Команды… | каждое событие; повтор не чаще раза в 30 сут | Execution | `T1059.004` Unix Shell |
+| Bi.Zone: опасная команда в истории оболочки | средний | BiZone_macOS<br>BI.ZONE ConsoleCommandInfo | В истории zsh/bash появилась новая опасная команда: curl \| sh, base64 -d, nc -l, csrutil/spctl disable, dump-keychain, dscl -create, /dev/tcp, снятие карантина, launchctl load. Команды,… | каждое событие; повтор не чаще раза в 30 сут | Execution | `T1059.004` Unix Shell |
 | Bi.Zone: неудачные входы по SSH | низкий | BiZone_macOS<br>BI.ZONE LogonHistoryFailure | В журнале sshd есть ошибки аутентификации (по снимку Bi.Zone). Повтор не чаще раза в сутки на хост. | каждое событие; повтор не чаще раза в 1 сут | Credential Access | `T1110` Brute Force |
 
 <details><summary>Запросы Graylog (очищенные)</summary>
@@ -1213,13 +1217,13 @@ mac_bz_event_type:SSHKeyInfo AND NOT auth_key_fingerprint:(<белый спис�
 **macOS - Bi.Zone: новое правило в sudoers**
 
 ```
-mac_bz_event_type:SudoersInfo AND NOT sudoers_rule:("%admin ALL = (ALL) ALL" OR "root ALL = (ALL) ALL" OR "example-user ALL=(root) NOPASSWD: /usr/local/bin/example.sh")
+mac_bz_event_type:SudoersInfo AND NOT sudoers_rule:("%admin ALL = (ALL) ALL" OR "logatlas-collect ALL=(root) NOPASSWD: /usr/local/libexec/logatlas/collect.sh" OR "root ALL = (ALL) ALL")
 ```
 
 **macOS - Bi.Zone: новый пользователь**
 
 ```
-mac_bz_event_type:UserInfo AND usr_tgt_id:>=500 AND NOT mac_bz_user:("example-user" OR "nobody")
+mac_bz_event_type:UserInfo AND usr_tgt_id:>=500 AND NOT mac_bz_user:("igor" OR "logatlas-collect" OR "nobody")
 ```
 
 **macOS - Bi.Zone: подозрительная запись в hosts**
@@ -1231,7 +1235,7 @@ mac_bz_event_type:NetworkHostsFileInfo AND inventory_task_name:"LineInFileFound 
 **macOS - Bi.Zone: процесс из /tmp или /Users/Shared**
 
 ```
-mac_bz_event_type:ProcessInfo AND proc_file_path:(\/tmp\/* OR \/private\/tmp\/* OR \/Users\/Shared\/* OR \/private\/var\/tmp\/*) AND NOT proc_file_path:(\/tmp\/bzt.* OR \/private\/tmp\/bzt.* OR \/tmp\/bz_triage_tmp_* OR \/private\/tmp\/bz_triage_tmp_*)
+mac_bz_event_type:ProcessInfo AND proc_file_path:(\/tmp\/* OR \/private\/tmp\/* OR \/Users\/Shared\/* OR \/private\/var\/tmp\/*) AND NOT proc_file_path:(\/tmp\/bzt.* OR \/private\/tmp\/bzt.* OR \/tmp\/bz_triage_tmp_* OR \/private\/tmp\/bz_triage_tmp_* OR \/tmp\/bun-node-* OR \/private\/tmp\/bun-node-*)
 ```
 
 **macOS - Bi.Zone: смена DNS-серверов**
@@ -1249,13 +1253,13 @@ mac_bz_event_type:AsepInfo AND asep_file_age:<86400 AND NOT asep_file_path:\/Lib
 **macOS - Bi.Zone: опасная команда в истории оболочки**
 
 ```
-mac_bz_event_type:ConsoleCommandInfo AND ((message:"csrutil" AND message:"disable") OR (message:"spctl" AND message:"disable") OR (message:"base64" AND message:("-d" OR "--decode" OR "-D")) OR (message:"curl" AND message:("sh" OR "bash")) OR (message:"nc" AND message:"-l") OR message:"ncat" OR message:"dump-keychain" OR message:"find-generic-password" OR (message:"dscl" AND message:"-create") OR message:"/dev/tcp" OR (message:"xattr" AND message:"quarantine") OR (message:"launchctl" AND message:("load" OR "bootstrap"))) AND NOT cmdline:("curl -fsSL http://server.example.domain:8484/setup/host.sh | sudo bash" OR "nc -l 9999 > /tmp/test.out" OR "openssl base64 -d -A < /tmp/example.b64 > /tmp/example.bundle")
+mac_bz_event_type:ConsoleCommandInfo AND ((message:"csrutil" AND message:"disable") OR (message:"spctl" AND message:"disable") OR (message:"base64" AND message:("-d" OR "--decode" OR "-D")) OR (message:"curl" AND message:("sh" OR "bash")) OR (message:"nc" AND message:"-l") OR message:"ncat" OR message:"dump-keychain" OR message:"find-generic-password" OR (message:"dscl" AND message:"-create") OR message:"/dev/tcp" OR (message:"xattr" AND message:"quarantine") OR (message:"launchctl" AND message:("load" OR "bootstrap"))) AND NOT cmdline:("sudo launchctl bootstrap system /Library/LaunchDaemons/ru.bi.zone.bzt-activity.plist\\" OR "sudo launchctl bootstrap system /Library/LaunchDaemons/ru.bi.zone.bzt-persistence.plist\\" OR "sudo launchctl load -w /System/Library/LaunchDaemons/org.net-snmp.snmpd.plist" OR "sudo launchctl load /Library/LaunchDaemons/com.wazuh.agent.plist" OR "sudo launchctl bootstrap system /Library/LaunchDaemons/ru.bi.zone.bzt-${p}.plist\\" OR "sudo launchctl bootstrap system /Library/LaunchDaemons/co.elastic.filebeat.plist\\" OR "sudo launchctl bootstrap system /Library/LaunchDaemons/co.elastic.filebeat.plist" OR "sudo launchctl bootstrap system /Library/LaunchDaemons/com.velocidex.velociraptor.client.plist" OR "sudo launchctl load /Library/LaunchDaemons/com.velocidex.velociraptor.client.plist" OR "sudo launchctl bootstrap system /Library/LaunchDaemons/com.user.logstream.plist\\" OR "sudo launchctl bootstrap system /Library/LaunchDaemons/ru.bi.zone.bzt-baseline.plist\\" OR "nc -l 19095 > /tmp/bz_cap.out 2>/tmp/bz_cap.err &\\" OR "nc -l 19095 > /tmp/bz_capture.out 2>/tmp/bz_capture.err &\\" OR "nc -l 5555 > /tmp/bzt_test/stream.bin" OR "sudo launchctl bootstrap system /Library/LaunchDaemons/com.homelab.bzt-stream.plist 2>/dev/null \\\\" OR "sudo launchctl load /Library/LaunchDaemons/co.elastic.filebeat.plist" OR "sudo launchctl load /Library/LaunchDaemons/io.osquery.agent.plist" OR "timeout 3 bash -c 'cat < /dev/null > /dev/tcp/<IP>/9095' && echo OPEN || echo BLOCKED" OR "|| sudo launchctl load -w /Library/LaunchDaemons/com.homelab.bzt-stream.plist" OR "curl -fsSL http://<домен>:8484/setup/host.sh | sudo bash" OR "sudo launchctl bootstrap system /Library/LaunchDaemons/com.velocidex.velociraptor.plist" OR "sudo launchctl bootstrap system /Library/LaunchDaemons/io.osquery.agent.plist" OR "sudo launchctl load /Library/LaunchDaemons/com.example.bzt-collector.plist\\" OR "sudo nc -l 9999 > /tmp/bzt-test.out &" OR "launchctl bootstrap system /Library/LaunchDaemons/ru.bi.zone.bzt-fast.plist" OR "launchctl bootstrap system /Library/LaunchDaemons/ru.bi.zone.bzt-slow.plist" OR "nc -l 9998 > /tmp/test-nc.out" OR "sudo launchctl bootstrap system /Library/LaunchDaemons/com.example.bzt-collector.plist\\" OR "sudo launchctl bootstrap system /Library/LaunchDaemons/com.user.logstream.plist" OR "sudo launchctl load /Library/LaunchDaemons/com.bzt.stream.plist" OR "sudo launchctl load /Library/LaunchDaemons/com.graylog.logstream.plist" OR "sudo launchctl load /Library/LaunchDaemons/com.user.logstream.plist\\" OR "sudo launchctl load /Library/LaunchDaemons/org.syslog-ng.plist" OR "sudo nc -l 9998 > /tmp/test1.out &\\" OR "sudo nc -l 9999 > /tmp/test2.out &\\" OR "/bin/bash -c \"$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)\"" OR "launchctl bootstrap" OR "nc -l 9096 > /tmp/bzt_manual.log" OR "nc -l 9999 > /tmp/local_received.json\\" OR "openssl base64 -d -A < /tmp/la-fix.b64 > /tmp/la-fix.bundle" OR "openssl base64 -d -A < /tmp/la.b64 > /tmp/logatlas-release.bundle" OR "openssl base64 -d -A < /tmp/zs-fix.b64 > /tmp/zs-fix.bundle" OR "openssl base64 -d -A < /tmp/zs.b64 > /tmp/zaslon-release.bundle" OR "sh -c \"$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)\"" OR "sudo launchctl bootstrap system /Library/LaunchDaemons/ru.bi.zone.bzt-activity.plist 2>/dev/null\\" OR "sudo launchctl bootstrap system /Library/LaunchDaemons/ru.bi.zone.bzt-baseline.plist 2>/dev/null\\" OR "sudo launchctl bootstrap system /Library/LaunchDaemons/ru.bi.zone.bzt-fast.plist\\" OR "sudo launchctl bootstrap system /Library/LaunchDaemons/ru.bi.zone.bzt-persistence.plist 2>/dev/null\\" OR "sudo launchctl load -w /Library/LaunchDaemons/co.elastic.filebeat.plist\\" OR "sudo launchctl load /Library/LaunchDaemons/com.example.bzt-collector.plist" OR "sudo launchctl load /Library/LaunchDaemons/com.velocidex.velociraptor.client.plist\\" OR "curl -fsSL http://<домен>:8484/setup/host.sh | sudo bash" OR "grep -E \"bash|zsh|sudo|curl|python|ssh\" strings.txt | head -30\\" OR "nc -l 9095 > /tmp/bzt_listen.log" OR "strings memory.raw | grep -E \"bash|zsh|sudo|curl\" > commands.txt\\" OR "sudo launchctl bootstrap system --force /Library/LaunchDaemons/co.elastic.filebeat.plist" OR "sudo launchctl bootstrap system /Library/LaunchDaemons/com.example.bzt-collector.plist" OR "sudo launchctl bootstrap system /Library/LaunchDaemons/com.user.streamapps.plist\\" OR "sudo launchctl load /Library/LaunchDaemons/com.user.logstream.plist" OR "sudo launchctl load /Library/LaunchDaemons/io.osquery.agent.plist\\" OR "sudo launchctl load /System/Library/LaunchDaemons/com.apple.syslogd.plist 2>/dev/null" OR "sudo launchctl load com.velocidex.velociraptor.client") AND NOT message:("<домен>" OR "downloads.graylog.org")
 ```
 
 **macOS - Bi.Zone: неудачные входы по SSH**
 
 ```
-mac_bz_event_type:LogonHistoryFailure
+mac_bz_event_type:LogonHistoryFailure AND NOT script_output:"Timestamp                       (process)[PID]"
 ```
 
 </details>
@@ -1266,15 +1270,15 @@ syslog роутера; поток Syslog Logs. Правил: 9. Сортиров
 
 | Правило | Приоритет | Источник логов | Что проверяет | Корреляция | Тактика | Техника |
 |---|---|---|---|---|---|---|
-| Вход в админку роутера (SSH) | высокий | Syslog Logs<br>событие Keenetic SSH_Connection, SSH_Success | SSH-подключение к роутеру Keenetic с адреса вне белого списка (сервер мониторинга и рабочие хосты). | каждое событие | Lateral Movement | `T1021.004` SSH |
+| Вход в админку роутера (SSH) | высокий | Syslog Logs<br>событие Keenetic SSH_Connection, SSH_Success | SSH-подключение к роутеру Keenetic с IP, не входящего в белый список (сервер мониторинга <IP> и <IP>). | каждое событие | Lateral Movement | `T1021.004` SSH |
 | Отказ во входе на роутер | высокий | Syslog Logs<br>событие Keenetic Auth_Denied | Отказ в доступе к роутеру (Auth_Denied). | каждое событие | Credential Access | `T1110` Brute Force |
 | ARP-конфликт на новом адресе | средний | Syslog Logs<br>событие Keenetic ARP_Conflict | Конфликт ARP (два MAC на одном IP) на адресе, которого нет среди постоянных пар. Исключены <IP>, .54, .118, .38, .117, .146, .145: у них за месяц десятки тысяч конфликтов из-за двух… | каждое событие | Credential Access | `T1557.002` ARP Cache Poisoning |
 | Блокировка адреса за попытки входа в веб-интерфейс | средний | Syslog Logs | Роутер заблокировал удалённый адрес за подбор или сканирование веб-интерфейса (Netfilter Lockout, ban remote host). Адреса из интернета означают, что веб-интерфейс доступен снаружи. | каждое событие | Credential Access | `T1110` Brute Force |
-| Новое устройство в сети | средний | Syslog Logs<br>событие Keenetic DHCP_Request | DHCP выдал адрес устройству, MAC которого отсутствует в белом списке. Возможно подключение нового клиента. | каждое событие; повтор не чаще раза в 7 сут | Initial Access | `T1200` Hardware Additions |
+| Новое устройство в сети | средний | Syslog Logs<br>событие Keenetic DHCP_Request | DHCP выдал адрес устройству, MAC которого отсутствует в белом списке (15 MAC на 17.10.2026). Возможно подключение нового клиента. | каждое событие; повтор не чаще раза в 7 сут | Initial Access | `T1200` Hardware Additions |
 | Сканирование веб-интерфейса из интернета | средний | Syslog Logs | Запросы к веб-интерфейсу роутера несуществующих или служебных файлов (.env, readme.html и т. п.): типичное сканирование уязвимостей. | каждое событие | Reconnaissance | `T1595.002` Vulnerability Scanning<br>`T1190` |
 | Сохранена конфигурация роутера | средний | Syslog Logs | Конфигурация роутера сохранена (StartupConfig: configuration saved). Событие редкое: сверьте, что это ваша правка. | каждое событие | Defense Impairment | `T1686` Disable or Modify System Firewall |
 | Обрыв PPPoE-соединения с провайдером | низкий | Syslog Logs | Роутер потерял PPPoE-соединение с провайдером (pppd: Connection terminated или Modem hangup). Интернет пропал или роутер переподключился. | каждое событие; повтор не чаще раза в 1 ч | — | — |
-| Отказы WireGuard (ежедневная сводка) | низкий | Syslog Logs<br>событие Keenetic Wireguard_Failed | Количество неудачных WireGuard-handshake за прошедшие сутки. Высокое число (сотни или тысячи) может означать подбор ключа или сканирование извне. Проверяется раз в сутки, одно письмо в день. | число событий ≥ 1 за 1 сут, группировка по source | Persistence | `T1133` External Remote Services |
+| Отказы WireGuard (ежедневная сводка) | низкий | Syslog Logs<br>событие Keenetic Wireguard_Failed | Количество неудачных WireGuard-handshake за прошедшие сутки. Высокое число (сотни-тысячи) может означать подбор ключа или скан извне. Проверяется раз в сутки в 09:00, одно письмо в день. | число событий ≥ 1 за 1 сут, группировка по source | Persistence | `T1133` External Remote Services |
 
 <details><summary>Запросы Graylog (очищенные)</summary>
 
@@ -1299,25 +1303,25 @@ kn_event_type:ARP_Conflict AND NOT kn_conflict_ip:(<белый список>)
 **KEENETIC - Блокировка адреса за попытки входа в веб-интерфейс**
 
 ```
-source:"<роутер>" AND message:"Lockout" AND message:"ban remote host"
+source:"Keenetic-7625" AND message:"Lockout" AND message:"ban remote host"
 ```
 
 **KEENETIC - Новое устройство в сети**
 
 ```
-kn_event_type:DHCP_Request AND NOT kn_mac:(<белый список MAC>)
+kn_event_type:DHCP_Request AND NOT kn_mac:(<белый список>)
 ```
 
 **KEENETIC - Сканирование веб-интерфейса из интернета**
 
 ```
-source:"<роутер>" AND message:"Core::Scgi::Session" AND (message:"unsupported file path" OR message:"not found")
+source:"Keenetic-7625" AND message:"Core::Scgi::Session" AND (message:"unsupported file path" OR message:"not found")
 ```
 
 **KEENETIC - Сохранена конфигурация роутера**
 
 ```
-source:"<роутер>" AND message:"StartupConfig" AND message:"configuration saved"
+source:"Keenetic-7625" AND message:"StartupConfig" AND message:"configuration saved"
 ```
 
 **KEENETIC - Обрыв PPPoE-соединения с провайдером**
@@ -1336,7 +1340,7 @@ kn_event_type:Wireguard_Failed
 
 ## FreeIPA и здоровье сервисов
 
-аудит FreeIPA и служебные проверки. Правил: 23. Сортировка: сначала высокий приоритет.
+аудит FreeIPA и служебные проверки. Правил: 27. Сортировка: сначала высокий приоритет.
 
 | Правило | Приоритет | Источник логов | Что проверяет | Корреляция | Тактика | Техника |
 |---|---|---|---|---|---|---|
@@ -1345,23 +1349,27 @@ kn_event_type:Wireguard_Failed
 | Изменение политик паролей, Kerberos и конфигурации (API) | высокий | FreeIPA Logs<br>приложение freeipa_httpd_error | Изменены политики паролей, времени жизни Kerberos-билетов, глобальная конфигурация или доверительные отношения. Так ослабляют защиту. | каждое событие; повтор не чаще раза в 1 ч | Credential Access | `T1556` Modify Authentication Process |
 | Изменение привилегированных групп и ролей (API) | высокий | FreeIPA Logs<br>приложение freeipa_httpd_error | Через API изменены роли, привилегии или группа admins. Так повышают права в домене. | каждое событие; повтор не чаще раза в 1 ч | Privilege Escalation | `T1098` Account Manipulation |
 | Остановка служб IPA на сервере (dirsrv, krb5kdc, httpd, pki) | высокий | RedOS auditd Logs<br>auditd SERVICE_STOP | На сервере FreeIPA остановлена одна из служб домена. Без неё не работают вход, DNS и сертификаты. | каждое событие; повтор не чаще раза в 1 ч | Defense Impairment | `T1685` Disable or Modify Tools |
-| Подбор пароля (10+ PREAUTH_FAILED за 5 мин) | высокий | FreeIPA Logs | Серия отказов предварительной аутентификации Kerberos на контроллере домена. Возможен подбор пароля доменной учётной записи (password spray). | число событий ≥ 10 за 5 мин, группировка по source | Credential Access | `T1110.001` Password Guessing |
-| Клиенты не могут связаться с KDC | высокий | RedOS auditd Logs | На хостах auditd/sssd сообщает «Cannot contact any KDC for realm». Признак того, что контроллер домена FreeIPA упал или недоступен по сети. | каждое событие | — | — |
+| Подбор пароля (10+ PREAUTH_FAILED за 5 мин) | высокий | FreeIPA Logs | Серия отказов предварительной аутентификации Kerberos на DC. Возможен подбор пароля доменной учётной записи (password spray). | число событий ≥ 10 за 5 мин, группировка по source | Credential Access | `T1110.001` Password Guessing |
+| Клиенты не могут связаться с KDC | высокий | RedOS auditd Logs | На хостах auditd/sssd сообщает "Cannot contact any KDC for realm". Признак того, что контроллер домена FreeIPA упал или недоступен по сети. | каждое событие | — | — |
 | Kerberos: вход отключённой, заблокированной или просроченной учётной записи | средний | FreeIPA Logs<br>приложение freeipa_krb5kdc | KDC отказал: учётная запись отключена, заблокирована, или истёк срок ключа. Использование чужих или забытых учётных записей. | каждое событие; повтор не чаще раза в 1 ч | Initial Access | `T1078` Valid Accounts |
-| Выпуск сертификата в CA (Dogtag) | средний | FreeIPA Logs<br>приложение freeipa_389_audit | Запрос на выпуск сертификата через CA FreeIPA (Dogtag). Выпуски должны происходить только при добавлении новых сервисов или хостов. Внезапный массовый выпуск — повод проверить. | каждое событие | Credential Access | `T1649` Steal or Forge Authentication Certificates |
+| Выпуск сертификата в CA (Dogtag) | средний | FreeIPA Logs<br>приложение freeipa_389_audit | Запрос на выпуск сертификата через CA FreeIPA (Dogtag). Выпуски должны происходить только при добавлении новых сервисов/хостов. Внезапный массовый выпуск — повод проверить. | каждое событие | Credential Access | `T1649` Steal or Forge Authentication Certificates |
 | Изменение пользователей, групп и правил через API | средний | FreeIPA Logs<br>приложение freeipa_httpd_error | Администратор FreeIPA изменил пользователей, группы, правила HBAC или sudo, роли, пароли или хосты через API. В журнале записаны только такие вызовы, чтения (show, find) не учитываются.… | каждое событие | Persistence | `T1098` Account Manipulation<br>`T1136` |
 | Массовая выгрузка из каталога LDAP (100+ записей за запрос) | средний | FreeIPA Logs<br>приложение freeipa_389_access | Один LDAP-запрос вернул сто и более записей. Разведка по каталогу или выгрузка учётных записей. | каждое событие; повтор не чаще раза в 1 ч | Discovery | `T1087.002` Domain Account<br>`T1018` |
 | Неудачный вход в веб-интерфейс | средний | FreeIPA Logs<br>приложение freeipa_httpd_access | Веб-интерфейс FreeIPA ответил 401 на вход по паролю. Одиночный случай значит опечатку, серия значит подбор пароля. | каждое событие | Credential Access | `T1110` Brute Force |
 | Прямое изменение атрибутов безопасности в каталоге (389) | средний | FreeIPA Logs<br>приложение freeipa_389_audit | В журнале аудита 389 DS изменён атрибут блокировки, пароля или ключа Kerberos. | каждое событие; повтор не чаще раза в 1 ч | Persistence | `T1098` Account Manipulation |
 | Разблокировка учётной записи, ключи и сертификаты пользователя (API) | средний | FreeIPA Logs<br>приложение freeipa_httpd_error | Разблокирована или включена учётная запись, изменены OTP-токены, сертификаты или альтернативные имена пользователя. | каждое событие; повтор не чаще раза в 1 ч | Persistence | `T1098` Account Manipulation |
 | Сбои certmonger (продление сертификатов) | средний | FreeIPA Logs | Certmonger не смог продлить или получить сертификат. Сертификаты сервера могут истечь, после чего FreeIPA перестанет работать. | каждое событие; повтор не чаще раза в 1 сут | — | — |
+| Тишина: <хост> не шлёт логи (час) | средний | MacOS Logs | За последний час от <хост> не пришло ни одного сообщения. Агент сбора остановился, Mac выключен или пропала сеть. | число событий < 1 за 1 ч; повтор не чаще раза в 1 сут | — | — |
 | Тишина: FreeIPA (3 часа) | средний | FreeIPA Logs | За 3 часа не пришло ни одного сообщения от FreeIPA. Сервер или доставка логов остановились. | число событий < 1 за 3 ч; повтор не чаще раза в 1 сут | — | — |
+| Тишина: HomeRepo (3 часа) | средний | HomeRepo | За 3 часа панель HomeRepo не прислала ни одного пульса (hr_event=heartbeat, уходит раз в час от сторожа панели). Панель, служба homerepo-web или доставка GELF остановились — проверить… | число событий < 1 за 3 ч; повтор не чаще раза в 1 сут | — | — |
+| Тишина: HostDeck (3 часа) | средний | HostDeck | За 3 часа панель HostDeck не прислала ни одного пульса (hd_event=heartbeat, уходит раз в час от панели). Панель, контейнер hostdeck или доставка GELF остановились — проверить сервер.… | число событий < 1 за 3 ч; повтор не чаще раза в 1 сут | — | — |
 | Тишина: Keenetic не шлёт логи (час) | средний | Syslog Logs | За последний час от роутера не пришло ни одного сообщения. Роутер или связь с Graylog отвалились. | число событий < 1 за 1 ч; повтор не чаще раза в 1 сут | — | — |
-| Тишина: MacMiniM2 не шлёт логи (час) | средний | MacOS Logs | За последний час от MacMiniM2 не пришло ни одного сообщения. Агент сбора остановился, Mac выключен или пропала сеть. | число событий < 1 за 1 ч; повтор не чаще раза в 1 сут | — | — |
-| Тишина: auditd на redos-server (час) | средний | RedOS auditd Logs | За последний час от redos-server не пришло ни одного события auditd. Служба или доставка логов остановились. | число событий < 1 за 1 ч; повтор не чаще раза в 1 сут | — | — |
+| Тишина: TrafficLens (3 часа) | средний | TrafficLens | За 3 часа сервис TrafficLens не прислал ни одного пульса (tl_event=heartbeat, уходит раз в час). Контейнер trafficlens или доставка GELF остановились — проверить сервер. Пока сервис… | число событий < 1 за 3 ч; повтор не чаще раза в 1 сут | — | — |
+| Тишина: ZaSlon (3 часа) | средний | ZaSlon | За 3 часа панель ZaSlon не прислала ни одного пульса (zs_event=heartbeat, уходит раз в час от панели). Панель, контейнер zaslon или доставка GELF остановились — проверить сервер. Пока… | число событий < 1 за 3 ч; повтор не чаще раза в 1 сут | — | — |
+| Тишина: auditd на <хост> (час) | средний | RedOS auditd Logs | За последний час от <хост> не пришло ни одного события auditd. Служба или доставка логов остановились. | число событий < 1 за 1 ч; повтор не чаще раза в 1 сут | — | — |
 | Kerberos: расхождение часов (CLOCK_SKEW) | низкий | FreeIPA Logs<br>приложение freeipa_krb5kdc | Клиент отправил запрос с расхождением часов больше допустимого. Kerberos перестанет работать для этого хоста. | каждое событие; повтор не чаще раза в 1 ч | — | — |
 | Успешный вход в веб-интерфейс | низкий | FreeIPA Logs<br>приложение freeipa_httpd_access | Успешный вход по паролю в веб-интерфейс FreeIPA. Входов мало (около 10 в месяц), все видны. | каждое событие; повтор не чаще раза в 1 ч | Initial Access | `T1078` Valid Accounts |
-| Тишина: MacBook-Pro не шлёт логи (3 часа) | низкий | MacOS Logs | За 3 часа от MacBook-Pro не пришло ни одного сообщения. Ноутбук мог уснуть или выключиться, поэтому приоритет низкий. | число событий < 1 за 3 ч; повтор не чаще раза в 1 сут | — | — |
+| Тишина: <хост> не шлёт логи (3 часа) | низкий | MacOS Logs | За 3 часа от <хост> не пришло ни одного сообщения. Ноутбук мог уснуть или выключиться, поэтому приоритет низкий. | число событий < 1 за 3 ч; повтор не чаще раза в 1 сут | — | — |
 | Тишина: macOS (сутки) | низкий | MacOS Logs | За сутки не пришло ни одного сообщения от Mac-хостов. Агент сбора остановился или все Mac выключены. | число событий < 1 за 1 сут; повтор не чаще раза в 1 сут | — | — |
 
 <details><summary>Запросы Graylog (очищенные)</summary>
@@ -1456,10 +1464,28 @@ application_name:freeipa_httpd_error AND message:"ipa: INFO" AND message:(user_u
 message:certmonger AND NOT message:ansible* AND message:("Cannot contact" OR CA_UNREACHABLE OR NEED_GUIDANCE OR CA_REJECTED OR "ca-error")
 ```
 
+**HEALTH - Тишина: <хост> не шлёт логи (час)**
+
+```
+source:macminim2
+```
+
 **HEALTH - Тишина: FreeIPA (3 часа)**
 
 ```
 *
+```
+
+**HEALTH - Тишина: HomeRepo (3 часа)**
+
+```
+hr_event:heartbeat
+```
+
+**HEALTH - Тишина: HostDeck (3 часа)**
+
+```
+hd_event:heartbeat
 ```
 
 **HEALTH - Тишина: Keenetic не шлёт логи (час)**
@@ -1468,16 +1494,22 @@ message:certmonger AND NOT message:ansible* AND message:("Cannot contact" OR CA_
 *
 ```
 
-**HEALTH - Тишина: MacMiniM2 не шлёт логи (час)**
+**HEALTH - Тишина: TrafficLens (3 часа)**
 
 ```
-source:macminim2
+tl_event:heartbeat
 ```
 
-**HEALTH - Тишина: auditd на redos-server (час)**
+**HEALTH - Тишина: ZaSlon (3 часа)**
 
 ```
-source:redos-server
+zs_event:heartbeat
+```
+
+**HEALTH - Тишина: auditd на <хост> (час)**
+
+```
+source:<хост>
 ```
 
 **FREEIPA - Kerberos: расхождение часов (CLOCK_SKEW)**
@@ -1492,7 +1524,7 @@ application_name:freeipa_krb5kdc AND message:CLOCK_SKEW
 application_name:freeipa_httpd_access AND message:"login_password http 1.1 200"
 ```
 
-**HEALTH - Тишина: MacBook-Pro не шлёт логи (3 часа)**
+**HEALTH - Тишина: <хост> не шлёт логи (3 часа)**
 
 ```
 source:macbook-pro
@@ -1515,12 +1547,12 @@ Docker-логи через promtail и Filebeat; поток Containers. Прав
 | Контейнеры: Grafana — неудачный вход (подбор пароля) | высокий | Containers<br>контейнер grafana | Больше 5 неудачных входов в Grafana за 5 минут. | число событий > 5 за 5 мин, группировка по container_name; повтор не чаще раза в 1 ч | Credential Access | `T1110` Brute Force |
 | Контейнеры: нехватка памяти или падение процесса | высокий | Containers | В логах контейнера OOM, Killed process, segfault или core dumped. | число событий > 0 за 5 мин, группировка по container_name; повтор не чаще раза в 1 ч | — | — |
 | Контейнеры: перезапуски MariaDB | высокий | Containers<br>контейнер observiumdb | Больше 2 запусков entrypoint MariaDB (контейнер observiumdb) за 15 минут — цикл перезапусков БД Observium. | число событий > 2 за 15 мин, группировка по container_name | — | — |
-| Контейнеры: тишина — atrium | высокий | Containers<br>контейнер atrium | Контейнер atrium не прислал ни одного сообщения за 15 минут — остановлен или завис. | число событий < 1 за 1 ч; повтор не чаще раза в 1 сут | — | — |
-| Контейнеры: тишина — grafana | высокий | Containers<br>контейнер grafana | Контейнер grafana не прислал ни одного сообщения за 15 минут — остановлен или завис. | число событий < 1 за 1 ч; повтор не чаще раза в 1 сут | — | — |
-| Контейнеры: тишина — komodo_mongo_1 | высокий | Containers<br>контейнер komodo_mongo_1 | Контейнер komodo_mongo_1 не прислал ни одного сообщения за 15 минут — остановлен или завис. | число событий < 1 за 1 ч; повтор не чаще раза в 1 сут | — | — |
-| Контейнеры: тишина — loki | высокий | Containers<br>контейнер loki | Контейнер loki не прислал ни одного сообщения за 15 минут — остановлен или завис. | число событий < 1 за 1 ч; повтор не чаще раза в 1 сут | — | — |
-| Контейнеры: тишина — netalertx | высокий | Containers<br>контейнер netalertx | Контейнер netalertx не прислал ни одного сообщения за 15 минут — остановлен или завис. | число событий < 1 за 1 ч; повтор не чаще раза в 1 сут | — | — |
-| Контейнеры: тишина — wazuh.dashboard | высокий | Containers<br>контейнер wazuh.dashboard | Контейнер wazuh.dashboard не прислал ни одного сообщения за 15 минут — остановлен или завис. | число событий < 1 за 1 ч; повтор не чаще раза в 1 сут | — | — |
+| Контейнеры: тишина — atrium | высокий | Containers<br>контейнер atrium | Контейнер atrium не прислал ни одного сообщения за час — остановлен или завис. | число событий < 1 за 1 ч; повтор не чаще раза в 1 сут | — | — |
+| Контейнеры: тишина — grafana | высокий | Containers<br>контейнер grafana | Контейнер grafana не прислал ни одного сообщения за час — остановлен или завис. | число событий < 1 за 1 ч; повтор не чаще раза в 1 сут | — | — |
+| Контейнеры: тишина — komodo_mongo_1 | высокий | Containers<br>контейнер komodo_mongo_1 | Контейнер komodo_mongo_1 не прислал ни одного сообщения за час — остановлен или завис. | число событий < 1 за 1 ч; повтор не чаще раза в 1 сут | — | — |
+| Контейнеры: тишина — loki | высокий | Containers<br>контейнер loki | Контейнер loki не прислал ни одного сообщения за час — остановлен или завис. | число событий < 1 за 1 ч; повтор не чаще раза в 1 сут | — | — |
+| Контейнеры: тишина — netalertx | высокий | Containers<br>контейнер netalertx | Контейнер netalertx не прислал ни одного сообщения за час — остановлен или завис. | число событий < 1 за 1 ч; повтор не чаще раза в 1 сут | — | — |
+| Контейнеры: тишина — wazuh.dashboard | высокий | Containers<br>контейнер wazuh.dashboard | Контейнер wazuh.dashboard не прислал ни одного сообщения за час — остановлен или завис. | число событий < 1 за 1 ч; повтор не чаще раза в 1 сут | — | — |
 | Контейнеры: тишина — zaslon | высокий | Containers<br>контейнер zaslon | Контейнер zaslon не прислал ни одного сообщения за 15 минут — остановлен или завис. | число событий < 1 за 15 мин; повтор не чаще раза в 1 ч | — | — |
 | Контейнеры: тишина — нет логов ни от одного контейнера | высокий | Containers | Поток Containers не получил ни одного сообщения за 10 минут — упал input «Podman Logs», Graylog или все хосты разом. | число событий < 1 за 10 мин; повтор не чаще раза в 1 ч | — | — |
 | Контейнеры: Loki — ошибки приёма | средний | Containers<br>контейнер loki | Loki пишет level=error (например, write operation failed). | число событий > 0 за 15 мин, группировка по container_name; повтор не чаще раза в 1 ч | — | — |
@@ -1528,7 +1560,7 @@ Docker-логи через promtail и Filebeat; поток Containers. Прав
 | Контейнеры: netalertx — новое устройство в сети | средний | Containers<br>контейнер netalertx | Скан netalertx нашёл новые устройства (New Devices больше нуля). | число событий > 0 за 5 мин, группировка по container_name; повтор не чаще раза в 1 ч | Initial Access | `T1200` Hardware Additions |
 | Контейнеры: promtail не доставляет логи в Loki | средний | Containers<br>контейнер promtail | Больше 15 ошибок «context deadline exceeded» за 10 минут на одном хосте — promtail не может записать в Loki. | число событий > 15 за 10 мин, группировка по source; повтор не чаще раза в 1 ч | — | — |
 | Контейнеры: всплеск ошибок | средний | Containers | Больше 10 реальных ошибок за 5 минут в одном контейнере: loglevel error/warn/fatal (loki/promtail) или ключевые слова error/fatal/panic/exception/traceback в message. Исключены cadvisor,… | число событий > 10 за 5 мин, группировка по container_name | — | — |
-| Контейнеры: ошибки прав доступа | средний | Containers | Больше 50 сообщений «Operation not permitted» за 10 минут в одном контейнере. | число событий > 50 за 10 мин, группировка по container_name | — | — |
+| Контейнеры: ошибки прав доступа | средний | Containers | Больше 50 сообщений Operation not permitted за 10 минут | число событий > 50 за 10 мин, группировка по container_name | — | — |
 | Контейнеры: netalertx — всплеск объёма логов | низкий | Containers<br>контейнер netalertx | Больше чем втрое выше обычного: более 4500 сообщений netalertx за 15 минут (норма около 1500). | число событий > 4500 за 15 мин, группировка по container_name; повтор не чаще раза в 1 ч | — | — |
 
 <details><summary>Запросы Graylog (очищенные)</summary>
@@ -1639,6 +1671,304 @@ message:"Operation not permitted" AND _exists_:container_name
 
 ```
 container_name:netalertx
+```
+
+</details>
+
+## Экосистема и служебные правила
+
+AUDIT, HOMEREPO, HOSTDECK, TRAFFICLENS, ZASLON, CANARY, COWRIE, DIFFWATCH, DIGEST, LABSCORE, LOGATLAS и SANDBOX. Правил: 41. Сортировка: сначала высокий приоритет.
+
+| Правило | Приоритет | Источник логов | Что проверяет | Корреляция | Тактика | Техника |
+|---|---|---|---|---|---|---|
+| Запуск программы из временного каталога | высокий | RedOS auditd Logs | Выполнен бинарник или скрипт из /tmp, /var/tmp или /dev/shm — классическое место распаковки дропперов и малвари. Команда и аргументы — в тексте события (EXECVE). | каждое событие | — | — |
+| Изменение файлов учётных записей | высокий | RedOS auditd Logs | Изменены /etc/passwd, /etc/shadow, /etc/group или /etc/gshadow — создание или правка учётной записи (persistence). Файл и операция — в тексте события. | каждое событие | — | — |
+| Работа с модулями ядра | высокий | RedOS auditd Logs | Запущены insmod/modprobe/rmmod или изменён /etc/modprobe.d — загрузка или выгрузка модулей ядра (rootkit-активность). Команда — в тексте события. | каждое событие | — | — |
+| Логин в ловушку | высокий | Canary | Кто-то ввёл логин/пароль в ловушку canary (Telnet 2323 или HTTP Basic 8081). Легитимных обращений к ловушке нет: это сканер с подбором паролей или злоумышленник в сети. Логин и пароль —… | каждое событие | — | — |
+| Открытие honeytoken-файла | высокий | RedOS auditd Logs | Чтение канареечного файла (passwords.xlsx, backup_credentials.txt) — признак разведки или компрометации хоста | число событий ≥ 1 за 1 мин, группировка по source | — | — |
+| Команда в honeypot | высокий | Cowrie | Внутри honeypot выполнена команда: разведка (uname, ip a), закачка (wget/curl), запуск вредоноса. Текст команды — в поле input, адрес — src_ip. | каждое событие | — | — |
+| Скачивание файла в honeypot | высокий | Cowrie | Злоумышленник скачал файл внутрь honeypot (wget/curl) — адрес и URL в полях события, файл сохранён в var/lib/cowrie/downloads. URL и хэш — готовые IOC для TrafficLens. | каждое событие | — | — |
+| Успешный вход в honeypot | высокий | Cowrie | Злоумышленник подобрал пароль и вошёл в SSH/Telnet honeypot (порт 2222/2223). Логин, пароль, адрес и клиент (hassh) — в полях события; дальше обычно следуют команды разведки. | каждое событие | — | — |
+| Изменение автозагрузки (unit/cron) | высокий | DiffWatch | DiffWatch: добавление/удаление/изменение systemd-юнита или crontab — возможное закрепление | каждое событие | — | — |
+| Новый открытый порт | высокий | DiffWatch | DiffWatch: появился слушающий порт — кто-то поднял сервис на хосте | каждое событие | — | — |
+| Переподпись, удаление пакетов или смена ключа репозитория | высокий | HomeRepo | В HomeRepo переподписаны пакеты (в том числе чужие), удалены пакеты или изменён ключ подписи. Всё, что подписано ключом репозитория, устройства установят без вопросов: такие действия… | каждое событие | Initial Access | `T1195.002` Compromise Software Supply Chain |
+| Подбор пароля к панели (5+ неудачных входов за 10 мин) | высокий | HomeRepo | Пять и более неудачных входов в панель HomeRepo с одного адреса за 10 минут. Панель хранит репозиторий, которому доверяют все устройства, поэтому подбор к ней — повод разобраться сразу. | число событий ≥ 5 за 10 мин, группировка по hr_client_ip; повтор не чаще раза в 1 ч | Credential Access | `T1110` Brute Force |
+| Подбор пароля (5+ неудачных входов за 10 мин) | высокий | HostDeck | Пять и более неудачных входов в HostDeck за 10 минут. У HostDeck есть консоль root, поэтому учётная запись администратора — ценная цель. | число событий ≥ 5 за 10 мин, группировка по hd_detail; повтор не чаще раза в 1 ч | Credential Access | `T1110` Brute Force |
+| Проверка безопасности перешла в fail | высокий | HostDeck | Проверка HostDeck на хосте перешла в fail с учётом профиля и исключений: выключено шифрование диска, хост выпал из домена, SELinux или межсетевой экран выключены, вышли обновления… | каждое событие; повтор не чаще раза в 1 ч | Defense Impairment | `T1685` Disable or Modify Tools |
+| Находка высокой важности в разборе журналов | высокий | LogAtlas | LogAtlas разобрал архив журналов хоста, и сработало правило критичной или высокой важности (встроенное или импортированное правило Sigma). Хост — la_host, правило — la_rule_title, когда… | каждое событие | — | — |
+| Подозрительное поведение файла | высокий | Sandbox | Песочница-мини: у образца сетевые обращения, работа с системными путями, дочерние процессы или URL по IP-литералу | каждое событие | — | — |
+| Адрес из базы IOC в логах хостов | высокий | Syslog Logs, WindowsLogs, RedOS auditd Logs | Правило pipeline сверило адрес из логов (бан Keenetic, вход в Linux, вход в Windows) с lookup table trafficlens-iocs, которую TrafficLens отдаёт по HTTP, и поставило tl_ioc_hit=true.… | каждое событие; повтор не чаще раза в 1 ч | Command and Control | `T1071` Application Layer Protocol |
+| Компрометация по итогам анализа трафика | высокий | TrafficLens | TrafficLens разобрал запись трафика (загрузка или живой захват) и выставил итог «Компрометация»: есть совпадение с IOC, сигнатура Suricata высокой важности или файл из базы. Причины и… | каждое событие | — | — |
+| Обращение к индикатору компрометации | высокий | TrafficLens | В трафике найдено обращение к индикатору из базы TrafficLens с уверенностью не ниже 70: адрес, домен, URL, хэш файла или отпечаток JA3/JA4. Где найдено — поле tl_contexts, какие хосты —… | каждое событие; повтор не чаще раза в 1 ч | Command and Control | `T1071` Application Layer Protocol |
+| Ретропроверка: прошлый трафик совпал с новым IOC | высокий | TrafficLens | Индикатор появился в базе после анализа, а трафик с ним уже был: TrafficLens перепроверил прошлые задачи после обновления IOC. Когда это было в трафике — поле tl_seen_ts. | каждое событие | Command and Control | `T1071` Application Layer Protocol |
+| firewalld остановлен из панели | высокий | ZaSlon | Через ZaSlon остановлена служба firewalld: хост остался без межсетевого экрана. Если остановка с таймером отката не была подтверждена, ZaSlon вернёт службу сам (zs_op:tx_rollback). | каждое событие | Defense Impairment | `T1685` Disable or Modify Tools |
+| Подбор пароля к панели (5+ неудачных входов за 10 мин) | высокий | ZaSlon | Пять и более неудачных входов в панель ZaSlon с одного адреса за 10 минут. Своего ограничения частоты входа у панели нет, поэтому подбор замечает Graylog. Адрес клиента — поле… | число событий ≥ 5 за 10 мин, группировка по zs_client_ip; повтор не чаще раза в 1 ч | Credential Access | `T1110` Brute Force |
+| Base64-декодирование в командной строке | средний | RedOS auditd Logs | В командной строке выполнено base64 -d/--decode — обфускация команд (часто связка echo BASE64 \| base64 -d \| bash). Команда — в тексте события. | каждое событие | — | — |
+| Изменение systemd-юнитов | средний | RedOS auditd Logs | Изменены юниты systemd (/etc/systemd/system или ~/.config/systemd/user) — установка сервиса (persistence). Файл — в тексте события. | каждое событие | — | — |
+| Изменение расписаний cron | средний | RedOS auditd Logs | Изменены файлы cron (/etc/cron.d, /etc/crontab, /var/spool/cron) — создание или правка задачи (persistence). Файл — в тексте события. | каждое событие | — | — |
+| Касание ловушки | средний | Canary | TCP-подключение к порту-ловушке canary (SMB 445, MSSQL 1433, MySQL 3306, VNC 5900, Redis 6379, Memcached 11211, Docker API 2375 и др.). Легитимных обращений к ловушке нет: это… | каждое событие | — | — |
+| Изменение состава пакетов | средний | DiffWatch | DiffWatch: установка или удаление пакетов на хосте | каждое событие | — | — |
+| Агент молчит больше суток | средний | HomeRepo | Сторож HomeRepo: устройство не выходило на связь с панелью дольше суток — агент остановлен, хост выключен или сеть недоступна. Пока устройство молчит, напоминание приходит раз в сутки;… | каждое событие | Defense Evasion | `T1562.001` Disable or Modify Tools |
+| Деградация: молчат 3+ агентов | средний | HomeRepo | Пульс панели HomeRepo сообщает, что молчат 3 или больше агентов (hr_hosts_silent >= 3). Панель жива, но парк агентов деградирует — проверить, кто отвалился, на дашборде «Пульс… | число событий ≥ 1 за 9 ч; повтор не чаще раза в 1 сут | — | — |
+| Новое устройство в сети | средний | HomeRepo | Сканер HomeRepo нашёл адрес, которого раньше не видел: адрес, MAC, производитель, имя, открытые порты. Первое сканирование подсети событий не создаёт. | каждое событие | Initial Access | `T1200` Hardware Additions |
+| Пользователи, роли и токены | средний | HomeRepo | Создан или удалён пользователь, изменена роль, сброшен или сменён пароль, создан или удалён токен API, выдан доступ Ansible. | каждое событие | Persistence | `T1098` Account Manipulation |
+| Деградация: провалов проверок 3+ | средний | HostDeck | Пульс панели HostDeck сообщает о 3 или больше провалах проверок безопасности (hd_checks_failing >= 3). Панель жива, но состояние парка деградирует — открыть HostDeck и разобрать… | число событий ≥ 1 за 9 ч; повтор не чаще раза в 1 сут | — | — |
+| Открыта консоль root в браузере | средний | HostDeck | Из HostDeck открыта консоль root на хосте (или в ней отказано). Действие редкое и мощное: стоит знать о каждом. | каждое событие | Execution | `T1059.004` Unix Shell |
+| SELinux переведён в permissive или disabled из панели | средний | ZaSlon | Через ZaSlon SELinux на хосте переведён в разрешающий режим или отключён. Это легитимное действие администратора, но защита хоста ослаблена: событие позволяет отличить его от setenforce… | каждое событие | Defense Impairment | `T1685` Disable or Modify Tools |
+| Утренний дайджест экосистемы | низкий | — | Скрипт morning-digest.py на <хост> (systemd-таймер, 08:47 YEKT) присылает GELF-сообщение dg_event=digest с пульсами инструментов и сводкой алертов за сутки; это правило превращает его в… | каждое событие | — | — |
+| Агент вернулся на связь | низкий | HomeRepo | Агент снова шлёт heartbeat — TicketBridge автоматически закрывает открытый тикет инцидента. | каждое событие | — | — |
+| Проверка безопасности перешла в warn | низкий | HostDeck | Проверка HostDeck перешла в warn с учётом профиля и исключений. Без письма: для разбора на странице Alerts & Events. | каждое событие | — | — |
+| Риск принят: добавлено исключение | низкий | HostDeck | В HostDeck добавлено исключение для проверки: её отклонение больше не попадает в итог и в алерты. Событие для учёта принятых рисков. | каждое событие | — | — |
+| Еженедельный отчёт зрелости | низкий | Lab Score | Lab Score: правила, срабатывания за неделю, покрытие HomeWiki, техники MITRE — одним письмом | каждое событие | — | — |
+| Подозрительный трафик | низкий | TrafficLens | Итог анализа «Подозрительно»: эвристики (маячки, крупные выгрузки, невалидный TLS, нестандартные порты) без сильных признаков. Событие без уведомления, для разбора на странице Alerts &… | каждое событие | — | — |
+| Изменения доверия: пароль панели, добавление и удаление хостов | низкий | ZaSlon | Сменён пароль администратора панели, добавлен, зарегистрирован или удалён управляемый хост. Редкие действия, после которых меняется круг доверия ZaSlon. | каждое событие | Persistence | `T1098` Account Manipulation |
+
+<details><summary>Запросы Graylog (очищенные)</summary>
+
+**AUDIT - Запуск программы из временного каталога**
+
+```
+audit AND EXECVE AND ("/tmp/" OR "/var/tmp/" OR "/dev/shm/")
+```
+
+**AUDIT - Изменение файлов учётных записей**
+
+```
+audit AND PATH AND ("/etc/passwd" OR "/etc/shadow" OR "/etc/group" OR "/etc/gshadow")
+```
+
+**AUDIT - Работа с модулями ядра**
+
+```
+audit AND (insmod OR modprobe OR rmmod)
+```
+
+**CANARY - Логин в ловушку**
+
+```
+tool:canary AND event:auth
+```
+
+**CANARY - Открытие honeytoken-файла**
+
+```
+audit AND honeytoken
+```
+
+**COWRIE - Команда в honeypot**
+
+```
+tool:cowrie AND event:"cowrie.command.input"
+```
+
+**COWRIE - Скачивание файла в honeypot**
+
+```
+tool:cowrie AND event:"cowrie.session.file_download"
+```
+
+**COWRIE - Успешный вход в honeypot**
+
+```
+tool:cowrie AND event:"cowrie.login.success"
+```
+
+**DIFFWATCH - Изменение автозагрузки (unit/cron)**
+
+```
+tool:diffwatch AND (dw_kind:unit OR dw_kind:cron)
+```
+
+**DIFFWATCH - Новый открытый порт**
+
+```
+tool:diffwatch AND dw_kind:port AND dw_event:added
+```
+
+**HOMEREPO - Переподпись, удаление пакетов или смена ключа репозитория**
+
+```
+hr_event:audit AND hr_action:(package_resign OR resign_foreign OR package_delete OR repo_key)
+```
+
+**HOMEREPO - Подбор пароля к панели (5+ неудачных входов за 10 мин)**
+
+```
+hr_event:audit AND hr_action:login_failed
+```
+
+**HOSTDECK - Подбор пароля (5+ неудачных входов за 10 мин)**
+
+```
+hd_event:audit AND hd_action:login-failed
+```
+
+**HOSTDECK - Проверка безопасности перешла в fail**
+
+```
+hd_event:check_changed AND hd_effective:fail
+```
+
+**LOGATLAS - Находка высокой важности в разборе журналов**
+
+```
+la_event:finding AND la_severity:(critical OR high)
+```
+
+**SANDBOX - Подозрительное поведение файла**
+
+```
+tool:sandbox AND sb_event:alert
+```
+
+**TRAFFICLENS - Адрес из базы IOC в логах хостов**
+
+```
+tl_ioc_hit:true
+```
+
+**TRAFFICLENS - Компрометация по итогам анализа трафика**
+
+```
+tl_event:verdict AND tl_level:critical
+```
+
+**TRAFFICLENS - Обращение к индикатору компрометации**
+
+```
+tl_event:ioc_hit AND tl_ioc_conf:>=70
+```
+
+**TRAFFICLENS - Ретропроверка: прошлый трафик совпал с новым IOC**
+
+```
+tl_event:retro_hit
+```
+
+**ZASLON - firewalld остановлен из панели**
+
+```
+zs_op:firewalld_set AND zs_ok:true AND zs_arg_running:false
+```
+
+**ZASLON - Подбор пароля к панели (5+ неудачных входов за 10 мин)**
+
+```
+zs_op:login_failed
+```
+
+**AUDIT - Base64-декодирование в командной строке**
+
+```
+audit AND EXECVE AND base64 AND ("-d" OR "--decode")
+```
+
+**AUDIT - Изменение systemd-юнитов**
+
+```
+audit AND PATH AND ("/etc/systemd/system" OR "config/systemd")
+```
+
+**AUDIT - Изменение расписаний cron**
+
+```
+audit AND PATH AND cron
+```
+
+**CANARY - Касание ловушки**
+
+```
+tool:canary AND event:connect
+```
+
+**DIFFWATCH - Изменение состава пакетов**
+
+```
+tool:diffwatch AND dw_kind:package
+```
+
+**HOMEREPO - Агент молчит больше суток**
+
+```
+hr_event:agent_silent
+```
+
+**HOMEREPO - Деградация: молчат 3+ агентов**
+
+```
+hr_event:heartbeat AND hr_hosts_silent:[3 TO *]
+```
+
+**HOMEREPO - Новое устройство в сети**
+
+```
+hr_event:device_new
+```
+
+**HOMEREPO - Пользователи, роли и токены**
+
+```
+hr_event:audit AND hr_action:(user_create OR user_delete OR user_role OR user_reset_password OR password_changed OR token_create OR token_delete OR ansible_access)
+```
+
+**HOSTDECK - Деградация: провалов проверок 3+**
+
+```
+hd_event:heartbeat AND hd_checks_failing:[3 TO *]
+```
+
+**HOSTDECK - Открыта консоль root в браузере**
+
+```
+hd_event:audit AND hd_action:(term-open OR term-denied)
+```
+
+**ZASLON - SELinux переведён в permissive или disabled из панели**
+
+```
+zs_op:selinux_mode AND zs_ok:true AND zs_arg_mode:(permissive OR disabled)
+```
+
+**DIGEST - Утренний дайджест экосистемы**
+
+```
+dg_event:digest
+```
+
+**HOMEREPO - Агент вернулся на связь**
+
+```
+hr_event:agent_recovered
+```
+
+**HOSTDECK - Проверка безопасности перешла в warn**
+
+```
+hd_event:check_changed AND hd_effective:warn
+```
+
+**HOSTDECK - Риск принят: добавлено исключение**
+
+```
+hd_event:audit AND hd_action:exception-set
+```
+
+**LABSCORE - Еженедельный отчёт зрелости**
+
+```
+tool:labscore AND ls_event:weekly
+```
+
+**TRAFFICLENS - Подозрительный трафик**
+
+```
+tl_event:verdict AND tl_level:suspicious
+```
+
+**ZASLON - Изменения доверия: пароль панели, добавление и удаление хостов**
+
+```
+zs_op:(admin_password OR host_add OR host_enroll OR host_remove)
 ```
 
 </details>

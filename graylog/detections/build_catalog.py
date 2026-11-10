@@ -21,11 +21,11 @@ OUT_MD = os.path.join(HERE, '..', '..', 'docs', '14-detections.md')
 OUT_CSV = os.path.join(HERE, 'catalog.csv')
 
 TACTICS = ['Reconnaissance', 'Initial Access', 'Execution', 'Persistence', 'Privilege Escalation',
-           'Stealth', 'Defense Impairment', 'Credential Access', 'Discovery', 'Lateral Movement',
+           'Defense Evasion', 'Stealth', 'Defense Impairment', 'Credential Access', 'Discovery', 'Lateral Movement',
            'Collection', 'Command and Control', 'Exfiltration', 'Impact']
 TACTIC_RU = {'Reconnaissance': 'Разведка', 'Initial Access': 'Первоначальный доступ', 'Execution': 'Выполнение',
              'Persistence': 'Закрепление', 'Privilege Escalation': 'Повышение привилегий',
-             'Stealth': 'Скрытность', 'Defense Impairment': 'Подавление защиты',
+             'Defense Evasion': 'Обход защиты', 'Stealth': 'Скрытность', 'Defense Impairment': 'Подавление защиты',
              'Credential Access': 'Доступ к учётным данным', 'Discovery': 'Исследование среды',
              'Lateral Movement': 'Перемещение', 'Collection': 'Сбор данных',
              'Command and Control': 'управление, C2', 'Exfiltration': 'Вывод данных', 'Impact': 'Воздействие'}
@@ -39,9 +39,10 @@ PLATFORMS = OrderedDict([
     ('keenetic', ('Keenetic', 'syslog роутера; поток Syslog Logs')),
     ('freeipa', ('FreeIPA и здоровье сервисов', 'аудит FreeIPA и служебные проверки')),
     ('containers', ('Контейнеры', 'Docker-логи через promtail и Filebeat; поток Containers')),
+    ('tools', ('Экосистема и служебные правила', 'AUDIT, HOMEREPO, HOSTDECK, TRAFFICLENS, ZASLON, CANARY, COWRIE, DIFFWATCH, DIGEST, LABSCORE, LOGATLAS и SANDBOX')),
 ])
 MATRIX_COLS = [('windows', 'Windows'), ('linux', 'Linux'), ('macos', 'macOS'), ('keenetic', 'Keenetic'),
-               ('freeipa', 'FreeIPA'), ('containers', 'Контейнеры')]
+               ('freeipa', 'FreeIPA'), ('containers', 'Контейнеры'), ('tools', 'Экосистема')]
 PRIO = {1: 'низкий', 2: 'средний', 3: 'высокий'}
 
 
@@ -53,7 +54,7 @@ def platform(title):
     if title.startswith('KEENETIC'): return 'keenetic'
     if title.startswith('FREEIPA'): return 'freeipa'
     if title.startswith('Контейнеры'): return 'containers'
-    return 'other'
+    return 'tools'
 
 
 def matrix_col(p):
@@ -133,7 +134,7 @@ by = {k: sorted([d for d in defs if d['platform'] == k], key=lambda x: (-x['prio
 
 # ---------- CSV ----------
 with open(OUT_CSV, 'w', newline='', encoding='utf-8') as f:
-    w = csv.writer(f)
+    w = csv.writer(f, lineterminator='\n')
     w.writerow(['Платформа', 'Правило', 'Приоритет', 'Поток', 'Источник логов', 'Что проверяет', 'Корреляция',
                 'Тактика', 'Техника', 'Все техники', 'Уведомление', 'Запрос (очищенный)'])
     for k in PLATFORMS:
@@ -159,6 +160,9 @@ w(f'> Все правила (event definitions) лаборатории в одн
   f'Всего **{total}** правил, из них **{with_tech}** привязаны к технике ATT&CK v20 '
   f'({len(techs)} разных техник). Остальные описывают здоровье сервисов и тишину в логах: атак они не ловят.')
 w('')
+w('Встроенное определение `System notification events` (`system-notifications-v1`) в каталог не входит: '
+  'это не пользовательское правило детектирования. Поэтому при 264 определениях в API здесь 263 пользовательских правила.')
+w('')
 w('Страница собирается скриптом из выгрузки Graylog и руками не правится: '
   '[как обновить](#как-обновить-каталог). Запросы очищены: IP, MAC, отпечатки ключей и белые списки '
   'заменены на `<IP>`, `<MAC>`, `<белый список>`. Готовые определения для импорта лежат в '
@@ -180,7 +184,7 @@ w('Основная тактика правила — первая из запи
 w('')
 w('| Тактика | ' + ' | '.join(n for _, n in MATRIX_COLS) + ' | Всего |')
 w('|---|' + '---|' * len(MATRIX_COLS) + '---|')
-cnt = Counter((d['tactic'] or '—', matrix_col(d['platform'])) for d in defs)
+cnt = Counter(((d['tactic'] or '—').split(',')[0].strip(), matrix_col(d['platform'])) for d in defs)
 colsum = Counter()
 for t in TACTICS + ['—']:
     row = [cnt.get((t, c), 0) for c, _ in MATRIX_COLS]
