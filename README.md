@@ -15,7 +15,27 @@
 
 ## Скриншоты
 
-![Alerts & Events — лента срабатываний](docs/screenshots/alerts.png)
+Актуальный интерфейс Graylog 7.2.1 на данных лаборатории. Имена хостов, сетевые адреса и внутренние учётные записи на снимках обезличены.
+
+<table>
+  <tr>
+    <td><b>Обзор:</b> сообщения, алерты и основные источники<br><img src="docs/screenshots/overview.png" alt="Обзор Graylog"/></td>
+    <td><b>Поиск:</b> временной диапазон, гистограмма и сообщения<br><img src="docs/screenshots/search.png" alt="Поиск Graylog"/></td>
+  </tr>
+  <tr>
+    <td><b>Alerts &amp; Events:</b> лента срабатываний<br><img src="docs/screenshots/alerts.png" alt="Алерты Graylog"/></td>
+    <td><b>Event Definitions:</b> каталог правил обнаружения<br><img src="docs/screenshots/event-definitions.png" alt="Определения событий Graylog"/></td>
+  </tr>
+  <tr>
+    <td><b>«Пульс экосистемы»:</b> heartbeat своих инструментов<br><img src="docs/screenshots/dashboard.png" alt="Дашборд Пульс экосистемы"/></td>
+    <td><b>Дашборды:</b> готовые представления лаборатории<br><img src="docs/screenshots/dashboards.png" alt="Список дашбордов Graylog"/></td>
+  </tr>
+</table>
+
+<details><summary>Страница входа</summary>
+<br>
+<img src="docs/screenshots/login.png" alt="Страница входа Graylog" width="900"/>
+</details>
 
 ## 📑 Оглавление
 
