@@ -3122,7 +3122,7 @@
           "type": "aggregation-v1",
           "query": {
             "@type": "string",
-            "@value": "log_type:macos_unified AND processImagePath:\\/kernel AND senderImagePath:\"\\/System\\/Library\\/Extensions\\/IOUSBMassStorageDriver.kext\\/Contents\\/MacOS\\/IOUSBMassStorageDriver\""
+            "@value": "log_type:macos_unified AND processImagePath:\\/kernel AND senderImagePath:\"\\/System\\/Library\\/Extensions\\/IOUSBMassStorageDriver.kext\\/Contents\\/MacOS\\/IOUSBMassStorageDriver\" AND message:start AND NOT message:(stop OR termination OR terminated)"
           },
           "query_parameters": [],
           "filters": [],
@@ -4931,7 +4931,7 @@
           "type": "aggregation-v1",
           "query": {
             "@type": "string",
-            "@value": "win_event_id:(1116 OR 1117 OR 5001 OR 5010 OR 5012)"
+            "@value": "win_channel:\"Microsoft-Windows-Windows Defender/Operational\" AND win_event_id:(1116 OR 1117 OR 5001 OR 5010 OR 5012)"
           },
           "query_parameters": [],
           "filters": [],
@@ -7673,7 +7673,7 @@
         ],
         "is_scheduled": {
           "@type": "boolean",
-          "@value": true
+          "@value": false
         },
         "event_procedure": null,
         "event_summary_template": null,

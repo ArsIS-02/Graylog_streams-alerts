@@ -1568,7 +1568,7 @@
     "alert": true,
     "config": {
       "type": "aggregation-v1",
-      "query": "log_type:macos_osquery AND name:suspicious_processes AND columns_cmdline:/.*osascript.*-l[ ]JavaScript.*/ AND NOT columns_cmdline:(/.*CoreWLAN.*/ OR /.*URLForApplicationT.*/)",
+      "query": "log_type:macos_osquery AND name:suspicious_processes AND columns_cmdline:/.*osascript.*-l[ ]JavaScript.*/ AND NOT columns_cmdline:(/.*CoreWLAN.*/ OR /.*URLForApplicationT.*/ OR /.*CGWindowListCopyWindowInfo.*NSRunningApplication.*NSBitmapImageFileTypePNG.*/ OR /.*iconDataURL.*NSWorkspace.*TIFFRepresentation.*base64EncodedStringWithOptions.*/)",
       "query_parameters": [],
       "filters": [],
       "streams": [

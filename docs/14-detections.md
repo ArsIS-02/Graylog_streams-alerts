@@ -1,6 +1,6 @@
 # Каталог детектов Graylog
 
-> Все правила (event definitions) лаборатории в одном месте: какой лог проверяется, по какому условию, как коррелируются события, к какой тактике и технике MITRE ATT&CK относятся. Всего **263** правил, из них **203** привязаны к технике ATT&CK v20 (118 разных техник). Остальные описывают здоровье сервисов и тишину в логах: атак они не ловят.
+> Все правила (event definitions) лаборатории в одном месте: какой лог проверяется, по какому условию, как коррелируются события, к какой тактике и технике MITRE ATT&CK относятся. Всего **263** правил: активны **259**, отключены **4** (сохранены для истории). Из них **203** привязаны к технике ATT&CK v20 (118 разных техник). Остальные описывают здоровье сервисов и тишину в логах: атак они не ловят.
 
 Встроенное определение `System notification events` (`system-notifications-v1`) в каталог не входит: это не пользовательское правило детектирования. Поэтому при 264 определениях в API здесь 263 пользовательских правила.
 
@@ -51,7 +51,7 @@ Sysmon, Security, PowerShell, Defender; поток WindowsLogs. Правил: 59
 | Правило | Приоритет | Источник логов | Что проверяет | Корреляция | Тактика | Техника |
 |---|---|---|---|---|---|---|
 | DCSync: репликация каталога не от контроллера домена (4662) | высокий | WindowsLogs<br>канал Security, EventID 4662 | Чтение прав репликации каталога учётной записью, которая не является компьютером. Так атака DCSync забирает хэши всех паролей. Работает только при включённой SACL на корне домена. | каждое событие; повтор не чаще раза в 1 ч | Credential Access | `T1003.006` DCSync |
-| Defender обнаружил угрозу или отключён | высокий | WindowsLogs<br>EventID 1116, 1117, 5001, 5010, 5012 | Defender обнаружил или обезвредил угрозу (1116, 1117) либо защита в реальном времени отключена (5001, 5010, 5012). | каждое событие | Defense Impairment | `T1685` Disable or Modify Tools |
+| Defender обнаружил угрозу или отключён | высокий | WindowsLogs<br>канал Microsoft-Windows-Windows Defender/Operational, EventID 1116, 1117, 5001, 5010, 5012 | Defender обнаружил или обезвредил угрозу (1116, 1117) либо защита в реальном времени отключена (5001, 5010, 5012). | каждое событие | Defense Impairment | `T1685` Disable or Modify Tools |
 | Kerberoasting: билет службы с шифрованием RC4 (4769) | высокий | WindowsLogs<br>канал Security, EventID 4769 | Запрошен билет службы с шифрованием RC4 (0x17) к учётной записи службы, не к компьютеру. Так выглядит Kerberoasting: атакующий забирает билеты, чтобы подобрать пароль службы офлайн.… | каждое событие; повтор не чаще раза в 1 ч | Credential Access | `T1558.003` Kerberoasting |
 | Office, wscript или mshta создал исполняемый файл | высокий | WindowsLogs<br>канал Microsoft-Windows-Sysmon/Operational, EventID 11 | Sysmon 11: Office, wscript, cscript или mshta записал exe, dll, scr, hta, js, vbs, ps1 или bat в Temp, AppData, Public, ProgramData, Downloads, PerfLogs. powershell не включён: он… | каждое событие | Execution | `T1204.002` Malicious File<br>`T1105` |
 | PowerShell с закодированной командой | высокий | WindowsLogs<br>EventID 1 | PowerShell запущен с -EncodedCommand или декодирует Base64. Так прячут вредоносные скрипты. | каждое событие | Execution | `T1059.001` PowerShell<br>`T1027.010` |
@@ -121,7 +121,7 @@ win_channel:Security AND win_event_id:4662 AND winlogbeat_winlog_event_data_Prop
 **Windows - Defender обнаружил угрозу или отключён**
 
 ```
-win_event_id:(1116 OR 1117 OR 5001 OR 5010 OR 5012)
+win_channel:"Microsoft-Windows-Windows Defender/Operational" AND win_event_id:(1116 OR 1117 OR 5001 OR 5010 OR 5012)
 ```
 
 **Windows - Kerberoasting: билет службы с шифрованием RC4 (4769)**
@@ -602,7 +602,7 @@ audit_type:PROCTITLE AND proctitle:/.*(bash[ ]+-i.*\/dev\/tcp|\/dev\/tcp\/.*0\>\
 **LNX - Обратная оболочка (python, perl, nc, socat, mkfifo)**
 
 ```
-audit_type:PROCTITLE AND proctitle:/.*(python[0-9.]* -c .*socket|perl -e .*socket|nc(at)? .* -e |mkfifo |socat .*exec:|bash -i .*\>\&).*/
+audit_type:PROCTITLE AND proctitle:/.*(python[0-9.]* -c .*socket.*(dup2|pty[.]spawn|subprocess)|perl -e .*socket.*(exec|open|system)|nc(at)? .* -e |mkfifo |socat .*exec:|bash -i .*\>\&).*/
 ```
 
 **LNX - Опасный запуск контейнера (--privileged, -v /:/, docker.sock)**
@@ -837,7 +837,7 @@ osquery Endpoint Security и unified log; поток MacOS Logs. Правил: 5
 |---|---|---|---|---|---|---|
 | Включение удалённого доступа (SSH, Screen Sharing, ARD) | высокий | MacOS Logs<br>osquery es_process_events | Включён удалённый вход по SSH, общий экран или Remote Desktop. Простые launchctl print не учитываются. | каждое событие; повтор не чаще раза в 1 ч | Lateral Movement | `T1021.004` SSH<br>`T1021.005` |
 | Вмешательство в TCC | высокий | MacOS Logs<br>osquery es_process_events | Сброс разрешений приватности (tccutil) или прямой доступ к базе TCC.db. | каждое событие | Privilege Escalation | `T1548.006` TCC Manipulation |
-| Выгрузка паролей из Keychain | высокий | MacOS Logs<br>osquery es_process_events | Команда security читает пароли из Keychain (dump-keychain, find-generic-password, find-internet-password). Типично для стилеров. | каждое событие | Credential Access | `T1555.001` Keychain |
+| Выгрузка паролей из Keychain | высокий | MacOS Logs<br>osquery es_process_events | Команда security читает пароли из Keychain (dump-keychain, find-generic-password, find-internet-password). Типично для стилеров. | ОТКЛЮЧЕНО; каждое событие | Credential Access | `T1555.001` Keychain |
 | Выгрузка паролей из Keychain (security dump-keychain) | высокий | MacOS Logs<br>osquery es_process_events | Команда security выгружает связку ключей или печатает пароль из неё. | каждое событие; повтор не чаще раза в 1 ч | Credential Access | `T1555.001` Keychain |
 | Изменение /etc/sudoers | высокий | MacOS Logs<br>osquery file_events | Изменён файл /etc/sudoers, задающий права суперпользователя. Возможна эскалация привилегий. | число событий > 0 за 5 мин, группировка по source | Privilege Escalation | `T1548.003` Sudo and Sudo Caching |
 | Изменение базы авторизации (authorizationdb) | высокий | MacOS Logs<br>osquery es_process_events | security authorizationdb: правка прав на системные действия. Позволяет выполнять привилегированные операции без пароля. | каждое событие | Privilege Escalation | `T1548` Abuse Elevation Control Mechanism |
@@ -1029,7 +1029,7 @@ name:es_process_events AND message:"osascript" AND message:("display dialog" OR 
 **macOS - JXA-скрипт через osascript**
 
 ```
-log_type:macos_osquery AND name:suspicious_processes AND columns_cmdline:/.*osascript.*-l[ ]JavaScript.*/ AND NOT columns_cmdline:(/.*CoreWLAN.*/ OR /.*URLForApplicationT.*/)
+log_type:macos_osquery AND name:suspicious_processes AND columns_cmdline:/.*osascript.*-l[ ]JavaScript.*/ AND NOT columns_cmdline:(/.*CoreWLAN.*/ OR /.*URLForApplicationT.*/ OR /.*CGWindowListCopyWindowInfo.*NSRunningApplication.*NSBitmapImageFileTypePNG.*/ OR /.*iconDataURL.*NSWorkspace.*TIFFRepresentation.*base64EncodedStringWithOptions.*/)
 ```
 
 **macOS - Активность AirDrop**
@@ -1113,7 +1113,7 @@ log_type:macos_wifi_usb AND message:(hostNotificationUSBDeviceInserted AND (iPad
 **macOS - Подключён USB-накопитель**
 
 ```
-log_type:macos_unified AND processImagePath:\/kernel AND senderImagePath:"\/System\/Library\/Extensions\/IOUSBMassStorageDriver.kext\/Contents\/MacOS\/IOUSBMassStorageDriver"
+log_type:macos_unified AND processImagePath:\/kernel AND senderImagePath:"\/System\/Library\/Extensions\/IOUSBMassStorageDriver.kext\/Contents\/MacOS\/IOUSBMassStorageDriver" AND message:start AND NOT message:(stop OR termination OR terminated)
 ```
 
 **macOS - Поиск паролей в файлах (grep -r по / и ~)**
@@ -1309,7 +1309,7 @@ source:"Keenetic-7625" AND message:"Lockout" AND message:"ban remote host"
 **KEENETIC - Новое устройство в сети**
 
 ```
-kn_event_type:DHCP_Request AND NOT kn_mac:(<белый список>)
+kn_event_type:DHCP_Request AND NOT message:STATE_RENEWING AND NOT kn_mac:(<белый список>)
 ```
 
 **KEENETIC - Сканирование веб-интерфейса из интернета**
@@ -1681,11 +1681,11 @@ AUDIT, HOMEREPO, HOSTDECK, TRAFFICLENS, ZASLON, CANARY, COWRIE, DIFFWATCH, DIGES
 
 | Правило | Приоритет | Источник логов | Что проверяет | Корреляция | Тактика | Техника |
 |---|---|---|---|---|---|---|
-| Запуск программы из временного каталога | высокий | RedOS auditd Logs | Выполнен бинарник или скрипт из /tmp, /var/tmp или /dev/shm — классическое место распаковки дропперов и малвари. Команда и аргументы — в тексте события (EXECVE). | каждое событие | — | — |
-| Изменение файлов учётных записей | высокий | RedOS auditd Logs | Изменены /etc/passwd, /etc/shadow, /etc/group или /etc/gshadow — создание или правка учётной записи (persistence). Файл и операция — в тексте события. | каждое событие | — | — |
+| Запуск программы из временного каталога | высокий | RedOS auditd Logs | Выполнен бинарник или скрипт из /tmp, /var/tmp или /dev/shm — классическое место распаковки дропперов и малвари. Команда и аргументы — в тексте события (EXECVE). | ОТКЛЮЧЕНО; каждое событие | — | — |
+| Изменение файлов учётных записей | высокий | RedOS auditd Logs | Изменены /etc/passwd, /etc/shadow, /etc/group или /etc/gshadow — создание или правка учётной записи (persistence). Файл и операция — в тексте события. | ОТКЛЮЧЕНО; каждое событие | — | — |
 | Работа с модулями ядра | высокий | RedOS auditd Logs | Запущены insmod/modprobe/rmmod или изменён /etc/modprobe.d — загрузка или выгрузка модулей ядра (rootkit-активность). Команда — в тексте события. | каждое событие | — | — |
 | Логин в ловушку | высокий | Canary | Кто-то ввёл логин/пароль в ловушку canary (Telnet 2323 или HTTP Basic 8081). Легитимных обращений к ловушке нет: это сканер с подбором паролей или злоумышленник в сети. Логин и пароль —… | каждое событие | — | — |
-| Открытие honeytoken-файла | высокий | RedOS auditd Logs | Чтение канареечного файла (passwords.xlsx, backup_credentials.txt) — признак разведки или компрометации хоста | число событий ≥ 1 за 1 мин, группировка по source | — | — |
+| Открытие honeytoken-файла | высокий | RedOS auditd Logs<br>auditd SYSCALL, ключ honeytoken | Чтение канареечного файла (passwords.xlsx, backup_credentials.txt) — признак разведки или компрометации хоста | число событий ≥ 1 за 1 мин, группировка по source | — | — |
 | Команда в honeypot | высокий | Cowrie | Внутри honeypot выполнена команда: разведка (uname, ip a), закачка (wget/curl), запуск вредоноса. Текст команды — в поле input, адрес — src_ip. | каждое событие | — | — |
 | Скачивание файла в honeypot | высокий | Cowrie | Злоумышленник скачал файл внутрь honeypot (wget/curl) — адрес и URL в полях события, файл сохранён в var/lib/cowrie/downloads. URL и хэш — готовые IOC для TrafficLens. | каждое событие | — | — |
 | Успешный вход в honeypot | высокий | Cowrie | Злоумышленник подобрал пароль и вошёл в SSH/Telnet honeypot (порт 2222/2223). Логин, пароль, адрес и клиент (hassh) — в полях события; дальше обычно следуют команды разведки. | каждое событие | — | — |
@@ -1705,7 +1705,7 @@ AUDIT, HOMEREPO, HOSTDECK, TRAFFICLENS, ZASLON, CANARY, COWRIE, DIFFWATCH, DIGES
 | Подбор пароля к панели (5+ неудачных входов за 10 мин) | высокий | ZaSlon | Пять и более неудачных входов в панель ZaSlon с одного адреса за 10 минут. Своего ограничения частоты входа у панели нет, поэтому подбор замечает Graylog. Адрес клиента — поле… | число событий ≥ 5 за 10 мин, группировка по zs_client_ip; повтор не чаще раза в 1 ч | Credential Access | `T1110` Brute Force |
 | Base64-декодирование в командной строке | средний | RedOS auditd Logs | В командной строке выполнено base64 -d/--decode — обфускация команд (часто связка echo BASE64 \| base64 -d \| bash). Команда — в тексте события. | каждое событие | — | — |
 | Изменение systemd-юнитов | средний | RedOS auditd Logs | Изменены юниты systemd (/etc/systemd/system или ~/.config/systemd/user) — установка сервиса (persistence). Файл — в тексте события. | каждое событие | — | — |
-| Изменение расписаний cron | средний | RedOS auditd Logs | Изменены файлы cron (/etc/cron.d, /etc/crontab, /var/spool/cron) — создание или правка задачи (persistence). Файл — в тексте события. | каждое событие | — | — |
+| Изменение расписаний cron | средний | RedOS auditd Logs | Изменены файлы cron (/etc/cron.d, /etc/crontab, /var/spool/cron) — создание или правка задачи (persistence). Файл — в тексте события. | ОТКЛЮЧЕНО; каждое событие | — | — |
 | Касание ловушки | средний | Canary | TCP-подключение к порту-ловушке canary (SMB 445, MSSQL 1433, MySQL 3306, VNC 5900, Redis 6379, Memcached 11211, Docker API 2375 и др.). Легитимных обращений к ловушке нет: это… | каждое событие | — | — |
 | Изменение состава пакетов | средний | DiffWatch | DiffWatch: установка или удаление пакетов на хосте | каждое событие | — | — |
 | Агент молчит больше суток | средний | HomeRepo | Сторож HomeRepo: устройство не выходило на связь с панелью дольше суток — агент остановлен, хост выключен или сеть недоступна. Пока устройство молчит, напоминание приходит раз в сутки;… | каждое событие | Defense Evasion | `T1562.001` Disable or Modify Tools |
@@ -1752,7 +1752,7 @@ tool:canary AND event:auth
 **CANARY - Открытие honeytoken-файла**
 
 ```
-audit AND honeytoken
+audit_type:SYSCALL AND key:honeytoken AND success:yes AND syscall:(2 OR 5 OR 56 OR 257 OR 295 OR 437) AND NOT exe:"/var/ossec/bin/wazuh-syscheckd"
 ```
 
 **COWRIE - Команда в honeypot**

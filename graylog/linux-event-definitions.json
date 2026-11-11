@@ -792,7 +792,7 @@
     "alert": true,
     "config": {
       "type": "aggregation-v1",
-      "query": "audit_type:PROCTITLE AND proctitle:/.*(python[0-9.]* -c .*socket|perl -e .*socket|nc(at)? .* -e |mkfifo |socat .*exec:|bash -i .*\\>\\&).*/",
+      "query": "audit_type:PROCTITLE AND proctitle:/.*(python[0-9.]* -c .*socket.*(dup2|pty[.]spawn|subprocess)|perl -e .*socket.*(exec|open|system)|nc(at)? .* -e |mkfifo |socat .*exec:|bash -i .*\\>\\&).*/",
       "query_parameters": [],
       "filters": [],
       "streams": [

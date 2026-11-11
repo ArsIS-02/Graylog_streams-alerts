@@ -70,6 +70,8 @@ def fmt_min(m):
 
 def correlation(d):
     parts = []
+    if d.get('state') == 'DISABLED':
+        parts.append('ОТКЛЮЧЕНО')
     c = d.get('condition')
     if d.get('aggregated') and c:
         op = {'>=': '≥', '>': '>', '<': '<', '<=': '≤', '=': '='}.get(c['op'], c['op'])
@@ -147,6 +149,8 @@ with open(OUT_CSV, 'w', newline='', encoding='utf-8') as f:
 L = []
 w = L.append
 total = len(defs)
+enabled = sum(1 for d in defs if d.get('state') != 'DISABLED')
+disabled = total - enabled
 with_tech = sum(1 for d in defs if d['tactic'])
 techs = set()
 for d in defs:
@@ -157,7 +161,8 @@ w('# Каталог детектов Graylog')
 w('')
 w(f'> Все правила (event definitions) лаборатории в одном месте: какой лог проверяется, по какому условию, '
   f'как коррелируются события, к какой тактике и технике MITRE ATT&CK относятся. '
-  f'Всего **{total}** правил, из них **{with_tech}** привязаны к технике ATT&CK v20 '
+  f'Всего **{total}** правил: активны **{enabled}**, отключены **{disabled}** (сохранены для истории). '
+  f'Из них **{with_tech}** привязаны к технике ATT&CK v20 '
   f'({len(techs)} разных техник). Остальные описывают здоровье сервисов и тишину в логах: атак они не ловят.')
 w('')
 w('Встроенное определение `System notification events` (`system-notifications-v1`) в каталог не входит: '
