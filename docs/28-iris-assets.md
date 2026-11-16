@@ -85,3 +85,21 @@ Graylog (event definition срабатывает)
   HostDeck, иначе его адреса будут попадать в IOC вместо активов.
 - Токены и URL хранятся в `ticketbridge.env` (права 600, вне репозитория).
 - Реестр активов входит в ежедневный бэкап IRIS (дамп Postgres).
+
+## Чистка реестра (16.11.2026)
+
+Ревизия реестра после двух дней эксплуатации:
+
+- **IP-адреса приведены к HostDeck** (269 записей `case_assets`): redos-raspi .106→**.149**
+  (адрес сменился 15.11), проставлены homelab **.210**, homeserver **.56**, redosrp16 **.55**,
+  server.monitoring.test **.50**, MacBookPro-M4Pro **.5**.
+- **`gl2_remote_ip` в Graylog не годится для различения хостов** за ретранслятором:
+  server.monitoring.test (.50) и wazuh-homelab.monitoring.test (.37) присылают логи
+  через redosrp16 (.55), поэтому у обоих `gl2_remote_ip=.55`. Источник истины по
+  адресам — агентский инвентарь HostDeck.
+- **Мусорные «учётки» удалены** (7 шт., транзакцией — сначала `alert_assets_association`,
+  потом `case_assets`): `1000`, `dfir-iris.service`, `homewiki-backup.timer`,
+  `iris-backup.timer`, `soc-watchdog.timer`, `zabbix-analytics.timer`.
+- **Парсер дополнен фильтром `_is_valid_user`**: не берёт в активы суффиксы
+  `.service/.timer/.socket/.mount/.target/.scope`, числовые UID и системные имена
+  (unknown/system/local/network) — мусор больше не регенерируется.
