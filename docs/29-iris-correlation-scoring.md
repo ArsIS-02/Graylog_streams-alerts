@@ -46,6 +46,25 @@ Zabbix-события идут отдельным путём (`iris_dedup`: од
 | `TB_SCORE_THRESHOLD` | `100` | порог автоэскалации в кейс |
 | `TB_SCORE_HIGH` / `TB_SCORE_MEDIUM` / `TB_SCORE_LOW` | `50` / `20` / `5` | веса по приоритету Graylog |
 | `TB_SCORE_MITRE_MULT` | `2` | множитель за MITRE-технику |
+| `TB_RULE_WEIGHTS` | `{}` | JSON-карта точечных весов: ключ — id правила или префикс заголовка, значение — вес, заменяющий приоритетный |
+
+## Точечные веса правил (матрица рисков)
+
+Помимо приоритетов действует таблица `TB_RULE_WEIGHTS` (JSON одной строкой в `ticketbridge.env`): ключ — точный `event_definition_id` или префикс заголовка правила; при совпадении нескольких префиксов берётся самый длинный; MITRE-множитель применяется поверх.
+
+Тиры (порог эскалации 100):
+
+- **100** — TRAFFICLENS - Компрометация (одно срабатывание = кейс)
+- **90** — Windows - DCSync; LNX/macOS - Обратная оболочка; macOS - Выгрузка паролей из Keychain
+- **80** — CANARY; COWRIE; SANDBOX; TRAFFICLENS (IOC, обращение, ретропроверка); Kerberoasting (Windows, FREEIPA)
+- **70** — PowerShell download&execute; Defender обнаружил; подбор + успешный вход; WAZUH критичный (12+)
+- **60** — LOGATLAS high; брутфорсы (LNX SSH, FREEIPA, HOSTDECK, HOMEREPO); переподпись репозитория
+- **40–50** — KEENETIC вход/отказ в админку; HOSTDECK проверка fail
+- **20–30** — блокировки и сканирование KEENETIC; потеря связи с KDC; консоль root; WAZUH важный (9–11)
+- **2–10** — тишина источников, сохранение конфигурации, PPPoE, новые устройства, деградации, предупреждения
+- **1** — дайджесты, отчёты, штатные sudo, «агент вернулся»
+
+Правила вне таблицы — по приоритету (50/20/5). Изменение веса: правка JSON в `ticketbridge.env` + `systemctl --user restart ticketbridge`; контроль — `custom_weights` в `/correlation/status`.
 
 ## Наблюдаемость
 
