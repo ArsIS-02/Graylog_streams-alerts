@@ -74,11 +74,14 @@ def correlation(d):
         parts.append('ОТКЛЮЧЕНО')
     c = d.get('condition')
     if d.get('aggregated') and c:
-        op = {'>=': '≥', '>': '>', '<': '<', '<=': '≤', '=': '='}.get(c['op'], c['op'])
-        v = c['value']
-        v = int(v) if isinstance(v, (int, float)) and float(v).is_integer() else v
         gb = ', '.join(re.sub(r'^winlogbeat_winlog_event_data_', '', g) for g in (d.get('group_by') or []))
-        s = f'число событий {op} {v} за {fmt_min(d["window_min"])}'
+        if c['op'] in ('&&', '||'):
+            s = f'составное условие {c["op"]} за {fmt_min(d["window_min"])}'
+        else:
+            op = {'>=': '≥', '>': '>', '<': '<', '<=': '≤', '=': '='}.get(c['op'], c['op'])
+            v = c['value']
+            v = int(v) if isinstance(v, (int, float)) and float(v).is_integer() else v
+            s = f'число событий {op} {v} за {fmt_min(d["window_min"])}'
         if gb: s += f', группировка по {gb}'
         parts.append(s)
     elif d.get('aggregated'):

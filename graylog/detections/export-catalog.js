@@ -59,10 +59,21 @@ async function exportCatalog(opts = {}) {
   const out = defs.filter(d => d.config && d.config.type === 'aggregation-v1').map(d => {
     const c = d.config;
     const ex = (c.conditions || {}).expression;
-    // В сводный каталог попадают только простые числовые пороги. Составное &&
-    // нельзя представлять как {op:'&&', value:null}: это не порог и ломает drift.
-    const cond = ex && ['>', '>=', '<', '<=', '=='].includes(ex.expr) &&
-      ex.right && ex.right.expr === 'number' ? {op: ex.expr, value: ex.right.value} : null;
+    // Сохраняем простые пороги и составные count/cardinality без потери метрик.
+    const norm = (e, nested = false) => {
+      if (!e) return null;
+      if (['>', '>=', '<', '<=', '=='].includes(e.expr) && e.right && e.right.expr === 'number') {
+        const out = {op: e.expr, value: e.right.value};
+        if (nested && e.left && e.left.expr === 'number-ref') out.ref = e.left.ref || 'count-';
+        return out;
+      }
+      if (['&&', '||'].includes(e.expr)) {
+        const left = norm(e.left, true), right = norm(e.right, true);
+        return left && right ? {op: e.expr, left, right} : null;
+      }
+      return null;
+    };
+    const cond = norm(ex);
     return {
       title: sanitizeText(d.title),
       priority: d.priority,

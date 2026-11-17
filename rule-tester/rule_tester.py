@@ -52,18 +52,32 @@ def platform_of(title):
     return re.split(r"\s*[-:]\s", title, maxsplit=1)[0].strip()
 
 
+def _cond_expr(ex, nested=False):
+    if not isinstance(ex, dict):
+        return None
+    if ex.get("expr") in (">", ">=", "<", "<=", "=="):
+        right = ex.get("right") or {}
+        if right.get("expr") != "number":
+            return None
+        out = {"op": ex["expr"], "value": right.get("value")}
+        left = ex.get("left") or {}
+        if nested and left.get("expr") == "number-ref":
+            out["ref"] = left.get("ref") or "count-"
+        return out
+    if ex.get("expr") in ("&&", "||"):
+        left, right = _cond_expr(ex.get("left"), True), _cond_expr(ex.get("right"), True)
+        if left and right:
+            return {"op": ex["expr"], "left": left, "right": right}
+    return None
+
+
 def cond_of(c):
-    """Приводит условие определения событий к {'op','value'} или None."""
+    """Нормализует простые пороги и составные ``&&``/``||`` условия Graylog."""
     if not c:
         return None
     if "op" in c:
         return c
-    ex = c.get("expression") if isinstance(c, dict) else None
-    if isinstance(ex, dict) and ex.get("expr") in (">", ">=", "<", "<=", "=="):
-        right = ex.get("right") or {}
-        if right.get("expr") == "number":
-            return {"op": ex["expr"], "value": right.get("value")}
-    return None
+    return _cond_expr(c.get("expression") if isinstance(c, dict) else None)
 
 
 def is_silence(cond):
@@ -73,6 +87,10 @@ def is_silence(cond):
 def threshold(cond):
     if not cond or is_silence(cond):
         return 1
+    if cond["op"] in ("&&", "||"):
+        count = next((side for side in (cond["left"], cond["right"])
+                      if side.get("ref", "count-") == "count-"), None)
+        return threshold(count) if count else 1
     v = int(cond["value"] or 0)
     return v + 1 if cond["op"] == ">" else max(v, 1)
 
@@ -700,6 +718,8 @@ def load_corpus_file(path):
 
 
 def fp_rule_kind(rule):
+    if re.search(r"^DIGEST\b|\bсводк[аеи]\b|\bдайджест\b", rule.get("title", ""), re.I):
+        return "сводка"
     if is_silence(rule.get("cond")):
         return "тишина"
     return "агрегация" if rule.get("cond") else "событие"
@@ -717,26 +737,66 @@ def _group_key(rule, doc):
     return tuple(str(doc.get(field, "<пусто>")) for field in rule.get("group_by") or [])
 
 
+def _metric_value(ref, docs):
+    if ref == "count-":
+        return len(docs)
+    if ref and ref.startswith("card-"):
+        field = ref[5:]
+        return len({str(doc[field]) for doc in docs if doc.get(field) not in (None, "")})
+    return None
+
+
+def _condition_metrics(cond, docs):
+    if cond["op"] in ("&&", "||"):
+        return dict(_condition_metrics(cond["left"], docs), **_condition_metrics(cond["right"], docs))
+    ref = cond.get("ref", "count-")
+    return {ref: _metric_value(ref, docs)}
+
+
+def _condition_met(cond, docs):
+    if cond["op"] == "&&":
+        left, right = _condition_met(cond["left"], docs), _condition_met(cond["right"], docs)
+        return None if left is None or right is None else left and right
+    if cond["op"] == "||":
+        left, right = _condition_met(cond["left"], docs), _condition_met(cond["right"], docs)
+        return None if left is None or right is None else left or right
+    value = _metric_value(cond.get("ref", "count-"), docs)
+    if value is None:
+        return None
+    limit = float(cond["value"] or 0)
+    return {">": value > limit, ">=": value >= limit, "<": value < limit,
+            "<=": value <= limit, "==": value == limit}[cond["op"]]
+
+
 def aggregation_assessment(rule, matches):
-    """Максимум совпадений в группе и скользящем окне правила.
+    """Оценивает count/cardinality в группах и скользящих окнах правила.
 
     Это оценка корпуса, а не повтор планировщика Graylog: любое скользящее окно
     допускается, поэтому конкретное расписание выполнения не скрывает всплеск.
     """
-    need = threshold(rule.get("cond"))
+    cond = rule.get("cond")
+    need = threshold(cond)
     groups = {}
     for doc in matches:
         groups.setdefault(_group_key(rule, doc), []).append(doc)
     result = {"assessed": True, "threshold": need, "count": 0, "group": (),
-              "window_min": rule.get("window_min"), "groups": len(groups)}
-    if not matches or need <= 1:
-        result["count"] = len(matches)
+              "window_min": rule.get("window_min"), "groups": len(groups),
+              "condition_met": False, "metrics": {}}
+    if not matches:
+        return result
+    if need <= 1 and cond["op"] not in ("&&", "||"):
+        met = _condition_met(cond, matches)
+        result.update({"count": len(matches), "condition_met": bool(met),
+                       "metrics": _condition_metrics(cond, matches)})
+        if met is None:
+            result["assessed"] = False
+            result["reason"] = "неизвестная метрика условия"
         return result
     if not rule.get("window_min"):
         result["assessed"] = False
         result["reason"] = "не задано окно агрегации"
         return result
-    best = (0, (), None, None)
+    best, triggered = (0, (), None, None, {}), None
     for group, docs in groups.items():
         timed = sorted(((dt, doc) for dt, doc in ((_doc_time(d), d) for d in docs) if dt is not None),
                        key=lambda item: item[0])
@@ -748,12 +808,22 @@ def aggregation_assessment(rule, matches):
         for right, (end, _) in enumerate(timed):
             while (end - timed[left][0]).total_seconds() > float(rule["window_min"]) * 60:
                 left += 1
-            count = right - left + 1
+            window_docs = [doc for _, doc in timed[left:right + 1]]
+            count = len(window_docs)
+            metrics = _condition_metrics(cond, window_docs)
+            met = _condition_met(cond, window_docs)
+            if met is None:
+                result["assessed"] = False
+                result["reason"] = "неизвестная метрика условия"
+            candidate = (count, group, timed[left][0], end, metrics)
             if count > best[0]:
-                best = (count, group, timed[left][0], end)
-    result.update({"count": best[0], "group": best[1],
-                   "from": best[2].isoformat() if best[2] else None,
-                   "to": best[3].isoformat() if best[3] else None})
+                best = candidate
+            if met and triggered is None:
+                triggered = candidate
+    chosen = triggered or best
+    result.update({"count": chosen[0], "group": chosen[1], "condition_met": triggered is not None,
+                   "metrics": chosen[4], "from": chosen[2].isoformat() if chosen[2] else None,
+                   "to": chosen[3].isoformat() if chosen[3] else None})
     return result
 
 
@@ -773,6 +843,10 @@ def fp_check_rule(rule, corpus):
                 matches.append(doc)
         except Exception:
             continue
+    if kind == "сводка":
+        return dict(base, status="НЕ ПРИМЕНИМО", samples=[],
+                    detail="информационная сводка: запрос совпал с %d сообщениями; совпадения являются содержимым отчёта, "
+                           "а не кандидатами на ложную тревогу" % len(matches))
     if kind == "тишина":
         return dict(base, status="НЕ ПРИМЕНИМО", samples=[],
                     detail="правило тишины: запрос совпал с %d сообщениями; наличие сообщений не является ложной тревогой, "
@@ -787,13 +861,14 @@ def fp_check_rule(rule, corpus):
             return dict(base, status="НЕ ПРИМЕНИМО", samples=[],
                         detail="агрегация: запрос совпал с %d сообщениями, но порог не оценён: %s" % (
                             len(matches), assessment.get("reason")))
-        if assessment["count"] < need:
+        if not assessment["condition_met"]:
             group = "/".join(assessment["group"]) if assessment["group"] else "все сообщения"
+            reason = "ниже порога %d" % need if assessment["count"] < need else "составное условие не выполнено: %s" % assessment["metrics"]
             return dict(base, status="ЧИСТО", samples=[], match_count=len(matches), aggregation=assessment,
-                        detail="агрегация: совпадений запроса %d; максимум в группе «%s» за окно %s мин — %d, ниже порога %d" % (
-                            len(matches), group[:100], rule.get("window_min"), assessment["count"], need))
-        detail = "агрегация: порог достигнут — %d совпадений при пороге %d; всего совпадений запроса %d (показаны первые %d)" % (
-            assessment["count"], need, len(matches), min(5, len(matches)))
+                        detail="агрегация: совпадений запроса %d; максимум в группе «%s» за окно %s мин — %d, %s" % (
+                            len(matches), group[:100], rule.get("window_min"), assessment["count"], reason))
+        detail = "агрегация: условие выполнено — %d совпадений при пороге count %d; метрики %s; всего совпадений запроса %d (показаны первые %d)" % (
+            assessment["count"], need, assessment["metrics"], len(matches), min(5, len(matches)))
     else:
         detail = "запрос совпал с %d из %d сообщений обычного трафика (показаны первые %d)" % (
             len(matches), len(corpus), min(5, len(matches)))

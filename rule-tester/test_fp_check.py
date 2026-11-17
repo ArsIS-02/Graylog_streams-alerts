@@ -62,6 +62,12 @@ class FpCheckTest(unittest.TestCase):
         self.assertEqual(row["status"], "ЕСТЬ СОВПАДЕНИЯ")
         self.assertEqual(row["kind"], "событие")
 
+    def test_informational_digest_is_not_false_positive(self):
+        row = rt.fp_check_rule(rule(title="KEENETIC - Отказы WireGuard (ежедневная сводка)",
+                                    cond={"op": ">=", "value": 1}), [doc(), doc()])
+        self.assertEqual(row["status"], "НЕ ПРИМЕНИМО")
+        self.assertEqual(row["kind"], "сводка")
+
     def test_silence_match_is_not_false_positive(self):
         row = rt.fp_check_rule(rule(cond={"op": "<", "value": 1}), [doc()])
         self.assertEqual(row["status"], "НЕ ПРИМЕНИМО")
@@ -101,6 +107,48 @@ class FpCheckTest(unittest.TestCase):
         row = rt.fp_check_rule(r, corpus)
         self.assertEqual(row["status"], "НЕ ПРИМЕНИМО")
         self.assertIn("timestamp", row["detail"])
+
+    @staticmethod
+    def composite_condition(count=5, field="winlogbeat_event_code"):
+        return rt.cond_of({"expression": {
+            "expr": "&&",
+            "left": {"expr": ">=", "left": {"expr": "number-ref", "ref": "count-"},
+                     "right": {"expr": "number", "value": count}},
+            "right": {"expr": ">=", "left": {"expr": "number-ref", "ref": "card-" + field},
+                      "right": {"expr": "number", "value": 2}},
+        }})
+
+    def test_composite_condition_normalization(self):
+        cond = self.composite_condition()
+        self.assertEqual(cond["op"], "&&")
+        self.assertEqual(cond["left"]["ref"], "count-")
+        self.assertEqual(cond["right"]["ref"], "card-winlogbeat_event_code")
+        self.assertEqual(rt.threshold(cond), 5)
+        self.assertEqual(rt.fp_rule_kind(rule(cond=cond)), "агрегация")
+
+    def test_composite_requires_both_count_and_cardinality(self):
+        cond = self.composite_condition()
+        corpus = [dict(doc(), winlogbeat_event_code=4624) for _ in range(5)]
+        row = rt.fp_check_rule(rule(cond=cond), corpus)
+        self.assertEqual(row["status"], "ЧИСТО")
+        self.assertEqual(row["aggregation"]["metrics"]["card-winlogbeat_event_code"], 1)
+
+    def test_composite_failure_and_success_is_candidate(self):
+        cond = self.composite_condition()
+        corpus = [dict(doc(), winlogbeat_event_code=4625) for _ in range(4)]
+        corpus.append(dict(doc(), winlogbeat_event_code=4624))
+        row = rt.fp_check_rule(rule(cond=cond), corpus)
+        self.assertEqual(row["status"], "ЕСТЬ СОВПАДЕНИЯ")
+        self.assertEqual(row["aggregation"]["metrics"]["card-winlogbeat_event_code"], 2)
+        json.dumps(row)
+
+    def test_single_success_no_longer_matches_composite_rules(self):
+        linux = self.composite_condition(count=6, field="res")
+        windows = self.composite_condition(count=5)
+        linux_row = rt.fp_check_rule(rule(cond=linux), [dict(doc(), res="success")])
+        windows_row = rt.fp_check_rule(rule(cond=windows), [dict(doc(), winlogbeat_event_code=4624)] * 2)
+        self.assertEqual(linux_row["status"], "ЧИСТО")
+        self.assertEqual(windows_row["status"], "ЧИСТО")
 
     def test_stats_separate_clean_and_not_applicable(self):
         stats = rt.stats_of([{"status": "ЧИСТО"}, {"status": "НЕ ПРИМЕНИМО"},

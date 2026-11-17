@@ -2301,7 +2301,19 @@
    "group_by": [
     "source"
    ],
-   "condition": null,
+   "condition": {
+    "op": "&&",
+    "left": {
+     "op": ">=",
+     "value": 6.0,
+     "ref": "count-"
+    },
+    "right": {
+     "op": ">=",
+     "value": 2.0,
+     "ref": "card-res"
+    }
+   },
    "aggregated": true,
    "window_min": 15.0,
    "grace_min": 5.0,
@@ -3633,7 +3645,19 @@
    "group_by": [
     "winlogbeat_winlog_event_data_IpAddress"
    ],
-   "condition": null,
+   "condition": {
+    "op": "&&",
+    "left": {
+     "op": ">=",
+     "value": 5.0,
+     "ref": "count-"
+    },
+    "right": {
+     "op": ">=",
+     "value": 2.0,
+     "ref": "card-winlogbeat_event_code"
+    }
+   },
    "aggregated": true,
    "window_min": 15.0,
    "grace_min": 5.0,
