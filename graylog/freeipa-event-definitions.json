@@ -1,712 +1,5 @@
 [
   {
-    "title": "FREEIPA - Изменение пользователей, групп и правил через API",
-    "description": "Администратор FreeIPA изменил пользователей, группы, правила HBAC или sudo, роли, пароли или хосты через API. В журнале записаны только такие вызовы, чтения (show, find) не учитываются. Неожиданное изменение означает правку каталога не вами.\nMITRE ATT&CK. Тактики: Persistence. Техники: T1098 Account Manipulation.",
-    "priority": 2,
-    "alert": true,
-    "config": {
-      "type": "aggregation-v1",
-      "query": "application_name:freeipa_httpd_error AND message:\"ipa: INFO\" AND message:(user_add OR user_del OR user_mod OR user_disable OR group_add OR group_del OR group_mod OR group_add_member OR group_remove_member OR passwd OR cert_revoke OR otptoken_add OR host_add OR host_del OR service_add)",
-      "query_parameters": [],
-      "filters": [],
-      "streams": [
-        "<FREEIPA_STREAM_ID>"
-      ],
-      "stream_categories": [],
-      "group_by": [],
-      "series": [],
-      "conditions": {
-        "expression": null
-      },
-      "search_within_ms": 300000,
-      "execute_every_ms": 300000,
-      "use_cron_scheduling": false,
-      "cron_expression": null,
-      "cron_timezone": null,
-      "event_limit": 100
-    },
-    "field_spec": {
-      "host": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "${source.source}",
-            "require_values": false,
-            "exclude_empty_fields": true
-          }
-        ]
-      },
-      "event": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "${source.message}",
-            "require_values": false,
-            "exclude_empty_fields": true
-          }
-        ]
-      },
-      "mitre_tactic": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "Persistence",
-            "require_values": false,
-            "exclude_empty_fields": false
-          }
-        ]
-      },
-      "mitre_technique": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "T1098 Account Manipulation",
-            "require_values": false,
-            "exclude_empty_fields": false
-          }
-        ]
-      },
-      "mitre_techniques": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "T1098, T1136",
-            "require_values": false,
-            "exclude_empty_fields": false
-          }
-        ]
-      }
-    },
-    "key_spec": [
-      "host"
-    ],
-    "notification_settings": {
-      "grace_period_ms": 300000,
-      "backlog_size": 5
-    },
-    "notifications": [
-      {
-        "notification_id": "<NOTIFICATION_ID>",
-        "notification_parameters": null
-      }
-    ],
-    "storage": [
-      {
-        "type": "persist-to-streams-v1",
-        "streams": [
-          "000000000000000000000002"
-        ]
-      }
-    ],
-    "tags": [
-      "detection",
-      "freeipa",
-      "medium"
-    ]
-  },
-  {
-    "title": "FREEIPA - Неудачный вход в веб-интерфейс",
-    "description": "Веб-интерфейс FreeIPA ответил 401 на вход по паролю. Одиночный случай значит опечатку, серия значит подбор пароля.\nMITRE ATT&CK. Тактики: Credential Access. Техники: T1110 Brute Force.",
-    "priority": 2,
-    "alert": true,
-    "config": {
-      "type": "aggregation-v1",
-      "query": "application_name:freeipa_httpd_access AND message:\"login_password http 1.1 401\"",
-      "query_parameters": [],
-      "filters": [],
-      "streams": [
-        "<FREEIPA_STREAM_ID>"
-      ],
-      "stream_categories": [],
-      "group_by": [],
-      "series": [],
-      "conditions": {
-        "expression": null
-      },
-      "search_within_ms": 300000,
-      "execute_every_ms": 300000,
-      "use_cron_scheduling": false,
-      "cron_expression": null,
-      "cron_timezone": null,
-      "event_limit": 100
-    },
-    "field_spec": {
-      "host": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "${source.source}",
-            "require_values": false,
-            "exclude_empty_fields": true
-          }
-        ]
-      },
-      "event": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "${source.message}",
-            "require_values": false,
-            "exclude_empty_fields": true
-          }
-        ]
-      },
-      "mitre_tactic": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "Credential Access",
-            "require_values": false,
-            "exclude_empty_fields": false
-          }
-        ]
-      },
-      "mitre_technique": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "T1110 Brute Force",
-            "require_values": false,
-            "exclude_empty_fields": false
-          }
-        ]
-      },
-      "mitre_techniques": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "T1110",
-            "require_values": false,
-            "exclude_empty_fields": false
-          }
-        ]
-      }
-    },
-    "key_spec": [
-      "host"
-    ],
-    "notification_settings": {
-      "grace_period_ms": 300000,
-      "backlog_size": 5
-    },
-    "notifications": [
-      {
-        "notification_id": "<NOTIFICATION_ID>",
-        "notification_parameters": null
-      }
-    ],
-    "storage": [
-      {
-        "type": "persist-to-streams-v1",
-        "streams": [
-          "000000000000000000000002"
-        ]
-      }
-    ],
-    "tags": [
-      "detection",
-      "freeipa",
-      "medium"
-    ]
-  },
-  {
-    "title": "FREEIPA - Изменение привилегированных групп и ролей (API)",
-    "description": "Через API изменены роли, привилегии или группа admins. Так повышают права в домене.\nMITRE ATT&CK. Тактики: Privilege Escalation. Техники: T1098 Account Manipulation.",
-    "priority": 3,
-    "alert": true,
-    "config": {
-      "type": "aggregation-v1",
-      "query": "application_name:freeipa_httpd_error AND message:\"ipa: INFO\" AND (message:(role_add_member OR role_remove_member OR privilege_add_member OR privilege_remove_member OR role_add_privilege OR privilege_add_permission) OR (message:(group_add_member OR group_mod OR group_remove_member) AND message:admins))",
-      "query_parameters": [],
-      "filters": [],
-      "streams": [
-        "<FREEIPA_STREAM_ID>"
-      ],
-      "stream_categories": [],
-      "group_by": [],
-      "series": [],
-      "conditions": {
-        "expression": null
-      },
-      "search_within_ms": 300000,
-      "execute_every_ms": 300000,
-      "use_cron_scheduling": false,
-      "cron_expression": null,
-      "cron_timezone": null,
-      "event_limit": 100
-    },
-    "field_spec": {
-      "host": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "${source.source}",
-            "require_values": false,
-            "exclude_empty_fields": true
-          }
-        ]
-      },
-      "component": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "${source.application_name}",
-            "require_values": false,
-            "exclude_empty_fields": true
-          }
-        ]
-      },
-      "event": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "${source.message}",
-            "require_values": false,
-            "exclude_empty_fields": true
-          }
-        ]
-      },
-      "mitre_tactic": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "Privilege Escalation",
-            "require_values": false,
-            "exclude_empty_fields": false
-          }
-        ]
-      },
-      "mitre_technique": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "T1098 Account Manipulation",
-            "require_values": false,
-            "exclude_empty_fields": false
-          }
-        ]
-      },
-      "mitre_techniques": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "T1098",
-            "require_values": false,
-            "exclude_empty_fields": false
-          }
-        ]
-      }
-    },
-    "key_spec": [
-      "host"
-    ],
-    "notification_settings": {
-      "grace_period_ms": 3600000,
-      "backlog_size": 5
-    },
-    "notifications": [
-      {
-        "notification_id": "<NOTIFICATION_ID>",
-        "notification_parameters": null
-      }
-    ],
-    "storage": [
-      {
-        "type": "persist-to-streams-v1",
-        "streams": [
-          "000000000000000000000002"
-        ]
-      }
-    ],
-    "tags": [
-      "detection",
-      "freeipa",
-      "high"
-    ]
-  },
-  {
-    "title": "FREEIPA - Изменение HBAC и sudo-правил (API)",
-    "description": "Изменены правила доступа (HBAC) или sudo-правила. Через них выдают право входа и повышения прав на хостах домена.\nMITRE ATT&CK. Тактики: Privilege Escalation. Техники: T1548.003 Sudo and Sudo Caching.",
-    "priority": 3,
-    "alert": true,
-    "config": {
-      "type": "aggregation-v1",
-      "query": "application_name:freeipa_httpd_error AND message:\"ipa: INFO\" AND message:(hbacrule_add OR hbacrule_mod OR hbacrule_del OR hbacrule_add_user OR hbacrule_add_host OR hbacrule_add_service OR hbacrule_enable OR hbacrule_disable OR sudorule_add OR sudorule_mod OR sudorule_del OR sudorule_add_user OR sudorule_add_host OR sudorule_add_option OR sudorule_add_allow_command OR sudorule_enable OR sudorule_disable)",
-      "query_parameters": [],
-      "filters": [],
-      "streams": [
-        "<FREEIPA_STREAM_ID>"
-      ],
-      "stream_categories": [],
-      "group_by": [],
-      "series": [],
-      "conditions": {
-        "expression": null
-      },
-      "search_within_ms": 300000,
-      "execute_every_ms": 300000,
-      "use_cron_scheduling": false,
-      "cron_expression": null,
-      "cron_timezone": null,
-      "event_limit": 100
-    },
-    "field_spec": {
-      "host": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "${source.source}",
-            "require_values": false,
-            "exclude_empty_fields": true
-          }
-        ]
-      },
-      "component": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "${source.application_name}",
-            "require_values": false,
-            "exclude_empty_fields": true
-          }
-        ]
-      },
-      "event": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "${source.message}",
-            "require_values": false,
-            "exclude_empty_fields": true
-          }
-        ]
-      },
-      "mitre_tactic": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "Privilege Escalation",
-            "require_values": false,
-            "exclude_empty_fields": false
-          }
-        ]
-      },
-      "mitre_technique": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "T1548.003 Sudo and Sudo Caching",
-            "require_values": false,
-            "exclude_empty_fields": false
-          }
-        ]
-      },
-      "mitre_techniques": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "T1548.003, T1098",
-            "require_values": false,
-            "exclude_empty_fields": false
-          }
-        ]
-      }
-    },
-    "key_spec": [
-      "host"
-    ],
-    "notification_settings": {
-      "grace_period_ms": 3600000,
-      "backlog_size": 5
-    },
-    "notifications": [
-      {
-        "notification_id": "<NOTIFICATION_ID>",
-        "notification_parameters": null
-      }
-    ],
-    "storage": [
-      {
-        "type": "persist-to-streams-v1",
-        "streams": [
-          "000000000000000000000002"
-        ]
-      }
-    ],
-    "tags": [
-      "detection",
-      "freeipa",
-      "high"
-    ]
-  },
-  {
-    "title": "FREEIPA - Изменение политик паролей, Kerberos и конфигурации (API)",
-    "description": "Изменены политики паролей, времени жизни Kerberos-билетов, глобальная конфигурация или доверительные отношения. Так ослабляют защиту.\nMITRE ATT&CK. Тактики: Credential Access. Техники: T1556 Modify Authentication Process.",
-    "priority": 3,
-    "alert": true,
-    "config": {
-      "type": "aggregation-v1",
-      "query": "application_name:freeipa_httpd_error AND message:\"ipa: INFO\" AND message:(pwpolicy_add OR pwpolicy_mod OR pwpolicy_del OR krbtpolicy_mod OR krbtpolicy_reset OR config_mod OR trust_add OR trust_del)",
-      "query_parameters": [],
-      "filters": [],
-      "streams": [
-        "<FREEIPA_STREAM_ID>"
-      ],
-      "stream_categories": [],
-      "group_by": [],
-      "series": [],
-      "conditions": {
-        "expression": null
-      },
-      "search_within_ms": 300000,
-      "execute_every_ms": 300000,
-      "use_cron_scheduling": false,
-      "cron_expression": null,
-      "cron_timezone": null,
-      "event_limit": 100
-    },
-    "field_spec": {
-      "host": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "${source.source}",
-            "require_values": false,
-            "exclude_empty_fields": true
-          }
-        ]
-      },
-      "component": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "${source.application_name}",
-            "require_values": false,
-            "exclude_empty_fields": true
-          }
-        ]
-      },
-      "event": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "${source.message}",
-            "require_values": false,
-            "exclude_empty_fields": true
-          }
-        ]
-      },
-      "mitre_tactic": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "Credential Access",
-            "require_values": false,
-            "exclude_empty_fields": false
-          }
-        ]
-      },
-      "mitre_technique": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "T1556 Modify Authentication Process",
-            "require_values": false,
-            "exclude_empty_fields": false
-          }
-        ]
-      },
-      "mitre_techniques": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "T1556",
-            "require_values": false,
-            "exclude_empty_fields": false
-          }
-        ]
-      }
-    },
-    "key_spec": [
-      "host"
-    ],
-    "notification_settings": {
-      "grace_period_ms": 3600000,
-      "backlog_size": 5
-    },
-    "notifications": [
-      {
-        "notification_id": "<NOTIFICATION_ID>",
-        "notification_parameters": null
-      }
-    ],
-    "storage": [
-      {
-        "type": "persist-to-streams-v1",
-        "streams": [
-          "000000000000000000000002"
-        ]
-      }
-    ],
-    "tags": [
-      "detection",
-      "freeipa",
-      "high"
-    ]
-  },
-  {
-    "title": "FREEIPA - Разблокировка учётной записи, ключи и сертификаты пользователя (API)",
-    "description": "Разблокирована или включена учётная запись, изменены OTP-токены, сертификаты или альтернативные имена пользователя.\nMITRE ATT&CK. Тактики: Persistence. Техники: T1098 Account Manipulation.",
-    "priority": 2,
-    "alert": true,
-    "config": {
-      "type": "aggregation-v1",
-      "query": "application_name:freeipa_httpd_error AND message:\"ipa: INFO\" AND message:(user_unlock OR user_enable OR user_undel OR user_stage OR otptoken_mod OR otptoken_del OR user_add_cert OR user_add_certmapdata OR user_add_principal)",
-      "query_parameters": [],
-      "filters": [],
-      "streams": [
-        "<FREEIPA_STREAM_ID>"
-      ],
-      "stream_categories": [],
-      "group_by": [],
-      "series": [],
-      "conditions": {
-        "expression": null
-      },
-      "search_within_ms": 300000,
-      "execute_every_ms": 300000,
-      "use_cron_scheduling": false,
-      "cron_expression": null,
-      "cron_timezone": null,
-      "event_limit": 100
-    },
-    "field_spec": {
-      "host": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "${source.source}",
-            "require_values": false,
-            "exclude_empty_fields": true
-          }
-        ]
-      },
-      "component": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "${source.application_name}",
-            "require_values": false,
-            "exclude_empty_fields": true
-          }
-        ]
-      },
-      "event": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "${source.message}",
-            "require_values": false,
-            "exclude_empty_fields": true
-          }
-        ]
-      },
-      "mitre_tactic": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "Persistence",
-            "require_values": false,
-            "exclude_empty_fields": false
-          }
-        ]
-      },
-      "mitre_technique": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "T1098 Account Manipulation",
-            "require_values": false,
-            "exclude_empty_fields": false
-          }
-        ]
-      },
-      "mitre_techniques": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "T1098",
-            "require_values": false,
-            "exclude_empty_fields": false
-          }
-        ]
-      }
-    },
-    "key_spec": [
-      "host"
-    ],
-    "notification_settings": {
-      "grace_period_ms": 3600000,
-      "backlog_size": 5
-    },
-    "notifications": [
-      {
-        "notification_id": "<NOTIFICATION_ID>",
-        "notification_parameters": null
-      }
-    ],
-    "storage": [
-      {
-        "type": "persist-to-streams-v1",
-        "streams": [
-          "000000000000000000000002"
-        ]
-      }
-    ],
-    "tags": [
-      "detection",
-      "freeipa",
-      "medium"
-    ]
-  },
-  {
-    "title": "FREEIPA - Kerberos: билет службы с шифрованием RC4 (Kerberoasting)",
-    "description": "KDC выдал билет службы с шифрованием RC4. Современные клиенты просят AES, RC4 указывает на Kerberoasting или устаревший клиент.\nMITRE ATT&CK. Тактики: Credential Access. Техники: T1558.003 Kerberoasting.",
-    "priority": 3,
     "alert": true,
     "config": {
       "type": "aggregation-v1",
@@ -714,7 +7,7 @@
       "query_parameters": [],
       "filters": [],
       "streams": [
-        "<FREEIPA_STREAM_ID>"
+        "6a37eff6e24d85dd10885bca"
       ],
       "stream_categories": [],
       "group_by": [],
@@ -729,18 +22,8 @@
       "cron_timezone": null,
       "event_limit": 100
     },
+    "description": "KDC выдал билет службы с шифрованием RC4. Современные клиенты просят AES, RC4 указывает на Kerberoasting или устаревший клиент.\nMITRE ATT&CK. Тактики: Credential Access. Техники: T1558.003 Kerberoasting.",
     "field_spec": {
-      "host": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "${source.source}",
-            "require_values": false,
-            "exclude_empty_fields": true
-          }
-        ]
-      },
       "component": {
         "data_type": "string",
         "providers": [
@@ -758,6 +41,17 @@
           {
             "type": "template-v1",
             "template": "${source.message}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "host": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.source}",
             "require_values": false,
             "exclude_empty_fields": true
           }
@@ -806,10 +100,15 @@
     },
     "notifications": [
       {
-        "notification_id": "<NOTIFICATION_ID>",
+        "notification_id": "6af1cf9b61b983feab6b8a3a",
+        "notification_parameters": null
+      },
+      {
+        "notification_id": "6ae6e19fbb96dbe5087b75e7",
         "notification_parameters": null
       }
     ],
+    "priority": 3,
     "storage": [
       {
         "type": "persist-to-streams-v1",
@@ -822,12 +121,10 @@
       "detection",
       "freeipa",
       "high"
-    ]
+    ],
+    "title": "FREEIPA - Kerberos: билет службы с шифрованием RC4 (Kerberoasting)"
   },
   {
-    "title": "FREEIPA - Kerberos: вход отключённой, заблокированной или просроченной учётной записи",
-    "description": "KDC отказал: учётная запись отключена, заблокирована, или истёк срок ключа. Использование чужих или забытых учётных записей.\nMITRE ATT&CK. Тактики: Initial Access. Техники: T1078 Valid Accounts.",
-    "priority": 2,
     "alert": true,
     "config": {
       "type": "aggregation-v1",
@@ -835,7 +132,7 @@
       "query_parameters": [],
       "filters": [],
       "streams": [
-        "<FREEIPA_STREAM_ID>"
+        "6a37eff6e24d85dd10885bca"
       ],
       "stream_categories": [],
       "group_by": [],
@@ -850,18 +147,8 @@
       "cron_timezone": null,
       "event_limit": 100
     },
+    "description": "KDC отказал: учётная запись отключена, заблокирована, или истёк срок ключа. Использование чужих или забытых учётных записей.\nMITRE ATT&CK. Тактики: Initial Access. Техники: T1078 Valid Accounts.",
     "field_spec": {
-      "host": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "${source.source}",
-            "require_values": false,
-            "exclude_empty_fields": true
-          }
-        ]
-      },
       "component": {
         "data_type": "string",
         "providers": [
@@ -879,6 +166,17 @@
           {
             "type": "template-v1",
             "template": "${source.message}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "host": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.source}",
             "require_values": false,
             "exclude_empty_fields": true
           }
@@ -927,10 +225,15 @@
     },
     "notifications": [
       {
-        "notification_id": "<NOTIFICATION_ID>",
+        "notification_id": "6af1cf9b61b983feab6b8a3a",
+        "notification_parameters": null
+      },
+      {
+        "notification_id": "6ae6e19fbb96dbe5087b75e7",
         "notification_parameters": null
       }
     ],
+    "priority": 2,
     "storage": [
       {
         "type": "persist-to-streams-v1",
@@ -943,12 +246,10 @@
       "detection",
       "freeipa",
       "medium"
-    ]
+    ],
+    "title": "FREEIPA - Kerberos: вход отключённой, заблокированной или просроченной учётной записи"
   },
   {
-    "title": "FREEIPA - Kerberos: расхождение часов (CLOCK_SKEW)",
-    "description": "Клиент отправил запрос с расхождением часов больше допустимого. Kerberos перестанет работать для этого хоста.",
-    "priority": 1,
     "alert": true,
     "config": {
       "type": "aggregation-v1",
@@ -956,7 +257,7 @@
       "query_parameters": [],
       "filters": [],
       "streams": [
-        "<FREEIPA_STREAM_ID>"
+        "6a37eff6e24d85dd10885bca"
       ],
       "stream_categories": [],
       "group_by": [],
@@ -971,18 +272,8 @@
       "cron_timezone": null,
       "event_limit": 100
     },
+    "description": "Клиент отправил запрос с расхождением часов больше допустимого. Kerberos перестанет работать для этого хоста.",
     "field_spec": {
-      "host": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "${source.source}",
-            "require_values": false,
-            "exclude_empty_fields": true
-          }
-        ]
-      },
       "component": {
         "data_type": "string",
         "providers": [
@@ -1000,6 +291,17 @@
           {
             "type": "template-v1",
             "template": "${source.message}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "host": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.source}",
             "require_values": false,
             "exclude_empty_fields": true
           }
@@ -1015,10 +317,15 @@
     },
     "notifications": [
       {
-        "notification_id": "<NOTIFICATION_ID>",
+        "notification_id": "6af1cf9b61b983feab6b8a3a",
+        "notification_parameters": null
+      },
+      {
+        "notification_id": "6ae6e19fbb96dbe5087b75e7",
         "notification_parameters": null
       }
     ],
+    "priority": 1,
     "storage": [
       {
         "type": "persist-to-streams-v1",
@@ -1031,20 +338,18 @@
       "detection",
       "freeipa",
       "low"
-    ]
+    ],
+    "title": "FREEIPA - Kerberos: расхождение часов (CLOCK_SKEW)"
   },
   {
-    "title": "FREEIPA - Массовая выгрузка из каталога LDAP (100+ записей за запрос)",
-    "description": "Один LDAP-запрос вернул сто и более записей. Разведка по каталогу или выгрузка учётных записей.\nMITRE ATT&CK. Тактики: Discovery. Техники: T1087.002 Domain Account.",
-    "priority": 2,
     "alert": true,
     "config": {
       "type": "aggregation-v1",
-      "query": "application_name:freeipa_389_access AND ldap_nentries:/[0-9]{3,}/",
+      "query": "application_name:freeipa_389_audit AND message:cert--005frequest",
       "query_parameters": [],
       "filters": [],
       "streams": [
-        "<FREEIPA_STREAM_ID>"
+        "6a37eff6e24d85dd10885bca"
       ],
       "stream_categories": [],
       "group_by": [],
@@ -1059,6 +364,7 @@
       "cron_timezone": null,
       "event_limit": 100
     },
+    "description": "Запрос на выпуск сертификата через CA FreeIPA (Dogtag). Выпуски должны происходить только при добавлении новых сервисов/хостов. Внезапный массовый выпуск — повод проверить.\nMITRE ATT&CK. Тактики: Credential Access. Техники: T1649 Steal or Forge Authentication Certificates.",
     "field_spec": {
       "host": {
         "data_type": "string",
@@ -1071,6 +377,98 @@
           }
         ]
       },
+      "mitre_tactic": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "Credential Access",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_technique": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1649 Steal or Forge Authentication Certificates",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_techniques": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1649",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      }
+    },
+    "key_spec": [
+      "host"
+    ],
+    "notification_settings": {
+      "grace_period_ms": 300000,
+      "backlog_size": 3
+    },
+    "notifications": [
+      {
+        "notification_id": "6af1cf9b61b983feab6b8a3a",
+        "notification_parameters": null
+      },
+      {
+        "notification_id": "6ae6e19fbb96dbe5087b75e7",
+        "notification_parameters": null
+      }
+    ],
+    "priority": 2,
+    "storage": [
+      {
+        "type": "persist-to-streams-v1",
+        "streams": [
+          "000000000000000000000002"
+        ]
+      }
+    ],
+    "tags": [
+      "detection",
+      "medium",
+      "freeipa"
+    ],
+    "title": "FREEIPA - Выпуск сертификата в CA (Dogtag)"
+  },
+  {
+    "alert": true,
+    "config": {
+      "type": "aggregation-v1",
+      "query": "application_name:freeipa_httpd_error AND message:\"ipa: INFO\" AND message:(hbacrule_add OR hbacrule_mod OR hbacrule_del OR hbacrule_add_user OR hbacrule_add_host OR hbacrule_add_service OR hbacrule_enable OR hbacrule_disable OR sudorule_add OR sudorule_mod OR sudorule_del OR sudorule_add_user OR sudorule_add_host OR sudorule_add_option OR sudorule_add_allow_command OR sudorule_enable OR sudorule_disable)",
+      "query_parameters": [],
+      "filters": [],
+      "streams": [
+        "6a37eff6e24d85dd10885bca"
+      ],
+      "stream_categories": [],
+      "group_by": [],
+      "series": [],
+      "conditions": {
+        "expression": null
+      },
+      "search_within_ms": 300000,
+      "execute_every_ms": 300000,
+      "use_cron_scheduling": false,
+      "cron_expression": null,
+      "cron_timezone": null,
+      "event_limit": 100
+    },
+    "description": "Изменены правила доступа (HBAC) или sudo-правила. Через них выдают право входа и повышения прав на хостах домена.\nMITRE ATT&CK. Тактики: Privilege Escalation. Техники: T1548.003 Sudo and Sudo Caching.",
+    "field_spec": {
       "component": {
         "data_type": "string",
         "providers": [
@@ -1088,6 +486,506 @@
           {
             "type": "template-v1",
             "template": "${source.message}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "host": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.source}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "mitre_tactic": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "Privilege Escalation",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_technique": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1548.003 Sudo and Sudo Caching",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_techniques": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1548.003, T1098",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      }
+    },
+    "key_spec": [
+      "host"
+    ],
+    "notification_settings": {
+      "grace_period_ms": 3600000,
+      "backlog_size": 5
+    },
+    "notifications": [
+      {
+        "notification_id": "6af1cf9b61b983feab6b8a3a",
+        "notification_parameters": null
+      },
+      {
+        "notification_id": "6ae6e19fbb96dbe5087b75e7",
+        "notification_parameters": null
+      }
+    ],
+    "priority": 3,
+    "storage": [
+      {
+        "type": "persist-to-streams-v1",
+        "streams": [
+          "000000000000000000000002"
+        ]
+      }
+    ],
+    "tags": [
+      "detection",
+      "freeipa",
+      "high"
+    ],
+    "title": "FREEIPA - Изменение HBAC и sudo-правил (API)"
+  },
+  {
+    "alert": true,
+    "config": {
+      "type": "aggregation-v1",
+      "query": "application_name:freeipa_httpd_error AND message:\"ipa: INFO\" AND message:(pwpolicy_add OR pwpolicy_mod OR pwpolicy_del OR krbtpolicy_mod OR krbtpolicy_reset OR config_mod OR trust_add OR trust_del)",
+      "query_parameters": [],
+      "filters": [],
+      "streams": [
+        "6a37eff6e24d85dd10885bca"
+      ],
+      "stream_categories": [],
+      "group_by": [],
+      "series": [],
+      "conditions": {
+        "expression": null
+      },
+      "search_within_ms": 300000,
+      "execute_every_ms": 300000,
+      "use_cron_scheduling": false,
+      "cron_expression": null,
+      "cron_timezone": null,
+      "event_limit": 100
+    },
+    "description": "Изменены политики паролей, времени жизни Kerberos-билетов, глобальная конфигурация или доверительные отношения. Так ослабляют защиту.\nMITRE ATT&CK. Тактики: Credential Access. Техники: T1556 Modify Authentication Process.",
+    "field_spec": {
+      "component": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.application_name}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "event": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.message}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "host": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.source}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "mitre_tactic": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "Credential Access",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_technique": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1556 Modify Authentication Process",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_techniques": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1556",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      }
+    },
+    "key_spec": [
+      "host"
+    ],
+    "notification_settings": {
+      "grace_period_ms": 3600000,
+      "backlog_size": 5
+    },
+    "notifications": [
+      {
+        "notification_id": "6af1cf9b61b983feab6b8a3a",
+        "notification_parameters": null
+      },
+      {
+        "notification_id": "6ae6e19fbb96dbe5087b75e7",
+        "notification_parameters": null
+      }
+    ],
+    "priority": 3,
+    "storage": [
+      {
+        "type": "persist-to-streams-v1",
+        "streams": [
+          "000000000000000000000002"
+        ]
+      }
+    ],
+    "tags": [
+      "detection",
+      "freeipa",
+      "high"
+    ],
+    "title": "FREEIPA - Изменение политик паролей, Kerberos и конфигурации (API)"
+  },
+  {
+    "alert": true,
+    "config": {
+      "type": "aggregation-v1",
+      "query": "application_name:freeipa_httpd_error AND message:\"ipa: INFO\" AND message:(user_add OR user_del OR user_mod OR user_disable OR group_add OR group_del OR group_mod OR group_add_member OR group_remove_member OR passwd OR cert_revoke OR otptoken_add OR host_add OR host_del OR service_add)",
+      "query_parameters": [],
+      "filters": [],
+      "streams": [
+        "6a37eff6e24d85dd10885bca"
+      ],
+      "stream_categories": [],
+      "group_by": [],
+      "series": [],
+      "conditions": {
+        "expression": null
+      },
+      "search_within_ms": 300000,
+      "execute_every_ms": 300000,
+      "use_cron_scheduling": false,
+      "cron_expression": null,
+      "cron_timezone": null,
+      "event_limit": 100
+    },
+    "description": "Администратор FreeIPA изменил пользователей, группы, правила HBAC или sudo, роли, пароли или хосты через API. В журнале записаны только такие вызовы, чтения (show, find) не учитываются. Неожиданное изменение означает правку каталога не вами.\nMITRE ATT&CK. Тактики: Persistence. Техники: T1098 Account Manipulation.",
+    "field_spec": {
+      "event": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.message}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "host": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.source}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "mitre_tactic": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "Persistence",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_technique": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1098 Account Manipulation",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_techniques": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1098, T1136",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      }
+    },
+    "key_spec": [
+      "host"
+    ],
+    "notification_settings": {
+      "grace_period_ms": 300000,
+      "backlog_size": 5
+    },
+    "notifications": [
+      {
+        "notification_id": "6af1cf9b61b983feab6b8a3a",
+        "notification_parameters": null
+      },
+      {
+        "notification_id": "6ae6e19fbb96dbe5087b75e7",
+        "notification_parameters": null
+      }
+    ],
+    "priority": 2,
+    "storage": [
+      {
+        "type": "persist-to-streams-v1",
+        "streams": [
+          "000000000000000000000002"
+        ]
+      }
+    ],
+    "tags": [
+      "detection",
+      "freeipa",
+      "medium"
+    ],
+    "title": "FREEIPA - Изменение пользователей, групп и правил через API"
+  },
+  {
+    "alert": true,
+    "config": {
+      "type": "aggregation-v1",
+      "query": "application_name:freeipa_httpd_error AND message:\"ipa: INFO\" AND (message:(role_add_member OR role_remove_member OR privilege_add_member OR privilege_remove_member OR role_add_privilege OR privilege_add_permission) OR (message:(group_add_member OR group_mod OR group_remove_member) AND message:admins))",
+      "query_parameters": [],
+      "filters": [],
+      "streams": [
+        "6a37eff6e24d85dd10885bca"
+      ],
+      "stream_categories": [],
+      "group_by": [],
+      "series": [],
+      "conditions": {
+        "expression": null
+      },
+      "search_within_ms": 300000,
+      "execute_every_ms": 300000,
+      "use_cron_scheduling": false,
+      "cron_expression": null,
+      "cron_timezone": null,
+      "event_limit": 100
+    },
+    "description": "Через API изменены роли, привилегии или группа admins. Так повышают права в домене.\nMITRE ATT&CK. Тактики: Privilege Escalation. Техники: T1098 Account Manipulation.",
+    "field_spec": {
+      "component": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.application_name}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "event": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.message}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "host": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.source}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "mitre_tactic": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "Privilege Escalation",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_technique": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1098 Account Manipulation",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_techniques": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1098",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      }
+    },
+    "key_spec": [
+      "host"
+    ],
+    "notification_settings": {
+      "grace_period_ms": 3600000,
+      "backlog_size": 5
+    },
+    "notifications": [
+      {
+        "notification_id": "6af1cf9b61b983feab6b8a3a",
+        "notification_parameters": null
+      },
+      {
+        "notification_id": "6ae6e19fbb96dbe5087b75e7",
+        "notification_parameters": null
+      }
+    ],
+    "priority": 3,
+    "storage": [
+      {
+        "type": "persist-to-streams-v1",
+        "streams": [
+          "000000000000000000000002"
+        ]
+      }
+    ],
+    "tags": [
+      "detection",
+      "freeipa",
+      "high"
+    ],
+    "title": "FREEIPA - Изменение привилегированных групп и ролей (API)"
+  },
+  {
+    "alert": true,
+    "config": {
+      "type": "aggregation-v1",
+      "query": "application_name:freeipa_389_access AND ldap_nentries:/[0-9]{3,}/",
+      "query_parameters": [],
+      "filters": [],
+      "streams": [
+        "6a37eff6e24d85dd10885bca"
+      ],
+      "stream_categories": [],
+      "group_by": [],
+      "series": [],
+      "conditions": {
+        "expression": null
+      },
+      "search_within_ms": 300000,
+      "execute_every_ms": 300000,
+      "use_cron_scheduling": false,
+      "cron_expression": null,
+      "cron_timezone": null,
+      "event_limit": 100
+    },
+    "description": "Один LDAP-запрос вернул сто и более записей. Разведка по каталогу или выгрузка учётных записей.\nMITRE ATT&CK. Тактики: Discovery. Техники: T1087.002 Domain Account.",
+    "field_spec": {
+      "component": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.application_name}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "event": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.message}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "host": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.source}",
             "require_values": false,
             "exclude_empty_fields": true
           }
@@ -1136,10 +1034,15 @@
     },
     "notifications": [
       {
-        "notification_id": "<NOTIFICATION_ID>",
+        "notification_id": "6af1cf9b61b983feab6b8a3a",
+        "notification_parameters": null
+      },
+      {
+        "notification_id": "6ae6e19fbb96dbe5087b75e7",
         "notification_parameters": null
       }
     ],
+    "priority": 2,
     "storage": [
       {
         "type": "persist-to-streams-v1",
@@ -1152,20 +1055,18 @@
       "detection",
       "freeipa",
       "medium"
-    ]
+    ],
+    "title": "FREEIPA - Массовая выгрузка из каталога LDAP (100+ записей за запрос)"
   },
   {
-    "title": "FREEIPA - Успешный вход в веб-интерфейс",
-    "description": "Успешный вход по паролю в веб-интерфейс FreeIPA. Входов мало (около 10 в месяц), все видны.\nMITRE ATT&CK. Тактики: Initial Access. Техники: T1078 Valid Accounts.",
-    "priority": 1,
     "alert": true,
     "config": {
       "type": "aggregation-v1",
-      "query": "application_name:freeipa_httpd_access AND message:\"login_password http 1.1 200\"",
+      "query": "application_name:freeipa_httpd_access AND message:\"login_password http 1.1 401\"",
       "query_parameters": [],
       "filters": [],
       "streams": [
-        "<FREEIPA_STREAM_ID>"
+        "6a37eff6e24d85dd10885bca"
       ],
       "stream_categories": [],
       "group_by": [],
@@ -1180,29 +1081,8 @@
       "cron_timezone": null,
       "event_limit": 100
     },
+    "description": "Веб-интерфейс FreeIPA ответил 401 на вход по паролю. Одиночный случай значит опечатку, серия значит подбор пароля.\nMITRE ATT&CK. Тактики: Credential Access. Техники: T1110 Brute Force.",
     "field_spec": {
-      "host": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "${source.source}",
-            "require_values": false,
-            "exclude_empty_fields": true
-          }
-        ]
-      },
-      "component": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "${source.application_name}",
-            "require_values": false,
-            "exclude_empty_fields": true
-          }
-        ]
-      },
       "event": {
         "data_type": "string",
         "providers": [
@@ -1214,12 +1094,23 @@
           }
         ]
       },
+      "host": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.source}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
       "mitre_tactic": {
         "data_type": "string",
         "providers": [
           {
             "type": "template-v1",
-            "template": "Initial Access",
+            "template": "Credential Access",
             "require_values": false,
             "exclude_empty_fields": false
           }
@@ -1230,7 +1121,7 @@
         "providers": [
           {
             "type": "template-v1",
-            "template": "T1078 Valid Accounts",
+            "template": "T1110 Brute Force",
             "require_values": false,
             "exclude_empty_fields": false
           }
@@ -1241,7 +1132,7 @@
         "providers": [
           {
             "type": "template-v1",
-            "template": "T1078",
+            "template": "T1110",
             "require_values": false,
             "exclude_empty_fields": false
           }
@@ -1252,15 +1143,20 @@
       "host"
     ],
     "notification_settings": {
-      "grace_period_ms": 3600000,
+      "grace_period_ms": 300000,
       "backlog_size": 5
     },
     "notifications": [
       {
-        "notification_id": "<NOTIFICATION_ID>",
+        "notification_id": "6af1cf9b61b983feab6b8a3a",
+        "notification_parameters": null
+      },
+      {
+        "notification_id": "6ae6e19fbb96dbe5087b75e7",
         "notification_parameters": null
       }
     ],
+    "priority": 2,
     "storage": [
       {
         "type": "persist-to-streams-v1",
@@ -1272,13 +1168,11 @@
     "tags": [
       "detection",
       "freeipa",
-      "low"
-    ]
+      "medium"
+    ],
+    "title": "FREEIPA - Неудачный вход в веб-интерфейс"
   },
   {
-    "title": "FREEIPA - Остановка служб IPA на сервере (dirsrv, krb5kdc, httpd, pki)",
-    "description": "На сервере FreeIPA остановлена одна из служб домена. Без неё не работают вход, DNS и сертификаты.\nMITRE ATT&CK. Тактики: Defense Impairment. Техники: T1685 Disable or Modify Tools.",
-    "priority": 3,
     "alert": true,
     "config": {
       "type": "aggregation-v1",
@@ -1286,7 +1180,7 @@
       "query_parameters": [],
       "filters": [],
       "streams": [
-        "<AUDITD_STREAM_ID>"
+        "6aafbd5619d17c02a62559a4"
       ],
       "stream_categories": [],
       "group_by": [],
@@ -1301,18 +1195,8 @@
       "cron_timezone": null,
       "event_limit": 100
     },
+    "description": "На сервере FreeIPA остановлена одна из служб домена. Без неё не работают вход, DNS и сертификаты.\nMITRE ATT&CK. Тактики: Defense Impairment. Техники: T1685 Disable or Modify Tools.",
     "field_spec": {
-      "host": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "${source.source}",
-            "require_values": false,
-            "exclude_empty_fields": true
-          }
-        ]
-      },
       "component": {
         "data_type": "string",
         "providers": [
@@ -1330,6 +1214,17 @@
           {
             "type": "template-v1",
             "template": "${source.message}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "host": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.source}",
             "require_values": false,
             "exclude_empty_fields": true
           }
@@ -1378,10 +1273,15 @@
     },
     "notifications": [
       {
-        "notification_id": "<NOTIFICATION_ID>",
+        "notification_id": "6af1cf9b61b983feab6b8a3a",
+        "notification_parameters": null
+      },
+      {
+        "notification_id": "6ae6e19fbb96dbe5087b75e7",
         "notification_parameters": null
       }
     ],
+    "priority": 3,
     "storage": [
       {
         "type": "persist-to-streams-v1",
@@ -1394,26 +1294,42 @@
       "detection",
       "freeipa",
       "high"
-    ]
+    ],
+    "title": "FREEIPA - Остановка служб IPA на сервере (dirsrv, krb5kdc, httpd, pki)"
   },
   {
-    "title": "FREEIPA - Сбои certmonger (продление сертификатов)",
-    "description": "Certmonger не смог продлить или получить сертификат. Сертификаты сервера могут истечь, после чего FreeIPA перестанет работать.",
-    "priority": 2,
     "alert": true,
     "config": {
       "type": "aggregation-v1",
-      "query": "message:certmonger AND NOT message:ansible* AND message:(\"Cannot contact\" OR CA_UNREACHABLE OR NEED_GUIDANCE OR CA_REJECTED OR \"ca-error\")",
+      "query": "message:PREAUTH_FAILED",
       "query_parameters": [],
       "filters": [],
       "streams": [
-        "<FREEIPA_STREAM_ID>"
+        "6a37eff6e24d85dd10885bca"
       ],
       "stream_categories": [],
-      "group_by": [],
-      "series": [],
+      "group_by": [
+        "source"
+      ],
+      "series": [
+        {
+          "type": "count",
+          "id": "count-",
+          "field": null
+        }
+      ],
       "conditions": {
-        "expression": null
+        "expression": {
+          "expr": ">=",
+          "left": {
+            "expr": "number-ref",
+            "ref": "count-"
+          },
+          "right": {
+            "expr": "number",
+            "value": 10.0
+          }
+        }
       },
       "search_within_ms": 300000,
       "execute_every_ms": 300000,
@@ -1422,6 +1338,7 @@
       "cron_timezone": null,
       "event_limit": 100
     },
+    "description": "Серия отказов предварительной аутентификации Kerberos на DC. Возможен подбор пароля доменной учётной записи (password spray).\nMITRE ATT&CK. Тактики: Credential Access. Техники: T1110.001 Password Guessing.",
     "field_spec": {
       "host": {
         "data_type": "string",
@@ -1434,25 +1351,36 @@
           }
         ]
       },
-      "component": {
+      "mitre_tactic": {
         "data_type": "string",
         "providers": [
           {
             "type": "template-v1",
-            "template": "${source.application_name}",
+            "template": "Credential Access",
             "require_values": false,
-            "exclude_empty_fields": true
+            "exclude_empty_fields": false
           }
         ]
       },
-      "event": {
+      "mitre_technique": {
         "data_type": "string",
         "providers": [
           {
             "type": "template-v1",
-            "template": "${source.message}",
+            "template": "T1110.001 Password Guessing",
             "require_values": false,
-            "exclude_empty_fields": true
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_techniques": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1110.001",
+            "require_values": false,
+            "exclude_empty_fields": false
           }
         ]
       }
@@ -1461,15 +1389,20 @@
       "host"
     ],
     "notification_settings": {
-      "grace_period_ms": 86400000,
+      "grace_period_ms": 300000,
       "backlog_size": 5
     },
     "notifications": [
       {
-        "notification_id": "<NOTIFICATION_ID>",
+        "notification_id": "6af1cf9b61b983feab6b8a3a",
+        "notification_parameters": null
+      },
+      {
+        "notification_id": "6ae6e19fbb96dbe5087b75e7",
         "notification_parameters": null
       }
     ],
+    "priority": 3,
     "storage": [
       {
         "type": "persist-to-streams-v1",
@@ -1480,14 +1413,12 @@
     ],
     "tags": [
       "detection",
-      "freeipa",
-      "medium"
-    ]
+      "high",
+      "freeipa"
+    ],
+    "title": "FREEIPA - Подбор пароля (10+ PREAUTH_FAILED за 5 мин)"
   },
   {
-    "title": "FREEIPA - Прямое изменение атрибутов безопасности в каталоге (389)",
-    "description": "В журнале аудита 389 DS изменён атрибут блокировки, пароля или ключа Kerberos.\nMITRE ATT&CK. Тактики: Persistence. Техники: T1098 Account Manipulation.",
-    "priority": 2,
     "alert": true,
     "config": {
       "type": "aggregation-v1",
@@ -1495,7 +1426,7 @@
       "query_parameters": [],
       "filters": [],
       "streams": [
-        "<FREEIPA_STREAM_ID>"
+        "6a37eff6e24d85dd10885bca"
       ],
       "stream_categories": [],
       "group_by": [],
@@ -1510,18 +1441,8 @@
       "cron_timezone": null,
       "event_limit": 100
     },
+    "description": "В журнале аудита 389 DS изменён атрибут блокировки, пароля или ключа Kerberos.\nMITRE ATT&CK. Тактики: Persistence. Техники: T1098 Account Manipulation.",
     "field_spec": {
-      "host": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "${source.source}",
-            "require_values": false,
-            "exclude_empty_fields": true
-          }
-        ]
-      },
       "component": {
         "data_type": "string",
         "providers": [
@@ -1539,6 +1460,17 @@
           {
             "type": "template-v1",
             "template": "${source.message}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "host": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.source}",
             "require_values": false,
             "exclude_empty_fields": true
           }
@@ -1587,10 +1519,15 @@
     },
     "notifications": [
       {
-        "notification_id": "<NOTIFICATION_ID>",
+        "notification_id": "6af1cf9b61b983feab6b8a3a",
+        "notification_parameters": null
+      },
+      {
+        "notification_id": "6ae6e19fbb96dbe5087b75e7",
         "notification_parameters": null
       }
     ],
+    "priority": 2,
     "storage": [
       {
         "type": "persist-to-streams-v1",
@@ -1603,6 +1540,349 @@
       "detection",
       "freeipa",
       "medium"
-    ]
+    ],
+    "title": "FREEIPA - Прямое изменение атрибутов безопасности в каталоге (389)"
+  },
+  {
+    "alert": true,
+    "config": {
+      "type": "aggregation-v1",
+      "query": "application_name:freeipa_httpd_error AND message:\"ipa: INFO\" AND message:(user_unlock OR user_enable OR user_undel OR user_stage OR otptoken_mod OR otptoken_del OR user_add_cert OR user_add_certmapdata OR user_add_principal)",
+      "query_parameters": [],
+      "filters": [],
+      "streams": [
+        "6a37eff6e24d85dd10885bca"
+      ],
+      "stream_categories": [],
+      "group_by": [],
+      "series": [],
+      "conditions": {
+        "expression": null
+      },
+      "search_within_ms": 300000,
+      "execute_every_ms": 300000,
+      "use_cron_scheduling": false,
+      "cron_expression": null,
+      "cron_timezone": null,
+      "event_limit": 100
+    },
+    "description": "Разблокирована или включена учётная запись, изменены OTP-токены, сертификаты или альтернативные имена пользователя.\nMITRE ATT&CK. Тактики: Persistence. Техники: T1098 Account Manipulation.",
+    "field_spec": {
+      "component": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.application_name}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "event": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.message}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "host": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.source}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "mitre_tactic": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "Persistence",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_technique": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1098 Account Manipulation",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_techniques": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1098",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      }
+    },
+    "key_spec": [
+      "host"
+    ],
+    "notification_settings": {
+      "grace_period_ms": 3600000,
+      "backlog_size": 5
+    },
+    "notifications": [
+      {
+        "notification_id": "6af1cf9b61b983feab6b8a3a",
+        "notification_parameters": null
+      },
+      {
+        "notification_id": "6ae6e19fbb96dbe5087b75e7",
+        "notification_parameters": null
+      }
+    ],
+    "priority": 2,
+    "storage": [
+      {
+        "type": "persist-to-streams-v1",
+        "streams": [
+          "000000000000000000000002"
+        ]
+      }
+    ],
+    "tags": [
+      "detection",
+      "freeipa",
+      "medium"
+    ],
+    "title": "FREEIPA - Разблокировка учётной записи, ключи и сертификаты пользователя (API)"
+  },
+  {
+    "alert": true,
+    "config": {
+      "type": "aggregation-v1",
+      "query": "message:certmonger AND NOT message:ansible* AND message:(\"Cannot contact\" OR CA_UNREACHABLE OR NEED_GUIDANCE OR CA_REJECTED OR \"ca-error\")",
+      "query_parameters": [],
+      "filters": [],
+      "streams": [
+        "6a37eff6e24d85dd10885bca"
+      ],
+      "stream_categories": [],
+      "group_by": [],
+      "series": [],
+      "conditions": {
+        "expression": null
+      },
+      "search_within_ms": 300000,
+      "execute_every_ms": 300000,
+      "use_cron_scheduling": false,
+      "cron_expression": null,
+      "cron_timezone": null,
+      "event_limit": 100
+    },
+    "description": "Certmonger не смог продлить или получить сертификат. Сертификаты сервера могут истечь, после чего FreeIPA перестанет работать.",
+    "field_spec": {
+      "component": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.application_name}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "event": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.message}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "host": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.source}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      }
+    },
+    "key_spec": [
+      "host"
+    ],
+    "notification_settings": {
+      "grace_period_ms": 86400000,
+      "backlog_size": 5
+    },
+    "notifications": [
+      {
+        "notification_id": "6af1cf9b61b983feab6b8a3a",
+        "notification_parameters": null
+      },
+      {
+        "notification_id": "6ae6e19fbb96dbe5087b75e7",
+        "notification_parameters": null
+      }
+    ],
+    "priority": 2,
+    "storage": [
+      {
+        "type": "persist-to-streams-v1",
+        "streams": [
+          "000000000000000000000002"
+        ]
+      }
+    ],
+    "tags": [
+      "detection",
+      "freeipa",
+      "medium"
+    ],
+    "title": "FREEIPA - Сбои certmonger (продление сертификатов)"
+  },
+  {
+    "alert": true,
+    "config": {
+      "type": "aggregation-v1",
+      "query": "application_name:freeipa_httpd_access AND message:\"login_password http 1.1 200\"",
+      "query_parameters": [],
+      "filters": [],
+      "streams": [
+        "6a37eff6e24d85dd10885bca"
+      ],
+      "stream_categories": [],
+      "group_by": [],
+      "series": [],
+      "conditions": {
+        "expression": null
+      },
+      "search_within_ms": 300000,
+      "execute_every_ms": 300000,
+      "use_cron_scheduling": false,
+      "cron_expression": null,
+      "cron_timezone": null,
+      "event_limit": 100
+    },
+    "description": "Успешный вход по паролю в веб-интерфейс FreeIPA. Входов мало (около 10 в месяц), все видны.\nMITRE ATT&CK. Тактики: Initial Access. Техники: T1078 Valid Accounts.",
+    "field_spec": {
+      "component": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.application_name}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "event": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.message}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "host": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.source}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "mitre_tactic": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "Initial Access",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_technique": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1078 Valid Accounts",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_techniques": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1078",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      }
+    },
+    "key_spec": [
+      "host"
+    ],
+    "notification_settings": {
+      "grace_period_ms": 3600000,
+      "backlog_size": 5
+    },
+    "notifications": [
+      {
+        "notification_id": "6af1cf9b61b983feab6b8a3a",
+        "notification_parameters": null
+      },
+      {
+        "notification_id": "6ae6e19fbb96dbe5087b75e7",
+        "notification_parameters": null
+      }
+    ],
+    "priority": 1,
+    "storage": [
+      {
+        "type": "persist-to-streams-v1",
+        "streams": [
+          "000000000000000000000002"
+        ]
+      }
+    ],
+    "tags": [
+      "detection",
+      "freeipa",
+      "low"
+    ],
+    "title": "FREEIPA - Успешный вход в веб-интерфейс"
   }
 ]

@@ -1,1944 +1,223 @@
 [
   {
-    "title": "ZASLON - Подбор пароля к панели (5+ неудачных входов за 10 мин)",
-    "description": "Пять и более неудачных входов в панель ZaSlon с одного адреса за 10 минут. Своего ограничения частоты входа у панели нет, поэтому подбор замечает Graylog. Адрес клиента — поле zs_client_ip (за прокси — из X-Forwarded-For).\nMITRE ATT&CK. Тактики: Credential Access. Техники: T1110 Brute Force.",
-    "priority": 3,
     "alert": true,
     "config": {
       "type": "aggregation-v1",
-      "query": "zs_op:login_failed",
+      "query": "tool:canary AND event:connect",
       "query_parameters": [],
       "filters": [],
       "streams": [
-        "<ZASLON_STREAM_ID>"
+        "6af0bfb161b983feab6a395c"
+      ],
+      "stream_categories": [],
+      "group_by": [],
+      "series": [],
+      "conditions": {
+        "expression": null
+      },
+      "search_within_ms": 60000,
+      "execute_every_ms": 60000,
+      "use_cron_scheduling": false,
+      "cron_expression": null,
+      "cron_timezone": null,
+      "event_limit": 100
+    },
+    "description": "TCP-подключение к порту-ловушке canary (SMB 445, MSSQL 1433, MySQL 3306, VNC 5900, Redis 6379, Memcached 11211, Docker API 2375 и др.). Легитимных обращений к ловушке нет: это сканирование сети или lateral movement. Адрес источника, порт и первые байты — в полях события.\nMITRE ATT&CK. Тактика: Discovery / Reconnaissance. Техники: T1046 Network Service Discovery, T1595.001 Active Scanning: Scanning IP Blocks.",
+    "field_spec": {
+      "dst_port": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.dst_port}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "event": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.message}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "proto": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.proto}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "src_ip": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.src_ip}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      }
+    },
+    "key_spec": [],
+    "notification_settings": {
+      "grace_period_ms": 0,
+      "backlog_size": 5
+    },
+    "notifications": [
+      {
+        "notification_id": "6af1cf9b61b983feab6b8a3a",
+        "notification_parameters": null
+      },
+      {
+        "notification_id": "6aefecd4bb96dbe508883d5e",
+        "notification_parameters": null
+      }
+    ],
+    "priority": 2,
+    "storage": [
+      {
+        "type": "persist-to-streams-v1",
+        "streams": [
+          "000000000000000000000002"
+        ]
+      }
+    ],
+    "tags": [],
+    "title": "CANARY - Касание ловушки"
+  },
+  {
+    "alert": true,
+    "config": {
+      "type": "aggregation-v1",
+      "query": "tool:canary AND event:auth",
+      "query_parameters": [],
+      "filters": [],
+      "streams": [
+        "6af0bfb161b983feab6a395c"
+      ],
+      "stream_categories": [],
+      "group_by": [],
+      "series": [],
+      "conditions": {
+        "expression": null
+      },
+      "search_within_ms": 60000,
+      "execute_every_ms": 60000,
+      "use_cron_scheduling": false,
+      "cron_expression": null,
+      "cron_timezone": null,
+      "event_limit": 100
+    },
+    "description": "Кто-то ввёл логин/пароль в ловушку canary (Telnet 2323 или HTTP Basic 8081). Легитимных обращений к ловушке нет: это сканер с подбором паролей или злоумышленник в сети. Логин и пароль — в полях события.\nMITRE ATT&CK. Тактики: Credential Access, Initial Access. Техники: T1110 Brute Force, T1078 Valid Accounts (попытка).",
+    "field_spec": {
+      "event": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.message}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "password": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.password}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "proto": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.proto}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "src_ip": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.src_ip}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "username": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.username}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      }
+    },
+    "key_spec": [],
+    "notification_settings": {
+      "grace_period_ms": 0,
+      "backlog_size": 5
+    },
+    "notifications": [
+      {
+        "notification_id": "6af1cf9b61b983feab6b8a3a",
+        "notification_parameters": null
+      },
+      {
+        "notification_id": "6aefecd4bb96dbe508883d5e",
+        "notification_parameters": null
+      }
+    ],
+    "priority": 3,
+    "storage": [
+      {
+        "type": "persist-to-streams-v1",
+        "streams": [
+          "000000000000000000000002"
+        ]
+      }
+    ],
+    "tags": [],
+    "title": "CANARY - Логин в ловушку"
+  },
+  {
+    "alert": true,
+    "config": {
+      "type": "aggregation-v1",
+      "query": "audit_type:SYSCALL AND key:honeytoken AND success:yes AND syscall:(2 OR 5 OR 56 OR 257 OR 295 OR 437) AND NOT exe:\"/var/ossec/bin/wazuh-syscheckd\"",
+      "query_parameters": [],
+      "filters": [],
+      "streams": [
+        "6aafbd5619d17c02a62559a4"
       ],
       "stream_categories": [],
       "group_by": [
-        "zs_client_ip"
+        "source"
       ],
-      "series": [
-        {
-          "type": "count",
-          "id": "count-",
-          "field": null
-        }
-      ],
-      "conditions": {
-        "expression": {
-          "expr": ">=",
-          "left": {
-            "expr": "number-ref",
-            "ref": "count-"
-          },
-          "right": {
-            "expr": "number",
-            "value": 5
-          }
-        }
-      },
-      "search_within_ms": 600000,
-      "execute_every_ms": 60000,
-      "use_cron_scheduling": false,
-      "cron_expression": null,
-      "cron_timezone": null,
-      "event_limit": 100
-    },
-    "field_spec": {
-      "host": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "${source.zs_client_ip}",
-            "require_values": false,
-            "exclude_empty_fields": true
-          }
-        ]
-      },
-      "event": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "${source.message}",
-            "require_values": false,
-            "exclude_empty_fields": true
-          }
-        ]
-      },
-      "mitre_tactic": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "Credential Access",
-            "require_values": false,
-            "exclude_empty_fields": false
-          }
-        ]
-      },
-      "mitre_technique": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "T1110 Brute Force",
-            "require_values": false,
-            "exclude_empty_fields": false
-          }
-        ]
-      },
-      "mitre_techniques": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "T1110",
-            "require_values": false,
-            "exclude_empty_fields": false
-          }
-        ]
-      }
-    },
-    "key_spec": [
-      "host"
-    ],
-    "notification_settings": {
-      "grace_period_ms": 3600000,
-      "backlog_size": 5
-    },
-    "notifications": [
-      {
-        "notification_id": "<NOTIFICATION_ID>",
-        "notification_parameters": null
-      }
-    ],
-    "storage": [
-      {
-        "type": "persist-to-streams-v1",
-        "streams": [
-          "000000000000000000000002"
-        ]
-      }
-    ],
-    "tags": [
-      "detection",
-      "zaslon",
-      "high"
-    ]
-  },
-  {
-    "title": "ZASLON - SELinux переведён в permissive или disabled из панели",
-    "description": "Через ZaSlon SELinux на хосте переведён в разрешающий режим или отключён. Это легитимное действие администратора, но защита хоста ослаблена: событие позволяет отличить его от setenforce 0 мимо панели (алерт «Отключение SELinux или аудита» в потоке auditd сработает на оба случая).\nMITRE ATT&CK. Тактики: Defense Impairment. Техники: T1685 Disable or Modify Tools.",
-    "priority": 2,
-    "alert": true,
-    "config": {
-      "type": "aggregation-v1",
-      "query": "zs_op:selinux_mode AND zs_ok:true AND zs_arg_mode:(permissive OR disabled)",
-      "query_parameters": [],
-      "filters": [],
-      "streams": [
-        "<ZASLON_STREAM_ID>"
-      ],
-      "stream_categories": [],
-      "group_by": [],
-      "series": [],
-      "conditions": {
-        "expression": null
-      },
-      "search_within_ms": 60000,
-      "execute_every_ms": 60000,
-      "use_cron_scheduling": false,
-      "cron_expression": null,
-      "cron_timezone": null,
-      "event_limit": 100
-    },
-    "field_spec": {
-      "host": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "${source.zs_host}",
-            "require_values": false,
-            "exclude_empty_fields": true
-          }
-        ]
-      },
-      "host_address": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "${source.zs_host_address}",
-            "require_values": false,
-            "exclude_empty_fields": true
-          }
-        ]
-      },
-      "event": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "${source.message}",
-            "require_values": false,
-            "exclude_empty_fields": true
-          }
-        ]
-      },
-      "mode": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "${source.zs_arg_mode}",
-            "require_values": false,
-            "exclude_empty_fields": true
-          }
-        ]
-      },
-      "tx": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "${source.zs_tx}",
-            "require_values": false,
-            "exclude_empty_fields": true
-          }
-        ]
-      },
-      "mitre_tactic": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "Defense Impairment",
-            "require_values": false,
-            "exclude_empty_fields": false
-          }
-        ]
-      },
-      "mitre_technique": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "T1685 Disable or Modify Tools",
-            "require_values": false,
-            "exclude_empty_fields": false
-          }
-        ]
-      },
-      "mitre_techniques": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "T1685",
-            "require_values": false,
-            "exclude_empty_fields": false
-          }
-        ]
-      }
-    },
-    "key_spec": [
-      "host"
-    ],
-    "notification_settings": {
-      "grace_period_ms": 0,
-      "backlog_size": 5
-    },
-    "notifications": [
-      {
-        "notification_id": "<NOTIFICATION_ID>",
-        "notification_parameters": null
-      }
-    ],
-    "storage": [
-      {
-        "type": "persist-to-streams-v1",
-        "streams": [
-          "000000000000000000000002"
-        ]
-      }
-    ],
-    "tags": [
-      "detection",
-      "zaslon",
-      "medium"
-    ]
-  },
-  {
-    "title": "ZASLON - firewalld остановлен из панели",
-    "description": "Через ZaSlon остановлена служба firewalld: хост остался без межсетевого экрана. Если остановка с таймером отката не была подтверждена, ZaSlon вернёт службу сам (zs_op:tx_rollback).\nMITRE ATT&CK. Тактики: Defense Impairment. Техники: T1685 Disable or Modify Tools.",
-    "priority": 3,
-    "alert": true,
-    "config": {
-      "type": "aggregation-v1",
-      "query": "zs_op:firewalld_set AND zs_ok:true AND zs_arg_running:false",
-      "query_parameters": [],
-      "filters": [],
-      "streams": [
-        "<ZASLON_STREAM_ID>"
-      ],
-      "stream_categories": [],
-      "group_by": [],
-      "series": [],
-      "conditions": {
-        "expression": null
-      },
-      "search_within_ms": 60000,
-      "execute_every_ms": 60000,
-      "use_cron_scheduling": false,
-      "cron_expression": null,
-      "cron_timezone": null,
-      "event_limit": 100
-    },
-    "field_spec": {
-      "host": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "${source.zs_host}",
-            "require_values": false,
-            "exclude_empty_fields": true
-          }
-        ]
-      },
-      "host_address": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "${source.zs_host_address}",
-            "require_values": false,
-            "exclude_empty_fields": true
-          }
-        ]
-      },
-      "event": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "${source.message}",
-            "require_values": false,
-            "exclude_empty_fields": true
-          }
-        ]
-      },
-      "tx": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "${source.zs_tx}",
-            "require_values": false,
-            "exclude_empty_fields": true
-          }
-        ]
-      },
-      "mitre_tactic": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "Defense Impairment",
-            "require_values": false,
-            "exclude_empty_fields": false
-          }
-        ]
-      },
-      "mitre_technique": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "T1685 Disable or Modify Tools",
-            "require_values": false,
-            "exclude_empty_fields": false
-          }
-        ]
-      },
-      "mitre_techniques": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "T1685",
-            "require_values": false,
-            "exclude_empty_fields": false
-          }
-        ]
-      }
-    },
-    "key_spec": [
-      "host"
-    ],
-    "notification_settings": {
-      "grace_period_ms": 0,
-      "backlog_size": 5
-    },
-    "notifications": [
-      {
-        "notification_id": "<NOTIFICATION_ID>",
-        "notification_parameters": null
-      }
-    ],
-    "storage": [
-      {
-        "type": "persist-to-streams-v1",
-        "streams": [
-          "000000000000000000000002"
-        ]
-      }
-    ],
-    "tags": [
-      "detection",
-      "zaslon",
-      "high"
-    ]
-  },
-  {
-    "title": "ZASLON - Изменения доверия: пароль панели, добавление и удаление хостов",
-    "description": "Сменён пароль администратора панели, добавлен, зарегистрирован или удалён управляемый хост. Редкие действия, после которых меняется круг доверия ZaSlon.\nMITRE ATT&CK. Тактики: Persistence. Техники: T1098 Account Manipulation.",
-    "priority": 1,
-    "alert": true,
-    "config": {
-      "type": "aggregation-v1",
-      "query": "zs_op:(admin_password OR host_add OR host_enroll OR host_remove)",
-      "query_parameters": [],
-      "filters": [],
-      "streams": [
-        "<ZASLON_STREAM_ID>"
-      ],
-      "stream_categories": [],
-      "group_by": [],
-      "series": [],
-      "conditions": {
-        "expression": null
-      },
-      "search_within_ms": 60000,
-      "execute_every_ms": 60000,
-      "use_cron_scheduling": false,
-      "cron_expression": null,
-      "cron_timezone": null,
-      "event_limit": 100
-    },
-    "field_spec": {
-      "host": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "${source.zs_host}",
-            "require_values": false,
-            "exclude_empty_fields": true
-          }
-        ]
-      },
-      "event": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "${source.message}",
-            "require_values": false,
-            "exclude_empty_fields": true
-          }
-        ]
-      },
-      "op": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "${source.zs_op}",
-            "require_values": false,
-            "exclude_empty_fields": true
-          }
-        ]
-      },
-      "mitre_tactic": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "Persistence",
-            "require_values": false,
-            "exclude_empty_fields": false
-          }
-        ]
-      },
-      "mitre_technique": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "T1098 Account Manipulation",
-            "require_values": false,
-            "exclude_empty_fields": false
-          }
-        ]
-      },
-      "mitre_techniques": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "T1098",
-            "require_values": false,
-            "exclude_empty_fields": false
-          }
-        ]
-      }
-    },
-    "key_spec": [
-      "op"
-    ],
-    "notification_settings": {
-      "grace_period_ms": 0,
-      "backlog_size": 5
-    },
-    "notifications": [
-      {
-        "notification_id": "<NOTIFICATION_ID>",
-        "notification_parameters": null
-      }
-    ],
-    "storage": [
-      {
-        "type": "persist-to-streams-v1",
-        "streams": [
-          "000000000000000000000002"
-        ]
-      }
-    ],
-    "tags": [
-      "detection",
-      "zaslon",
-      "low"
-    ]
-  },
-  {
-    "title": "HOMEREPO - Подбор пароля к панели (5+ неудачных входов за 10 мин)",
-    "description": "Пять и более неудачных входов в панель HomeRepo с одного адреса за 10 минут. Панель хранит репозиторий, которому доверяют все устройства, поэтому подбор к ней — повод разобраться сразу.\nMITRE ATT&CK. Тактики: Credential Access. Техники: T1110 Brute Force.",
-    "priority": 3,
-    "alert": true,
-    "config": {
-      "type": "aggregation-v1",
-      "query": "hr_event:audit AND hr_action:login_failed",
-      "query_parameters": [],
-      "filters": [],
-      "streams": [
-        "<HOMEREPO_STREAM_ID>"
-      ],
-      "stream_categories": [],
-      "group_by": [
-        "hr_client_ip"
-      ],
-      "series": [
-        {
-          "type": "count",
-          "id": "count-",
-          "field": null
-        }
-      ],
-      "conditions": {
-        "expression": {
-          "expr": ">=",
-          "left": {
-            "expr": "number-ref",
-            "ref": "count-"
-          },
-          "right": {
-            "expr": "number",
-            "value": 5
-          }
-        }
-      },
-      "search_within_ms": 600000,
-      "execute_every_ms": 60000,
-      "use_cron_scheduling": false,
-      "cron_expression": null,
-      "cron_timezone": null,
-      "event_limit": 100
-    },
-    "field_spec": {
-      "host": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "${source.hr_client_ip}",
-            "require_values": false,
-            "exclude_empty_fields": true
-          }
-        ]
-      },
-      "event": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "${source.message}",
-            "require_values": false,
-            "exclude_empty_fields": true
-          }
-        ]
-      },
-      "mitre_tactic": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "Credential Access",
-            "require_values": false,
-            "exclude_empty_fields": false
-          }
-        ]
-      },
-      "mitre_technique": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "T1110 Brute Force",
-            "require_values": false,
-            "exclude_empty_fields": false
-          }
-        ]
-      },
-      "mitre_techniques": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "T1110",
-            "require_values": false,
-            "exclude_empty_fields": false
-          }
-        ]
-      }
-    },
-    "key_spec": [
-      "host"
-    ],
-    "notification_settings": {
-      "grace_period_ms": 3600000,
-      "backlog_size": 5
-    },
-    "notifications": [
-      {
-        "notification_id": "<NOTIFICATION_ID>",
-        "notification_parameters": null
-      }
-    ],
-    "storage": [
-      {
-        "type": "persist-to-streams-v1",
-        "streams": [
-          "000000000000000000000002"
-        ]
-      }
-    ],
-    "tags": [
-      "detection",
-      "homerepo",
-      "high"
-    ]
-  },
-  {
-    "title": "HOMEREPO - Переподпись, удаление пакетов или смена ключа репозитория",
-    "description": "В HomeRepo переподписаны пакеты (в том числе чужие), удалены пакеты или изменён ключ подписи. Всё, что подписано ключом репозитория, устройства установят без вопросов: такие действия должны быть ожидаемыми.\nMITRE ATT&CK. Тактики: Initial Access. Техники: T1195.002 Compromise Software Supply Chain.",
-    "priority": 3,
-    "alert": true,
-    "config": {
-      "type": "aggregation-v1",
-      "query": "hr_event:audit AND hr_action:(package_resign OR resign_foreign OR package_delete OR repo_key)",
-      "query_parameters": [],
-      "filters": [],
-      "streams": [
-        "<HOMEREPO_STREAM_ID>"
-      ],
-      "stream_categories": [],
-      "group_by": [],
-      "series": [],
-      "conditions": {
-        "expression": null
-      },
-      "search_within_ms": 60000,
-      "execute_every_ms": 60000,
-      "use_cron_scheduling": false,
-      "cron_expression": null,
-      "cron_timezone": null,
-      "event_limit": 100
-    },
-    "field_spec": {
-      "host": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "${source.hr_user}",
-            "require_values": false,
-            "exclude_empty_fields": true
-          }
-        ]
-      },
-      "event": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "${source.message}",
-            "require_values": false,
-            "exclude_empty_fields": true
-          }
-        ]
-      },
-      "action": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "${source.hr_action_name}",
-            "require_values": false,
-            "exclude_empty_fields": true
-          }
-        ]
-      },
-      "detail": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "${source.hr_detail}",
-            "require_values": false,
-            "exclude_empty_fields": true
-          }
-        ]
-      },
-      "mitre_tactic": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "Initial Access",
-            "require_values": false,
-            "exclude_empty_fields": false
-          }
-        ]
-      },
-      "mitre_technique": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "T1195.002 Compromise Software Supply Chain",
-            "require_values": false,
-            "exclude_empty_fields": false
-          }
-        ]
-      },
-      "mitre_techniques": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "T1195.002",
-            "require_values": false,
-            "exclude_empty_fields": false
-          }
-        ]
-      }
-    },
-    "key_spec": [
-      "action"
-    ],
-    "notification_settings": {
-      "grace_period_ms": 0,
-      "backlog_size": 5
-    },
-    "notifications": [
-      {
-        "notification_id": "<NOTIFICATION_ID>",
-        "notification_parameters": null
-      }
-    ],
-    "storage": [
-      {
-        "type": "persist-to-streams-v1",
-        "streams": [
-          "000000000000000000000002"
-        ]
-      }
-    ],
-    "tags": [
-      "detection",
-      "homerepo",
-      "high"
-    ]
-  },
-  {
-    "title": "HOMEREPO - Пользователи, роли и токены",
-    "description": "Создан или удалён пользователь, изменена роль, сброшен или сменён пароль, создан или удалён токен API, выдан доступ Ansible.\nMITRE ATT&CK. Тактики: Persistence. Техники: T1098 Account Manipulation.",
-    "priority": 2,
-    "alert": true,
-    "config": {
-      "type": "aggregation-v1",
-      "query": "hr_event:audit AND hr_action:(user_create OR user_delete OR user_role OR user_reset_password OR password_changed OR token_create OR token_delete OR ansible_access)",
-      "query_parameters": [],
-      "filters": [],
-      "streams": [
-        "<HOMEREPO_STREAM_ID>"
-      ],
-      "stream_categories": [],
-      "group_by": [],
-      "series": [],
-      "conditions": {
-        "expression": null
-      },
-      "search_within_ms": 60000,
-      "execute_every_ms": 60000,
-      "use_cron_scheduling": false,
-      "cron_expression": null,
-      "cron_timezone": null,
-      "event_limit": 100
-    },
-    "field_spec": {
-      "host": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "${source.hr_user}",
-            "require_values": false,
-            "exclude_empty_fields": true
-          }
-        ]
-      },
-      "event": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "${source.message}",
-            "require_values": false,
-            "exclude_empty_fields": true
-          }
-        ]
-      },
-      "action": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "${source.hr_action_name}",
-            "require_values": false,
-            "exclude_empty_fields": true
-          }
-        ]
-      },
-      "mitre_tactic": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "Persistence",
-            "require_values": false,
-            "exclude_empty_fields": false
-          }
-        ]
-      },
-      "mitre_technique": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "T1098 Account Manipulation",
-            "require_values": false,
-            "exclude_empty_fields": false
-          }
-        ]
-      },
-      "mitre_techniques": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "T1098",
-            "require_values": false,
-            "exclude_empty_fields": false
-          }
-        ]
-      }
-    },
-    "key_spec": [
-      "action"
-    ],
-    "notification_settings": {
-      "grace_period_ms": 0,
-      "backlog_size": 5
-    },
-    "notifications": [
-      {
-        "notification_id": "<NOTIFICATION_ID>",
-        "notification_parameters": null
-      }
-    ],
-    "storage": [
-      {
-        "type": "persist-to-streams-v1",
-        "streams": [
-          "000000000000000000000002"
-        ]
-      }
-    ],
-    "tags": [
-      "detection",
-      "homerepo",
-      "medium"
-    ]
-  },
-  {
-    "title": "HOMEREPO - Новое устройство в сети",
-    "description": "Сканер HomeRepo нашёл адрес, которого раньше не видел: адрес, MAC, производитель, имя, открытые порты. Первое сканирование подсети событий не создаёт.\nMITRE ATT&CK. Тактики: Initial Access. Техники: T1200 Hardware Additions.",
-    "priority": 2,
-    "alert": true,
-    "config": {
-      "type": "aggregation-v1",
-      "query": "hr_event:device_new",
-      "query_parameters": [],
-      "filters": [],
-      "streams": [
-        "<HOMEREPO_STREAM_ID>"
-      ],
-      "stream_categories": [],
-      "group_by": [],
-      "series": [],
-      "conditions": {
-        "expression": null
-      },
-      "search_within_ms": 60000,
-      "execute_every_ms": 60000,
-      "use_cron_scheduling": false,
-      "cron_expression": null,
-      "cron_timezone": null,
-      "event_limit": 100
-    },
-    "field_spec": {
-      "host": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "${source.hr_ip}",
-            "require_values": false,
-            "exclude_empty_fields": true
-          }
-        ]
-      },
-      "event": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "${source.message}",
-            "require_values": false,
-            "exclude_empty_fields": true
-          }
-        ]
-      },
-      "mac": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "${source.hr_mac}",
-            "require_values": false,
-            "exclude_empty_fields": true
-          }
-        ]
-      },
-      "vendor": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "${source.hr_vendor}",
-            "require_values": false,
-            "exclude_empty_fields": true
-          }
-        ]
-      },
-      "ports": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "${source.hr_ports}",
-            "require_values": false,
-            "exclude_empty_fields": true
-          }
-        ]
-      },
-      "mitre_tactic": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "Initial Access",
-            "require_values": false,
-            "exclude_empty_fields": false
-          }
-        ]
-      },
-      "mitre_technique": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "T1200 Hardware Additions",
-            "require_values": false,
-            "exclude_empty_fields": false
-          }
-        ]
-      },
-      "mitre_techniques": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "T1200",
-            "require_values": false,
-            "exclude_empty_fields": false
-          }
-        ]
-      }
-    },
-    "key_spec": [
-      "host"
-    ],
-    "notification_settings": {
-      "grace_period_ms": 0,
-      "backlog_size": 5
-    },
-    "notifications": [
-      {
-        "notification_id": "<NOTIFICATION_ID>",
-        "notification_parameters": null
-      }
-    ],
-    "storage": [
-      {
-        "type": "persist-to-streams-v1",
-        "streams": [
-          "000000000000000000000002"
-        ]
-      }
-    ],
-    "tags": [
-      "detection",
-      "homerepo",
-      "medium"
-    ]
-  },
-  {
-    "title": "HOSTDECK - Проверка безопасности перешла в fail",
-    "description": "Проверка HostDeck на хосте перешла в fail с учётом профиля и исключений: выключено шифрование диска, хост выпал из домена, SELinux или межсетевой экран выключены, вышли обновления безопасности и т. п. Проверка — поле hd_check, значение и подробности — hd_value и hd_detail. Исключение, добавленное в HostDeck, переводит событие в info и алерт не срабатывает.\nMITRE ATT&CK. Тактики: Defense Impairment. Техники: T1685 Disable or Modify Tools.",
-    "priority": 3,
-    "alert": true,
-    "config": {
-      "type": "aggregation-v1",
-      "query": "hd_event:check_changed AND hd_effective:fail",
-      "query_parameters": [],
-      "filters": [],
-      "streams": [
-        "<HOSTDECK_STREAM_ID>"
-      ],
-      "stream_categories": [],
-      "group_by": [],
-      "series": [],
-      "conditions": {
-        "expression": null
-      },
-      "search_within_ms": 60000,
-      "execute_every_ms": 60000,
-      "use_cron_scheduling": false,
-      "cron_expression": null,
-      "cron_timezone": null,
-      "event_limit": 100
-    },
-    "field_spec": {
-      "host": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "${source.hd_host}",
-            "require_values": false,
-            "exclude_empty_fields": true
-          }
-        ]
-      },
-      "event": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "${source.message}",
-            "require_values": false,
-            "exclude_empty_fields": true
-          }
-        ]
-      },
-      "check": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "${source.hd_check}",
-            "require_values": true,
-            "exclude_empty_fields": true
-          }
-        ]
-      },
-      "value": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "${source.hd_value}",
-            "require_values": false,
-            "exclude_empty_fields": true
-          }
-        ]
-      },
-      "detail": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "${source.hd_detail}",
-            "require_values": false,
-            "exclude_empty_fields": true
-          }
-        ]
-      },
-      "profile": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "${source.hd_profile}",
-            "require_values": false,
-            "exclude_empty_fields": true
-          }
-        ]
-      },
-      "mitre_tactic": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "Defense Impairment",
-            "require_values": false,
-            "exclude_empty_fields": false
-          }
-        ]
-      },
-      "mitre_technique": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "T1685 Disable or Modify Tools",
-            "require_values": false,
-            "exclude_empty_fields": false
-          }
-        ]
-      },
-      "mitre_techniques": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "T1685",
-            "require_values": false,
-            "exclude_empty_fields": false
-          }
-        ]
-      }
-    },
-    "key_spec": [
-      "host",
-      "check"
-    ],
-    "notification_settings": {
-      "grace_period_ms": 3600000,
-      "backlog_size": 5
-    },
-    "notifications": [
-      {
-        "notification_id": "<NOTIFICATION_ID>",
-        "notification_parameters": null
-      }
-    ],
-    "storage": [
-      {
-        "type": "persist-to-streams-v1",
-        "streams": [
-          "000000000000000000000002"
-        ]
-      }
-    ],
-    "tags": [
-      "detection",
-      "hostdeck",
-      "high"
-    ]
-  },
-  {
-    "title": "HOSTDECK - Проверка безопасности перешла в warn",
-    "description": "Проверка HostDeck перешла в warn с учётом профиля и исключений. Без письма: для разбора на странице Alerts & Events.",
-    "priority": 1,
-    "alert": false,
-    "config": {
-      "type": "aggregation-v1",
-      "query": "hd_event:check_changed AND hd_effective:warn",
-      "query_parameters": [],
-      "filters": [],
-      "streams": [
-        "<HOSTDECK_STREAM_ID>"
-      ],
-      "stream_categories": [],
-      "group_by": [],
-      "series": [],
-      "conditions": {
-        "expression": null
-      },
-      "search_within_ms": 60000,
-      "execute_every_ms": 60000,
-      "use_cron_scheduling": false,
-      "cron_expression": null,
-      "cron_timezone": null,
-      "event_limit": 100
-    },
-    "field_spec": {
-      "host": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "${source.hd_host}",
-            "require_values": false,
-            "exclude_empty_fields": true
-          }
-        ]
-      },
-      "event": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "${source.message}",
-            "require_values": false,
-            "exclude_empty_fields": true
-          }
-        ]
-      },
-      "check": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "${source.hd_check}",
-            "require_values": true,
-            "exclude_empty_fields": true
-          }
-        ]
-      },
-      "detail": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "${source.hd_detail}",
-            "require_values": false,
-            "exclude_empty_fields": true
-          }
-        ]
-      }
-    },
-    "key_spec": [
-      "host",
-      "check"
-    ],
-    "notification_settings": {
-      "grace_period_ms": 0,
-      "backlog_size": 5
-    },
-    "notifications": [],
-    "storage": [
-      {
-        "type": "persist-to-streams-v1",
-        "streams": [
-          "000000000000000000000002"
-        ]
-      }
-    ],
-    "tags": [
-      "detection",
-      "hostdeck",
-      "low"
-    ]
-  },
-  {
-    "title": "HOSTDECK - Открыта консоль root в браузере",
-    "description": "Из HostDeck открыта консоль root на хосте (или в ней отказано). Действие редкое и мощное: стоит знать о каждом.\nMITRE ATT&CK. Тактики: Execution. Техники: T1059.004 Unix Shell.",
-    "priority": 2,
-    "alert": true,
-    "config": {
-      "type": "aggregation-v1",
-      "query": "hd_event:audit AND hd_action:(term-open OR term-denied)",
-      "query_parameters": [],
-      "filters": [],
-      "streams": [
-        "<HOSTDECK_STREAM_ID>"
-      ],
-      "stream_categories": [],
-      "group_by": [],
-      "series": [],
-      "conditions": {
-        "expression": null
-      },
-      "search_within_ms": 60000,
-      "execute_every_ms": 60000,
-      "use_cron_scheduling": false,
-      "cron_expression": null,
-      "cron_timezone": null,
-      "event_limit": 100
-    },
-    "field_spec": {
-      "host": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "${source.hd_host}",
-            "require_values": false,
-            "exclude_empty_fields": true
-          }
-        ]
-      },
-      "event": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "${source.message}",
-            "require_values": false,
-            "exclude_empty_fields": true
-          }
-        ]
-      },
-      "actor": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "${source.hd_actor}",
-            "require_values": false,
-            "exclude_empty_fields": true
-          }
-        ]
-      },
-      "mitre_tactic": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "Execution",
-            "require_values": false,
-            "exclude_empty_fields": false
-          }
-        ]
-      },
-      "mitre_technique": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "T1059.004 Unix Shell",
-            "require_values": false,
-            "exclude_empty_fields": false
-          }
-        ]
-      },
-      "mitre_techniques": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "T1059.004",
-            "require_values": false,
-            "exclude_empty_fields": false
-          }
-        ]
-      }
-    },
-    "key_spec": [
-      "host"
-    ],
-    "notification_settings": {
-      "grace_period_ms": 0,
-      "backlog_size": 5
-    },
-    "notifications": [
-      {
-        "notification_id": "<NOTIFICATION_ID>",
-        "notification_parameters": null
-      }
-    ],
-    "storage": [
-      {
-        "type": "persist-to-streams-v1",
-        "streams": [
-          "000000000000000000000002"
-        ]
-      }
-    ],
-    "tags": [
-      "detection",
-      "hostdeck",
-      "medium"
-    ]
-  },
-  {
-    "title": "HOSTDECK - Подбор пароля (5+ неудачных входов за 10 мин)",
-    "description": "Пять и более неудачных входов в HostDeck за 10 минут. У HostDeck есть консоль root, поэтому учётная запись администратора — ценная цель.\nMITRE ATT&CK. Тактики: Credential Access. Техники: T1110 Brute Force.",
-    "priority": 3,
-    "alert": true,
-    "config": {
-      "type": "aggregation-v1",
-      "query": "hd_event:audit AND hd_action:login-failed",
-      "query_parameters": [],
-      "filters": [],
-      "streams": [
-        "<HOSTDECK_STREAM_ID>"
-      ],
-      "stream_categories": [],
-      "group_by": [
-        "hd_detail"
-      ],
-      "series": [
-        {
-          "type": "count",
-          "id": "count-",
-          "field": null
-        }
-      ],
-      "conditions": {
-        "expression": {
-          "expr": ">=",
-          "left": {
-            "expr": "number-ref",
-            "ref": "count-"
-          },
-          "right": {
-            "expr": "number",
-            "value": 5
-          }
-        }
-      },
-      "search_within_ms": 600000,
-      "execute_every_ms": 60000,
-      "use_cron_scheduling": false,
-      "cron_expression": null,
-      "cron_timezone": null,
-      "event_limit": 100
-    },
-    "field_spec": {
-      "host": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "${source.hd_detail}",
-            "require_values": false,
-            "exclude_empty_fields": true
-          }
-        ]
-      },
-      "event": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "${source.message}",
-            "require_values": false,
-            "exclude_empty_fields": true
-          }
-        ]
-      },
-      "mitre_tactic": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "Credential Access",
-            "require_values": false,
-            "exclude_empty_fields": false
-          }
-        ]
-      },
-      "mitre_technique": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "T1110 Brute Force",
-            "require_values": false,
-            "exclude_empty_fields": false
-          }
-        ]
-      },
-      "mitre_techniques": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "T1110",
-            "require_values": false,
-            "exclude_empty_fields": false
-          }
-        ]
-      }
-    },
-    "key_spec": [
-      "host"
-    ],
-    "notification_settings": {
-      "grace_period_ms": 3600000,
-      "backlog_size": 5
-    },
-    "notifications": [
-      {
-        "notification_id": "<NOTIFICATION_ID>",
-        "notification_parameters": null
-      }
-    ],
-    "storage": [
-      {
-        "type": "persist-to-streams-v1",
-        "streams": [
-          "000000000000000000000002"
-        ]
-      }
-    ],
-    "tags": [
-      "detection",
-      "hostdeck",
-      "high"
-    ]
-  },
-  {
-    "title": "HOSTDECK - Риск принят: добавлено исключение",
-    "description": "В HostDeck добавлено исключение для проверки: её отклонение больше не попадает в итог и в алерты. Событие для учёта принятых рисков.",
-    "priority": 1,
-    "alert": false,
-    "config": {
-      "type": "aggregation-v1",
-      "query": "hd_event:audit AND hd_action:exception-set",
-      "query_parameters": [],
-      "filters": [],
-      "streams": [
-        "<HOSTDECK_STREAM_ID>"
-      ],
-      "stream_categories": [],
-      "group_by": [],
-      "series": [],
-      "conditions": {
-        "expression": null
-      },
-      "search_within_ms": 60000,
-      "execute_every_ms": 60000,
-      "use_cron_scheduling": false,
-      "cron_expression": null,
-      "cron_timezone": null,
-      "event_limit": 100
-    },
-    "field_spec": {
-      "host": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "${source.hd_host}",
-            "require_values": false,
-            "exclude_empty_fields": true
-          }
-        ]
-      },
-      "event": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "${source.message}",
-            "require_values": false,
-            "exclude_empty_fields": true
-          }
-        ]
-      },
-      "actor": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "${source.hd_actor}",
-            "require_values": false,
-            "exclude_empty_fields": true
-          }
-        ]
-      },
-      "detail": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "${source.hd_detail}",
-            "require_values": false,
-            "exclude_empty_fields": true
-          }
-        ]
-      }
-    },
-    "key_spec": [
-      "host"
-    ],
-    "notification_settings": {
-      "grace_period_ms": 0,
-      "backlog_size": 5
-    },
-    "notifications": [],
-    "storage": [
-      {
-        "type": "persist-to-streams-v1",
-        "streams": [
-          "000000000000000000000002"
-        ]
-      }
-    ],
-    "tags": [
-      "detection",
-      "hostdeck",
-      "low"
-    ]
-  },
-  {
-    "title": "LOGATLAS - Находка высокой важности в разборе журналов",
-    "description": "LogAtlas разобрал архив журналов хоста, и сработало правило критичной или высокой важности (встроенное или импортированное правило Sigma). Хост — la_host, правило — la_rule_title, когда это было в журналах — la_first и la_last. Сообщение отправлено из LogAtlas кнопкой, поэтому его время — момент отправки.",
-    "priority": 3,
-    "alert": true,
-    "config": {
-      "type": "aggregation-v1",
-      "query": "la_event:finding AND la_severity:(critical OR high)",
-      "query_parameters": [],
-      "filters": [],
-      "streams": [
-        "<LOGATLAS_STREAM_ID>"
-      ],
-      "stream_categories": [],
-      "group_by": [],
-      "series": [],
-      "conditions": {
-        "expression": null
-      },
-      "search_within_ms": 60000,
-      "execute_every_ms": 60000,
-      "use_cron_scheduling": false,
-      "cron_expression": null,
-      "cron_timezone": null,
-      "event_limit": 100
-    },
-    "field_spec": {
-      "host": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "${source.la_host}",
-            "require_values": false,
-            "exclude_empty_fields": true
-          }
-        ]
-      },
-      "event": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "${source.message}",
-            "require_values": false,
-            "exclude_empty_fields": true
-          }
-        ]
-      },
-      "rule": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "${source.la_rule_title}",
-            "require_values": true,
-            "exclude_empty_fields": true
-          }
-        ]
-      },
-      "mitre": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "${source.la_mitre}",
-            "require_values": false,
-            "exclude_empty_fields": true
-          }
-        ]
-      },
-      "count": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "${source.la_count}",
-            "require_values": false,
-            "exclude_empty_fields": true
-          }
-        ]
-      },
-      "first": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "${source.la_first}",
-            "require_values": false,
-            "exclude_empty_fields": true
-          }
-        ]
-      },
-      "last": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "${source.la_last}",
-            "require_values": false,
-            "exclude_empty_fields": true
-          }
-        ]
-      },
-      "case": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "${source.la_case}",
-            "require_values": false,
-            "exclude_empty_fields": true
-          }
-        ]
-      }
-    },
-    "key_spec": [
-      "host",
-      "rule"
-    ],
-    "notification_settings": {
-      "grace_period_ms": 0,
-      "backlog_size": 5
-    },
-    "notifications": [
-      {
-        "notification_id": "<NOTIFICATION_ID>",
-        "notification_parameters": null
-      }
-    ],
-    "storage": [
-      {
-        "type": "persist-to-streams-v1",
-        "streams": [
-          "000000000000000000000002"
-        ]
-      }
-    ],
-    "tags": [
-      "detection",
-      "logatlas",
-      "high"
-    ]
-  },
-  {
-    "title": "HOMEREPO - Агент молчит больше суток",
-    "description": "Сторож HomeRepo: устройство не выходило на связь с панелью дольше суток — агент остановлен, хост выключен или сеть недоступна. Пока устройство молчит, напоминание приходит раз в сутки; возвращение на связь — событие hr_event=agent_recovered в журнале.\nMITRE ATT&CK. Тактики: Defense Evasion. Техники: T1562.001 Impair Defenses: Disable or Modify Tools (возможная трактовка: мониторинг на хосте отключён).",
-    "priority": 2,
-    "alert": true,
-    "config": {
-      "type": "aggregation-v1",
-      "query": "hr_event:agent_silent",
-      "query_parameters": [],
-      "filters": [],
-      "streams": [
-        "<HOMEREPO_STREAM_ID>"
-      ],
-      "stream_categories": [],
-      "group_by": [],
-      "series": [],
-      "conditions": {
-        "expression": null
-      },
-      "search_within_ms": 60000,
-      "execute_every_ms": 60000,
-      "use_cron_scheduling": false,
-      "cron_expression": null,
-      "cron_timezone": null,
-      "event_limit": 100
-    },
-    "field_spec": {
-      "event": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "${source.message}",
-            "require_values": false,
-            "exclude_empty_fields": true
-          }
-        ]
-      },
-      "host": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "${source.hr_agent_name}",
-            "require_values": false,
-            "exclude_empty_fields": true
-          }
-        ]
-      },
-      "ip": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "${source.hr_ip}",
-            "require_values": false,
-            "exclude_empty_fields": true
-          }
-        ]
-      },
-      "hours_silent": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "${source.hr_hours_silent}",
-            "require_values": false,
-            "exclude_empty_fields": true
-          }
-        ]
-      },
-      "last_seen": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "${source.hr_last_seen}",
-            "require_values": false,
-            "exclude_empty_fields": true
-          }
-        ]
-      },
-      "mitre_tactic": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "Defense Evasion",
-            "require_values": false,
-            "exclude_empty_fields": false
-          }
-        ]
-      },
-      "mitre_technique": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "T1562.001 Disable or Modify Tools",
-            "require_values": false,
-            "exclude_empty_fields": false
-          }
-        ]
-      },
-      "mitre_techniques": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "T1562.001",
-            "require_values": false,
-            "exclude_empty_fields": false
-          }
-        ]
-      }
-    },
-    "key_spec": [
-      "host"
-    ],
-    "notification_settings": {
-      "grace_period_ms": 0,
-      "backlog_size": 5
-    },
-    "notifications": [
-      {
-        "notification_id": "<NOTIFICATION_ID>",
-        "notification_parameters": null
-      }
-    ],
-    "storage": [
-      {
-        "type": "persist-to-streams-v1",
-        "streams": [
-          "000000000000000000000002"
-        ]
-      }
-    ],
-    "tags": [
-      "detection",
-      "homerepo",
-      "medium"
-    ]
-  },
-  {
-    "alert": true,
-    "config": {
-      "type": "aggregation-v1",
-      "query": "hr_event:heartbeat AND hr_hosts_silent:[3 TO *]",
-      "query_parameters": [],
-      "filters": [],
-      "streams": [
-        "6aefecd3bb96dbe508883d2a"
-      ],
-      "stream_categories": [],
-      "group_by": [],
       "series": [
         {
           "type": "count",
@@ -1959,27 +238,43 @@
           }
         }
       },
-      "search_within_ms": 32400000,
-      "execute_every_ms": 32400000,
+      "search_within_ms": 60000,
+      "execute_every_ms": 60000,
       "use_cron_scheduling": false,
       "cron_expression": null,
       "cron_timezone": null,
       "event_limit": 100
     },
-    "description": "Пульс панели HomeRepo сообщает, что молчат 3 или больше агентов (hr_hosts_silent >= 3). Панель жива, но парк агентов деградирует — проверить, кто отвалился, на дашборде «Пульс экосистемы». Порог 3 выбран по известной базовой линии (2 молчащих — текущая норма); при изменении парка обновить порог.",
-    "field_spec": {},
+    "description": "Чтение канареечного файла (passwords.xlsx, backup_credentials.txt) — признак разведки или компрометации хоста",
+    "field_spec": {
+      "event": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.message}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      }
+    },
     "key_spec": [],
     "notification_settings": {
-      "grace_period_ms": 86400000,
-      "backlog_size": 0
+      "grace_period_ms": 0,
+      "backlog_size": 3
     },
     "notifications": [
       {
-        "notification_id": "6aefecd4bb96dbe508883d5e",
+        "notification_id": "6af1cf9b61b983feab6b8a3a",
+        "notification_parameters": null
+      },
+      {
+        "notification_id": "6ace4abfa68bf21dfabba04d",
         "notification_parameters": null
       }
     ],
-    "priority": 2,
+    "priority": 3,
     "storage": [
       {
         "type": "persist-to-streams-v1",
@@ -1988,60 +283,400 @@
         ]
       }
     ],
-    "tags": [
-      "detection",
-      "health",
-      "medium"
-    ],
-    "title": "HOMEREPO - Деградация: молчат 3+ агентов"
+    "tags": [],
+    "title": "CANARY - Открытие honeytoken-файла"
   },
   {
     "alert": true,
     "config": {
       "type": "aggregation-v1",
-      "query": "hd_event:heartbeat AND hd_checks_failing:[3 TO *]",
+      "query": "tool:cowrie AND event:\"cowrie.command.input\"",
       "query_parameters": [],
       "filters": [],
       "streams": [
-        "6aefecd3bb96dbe508883d39"
+        "6af0c40e61b983feab6a4fc4"
       ],
       "stream_categories": [],
       "group_by": [],
-      "series": [
-        {
-          "type": "count",
-          "id": "count-",
-          "field": null
-        }
-      ],
+      "series": [],
       "conditions": {
-        "expression": {
-          "expr": ">=",
-          "left": {
-            "expr": "number-ref",
-            "ref": "count-"
-          },
-          "right": {
-            "expr": "number",
-            "value": 1.0
-          }
-        }
+        "expression": null
       },
-      "search_within_ms": 32400000,
-      "execute_every_ms": 32400000,
+      "search_within_ms": 60000,
+      "execute_every_ms": 60000,
       "use_cron_scheduling": false,
       "cron_expression": null,
       "cron_timezone": null,
       "event_limit": 100
     },
-    "description": "Пульс панели HostDeck сообщает о 3 или больше провалах проверок безопасности (hd_checks_failing >= 3). Панель жива, но состояние парка деградирует — открыть HostDeck и разобрать провалившиеся проверки. Порог 3 выбран по известной базовой линии (2 провала — текущая норма); при изменении парка обновить порог.",
-    "field_spec": {},
+    "description": "Внутри honeypot выполнена команда: разведка (uname, ip a), закачка (wget/curl), запуск вредоноса. Текст команды — в поле input, адрес — src_ip.\nMITRE ATT&CK. Тактика: Execution / Discovery. Техники: T1059.004 Command and Scripting Interpreter: Unix Shell, T1033 System Owner/User Discovery.",
+    "field_spec": {
+      "event": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.message}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "input": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.input}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "src_ip": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.src_ip}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      }
+    },
     "key_spec": [],
     "notification_settings": {
-      "grace_period_ms": 86400000,
-      "backlog_size": 0
+      "grace_period_ms": 0,
+      "backlog_size": 5
     },
     "notifications": [
+      {
+        "notification_id": "6af1cf9b61b983feab6b8a3a",
+        "notification_parameters": null
+      },
+      {
+        "notification_id": "6aefecd4bb96dbe508883d5e",
+        "notification_parameters": null
+      }
+    ],
+    "priority": 3,
+    "storage": [
+      {
+        "type": "persist-to-streams-v1",
+        "streams": [
+          "000000000000000000000002"
+        ]
+      }
+    ],
+    "tags": [],
+    "title": "COWRIE - Команда в honeypot"
+  },
+  {
+    "alert": true,
+    "config": {
+      "type": "aggregation-v1",
+      "query": "tool:cowrie AND event:\"cowrie.session.file_download\"",
+      "query_parameters": [],
+      "filters": [],
+      "streams": [
+        "6af0c40e61b983feab6a4fc4"
+      ],
+      "stream_categories": [],
+      "group_by": [],
+      "series": [],
+      "conditions": {
+        "expression": null
+      },
+      "search_within_ms": 60000,
+      "execute_every_ms": 60000,
+      "use_cron_scheduling": false,
+      "cron_expression": null,
+      "cron_timezone": null,
+      "event_limit": 100
+    },
+    "description": "Злоумышленник скачал файл внутрь honeypot (wget/curl) — адрес и URL в полях события, файл сохранён в var/lib/cowrie/downloads. URL и хэш — готовые IOC для TrafficLens.\nMITRE ATT&CK. Тактика: Command and Control / Ingress Tool Transfer. Техника: T1105 Ingress Tool Transfer.",
+    "field_spec": {
+      "event": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.message}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "shasum": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.shasum}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "src_ip": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.src_ip}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "url": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.url}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      }
+    },
+    "key_spec": [],
+    "notification_settings": {
+      "grace_period_ms": 0,
+      "backlog_size": 5
+    },
+    "notifications": [
+      {
+        "notification_id": "6af1cf9b61b983feab6b8a3a",
+        "notification_parameters": null
+      },
+      {
+        "notification_id": "6aefecd4bb96dbe508883d5e",
+        "notification_parameters": null
+      }
+    ],
+    "priority": 3,
+    "storage": [
+      {
+        "type": "persist-to-streams-v1",
+        "streams": [
+          "000000000000000000000002"
+        ]
+      }
+    ],
+    "tags": [],
+    "title": "COWRIE - Скачивание файла в honeypot"
+  },
+  {
+    "alert": true,
+    "config": {
+      "type": "aggregation-v1",
+      "query": "tool:cowrie AND event:\"cowrie.login.success\"",
+      "query_parameters": [],
+      "filters": [],
+      "streams": [
+        "6af0c40e61b983feab6a4fc4"
+      ],
+      "stream_categories": [],
+      "group_by": [],
+      "series": [],
+      "conditions": {
+        "expression": null
+      },
+      "search_within_ms": 60000,
+      "execute_every_ms": 60000,
+      "use_cron_scheduling": false,
+      "cron_expression": null,
+      "cron_timezone": null,
+      "event_limit": 100
+    },
+    "description": "Злоумышленник подобрал пароль и вошёл в SSH/Telnet honeypot (порт 2222/2223). Логин, пароль, адрес и клиент (hassh) — в полях события; дальше обычно следуют команды разведки.\nMITRE ATT&CK. Тактики: Initial Access, Credential Access. Техники: T1110.001 Brute Force: Password Guessing, T1133 External Remote Services.",
+    "field_spec": {
+      "event": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.message}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "password": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.password}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "src_ip": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.src_ip}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "username": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.username}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      }
+    },
+    "key_spec": [],
+    "notification_settings": {
+      "grace_period_ms": 0,
+      "backlog_size": 5
+    },
+    "notifications": [
+      {
+        "notification_id": "6af1cf9b61b983feab6b8a3a",
+        "notification_parameters": null
+      },
+      {
+        "notification_id": "6aefecd4bb96dbe508883d5e",
+        "notification_parameters": null
+      }
+    ],
+    "priority": 3,
+    "storage": [
+      {
+        "type": "persist-to-streams-v1",
+        "streams": [
+          "000000000000000000000002"
+        ]
+      }
+    ],
+    "tags": [],
+    "title": "COWRIE - Успешный вход в honeypot"
+  },
+  {
+    "alert": true,
+    "config": {
+      "type": "aggregation-v1",
+      "query": "tool:diffwatch AND (dw_kind:unit OR dw_kind:cron)",
+      "query_parameters": [],
+      "filters": [],
+      "streams": [
+        "6af16fdf61b983feab6b2741"
+      ],
+      "stream_categories": [],
+      "group_by": [],
+      "series": [],
+      "conditions": {
+        "expression": null
+      },
+      "search_within_ms": 300000,
+      "execute_every_ms": 300000,
+      "use_cron_scheduling": false,
+      "cron_expression": null,
+      "cron_timezone": null,
+      "event_limit": 100
+    },
+    "description": "DiffWatch: добавление/удаление/изменение systemd-юнита или crontab — возможное закрепление\nMITRE ATT&CK. Тактика: Persistence. Техники: T1053.003 Scheduled Task/Job: Cron, T1543.002 Create or Modify System Process: Systemd Service.",
+    "field_spec": {
+      "event": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.message}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      }
+    },
+    "key_spec": [],
+    "notification_settings": {
+      "grace_period_ms": 0,
+      "backlog_size": 3
+    },
+    "notifications": [
+      {
+        "notification_id": "6af1cf9b61b983feab6b8a3a",
+        "notification_parameters": null
+      },
+      {
+        "notification_id": "6aefecd4bb96dbe508883d5e",
+        "notification_parameters": null
+      }
+    ],
+    "priority": 3,
+    "storage": [
+      {
+        "type": "persist-to-streams-v1",
+        "streams": [
+          "000000000000000000000002"
+        ]
+      }
+    ],
+    "tags": [],
+    "title": "DIFFWATCH - Изменение автозагрузки (unit/cron)"
+  },
+  {
+    "alert": true,
+    "config": {
+      "type": "aggregation-v1",
+      "query": "tool:diffwatch AND dw_kind:package",
+      "query_parameters": [],
+      "filters": [],
+      "streams": [
+        "6af16fdf61b983feab6b2741"
+      ],
+      "stream_categories": [],
+      "group_by": [],
+      "series": [],
+      "conditions": {
+        "expression": null
+      },
+      "search_within_ms": 300000,
+      "execute_every_ms": 300000,
+      "use_cron_scheduling": false,
+      "cron_expression": null,
+      "cron_timezone": null,
+      "event_limit": 100
+    },
+    "description": "DiffWatch: установка или удаление пакетов на хосте\nMITRE ATT&CK. Тактика: Persistence. Техника: T1546 Event Triggered Execution — изменение состава ПО на хосте.",
+    "field_spec": {
+      "event": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.message}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      }
+    },
+    "key_spec": [],
+    "notification_settings": {
+      "grace_period_ms": 0,
+      "backlog_size": 3
+    },
+    "notifications": [
+      {
+        "notification_id": "6af1cf9b61b983feab6b8a3a",
+        "notification_parameters": null
+      },
       {
         "notification_id": "6aefecd4bb96dbe508883d5e",
         "notification_parameters": null
@@ -2056,12 +691,72 @@
         ]
       }
     ],
-    "tags": [
-      "detection",
-      "health",
-      "medium"
+    "tags": [],
+    "title": "DIFFWATCH - Изменение состава пакетов"
+  },
+  {
+    "alert": true,
+    "config": {
+      "type": "aggregation-v1",
+      "query": "tool:diffwatch AND dw_kind:port AND dw_event:added",
+      "query_parameters": [],
+      "filters": [],
+      "streams": [
+        "6af16fdf61b983feab6b2741"
+      ],
+      "stream_categories": [],
+      "group_by": [],
+      "series": [],
+      "conditions": {
+        "expression": null
+      },
+      "search_within_ms": 300000,
+      "execute_every_ms": 300000,
+      "use_cron_scheduling": false,
+      "cron_expression": null,
+      "cron_timezone": null,
+      "event_limit": 100
+    },
+    "description": "DiffWatch: появился слушающий порт — кто-то поднял сервис на хосте\nMITRE ATT&CK. Тактика: Command and Control. Техника: T1571 Non-Standard Port.",
+    "field_spec": {
+      "event": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.message}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      }
+    },
+    "key_spec": [],
+    "notification_settings": {
+      "grace_period_ms": 0,
+      "backlog_size": 3
+    },
+    "notifications": [
+      {
+        "notification_id": "6af1cf9b61b983feab6b8a3a",
+        "notification_parameters": null
+      },
+      {
+        "notification_id": "6aefecd4bb96dbe508883d5e",
+        "notification_parameters": null
+      }
     ],
-    "title": "HOSTDECK - Деградация: провалов проверок 3+"
+    "priority": 3,
+    "storage": [
+      {
+        "type": "persist-to-streams-v1",
+        "streams": [
+          "000000000000000000000002"
+        ]
+      }
+    ],
+    "tags": [],
+    "title": "DIFFWATCH - Новый открытый порт"
   },
   {
     "alert": true,
@@ -2127,7 +822,11 @@
     },
     "notifications": [
       {
-        "notification_id": "<NOTIFICATION_ID>",
+        "notification_id": "6af08eb661b983feab68f814",
+        "notification_parameters": null
+      },
+      {
+        "notification_id": "6af1cf9b61b983feab6b8a3a",
         "notification_parameters": null
       }
     ],
@@ -2142,5 +841,3128 @@
     ],
     "tags": [],
     "title": "DIGEST - Утренний дайджест экосистемы"
+  },
+  {
+    "alert": false,
+    "config": {
+      "type": "aggregation-v1",
+      "query": "hr_event:agent_recovered",
+      "query_parameters": [],
+      "filters": [],
+      "streams": [
+        "6aefecd3bb96dbe508883d2a"
+      ],
+      "stream_categories": [],
+      "group_by": [],
+      "series": [],
+      "conditions": {
+        "expression": null
+      },
+      "search_within_ms": 60000,
+      "execute_every_ms": 60000,
+      "use_cron_scheduling": false,
+      "cron_expression": null,
+      "cron_timezone": null,
+      "event_limit": 100
+    },
+    "description": "Агент снова шлёт heartbeat — TicketBridge автоматически закрывает открытый тикет инцидента.",
+    "field_spec": {
+      "event": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.message}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "host": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.hr_agent_name}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "ip": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.hr_ip}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "last_seen": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.hr_last_seen}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      }
+    },
+    "key_spec": [],
+    "notification_settings": {
+      "grace_period_ms": 0,
+      "backlog_size": 0
+    },
+    "notifications": [
+      {
+        "notification_id": "6af1cf9b61b983feab6b8a3a",
+        "notification_parameters": null
+      }
+    ],
+    "priority": 1,
+    "storage": [
+      {
+        "type": "persist-to-streams-v1",
+        "streams": [
+          "000000000000000000000002"
+        ]
+      }
+    ],
+    "tags": [],
+    "title": "HOMEREPO - Агент вернулся на связь"
+  },
+  {
+    "alert": true,
+    "config": {
+      "type": "aggregation-v1",
+      "query": "hr_event:agent_silent",
+      "query_parameters": [],
+      "filters": [],
+      "streams": [
+        "6aefecd3bb96dbe508883d2a"
+      ],
+      "stream_categories": [],
+      "group_by": [],
+      "series": [],
+      "conditions": {
+        "expression": null
+      },
+      "search_within_ms": 60000,
+      "execute_every_ms": 60000,
+      "use_cron_scheduling": false,
+      "cron_expression": null,
+      "cron_timezone": null,
+      "event_limit": 100
+    },
+    "description": "Сторож HomeRepo: устройство не выходило на связь с панелью дольше суток — агент остановлен, хост выключен или сеть недоступна. Пока устройство молчит, напоминание приходит раз в сутки; возвращение на связь — событие hr_event=agent_recovered в журнале.\nMITRE ATT&CK. Тактики: Defense Evasion. Техники: T1562.001 Impair Defenses: Disable or Modify Tools (возможная трактовка: мониторинг на хосте отключён).",
+    "field_spec": {
+      "event": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.message}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "host": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.hr_agent_name}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "hours_silent": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.hr_hours_silent}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "ip": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.hr_ip}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "last_seen": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.hr_last_seen}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "mitre_tactic": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "Defense Evasion",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_technique": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1562.001 Disable or Modify Tools",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_techniques": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1562.001",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      }
+    },
+    "key_spec": [
+      "host"
+    ],
+    "notification_settings": {
+      "grace_period_ms": 0,
+      "backlog_size": 5
+    },
+    "notifications": [
+      {
+        "notification_id": "6af1cf9b61b983feab6b8a3a",
+        "notification_parameters": null
+      },
+      {
+        "notification_id": "6aefecd4bb96dbe508883d5e",
+        "notification_parameters": null
+      }
+    ],
+    "priority": 2,
+    "storage": [
+      {
+        "type": "persist-to-streams-v1",
+        "streams": [
+          "000000000000000000000002"
+        ]
+      }
+    ],
+    "tags": [
+      "detection",
+      "homerepo",
+      "medium"
+    ],
+    "title": "HOMEREPO - Агент молчит больше суток"
+  },
+  {
+    "alert": true,
+    "config": {
+      "type": "aggregation-v1",
+      "query": "hr_event:heartbeat AND hr_hosts_silent:[3 TO *]",
+      "query_parameters": [],
+      "filters": [],
+      "streams": [
+        "6aefecd3bb96dbe508883d2a"
+      ],
+      "stream_categories": [],
+      "group_by": [],
+      "series": [
+        {
+          "type": "count",
+          "id": "count-",
+          "field": null
+        }
+      ],
+      "conditions": {
+        "expression": {
+          "expr": ">=",
+          "left": {
+            "expr": "number-ref",
+            "ref": "count-"
+          },
+          "right": {
+            "expr": "number",
+            "value": 1.0
+          }
+        }
+      },
+      "search_within_ms": 32400000,
+      "execute_every_ms": 32400000,
+      "use_cron_scheduling": false,
+      "cron_expression": null,
+      "cron_timezone": null,
+      "event_limit": 100
+    },
+    "description": "Пульс панели HomeRepo сообщает, что молчат 3 или больше агентов (hr_hosts_silent >= 3). Панель жива, но парк агентов деградирует — проверить, кто отвалился, на дашборде «Пульс экосистемы». Порог 3 выбран по известной базовой линии (2 молчащих — текущая норма); при изменении парка обновить порог.",
+    "field_spec": {},
+    "key_spec": [],
+    "notification_settings": {
+      "grace_period_ms": 86400000,
+      "backlog_size": 0
+    },
+    "notifications": [
+      {
+        "notification_id": "6af1cf9b61b983feab6b8a3a",
+        "notification_parameters": null
+      },
+      {
+        "notification_id": "6aefecd4bb96dbe508883d5e",
+        "notification_parameters": null
+      }
+    ],
+    "priority": 2,
+    "storage": [
+      {
+        "type": "persist-to-streams-v1",
+        "streams": [
+          "000000000000000000000002"
+        ]
+      }
+    ],
+    "tags": [
+      "detection",
+      "health",
+      "medium"
+    ],
+    "title": "HOMEREPO - Деградация: молчат 3+ агентов"
+  },
+  {
+    "alert": true,
+    "config": {
+      "type": "aggregation-v1",
+      "query": "hr_event:device_new",
+      "query_parameters": [],
+      "filters": [],
+      "streams": [
+        "6aefecd3bb96dbe508883d2a"
+      ],
+      "stream_categories": [],
+      "group_by": [],
+      "series": [],
+      "conditions": {
+        "expression": null
+      },
+      "search_within_ms": 60000,
+      "execute_every_ms": 60000,
+      "use_cron_scheduling": false,
+      "cron_expression": null,
+      "cron_timezone": null,
+      "event_limit": 100
+    },
+    "description": "Сканер HomeRepo нашёл адрес, которого раньше не видел: адрес, MAC, производитель, имя, открытые порты. Первое сканирование подсети событий не создаёт.\nMITRE ATT&CK. Тактики: Initial Access. Техники: T1200 Hardware Additions.",
+    "field_spec": {
+      "event": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.message}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "host": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.hr_ip}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "mac": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.hr_mac}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "mitre_tactic": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "Initial Access",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_technique": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1200 Hardware Additions",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_techniques": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1200",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "ports": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.hr_ports}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "vendor": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.hr_vendor}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      }
+    },
+    "key_spec": [
+      "host"
+    ],
+    "notification_settings": {
+      "grace_period_ms": 0,
+      "backlog_size": 5
+    },
+    "notifications": [
+      {
+        "notification_id": "6af1cf9b61b983feab6b8a3a",
+        "notification_parameters": null
+      },
+      {
+        "notification_id": "6aefecd4bb96dbe508883d5e",
+        "notification_parameters": null
+      }
+    ],
+    "priority": 2,
+    "storage": [
+      {
+        "type": "persist-to-streams-v1",
+        "streams": [
+          "000000000000000000000002"
+        ]
+      }
+    ],
+    "tags": [
+      "detection",
+      "homerepo",
+      "medium"
+    ],
+    "title": "HOMEREPO - Новое устройство в сети"
+  },
+  {
+    "alert": true,
+    "config": {
+      "type": "aggregation-v1",
+      "query": "hr_event:audit AND hr_action:(package_resign OR resign_foreign OR package_delete OR repo_key)",
+      "query_parameters": [],
+      "filters": [],
+      "streams": [
+        "6aefecd3bb96dbe508883d2a"
+      ],
+      "stream_categories": [],
+      "group_by": [],
+      "series": [],
+      "conditions": {
+        "expression": null
+      },
+      "search_within_ms": 60000,
+      "execute_every_ms": 60000,
+      "use_cron_scheduling": false,
+      "cron_expression": null,
+      "cron_timezone": null,
+      "event_limit": 100
+    },
+    "description": "В HomeRepo переподписаны пакеты (в том числе чужие), удалены пакеты или изменён ключ подписи. Всё, что подписано ключом репозитория, устройства установят без вопросов: такие действия должны быть ожидаемыми.\nMITRE ATT&CK. Тактики: Initial Access. Техники: T1195.002 Compromise Software Supply Chain.",
+    "field_spec": {
+      "action": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.hr_action_name}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "detail": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.hr_detail}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "event": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.message}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "host": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.hr_user}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "mitre_tactic": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "Initial Access",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_technique": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1195.002 Compromise Software Supply Chain",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_techniques": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1195.002",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      }
+    },
+    "key_spec": [
+      "action"
+    ],
+    "notification_settings": {
+      "grace_period_ms": 0,
+      "backlog_size": 5
+    },
+    "notifications": [
+      {
+        "notification_id": "6af1cf9b61b983feab6b8a3a",
+        "notification_parameters": null
+      },
+      {
+        "notification_id": "6aefecd4bb96dbe508883d5e",
+        "notification_parameters": null
+      }
+    ],
+    "priority": 3,
+    "storage": [
+      {
+        "type": "persist-to-streams-v1",
+        "streams": [
+          "000000000000000000000002"
+        ]
+      }
+    ],
+    "tags": [
+      "detection",
+      "homerepo",
+      "high"
+    ],
+    "title": "HOMEREPO - Переподпись, удаление пакетов или смена ключа репозитория"
+  },
+  {
+    "alert": true,
+    "config": {
+      "type": "aggregation-v1",
+      "query": "hr_event:audit AND hr_action:login_failed",
+      "query_parameters": [],
+      "filters": [],
+      "streams": [
+        "6aefecd3bb96dbe508883d2a"
+      ],
+      "stream_categories": [],
+      "group_by": [
+        "hr_client_ip"
+      ],
+      "series": [
+        {
+          "type": "count",
+          "id": "count-",
+          "field": null
+        }
+      ],
+      "conditions": {
+        "expression": {
+          "expr": ">=",
+          "left": {
+            "expr": "number-ref",
+            "ref": "count-"
+          },
+          "right": {
+            "expr": "number",
+            "value": 5.0
+          }
+        }
+      },
+      "search_within_ms": 600000,
+      "execute_every_ms": 60000,
+      "use_cron_scheduling": false,
+      "cron_expression": null,
+      "cron_timezone": null,
+      "event_limit": 100
+    },
+    "description": "Пять и более неудачных входов в панель HomeRepo с одного адреса за 10 минут. Панель хранит репозиторий, которому доверяют все устройства, поэтому подбор к ней — повод разобраться сразу.\nMITRE ATT&CK. Тактики: Credential Access. Техники: T1110 Brute Force.",
+    "field_spec": {
+      "event": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.message}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "host": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.hr_client_ip}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "mitre_tactic": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "Credential Access",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_technique": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1110 Brute Force",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_techniques": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1110",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      }
+    },
+    "key_spec": [
+      "host"
+    ],
+    "notification_settings": {
+      "grace_period_ms": 3600000,
+      "backlog_size": 5
+    },
+    "notifications": [
+      {
+        "notification_id": "6af1cf9b61b983feab6b8a3a",
+        "notification_parameters": null
+      },
+      {
+        "notification_id": "6aefecd4bb96dbe508883d5e",
+        "notification_parameters": null
+      }
+    ],
+    "priority": 3,
+    "storage": [
+      {
+        "type": "persist-to-streams-v1",
+        "streams": [
+          "000000000000000000000002"
+        ]
+      }
+    ],
+    "tags": [
+      "detection",
+      "homerepo",
+      "high"
+    ],
+    "title": "HOMEREPO - Подбор пароля к панели (5+ неудачных входов за 10 мин)"
+  },
+  {
+    "alert": true,
+    "config": {
+      "type": "aggregation-v1",
+      "query": "hr_event:audit AND hr_action:(user_create OR user_delete OR user_role OR user_reset_password OR password_changed OR token_create OR token_delete OR ansible_access)",
+      "query_parameters": [],
+      "filters": [],
+      "streams": [
+        "6aefecd3bb96dbe508883d2a"
+      ],
+      "stream_categories": [],
+      "group_by": [],
+      "series": [],
+      "conditions": {
+        "expression": null
+      },
+      "search_within_ms": 60000,
+      "execute_every_ms": 60000,
+      "use_cron_scheduling": false,
+      "cron_expression": null,
+      "cron_timezone": null,
+      "event_limit": 100
+    },
+    "description": "Создан или удалён пользователь, изменена роль, сброшен или сменён пароль, создан или удалён токен API, выдан доступ Ansible.\nMITRE ATT&CK. Тактики: Persistence. Техники: T1098 Account Manipulation.",
+    "field_spec": {
+      "action": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.hr_action_name}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "event": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.message}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "host": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.hr_user}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "mitre_tactic": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "Persistence",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_technique": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1098 Account Manipulation",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_techniques": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1098",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      }
+    },
+    "key_spec": [
+      "action"
+    ],
+    "notification_settings": {
+      "grace_period_ms": 0,
+      "backlog_size": 5
+    },
+    "notifications": [
+      {
+        "notification_id": "6af1cf9b61b983feab6b8a3a",
+        "notification_parameters": null
+      },
+      {
+        "notification_id": "6aefecd4bb96dbe508883d5e",
+        "notification_parameters": null
+      }
+    ],
+    "priority": 2,
+    "storage": [
+      {
+        "type": "persist-to-streams-v1",
+        "streams": [
+          "000000000000000000000002"
+        ]
+      }
+    ],
+    "tags": [
+      "detection",
+      "homerepo",
+      "medium"
+    ],
+    "title": "HOMEREPO - Пользователи, роли и токены"
+  },
+  {
+    "alert": true,
+    "config": {
+      "type": "aggregation-v1",
+      "query": "hd_event:heartbeat AND hd_checks_failing:[3 TO *]",
+      "query_parameters": [],
+      "filters": [],
+      "streams": [
+        "6aefecd3bb96dbe508883d39"
+      ],
+      "stream_categories": [],
+      "group_by": [],
+      "series": [
+        {
+          "type": "count",
+          "id": "count-",
+          "field": null
+        }
+      ],
+      "conditions": {
+        "expression": {
+          "expr": ">=",
+          "left": {
+            "expr": "number-ref",
+            "ref": "count-"
+          },
+          "right": {
+            "expr": "number",
+            "value": 1.0
+          }
+        }
+      },
+      "search_within_ms": 32400000,
+      "execute_every_ms": 32400000,
+      "use_cron_scheduling": false,
+      "cron_expression": null,
+      "cron_timezone": null,
+      "event_limit": 100
+    },
+    "description": "Пульс панели HostDeck сообщает о 3 или больше провалах проверок безопасности (hd_checks_failing >= 3). Панель жива, но состояние парка деградирует — открыть HostDeck и разобрать провалившиеся проверки. Порог 3 выбран по известной базовой линии (2 провала — текущая норма); при изменении парка обновить порог.",
+    "field_spec": {},
+    "key_spec": [],
+    "notification_settings": {
+      "grace_period_ms": 86400000,
+      "backlog_size": 0
+    },
+    "notifications": [
+      {
+        "notification_id": "6af1cf9b61b983feab6b8a3a",
+        "notification_parameters": null
+      },
+      {
+        "notification_id": "6aefecd4bb96dbe508883d5e",
+        "notification_parameters": null
+      }
+    ],
+    "priority": 2,
+    "storage": [
+      {
+        "type": "persist-to-streams-v1",
+        "streams": [
+          "000000000000000000000002"
+        ]
+      }
+    ],
+    "tags": [
+      "detection",
+      "health",
+      "medium"
+    ],
+    "title": "HOSTDECK - Деградация: провалов проверок 3+"
+  },
+  {
+    "alert": true,
+    "config": {
+      "type": "aggregation-v1",
+      "query": "hd_event:audit AND hd_action:(term-open OR term-denied)",
+      "query_parameters": [],
+      "filters": [],
+      "streams": [
+        "6aefecd3bb96dbe508883d39"
+      ],
+      "stream_categories": [],
+      "group_by": [],
+      "series": [],
+      "conditions": {
+        "expression": null
+      },
+      "search_within_ms": 60000,
+      "execute_every_ms": 60000,
+      "use_cron_scheduling": false,
+      "cron_expression": null,
+      "cron_timezone": null,
+      "event_limit": 100
+    },
+    "description": "Из HostDeck открыта консоль root на хосте (или в ней отказано). Действие редкое и мощное: стоит знать о каждом.\nMITRE ATT&CK. Тактики: Execution. Техники: T1059.004 Unix Shell.",
+    "field_spec": {
+      "actor": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.hd_actor}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "event": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.message}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "host": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.hd_host}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "mitre_tactic": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "Execution",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_technique": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1059.004 Unix Shell",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_techniques": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1059.004",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      }
+    },
+    "key_spec": [
+      "host"
+    ],
+    "notification_settings": {
+      "grace_period_ms": 0,
+      "backlog_size": 5
+    },
+    "notifications": [
+      {
+        "notification_id": "6af1cf9b61b983feab6b8a3a",
+        "notification_parameters": null
+      },
+      {
+        "notification_id": "6aefecd4bb96dbe508883d5e",
+        "notification_parameters": null
+      }
+    ],
+    "priority": 2,
+    "storage": [
+      {
+        "type": "persist-to-streams-v1",
+        "streams": [
+          "000000000000000000000002"
+        ]
+      }
+    ],
+    "tags": [
+      "detection",
+      "hostdeck",
+      "medium"
+    ],
+    "title": "HOSTDECK - Открыта консоль root в браузере"
+  },
+  {
+    "alert": true,
+    "config": {
+      "type": "aggregation-v1",
+      "query": "hd_event:audit AND hd_action:login-failed",
+      "query_parameters": [],
+      "filters": [],
+      "streams": [
+        "6aefecd3bb96dbe508883d39"
+      ],
+      "stream_categories": [],
+      "group_by": [
+        "hd_detail"
+      ],
+      "series": [
+        {
+          "type": "count",
+          "id": "count-",
+          "field": null
+        }
+      ],
+      "conditions": {
+        "expression": {
+          "expr": ">=",
+          "left": {
+            "expr": "number-ref",
+            "ref": "count-"
+          },
+          "right": {
+            "expr": "number",
+            "value": 5.0
+          }
+        }
+      },
+      "search_within_ms": 600000,
+      "execute_every_ms": 60000,
+      "use_cron_scheduling": false,
+      "cron_expression": null,
+      "cron_timezone": null,
+      "event_limit": 100
+    },
+    "description": "Пять и более неудачных входов в HostDeck за 10 минут. У HostDeck есть консоль root, поэтому учётная запись администратора — ценная цель.\nMITRE ATT&CK. Тактики: Credential Access. Техники: T1110 Brute Force.",
+    "field_spec": {
+      "event": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.message}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "host": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.hd_detail}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "mitre_tactic": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "Credential Access",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_technique": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1110 Brute Force",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_techniques": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1110",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      }
+    },
+    "key_spec": [
+      "host"
+    ],
+    "notification_settings": {
+      "grace_period_ms": 3600000,
+      "backlog_size": 5
+    },
+    "notifications": [
+      {
+        "notification_id": "6af1cf9b61b983feab6b8a3a",
+        "notification_parameters": null
+      },
+      {
+        "notification_id": "6aefecd4bb96dbe508883d5e",
+        "notification_parameters": null
+      }
+    ],
+    "priority": 3,
+    "storage": [
+      {
+        "type": "persist-to-streams-v1",
+        "streams": [
+          "000000000000000000000002"
+        ]
+      }
+    ],
+    "tags": [
+      "detection",
+      "hostdeck",
+      "high"
+    ],
+    "title": "HOSTDECK - Подбор пароля (5+ неудачных входов за 10 мин)"
+  },
+  {
+    "alert": true,
+    "config": {
+      "type": "aggregation-v1",
+      "query": "hd_event:check_changed AND hd_effective:fail",
+      "query_parameters": [],
+      "filters": [],
+      "streams": [
+        "6aefecd3bb96dbe508883d39"
+      ],
+      "stream_categories": [],
+      "group_by": [],
+      "series": [],
+      "conditions": {
+        "expression": null
+      },
+      "search_within_ms": 60000,
+      "execute_every_ms": 60000,
+      "use_cron_scheduling": false,
+      "cron_expression": null,
+      "cron_timezone": null,
+      "event_limit": 100
+    },
+    "description": "Проверка HostDeck на хосте перешла в fail с учётом профиля и исключений: выключено шифрование диска, хост выпал из домена, SELinux или межсетевой экран выключены, вышли обновления безопасности и т. п. Проверка — поле hd_check, значение и подробности — hd_value и hd_detail. Исключение, добавленное в HostDeck, переводит событие в info и алерт не срабатывает.\nMITRE ATT&CK. Тактики: Defense Impairment. Техники: T1685 Disable or Modify Tools.",
+    "field_spec": {
+      "check": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.hd_check}",
+            "require_values": true,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "detail": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.hd_detail}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "event": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.message}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "host": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.hd_host}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "mitre_tactic": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "Defense Impairment",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_technique": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1685 Disable or Modify Tools",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_techniques": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1685",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "profile": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.hd_profile}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "value": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.hd_value}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      }
+    },
+    "key_spec": [
+      "host",
+      "check"
+    ],
+    "notification_settings": {
+      "grace_period_ms": 3600000,
+      "backlog_size": 5
+    },
+    "notifications": [
+      {
+        "notification_id": "6af1cf9b61b983feab6b8a3a",
+        "notification_parameters": null
+      },
+      {
+        "notification_id": "6aefecd4bb96dbe508883d5e",
+        "notification_parameters": null
+      }
+    ],
+    "priority": 3,
+    "storage": [
+      {
+        "type": "persist-to-streams-v1",
+        "streams": [
+          "000000000000000000000002"
+        ]
+      }
+    ],
+    "tags": [
+      "detection",
+      "hostdeck",
+      "high"
+    ],
+    "title": "HOSTDECK - Проверка безопасности перешла в fail"
+  },
+  {
+    "alert": false,
+    "config": {
+      "type": "aggregation-v1",
+      "query": "hd_event:check_changed AND hd_effective:warn",
+      "query_parameters": [],
+      "filters": [],
+      "streams": [
+        "6aefecd3bb96dbe508883d39"
+      ],
+      "stream_categories": [],
+      "group_by": [],
+      "series": [],
+      "conditions": {
+        "expression": null
+      },
+      "search_within_ms": 60000,
+      "execute_every_ms": 60000,
+      "use_cron_scheduling": false,
+      "cron_expression": null,
+      "cron_timezone": null,
+      "event_limit": 100
+    },
+    "description": "Проверка HostDeck перешла в warn с учётом профиля и исключений. Без письма: для разбора на странице Alerts & Events.",
+    "field_spec": {
+      "check": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.hd_check}",
+            "require_values": true,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "detail": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.hd_detail}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "event": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.message}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "host": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.hd_host}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      }
+    },
+    "key_spec": [
+      "host",
+      "check"
+    ],
+    "notification_settings": {
+      "grace_period_ms": 0,
+      "backlog_size": 5
+    },
+    "notifications": [],
+    "priority": 1,
+    "storage": [
+      {
+        "type": "persist-to-streams-v1",
+        "streams": [
+          "000000000000000000000002"
+        ]
+      }
+    ],
+    "tags": [
+      "detection",
+      "hostdeck",
+      "low"
+    ],
+    "title": "HOSTDECK - Проверка безопасности перешла в warn"
+  },
+  {
+    "alert": false,
+    "config": {
+      "type": "aggregation-v1",
+      "query": "hd_event:audit AND hd_action:exception-set",
+      "query_parameters": [],
+      "filters": [],
+      "streams": [
+        "6aefecd3bb96dbe508883d39"
+      ],
+      "stream_categories": [],
+      "group_by": [],
+      "series": [],
+      "conditions": {
+        "expression": null
+      },
+      "search_within_ms": 60000,
+      "execute_every_ms": 60000,
+      "use_cron_scheduling": false,
+      "cron_expression": null,
+      "cron_timezone": null,
+      "event_limit": 100
+    },
+    "description": "В HostDeck добавлено исключение для проверки: её отклонение больше не попадает в итог и в алерты. Событие для учёта принятых рисков.",
+    "field_spec": {
+      "actor": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.hd_actor}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "detail": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.hd_detail}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "event": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.message}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "host": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.hd_host}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      }
+    },
+    "key_spec": [
+      "host"
+    ],
+    "notification_settings": {
+      "grace_period_ms": 0,
+      "backlog_size": 5
+    },
+    "notifications": [],
+    "priority": 1,
+    "storage": [
+      {
+        "type": "persist-to-streams-v1",
+        "streams": [
+          "000000000000000000000002"
+        ]
+      }
+    ],
+    "tags": [
+      "detection",
+      "hostdeck",
+      "low"
+    ],
+    "title": "HOSTDECK - Риск принят: добавлено исключение"
+  },
+  {
+    "alert": true,
+    "config": {
+      "type": "aggregation-v1",
+      "query": "tool:labscore AND ls_event:weekly",
+      "query_parameters": [],
+      "filters": [],
+      "streams": [
+        "6af17be161b983feab6b388e"
+      ],
+      "stream_categories": [],
+      "group_by": [],
+      "series": [],
+      "conditions": {
+        "expression": null
+      },
+      "search_within_ms": 300000,
+      "execute_every_ms": 300000,
+      "use_cron_scheduling": false,
+      "cron_expression": null,
+      "cron_timezone": null,
+      "event_limit": 100
+    },
+    "description": "Lab Score: правила, срабатывания за неделю, покрытие HomeWiki, техники MITRE — одним письмом",
+    "field_spec": {
+      "report": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.ls_text}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      }
+    },
+    "key_spec": [],
+    "notification_settings": {
+      "grace_period_ms": 0,
+      "backlog_size": 3
+    },
+    "notifications": [
+      {
+        "notification_id": "6af08eb661b983feab68f814",
+        "notification_parameters": null
+      },
+      {
+        "notification_id": "6af1cf9b61b983feab6b8a3a",
+        "notification_parameters": null
+      }
+    ],
+    "priority": 1,
+    "storage": [
+      {
+        "type": "persist-to-streams-v1",
+        "streams": [
+          "000000000000000000000002"
+        ]
+      }
+    ],
+    "tags": [],
+    "title": "LABSCORE - Еженедельный отчёт зрелости"
+  },
+  {
+    "alert": true,
+    "config": {
+      "type": "aggregation-v1",
+      "query": "la_event:finding AND la_severity:(critical OR high)",
+      "query_parameters": [],
+      "filters": [],
+      "streams": [
+        "6aefecd3bb96dbe508883d4b"
+      ],
+      "stream_categories": [],
+      "group_by": [],
+      "series": [],
+      "conditions": {
+        "expression": null
+      },
+      "search_within_ms": 60000,
+      "execute_every_ms": 60000,
+      "use_cron_scheduling": false,
+      "cron_expression": null,
+      "cron_timezone": null,
+      "event_limit": 100
+    },
+    "description": "LogAtlas разобрал архив журналов хоста, и сработало правило критичной или высокой важности (встроенное или импортированное правило Sigma). Хост — la_host, правило — la_rule_title, когда это было в журналах — la_first и la_last. Сообщение отправлено из LogAtlas кнопкой, поэтому его время — момент отправки.",
+    "field_spec": {
+      "case": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.la_case}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "count": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.la_count}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "event": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.message}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "first": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.la_first}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "host": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.la_host}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "last": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.la_last}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "mitre": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.la_mitre}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "rule": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.la_rule_title}",
+            "require_values": true,
+            "exclude_empty_fields": true
+          }
+        ]
+      }
+    },
+    "key_spec": [
+      "host",
+      "rule"
+    ],
+    "notification_settings": {
+      "grace_period_ms": 0,
+      "backlog_size": 5
+    },
+    "notifications": [
+      {
+        "notification_id": "6af1cf9b61b983feab6b8a3a",
+        "notification_parameters": null
+      },
+      {
+        "notification_id": "6aefecd4bb96dbe508883d5e",
+        "notification_parameters": null
+      }
+    ],
+    "priority": 3,
+    "storage": [
+      {
+        "type": "persist-to-streams-v1",
+        "streams": [
+          "000000000000000000000002"
+        ]
+      }
+    ],
+    "tags": [
+      "detection",
+      "logatlas",
+      "high"
+    ],
+    "title": "LOGATLAS - Находка высокой важности в разборе журналов"
+  },
+  {
+    "alert": true,
+    "config": {
+      "type": "aggregation-v1",
+      "query": "tool:sandbox AND sb_event:alert",
+      "query_parameters": [],
+      "filters": [],
+      "streams": [
+        "6af173e261b983feab6b2a93"
+      ],
+      "stream_categories": [],
+      "group_by": [],
+      "series": [],
+      "conditions": {
+        "expression": null
+      },
+      "search_within_ms": 300000,
+      "execute_every_ms": 300000,
+      "use_cron_scheduling": false,
+      "cron_expression": null,
+      "cron_timezone": null,
+      "event_limit": 100
+    },
+    "description": "Песочница-мини: у образца сетевые обращения, работа с системными путями, дочерние процессы или URL по IP-литералу\nMITRE ATT&CK. Тактики: Execution, Defense Evasion. Техники: T1204 User Execution, T1027 Obfuscated Files or Information.",
+    "field_spec": {
+      "event": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.message}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      }
+    },
+    "key_spec": [],
+    "notification_settings": {
+      "grace_period_ms": 0,
+      "backlog_size": 3
+    },
+    "notifications": [
+      {
+        "notification_id": "6af1cf9b61b983feab6b8a3a",
+        "notification_parameters": null
+      },
+      {
+        "notification_id": "6aefecd4bb96dbe508883d5e",
+        "notification_parameters": null
+      }
+    ],
+    "priority": 3,
+    "storage": [
+      {
+        "type": "persist-to-streams-v1",
+        "streams": [
+          "000000000000000000000002"
+        ]
+      }
+    ],
+    "tags": [],
+    "title": "SANDBOX - Подозрительное поведение файла"
+  },
+  {
+    "alert": true,
+    "config": {
+      "type": "aggregation-v1",
+      "query": "tool:wazuh AND rule_level:[9 TO 11]",
+      "query_parameters": [],
+      "filters": [],
+      "streams": [
+        "6af6b43661b983feab741352"
+      ],
+      "stream_categories": [],
+      "group_by": [
+        "wazuh_agent",
+        "rule_id",
+        "rule_level",
+        "wazuh_rule_desc",
+        "source"
+      ],
+      "series": [
+        {
+          "type": "count",
+          "id": "count-",
+          "field": null
+        }
+      ],
+      "conditions": {
+        "expression": {
+          "expr": ">=",
+          "left": {
+            "expr": "number-ref",
+            "ref": "count-"
+          },
+          "right": {
+            "expr": "number",
+            "value": 1.0
+          }
+        }
+      },
+      "search_within_ms": 60000,
+      "execute_every_ms": 60000,
+      "use_cron_scheduling": false,
+      "cron_expression": null,
+      "cron_timezone": null,
+      "event_limit": 100
+    },
+    "description": "Алерт Wazuh с уровнем 9-11 (входы в нерабочее время, изменения учёток и т.п.). В IRIS передаётся через TicketBridge с приоритетом Medium.",
+    "field_spec": {
+      "event": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.wazuh_rule_desc}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "host": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.source}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "rule_id": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.rule_id}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "rule_level": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.rule_level}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "wazuh_agent": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.wazuh_agent}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "wazuh_rule_desc": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.wazuh_rule_desc}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "wazuh_rule_id": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.rule_id}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "wazuh_rule_level": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.rule_level}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      }
+    },
+    "key_spec": [
+      "host",
+      "wazuh_rule_id"
+    ],
+    "notification_settings": {
+      "grace_period_ms": 3600000,
+      "backlog_size": 1
+    },
+    "notifications": [
+      {
+        "notification_id": "6af1cf9b61b983feab6b8a3a",
+        "notification_parameters": null
+      }
+    ],
+    "priority": 2,
+    "storage": [
+      {
+        "type": "persist-to-streams-v1",
+        "streams": [
+          "000000000000000000000002"
+        ]
+      }
+    ],
+    "tags": [],
+    "title": "WAZUH - Важный алерт (уровень 9-11)"
+  },
+  {
+    "alert": true,
+    "config": {
+      "type": "aggregation-v1",
+      "query": "tool:wazuh AND rule_level:[12 TO 15] AND NOT rule_id:40101",
+      "query_parameters": [],
+      "filters": [],
+      "streams": [
+        "6af6b43661b983feab741352"
+      ],
+      "stream_categories": [],
+      "group_by": [
+        "wazuh_agent",
+        "rule_id",
+        "rule_level",
+        "wazuh_rule_desc",
+        "source"
+      ],
+      "series": [
+        {
+          "type": "count",
+          "id": "count-",
+          "field": null
+        }
+      ],
+      "conditions": {
+        "expression": {
+          "expr": ">=",
+          "left": {
+            "expr": "number-ref",
+            "ref": "count-"
+          },
+          "right": {
+            "expr": "number",
+            "value": 1.0
+          }
+        }
+      },
+      "search_within_ms": 60000,
+      "execute_every_ms": 60000,
+      "use_cron_scheduling": false,
+      "cron_expression": null,
+      "cron_timezone": null,
+      "event_limit": 100
+    },
+    "description": "Алерт Wazuh с уровнем 12-15. Правило 40101 (логон системной учётки) исключено как шумное. В IRIS передаётся через TicketBridge с приоритетом High.",
+    "field_spec": {
+      "event": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.wazuh_rule_desc}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "host": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.source}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "rule_id": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.rule_id}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "rule_level": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.rule_level}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "wazuh_agent": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.wazuh_agent}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "wazuh_rule_desc": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.wazuh_rule_desc}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "wazuh_rule_id": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.rule_id}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "wazuh_rule_level": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.rule_level}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      }
+    },
+    "key_spec": [
+      "host",
+      "wazuh_rule_id"
+    ],
+    "notification_settings": {
+      "grace_period_ms": 3600000,
+      "backlog_size": 1
+    },
+    "notifications": [
+      {
+        "notification_id": "6af1cf9b61b983feab6b8a3a",
+        "notification_parameters": null
+      }
+    ],
+    "priority": 3,
+    "storage": [
+      {
+        "type": "persist-to-streams-v1",
+        "streams": [
+          "000000000000000000000002"
+        ]
+      }
+    ],
+    "tags": [],
+    "title": "WAZUH - Критичный алерт (уровень 12+)"
+  },
+  {
+    "alert": true,
+    "config": {
+      "type": "aggregation-v1",
+      "query": "_exists_:zabbix_event_id AND zabbix_event_status:PROBLEM",
+      "query_parameters": [],
+      "filters": [],
+      "streams": [
+        "6af499bc61b983feab706c5c"
+      ],
+      "stream_categories": [],
+      "group_by": [
+        "zabbix_event_id",
+        "source",
+        "zabbix_event_status",
+        "zabbix_trigger_id",
+        "zabbix_severity",
+        "zabbix_nseverity",
+        "zabbix_trigger_description",
+        "zabbix_event_duration",
+        "zabbix_tags_json",
+        "zabbix_url",
+        "zabbix_host_conn",
+        "zabbix_trigger_name"
+      ],
+      "series": [
+        {
+          "type": "count",
+          "id": "count-",
+          "field": null
+        }
+      ],
+      "conditions": {
+        "expression": {
+          "expr": ">=",
+          "left": {
+            "expr": "number-ref",
+            "ref": "count-"
+          },
+          "right": {
+            "expr": "number",
+            "value": 1.0
+          }
+        }
+      },
+      "search_within_ms": 60000,
+      "execute_every_ms": 60000,
+      "use_cron_scheduling": false,
+      "cron_expression": null,
+      "cron_timezone": null,
+      "event_limit": 100
+    },
+    "description": "Событие PROBLEM из Zabbix. В DFIR-IRIS передаётся через существующий TicketBridge; повторы того же zabbix_event_id не создают новый алерт. RESOLVED этим правилом не обрабатывается.",
+    "field_spec": {
+      "event": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.zabbix_trigger_description}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "host": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.source}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "zabbix_event_duration": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.zabbix_event_duration}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "zabbix_event_id": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.zabbix_event_id}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "zabbix_event_status": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.zabbix_event_status}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "zabbix_host_conn": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.zabbix_host_conn}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "zabbix_nseverity": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.zabbix_nseverity}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "zabbix_severity": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.zabbix_severity}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "zabbix_tags_json": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.zabbix_tags_json}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "zabbix_trigger_description": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.zabbix_trigger_description}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "zabbix_trigger_id": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.zabbix_trigger_id}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "zabbix_trigger_name": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.zabbix_trigger_name}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "zabbix_url": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.zabbix_url}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      }
+    },
+    "key_spec": [
+      "zabbix_event_id"
+    ],
+    "notification_settings": {
+      "grace_period_ms": 0,
+      "backlog_size": 1
+    },
+    "notifications": [
+      {
+        "notification_id": "6af1cf9b61b983feab6b8a3a",
+        "notification_parameters": null
+      }
+    ],
+    "priority": 2,
+    "storage": [
+      {
+        "type": "persist-to-streams-v1",
+        "streams": [
+          "000000000000000000000002"
+        ]
+      }
+    ],
+    "tags": [
+      "zabbix",
+      "monitoring",
+      "medium"
+    ],
+    "title": "ZABBIX - Проблема на узле или сервисе"
+  },
+  {
+    "alert": false,
+    "config": {
+      "type": "aggregation-v1",
+      "query": "_exists_:zabbix_event_id AND zabbix_event_status:RESOLVED",
+      "query_parameters": [],
+      "filters": [],
+      "streams": [
+        "6af499bc61b983feab706c5c"
+      ],
+      "stream_categories": [],
+      "group_by": [
+        "zabbix_event_id",
+        "source",
+        "zabbix_event_status",
+        "zabbix_trigger_id",
+        "zabbix_severity",
+        "zabbix_nseverity",
+        "zabbix_trigger_description",
+        "zabbix_event_duration",
+        "zabbix_tags_json",
+        "zabbix_url",
+        "zabbix_host_conn",
+        "zabbix_trigger_name"
+      ],
+      "series": [
+        {
+          "type": "count",
+          "id": "count-",
+          "field": null
+        }
+      ],
+      "conditions": {
+        "expression": {
+          "expr": ">=",
+          "left": {
+            "expr": "number-ref",
+            "ref": "count-"
+          },
+          "right": {
+            "expr": "number",
+            "value": 1.0
+          }
+        }
+      },
+      "search_within_ms": 60000,
+      "execute_every_ms": 60000,
+      "use_cron_scheduling": false,
+      "cron_expression": null,
+      "cron_timezone": null,
+      "event_limit": 100
+    },
+    "description": "Событие RESOLVED из Zabbix. TicketBridge находит ранее созданный алерт IRIS по zabbix_event_id и переводит его в статус Closed. Новый алерт и тикет GLPI не создаются.",
+    "field_spec": {
+      "event": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.zabbix_trigger_description}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "host": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.source}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "zabbix_event_duration": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.zabbix_event_duration}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "zabbix_event_id": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.zabbix_event_id}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "zabbix_event_status": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.zabbix_event_status}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "zabbix_host_conn": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.zabbix_host_conn}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "zabbix_nseverity": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.zabbix_nseverity}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "zabbix_severity": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.zabbix_severity}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "zabbix_tags_json": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.zabbix_tags_json}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "zabbix_trigger_description": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.zabbix_trigger_description}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "zabbix_trigger_id": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.zabbix_trigger_id}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "zabbix_trigger_name": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.zabbix_trigger_name}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "zabbix_url": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.zabbix_url}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      }
+    },
+    "key_spec": [
+      "zabbix_event_id"
+    ],
+    "notification_settings": {
+      "grace_period_ms": 0,
+      "backlog_size": 1
+    },
+    "notifications": [
+      {
+        "notification_id": "6af1cf9b61b983feab6b8a3a",
+        "notification_parameters": null
+      }
+    ],
+    "priority": 1,
+    "storage": [
+      {
+        "type": "persist-to-streams-v1",
+        "streams": [
+          "000000000000000000000002"
+        ]
+      }
+    ],
+    "tags": [
+      "zabbix",
+      "monitoring",
+      "recovery"
+    ],
+    "title": "ZABBIX - Проблема устранена (RESOLVED)"
+  },
+  {
+    "alert": true,
+    "config": {
+      "type": "aggregation-v1",
+      "query": "zs_op:selinux_mode AND zs_ok:true AND zs_arg_mode:(permissive OR disabled)",
+      "query_parameters": [],
+      "filters": [],
+      "streams": [
+        "6aefecd3bb96dbe508883d1b"
+      ],
+      "stream_categories": [],
+      "group_by": [],
+      "series": [],
+      "conditions": {
+        "expression": null
+      },
+      "search_within_ms": 60000,
+      "execute_every_ms": 60000,
+      "use_cron_scheduling": false,
+      "cron_expression": null,
+      "cron_timezone": null,
+      "event_limit": 100
+    },
+    "description": "Через ZaSlon SELinux на хосте переведён в разрешающий режим или отключён. Это легитимное действие администратора, но защита хоста ослаблена: событие позволяет отличить его от setenforce 0 мимо панели (алерт «Отключение SELinux или аудита» в потоке auditd сработает на оба случая).\nMITRE ATT&CK. Тактики: Defense Impairment. Техники: T1685 Disable or Modify Tools.",
+    "field_spec": {
+      "event": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.message}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "host": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.zs_host}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "host_address": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.zs_host_address}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "mitre_tactic": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "Defense Impairment",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_technique": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1685 Disable or Modify Tools",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_techniques": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1685",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mode": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.zs_arg_mode}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "tx": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.zs_tx}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      }
+    },
+    "key_spec": [
+      "host"
+    ],
+    "notification_settings": {
+      "grace_period_ms": 0,
+      "backlog_size": 5
+    },
+    "notifications": [
+      {
+        "notification_id": "6af1cf9b61b983feab6b8a3a",
+        "notification_parameters": null
+      },
+      {
+        "notification_id": "6aefecd4bb96dbe508883d5e",
+        "notification_parameters": null
+      }
+    ],
+    "priority": 2,
+    "storage": [
+      {
+        "type": "persist-to-streams-v1",
+        "streams": [
+          "000000000000000000000002"
+        ]
+      }
+    ],
+    "tags": [
+      "detection",
+      "zaslon",
+      "medium"
+    ],
+    "title": "ZASLON - SELinux переведён в permissive или disabled из панели"
+  },
+  {
+    "alert": true,
+    "config": {
+      "type": "aggregation-v1",
+      "query": "zs_op:firewalld_set AND zs_ok:true AND zs_arg_running:false",
+      "query_parameters": [],
+      "filters": [],
+      "streams": [
+        "6aefecd3bb96dbe508883d1b"
+      ],
+      "stream_categories": [],
+      "group_by": [],
+      "series": [],
+      "conditions": {
+        "expression": null
+      },
+      "search_within_ms": 60000,
+      "execute_every_ms": 60000,
+      "use_cron_scheduling": false,
+      "cron_expression": null,
+      "cron_timezone": null,
+      "event_limit": 100
+    },
+    "description": "Через ZaSlon остановлена служба firewalld: хост остался без межсетевого экрана. Если остановка с таймером отката не была подтверждена, ZaSlon вернёт службу сам (zs_op:tx_rollback).\nMITRE ATT&CK. Тактики: Defense Impairment. Техники: T1685 Disable or Modify Tools.",
+    "field_spec": {
+      "event": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.message}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "host": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.zs_host}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "host_address": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.zs_host_address}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "mitre_tactic": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "Defense Impairment",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_technique": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1685 Disable or Modify Tools",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_techniques": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1685",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "tx": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.zs_tx}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      }
+    },
+    "key_spec": [
+      "host"
+    ],
+    "notification_settings": {
+      "grace_period_ms": 0,
+      "backlog_size": 5
+    },
+    "notifications": [
+      {
+        "notification_id": "6af1cf9b61b983feab6b8a3a",
+        "notification_parameters": null
+      },
+      {
+        "notification_id": "6aefecd4bb96dbe508883d5e",
+        "notification_parameters": null
+      }
+    ],
+    "priority": 3,
+    "storage": [
+      {
+        "type": "persist-to-streams-v1",
+        "streams": [
+          "000000000000000000000002"
+        ]
+      }
+    ],
+    "tags": [
+      "detection",
+      "zaslon",
+      "high"
+    ],
+    "title": "ZASLON - firewalld остановлен из панели"
+  },
+  {
+    "alert": true,
+    "config": {
+      "type": "aggregation-v1",
+      "query": "zs_op:(admin_password OR host_add OR host_enroll OR host_remove)",
+      "query_parameters": [],
+      "filters": [],
+      "streams": [
+        "6aefecd3bb96dbe508883d1b"
+      ],
+      "stream_categories": [],
+      "group_by": [],
+      "series": [],
+      "conditions": {
+        "expression": null
+      },
+      "search_within_ms": 60000,
+      "execute_every_ms": 60000,
+      "use_cron_scheduling": false,
+      "cron_expression": null,
+      "cron_timezone": null,
+      "event_limit": 100
+    },
+    "description": "Сменён пароль администратора панели, добавлен, зарегистрирован или удалён управляемый хост. Редкие действия, после которых меняется круг доверия ZaSlon.\nMITRE ATT&CK. Тактики: Persistence. Техники: T1098 Account Manipulation.",
+    "field_spec": {
+      "event": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.message}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "host": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.zs_host}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "mitre_tactic": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "Persistence",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_technique": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1098 Account Manipulation",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_techniques": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1098",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "op": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.zs_op}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      }
+    },
+    "key_spec": [
+      "op"
+    ],
+    "notification_settings": {
+      "grace_period_ms": 0,
+      "backlog_size": 5
+    },
+    "notifications": [
+      {
+        "notification_id": "6af1cf9b61b983feab6b8a3a",
+        "notification_parameters": null
+      },
+      {
+        "notification_id": "6aefecd4bb96dbe508883d5e",
+        "notification_parameters": null
+      }
+    ],
+    "priority": 1,
+    "storage": [
+      {
+        "type": "persist-to-streams-v1",
+        "streams": [
+          "000000000000000000000002"
+        ]
+      }
+    ],
+    "tags": [
+      "detection",
+      "zaslon",
+      "low"
+    ],
+    "title": "ZASLON - Изменения доверия: пароль панели, добавление и удаление хостов"
+  },
+  {
+    "alert": true,
+    "config": {
+      "type": "aggregation-v1",
+      "query": "zs_op:login_failed",
+      "query_parameters": [],
+      "filters": [],
+      "streams": [
+        "6aefecd3bb96dbe508883d1b"
+      ],
+      "stream_categories": [],
+      "group_by": [
+        "zs_client_ip"
+      ],
+      "series": [
+        {
+          "type": "count",
+          "id": "count-",
+          "field": null
+        }
+      ],
+      "conditions": {
+        "expression": {
+          "expr": ">=",
+          "left": {
+            "expr": "number-ref",
+            "ref": "count-"
+          },
+          "right": {
+            "expr": "number",
+            "value": 5.0
+          }
+        }
+      },
+      "search_within_ms": 600000,
+      "execute_every_ms": 60000,
+      "use_cron_scheduling": false,
+      "cron_expression": null,
+      "cron_timezone": null,
+      "event_limit": 100
+    },
+    "description": "Пять и более неудачных входов в панель ZaSlon с одного адреса за 10 минут. Своего ограничения частоты входа у панели нет, поэтому подбор замечает Graylog. Адрес клиента — поле zs_client_ip (за прокси — из X-Forwarded-For).\nMITRE ATT&CK. Тактики: Credential Access. Техники: T1110 Brute Force.",
+    "field_spec": {
+      "event": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.message}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "host": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.zs_client_ip}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "mitre_tactic": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "Credential Access",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_technique": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1110 Brute Force",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_techniques": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1110",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      }
+    },
+    "key_spec": [
+      "host"
+    ],
+    "notification_settings": {
+      "grace_period_ms": 3600000,
+      "backlog_size": 5
+    },
+    "notifications": [
+      {
+        "notification_id": "6af1cf9b61b983feab6b8a3a",
+        "notification_parameters": null
+      },
+      {
+        "notification_id": "6aefecd4bb96dbe508883d5e",
+        "notification_parameters": null
+      }
+    ],
+    "priority": 3,
+    "storage": [
+      {
+        "type": "persist-to-streams-v1",
+        "streams": [
+          "000000000000000000000002"
+        ]
+      }
+    ],
+    "tags": [
+      "detection",
+      "zaslon",
+      "high"
+    ],
+    "title": "ZASLON - Подбор пароля к панели (5+ неудачных входов за 10 мин)"
   }
 ]

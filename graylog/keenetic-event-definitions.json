@@ -1,448 +1,5 @@
 [
   {
-    "title": "KEENETIC - Блокировка адреса за попытки входа в веб-интерфейс",
-    "description": "Роутер заблокировал удалённый адрес за подбор или сканирование веб-интерфейса (Netfilter Lockout, ban remote host). Адреса из интернета означают, что веб-интерфейс доступен снаружи.\nMITRE ATT&CK. Тактики: Credential Access. Техники: T1110 Brute Force.",
-    "priority": 2,
-    "alert": true,
-    "config": {
-      "type": "aggregation-v1",
-      "query": "source:\"Keenetic-7625\" AND message:\"Lockout\" AND message:\"ban remote host\"",
-      "query_parameters": [],
-      "filters": [],
-      "streams": [
-        "<SYSLOG_STREAM_ID>"
-      ],
-      "stream_categories": [],
-      "group_by": [],
-      "series": [],
-      "conditions": {
-        "expression": null
-      },
-      "search_within_ms": 300000,
-      "execute_every_ms": 300000,
-      "use_cron_scheduling": false,
-      "cron_expression": null,
-      "cron_timezone": null,
-      "event_limit": 100
-    },
-    "field_spec": {
-      "host": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "${source.source}",
-            "require_values": false,
-            "exclude_empty_fields": true
-          }
-        ]
-      },
-      "event": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "${source.message}",
-            "require_values": false,
-            "exclude_empty_fields": true
-          }
-        ]
-      },
-      "mitre_tactic": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "Credential Access",
-            "require_values": false,
-            "exclude_empty_fields": false
-          }
-        ]
-      },
-      "mitre_technique": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "T1110 Brute Force",
-            "require_values": false,
-            "exclude_empty_fields": false
-          }
-        ]
-      },
-      "mitre_techniques": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "T1110",
-            "require_values": false,
-            "exclude_empty_fields": false
-          }
-        ]
-      }
-    },
-    "key_spec": [
-      "host"
-    ],
-    "notification_settings": {
-      "grace_period_ms": 300000,
-      "backlog_size": 5
-    },
-    "notifications": [
-      {
-        "notification_id": "<NOTIFICATION_ID>",
-        "notification_parameters": null
-      }
-    ],
-    "storage": [
-      {
-        "type": "persist-to-streams-v1",
-        "streams": [
-          "000000000000000000000002"
-        ]
-      }
-    ],
-    "tags": [
-      "detection",
-      "keenetic",
-      "medium"
-    ]
-  },
-  {
-    "title": "KEENETIC - Сканирование веб-интерфейса из интернета",
-    "description": "Запросы к веб-интерфейсу роутера несуществующих или служебных файлов (.env, readme.html и т. п.): типичное сканирование уязвимостей.\nMITRE ATT&CK. Тактики: Reconnaissance. Техники: T1595.002 Vulnerability Scanning.",
-    "priority": 2,
-    "alert": true,
-    "config": {
-      "type": "aggregation-v1",
-      "query": "source:\"Keenetic-7625\" AND message:\"Core::Scgi::Session\" AND (message:\"unsupported file path\" OR message:\"not found\")",
-      "query_parameters": [],
-      "filters": [],
-      "streams": [
-        "<SYSLOG_STREAM_ID>"
-      ],
-      "stream_categories": [],
-      "group_by": [],
-      "series": [],
-      "conditions": {
-        "expression": null
-      },
-      "search_within_ms": 300000,
-      "execute_every_ms": 300000,
-      "use_cron_scheduling": false,
-      "cron_expression": null,
-      "cron_timezone": null,
-      "event_limit": 100
-    },
-    "field_spec": {
-      "host": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "${source.source}",
-            "require_values": false,
-            "exclude_empty_fields": true
-          }
-        ]
-      },
-      "event": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "${source.message}",
-            "require_values": false,
-            "exclude_empty_fields": true
-          }
-        ]
-      },
-      "mitre_tactic": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "Reconnaissance",
-            "require_values": false,
-            "exclude_empty_fields": false
-          }
-        ]
-      },
-      "mitre_technique": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "T1595.002 Vulnerability Scanning",
-            "require_values": false,
-            "exclude_empty_fields": false
-          }
-        ]
-      },
-      "mitre_techniques": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "T1595.002, T1190",
-            "require_values": false,
-            "exclude_empty_fields": false
-          }
-        ]
-      }
-    },
-    "key_spec": [
-      "host"
-    ],
-    "notification_settings": {
-      "grace_period_ms": 300000,
-      "backlog_size": 5
-    },
-    "notifications": [
-      {
-        "notification_id": "<NOTIFICATION_ID>",
-        "notification_parameters": null
-      }
-    ],
-    "storage": [
-      {
-        "type": "persist-to-streams-v1",
-        "streams": [
-          "000000000000000000000002"
-        ]
-      }
-    ],
-    "tags": [
-      "detection",
-      "keenetic",
-      "medium"
-    ]
-  },
-  {
-    "title": "KEENETIC - Сохранена конфигурация роутера",
-    "description": "Конфигурация роутера сохранена (StartupConfig: configuration saved). Событие редкое: сверьте, что это ваша правка.\nMITRE ATT&CK. Тактики: Defense Impairment. Техники: T1686 Disable or Modify System Firewall.",
-    "priority": 2,
-    "alert": true,
-    "config": {
-      "type": "aggregation-v1",
-      "query": "source:\"Keenetic-7625\" AND message:\"StartupConfig\" AND message:\"configuration saved\"",
-      "query_parameters": [],
-      "filters": [],
-      "streams": [
-        "<SYSLOG_STREAM_ID>"
-      ],
-      "stream_categories": [],
-      "group_by": [],
-      "series": [],
-      "conditions": {
-        "expression": null
-      },
-      "search_within_ms": 300000,
-      "execute_every_ms": 300000,
-      "use_cron_scheduling": false,
-      "cron_expression": null,
-      "cron_timezone": null,
-      "event_limit": 100
-    },
-    "field_spec": {
-      "host": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "${source.source}",
-            "require_values": false,
-            "exclude_empty_fields": true
-          }
-        ]
-      },
-      "event": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "${source.message}",
-            "require_values": false,
-            "exclude_empty_fields": true
-          }
-        ]
-      },
-      "mitre_tactic": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "Defense Impairment",
-            "require_values": false,
-            "exclude_empty_fields": false
-          }
-        ]
-      },
-      "mitre_technique": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "T1686 Disable or Modify System Firewall",
-            "require_values": false,
-            "exclude_empty_fields": false
-          }
-        ]
-      },
-      "mitre_techniques": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "T1686",
-            "require_values": false,
-            "exclude_empty_fields": false
-          }
-        ]
-      }
-    },
-    "key_spec": [
-      "host"
-    ],
-    "notification_settings": {
-      "grace_period_ms": 300000,
-      "backlog_size": 5
-    },
-    "notifications": [
-      {
-        "notification_id": "<NOTIFICATION_ID>",
-        "notification_parameters": null
-      }
-    ],
-    "storage": [
-      {
-        "type": "persist-to-streams-v1",
-        "streams": [
-          "000000000000000000000002"
-        ]
-      }
-    ],
-    "tags": [
-      "detection",
-      "keenetic",
-      "medium"
-    ]
-  },
-  {
-    "title": "KEENETIC - Отказ во входе на роутер",
-    "description": "Отказ в доступе к роутеру (Auth_Denied).\nMITRE ATT&CK. Тактики: Credential Access. Техники: T1110 Brute Force.",
-    "priority": 3,
-    "alert": true,
-    "config": {
-      "type": "aggregation-v1",
-      "query": "kn_event_type:Auth_Denied",
-      "query_parameters": [],
-      "filters": [],
-      "streams": [
-        "<SYSLOG_STREAM_ID>"
-      ],
-      "stream_categories": [],
-      "group_by": [],
-      "series": [],
-      "conditions": {
-        "expression": null
-      },
-      "search_within_ms": 300000,
-      "execute_every_ms": 300000,
-      "use_cron_scheduling": false,
-      "cron_expression": null,
-      "cron_timezone": null,
-      "event_limit": 100
-    },
-    "field_spec": {
-      "host": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "${source.source}",
-            "require_values": false,
-            "exclude_empty_fields": true
-          }
-        ]
-      },
-      "event": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "${source.message}",
-            "require_values": false,
-            "exclude_empty_fields": true
-          }
-        ]
-      },
-      "mitre_tactic": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "Credential Access",
-            "require_values": false,
-            "exclude_empty_fields": false
-          }
-        ]
-      },
-      "mitre_technique": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "T1110 Brute Force",
-            "require_values": false,
-            "exclude_empty_fields": false
-          }
-        ]
-      },
-      "mitre_techniques": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "T1110",
-            "require_values": false,
-            "exclude_empty_fields": false
-          }
-        ]
-      }
-    },
-    "key_spec": [
-      "host"
-    ],
-    "notification_settings": {
-      "grace_period_ms": 300000,
-      "backlog_size": 5
-    },
-    "notifications": [
-      {
-        "notification_id": "<NOTIFICATION_ID>",
-        "notification_parameters": null
-      }
-    ],
-    "storage": [
-      {
-        "type": "persist-to-streams-v1",
-        "streams": [
-          "000000000000000000000002"
-        ]
-      }
-    ],
-    "tags": [
-      "detection",
-      "keenetic",
-      "high"
-    ]
-  },
-  {
-    "title": "KEENETIC - ARP-конфликт на новом адресе",
-    "description": "Конфликт ARP (два MAC на одном IP) на адресе, которого нет среди постоянных пар. Исключены 192.168.1.149, .54, .118, .38, .117, .146, .145: у них за месяц десятки тысяч конфликтов из-за двух интерфейсов одного устройства. Новый конфликт, особенно на адресе роутера, может быть подменой ARP.\nMITRE ATT&CK. Тактики: Credential Access. Техники: T1557.002 ARP Cache Poisoning.",
-    "priority": 2,
     "alert": true,
     "config": {
       "type": "aggregation-v1",
@@ -450,7 +7,7 @@
       "query_parameters": [],
       "filters": [],
       "streams": [
-        "<SYSLOG_STREAM_ID>"
+        "6a36313088b8df857cfde88f"
       ],
       "stream_categories": [],
       "group_by": [],
@@ -465,24 +22,25 @@
       "cron_timezone": null,
       "event_limit": 100
     },
+    "description": "Конфликт ARP (два MAC на одном IP) на адресе, которого нет среди постоянных пар. Исключены 192.168.1.149, .54, .118, .38, .117, .146, .145: у них за месяц десятки тысяч конфликтов из-за двух интерфейсов одного устройства. Новый конфликт, особенно на адресе роутера, может быть подменой ARP.\nMITRE ATT&CK. Тактики: Credential Access. Техники: T1557.002 ARP Cache Poisoning.",
     "field_spec": {
-      "host": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "${source.source}",
-            "require_values": false,
-            "exclude_empty_fields": true
-          }
-        ]
-      },
       "event": {
         "data_type": "string",
         "providers": [
           {
             "type": "template-v1",
             "template": "${source.message}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "host": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.source}",
             "require_values": false,
             "exclude_empty_fields": true
           }
@@ -538,14 +96,19 @@
     ],
     "notification_settings": {
       "grace_period_ms": 300000,
-      "backlog_size": 5
+      "backlog_size": 3
     },
     "notifications": [
       {
-        "notification_id": "<NOTIFICATION_ID>",
+        "notification_id": "6af1cf9b61b983feab6b8a3a",
+        "notification_parameters": null
+      },
+      {
+        "notification_id": "6ae75423bb96dbe5087d79a8",
         "notification_parameters": null
       }
     ],
+    "priority": 2,
     "storage": [
       {
         "type": "persist-to-streams-v1",
@@ -558,20 +121,18 @@
       "detection",
       "keenetic",
       "medium"
-    ]
+    ],
+    "title": "KEENETIC - ARP-конфликт на новом адресе"
   },
   {
-    "title": "KEENETIC - Обрыв PPPoE-соединения с провайдером",
-    "description": "Роутер потерял PPPoE-соединение с провайдером (pppd: Connection terminated или Modem hangup). Интернет пропал или роутер переподключился.",
-    "priority": 1,
     "alert": true,
     "config": {
       "type": "aggregation-v1",
-      "query": "process:pppd* AND message:(\"Connection terminated\" OR \"Modem hangup\")",
+      "query": "source:\"Keenetic-7625\" AND message:\"Lockout\" AND message:\"ban remote host\"",
       "query_parameters": [],
       "filters": [],
       "streams": [
-        "<SYSLOG_STREAM_ID>"
+        "6a36313088b8df857cfde88f"
       ],
       "stream_categories": [],
       "group_by": [],
@@ -586,6 +147,121 @@
       "cron_timezone": null,
       "event_limit": 100
     },
+    "description": "Роутер заблокировал удалённый адрес за подбор или сканирование веб-интерфейса (Netfilter Lockout, ban remote host). Адреса из интернета означают, что веб-интерфейс доступен снаружи.\nMITRE ATT&CK. Тактики: Credential Access. Техники: T1110 Brute Force.",
+    "field_spec": {
+      "event": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.message}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "host": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.source}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "mitre_tactic": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "Credential Access",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_technique": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1110 Brute Force",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_techniques": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1110",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      }
+    },
+    "key_spec": [
+      "host"
+    ],
+    "notification_settings": {
+      "grace_period_ms": 300000,
+      "backlog_size": 3
+    },
+    "notifications": [
+      {
+        "notification_id": "6af1cf9b61b983feab6b8a3a",
+        "notification_parameters": null
+      },
+      {
+        "notification_id": "6ae75423bb96dbe5087d79a8",
+        "notification_parameters": null
+      }
+    ],
+    "priority": 2,
+    "storage": [
+      {
+        "type": "persist-to-streams-v1",
+        "streams": [
+          "000000000000000000000002"
+        ]
+      }
+    ],
+    "tags": [
+      "detection",
+      "keenetic",
+      "medium"
+    ],
+    "title": "KEENETIC - Блокировка адреса за попытки входа в веб-интерфейс"
+  },
+  {
+    "alert": true,
+    "config": {
+      "type": "aggregation-v1",
+      "query": "kn_event_type:(SSH_Connection OR SSH_Success) AND NOT kn_src_ip:(\"192.168.1.137\")",
+      "query_parameters": [],
+      "filters": [],
+      "streams": [
+        "6a36313088b8df857cfde88f"
+      ],
+      "stream_categories": [],
+      "group_by": [],
+      "series": [],
+      "conditions": {
+        "expression": null
+      },
+      "search_within_ms": 300000,
+      "execute_every_ms": 300000,
+      "use_cron_scheduling": false,
+      "cron_expression": null,
+      "cron_timezone": null,
+      "event_limit": 100
+    },
+    "description": "SSH-подключение к роутеру Keenetic с IP, не входящего в белый список (сервер Graylog).\nMITRE ATT&CK. Тактики: Lateral Movement. Техники: T1021.004 SSH.",
     "field_spec": {
       "host": {
         "data_type": "string",
@@ -598,12 +274,264 @@
           }
         ]
       },
+      "mitre_tactic": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "Lateral Movement",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_technique": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1021.004 SSH",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_techniques": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1021.004",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "src_ip": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.kn_src_ip}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      }
+    },
+    "key_spec": [
+      "host",
+      "src_ip"
+    ],
+    "notification_settings": {
+      "grace_period_ms": 300000,
+      "backlog_size": 3
+    },
+    "notifications": [
+      {
+        "notification_id": "6af1cf9b61b983feab6b8a3a",
+        "notification_parameters": null
+      },
+      {
+        "notification_id": "6ae75423bb96dbe5087d79a8",
+        "notification_parameters": null
+      }
+    ],
+    "priority": 3,
+    "storage": [
+      {
+        "type": "persist-to-streams-v1",
+        "streams": [
+          "000000000000000000000002"
+        ]
+      }
+    ],
+    "tags": [
+      "detection",
+      "high",
+      "keenetic"
+    ],
+    "title": "KEENETIC - Вход в админку роутера (SSH)"
+  },
+  {
+    "alert": true,
+    "config": {
+      "type": "aggregation-v1",
+      "query": "kn_event_type:DHCP_Request AND NOT message:STATE_RENEWING AND NOT kn_mac:(\"3a:c4:59:0e:0e:c9\" OR \"18:4a:53:06:4a:c4\" OR \"d8:cb:8a:57:05:09\" OR \"de:63:74:9d:1a:55\" OR \"84:2f:57:4b:55:60\" OR \"88:a2:9e:4c:2e:e5\" OR \"e8:ff:1e:da:8e:c2\" OR \"be:32:2c:15:47:12\" OR \"f4:4d:30:1a:2d:d8\" OR \"60:c5:47:23:2f:d3\" OR \"da:43:c8:56:a1:9b\" OR \"3c:07:54:4b:c8:f3\" OR \"62:40:3a:f1:00:03\" OR \"c0:bf:be:c7:05:fb\" OR \"b8:76:3f:a3:bd:05\")",
+      "query_parameters": [],
+      "filters": [],
+      "streams": [
+        "6a36313088b8df857cfde88f"
+      ],
+      "stream_categories": [],
+      "group_by": [],
+      "series": [],
+      "conditions": {
+        "expression": null
+      },
+      "search_within_ms": 300000,
+      "execute_every_ms": 300000,
+      "use_cron_scheduling": false,
+      "cron_expression": null,
+      "cron_timezone": null,
+      "event_limit": 100
+    },
+    "description": "DHCP выдал адрес устройству, MAC которого отсутствует в белом списке (15 MAC на 17.10.2026). Возможно подключение нового клиента.\nMITRE ATT&CK. Тактики: Initial Access. Техники: T1200 Hardware Additions.",
+    "field_spec": {
+      "host": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.source}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "hostname": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.kn_hostname}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "ip": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.kn_assigned_ip}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "mac": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.kn_mac}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "mitre_tactic": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "Initial Access",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_technique": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1200 Hardware Additions",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_techniques": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1200",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      }
+    },
+    "key_spec": [
+      "host",
+      "mac"
+    ],
+    "notification_settings": {
+      "grace_period_ms": 604800000,
+      "backlog_size": 3
+    },
+    "notifications": [
+      {
+        "notification_id": "6af1cf9b61b983feab6b8a3a",
+        "notification_parameters": null
+      },
+      {
+        "notification_id": "6ae75423bb96dbe5087d79a8",
+        "notification_parameters": null
+      }
+    ],
+    "priority": 2,
+    "storage": [
+      {
+        "type": "persist-to-streams-v1",
+        "streams": [
+          "000000000000000000000002"
+        ]
+      }
+    ],
+    "tags": [
+      "detection",
+      "medium",
+      "keenetic"
+    ],
+    "title": "KEENETIC - Новое устройство в сети"
+  },
+  {
+    "alert": true,
+    "config": {
+      "type": "aggregation-v1",
+      "query": "process:pppd* AND message:(\"Connection terminated\" OR \"Modem hangup\")",
+      "query_parameters": [],
+      "filters": [],
+      "streams": [
+        "6a36313088b8df857cfde88f"
+      ],
+      "stream_categories": [],
+      "group_by": [],
+      "series": [],
+      "conditions": {
+        "expression": null
+      },
+      "search_within_ms": 300000,
+      "execute_every_ms": 300000,
+      "use_cron_scheduling": false,
+      "cron_expression": null,
+      "cron_timezone": null,
+      "event_limit": 100
+    },
+    "description": "Роутер потерял PPPoE-соединение с провайдером (pppd: Connection terminated или Modem hangup). Интернет пропал или роутер переподключился.",
+    "field_spec": {
       "event": {
         "data_type": "string",
         "providers": [
           {
             "type": "template-v1",
             "template": "${source.message}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "host": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.source}",
             "require_values": false,
             "exclude_empty_fields": true
           }
@@ -619,10 +547,15 @@
     },
     "notifications": [
       {
-        "notification_id": "<NOTIFICATION_ID>",
+        "notification_id": "6af1cf9b61b983feab6b8a3a",
+        "notification_parameters": null
+      },
+      {
+        "notification_id": "6ae75423bb96dbe5087d79a8",
         "notification_parameters": null
       }
     ],
+    "priority": 1,
     "storage": [
       {
         "type": "persist-to-streams-v1",
@@ -635,6 +568,471 @@
       "detection",
       "keenetic",
       "low"
-    ]
+    ],
+    "title": "KEENETIC - Обрыв PPPoE-соединения с провайдером"
+  },
+  {
+    "alert": true,
+    "config": {
+      "type": "aggregation-v1",
+      "query": "kn_event_type:Auth_Denied",
+      "query_parameters": [],
+      "filters": [],
+      "streams": [
+        "6a36313088b8df857cfde88f"
+      ],
+      "stream_categories": [],
+      "group_by": [],
+      "series": [],
+      "conditions": {
+        "expression": null
+      },
+      "search_within_ms": 300000,
+      "execute_every_ms": 300000,
+      "use_cron_scheduling": false,
+      "cron_expression": null,
+      "cron_timezone": null,
+      "event_limit": 100
+    },
+    "description": "Отказ в доступе к роутеру (Auth_Denied).\nMITRE ATT&CK. Тактики: Credential Access. Техники: T1110 Brute Force.",
+    "field_spec": {
+      "event": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.message}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "host": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.source}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "mitre_tactic": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "Credential Access",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_technique": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1110 Brute Force",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_techniques": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1110",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      }
+    },
+    "key_spec": [
+      "host"
+    ],
+    "notification_settings": {
+      "grace_period_ms": 300000,
+      "backlog_size": 3
+    },
+    "notifications": [
+      {
+        "notification_id": "6af1cf9b61b983feab6b8a3a",
+        "notification_parameters": null
+      },
+      {
+        "notification_id": "6ae75423bb96dbe5087d79a8",
+        "notification_parameters": null
+      }
+    ],
+    "priority": 3,
+    "storage": [
+      {
+        "type": "persist-to-streams-v1",
+        "streams": [
+          "000000000000000000000002"
+        ]
+      }
+    ],
+    "tags": [
+      "detection",
+      "keenetic",
+      "high"
+    ],
+    "title": "KEENETIC - Отказ во входе на роутер"
+  },
+  {
+    "alert": true,
+    "config": {
+      "type": "aggregation-v1",
+      "query": "kn_event_type:Wireguard_Failed",
+      "query_parameters": [],
+      "filters": [],
+      "streams": [
+        "6a36313088b8df857cfde88f"
+      ],
+      "stream_categories": [],
+      "group_by": [
+        "source"
+      ],
+      "series": [
+        {
+          "type": "count",
+          "id": "count-",
+          "field": null
+        }
+      ],
+      "conditions": {
+        "expression": {
+          "expr": ">=",
+          "left": {
+            "expr": "number-ref",
+            "ref": "count-"
+          },
+          "right": {
+            "expr": "number",
+            "value": 1.0
+          }
+        }
+      },
+      "search_within_ms": 86400000,
+      "execute_every_ms": 86400000,
+      "use_cron_scheduling": true,
+      "cron_expression": "0 0 9 * * ?",
+      "cron_timezone": "Asia/Yekaterinburg",
+      "event_limit": 100
+    },
+    "description": "Количество неудачных WireGuard-handshake за прошедшие сутки. Высокое число (сотни-тысячи) может означать подбор ключа или скан извне. Проверяется раз в сутки в 09:00, одно письмо в день.\nMITRE ATT&CK. Тактики: Persistence, Initial Access. Техники: T1133 External Remote Services.",
+    "field_spec": {
+      "host": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.source}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "mitre_tactic": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "Persistence",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_technique": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1133 External Remote Services",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_techniques": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1133",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      }
+    },
+    "key_spec": [
+      "host"
+    ],
+    "notification_settings": {
+      "grace_period_ms": 300000,
+      "backlog_size": 5
+    },
+    "notifications": [
+      {
+        "notification_id": "6ad383f0cc18050c4f1ed7d0",
+        "notification_parameters": null
+      },
+      {
+        "notification_id": "6af1cf9b61b983feab6b8a3a",
+        "notification_parameters": null
+      }
+    ],
+    "priority": 1,
+    "storage": [
+      {
+        "type": "persist-to-streams-v1",
+        "streams": [
+          "000000000000000000000002"
+        ]
+      }
+    ],
+    "tags": [
+      "detection",
+      "low",
+      "keenetic",
+      "daily-digest"
+    ],
+    "title": "KEENETIC - Отказы WireGuard (ежедневная сводка)"
+  },
+  {
+    "alert": true,
+    "config": {
+      "type": "aggregation-v1",
+      "query": "source:\"Keenetic-7625\" AND message:\"Core::Scgi::Session\" AND (message:\"unsupported file path\" OR message:\"not found\")",
+      "query_parameters": [],
+      "filters": [],
+      "streams": [
+        "6a36313088b8df857cfde88f"
+      ],
+      "stream_categories": [],
+      "group_by": [],
+      "series": [],
+      "conditions": {
+        "expression": null
+      },
+      "search_within_ms": 300000,
+      "execute_every_ms": 300000,
+      "use_cron_scheduling": false,
+      "cron_expression": null,
+      "cron_timezone": null,
+      "event_limit": 100
+    },
+    "description": "Запросы к веб-интерфейсу роутера несуществующих или служебных файлов (.env, readme.html и т. п.): типичное сканирование уязвимостей.\nMITRE ATT&CK. Тактики: Reconnaissance. Техники: T1595.002 Vulnerability Scanning.",
+    "field_spec": {
+      "event": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.message}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "host": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.source}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "mitre_tactic": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "Reconnaissance",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_technique": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1595.002 Vulnerability Scanning",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_techniques": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1595.002, T1190",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      }
+    },
+    "key_spec": [
+      "host"
+    ],
+    "notification_settings": {
+      "grace_period_ms": 300000,
+      "backlog_size": 3
+    },
+    "notifications": [
+      {
+        "notification_id": "6af1cf9b61b983feab6b8a3a",
+        "notification_parameters": null
+      },
+      {
+        "notification_id": "6ae75423bb96dbe5087d79a8",
+        "notification_parameters": null
+      }
+    ],
+    "priority": 2,
+    "storage": [
+      {
+        "type": "persist-to-streams-v1",
+        "streams": [
+          "000000000000000000000002"
+        ]
+      }
+    ],
+    "tags": [
+      "detection",
+      "keenetic",
+      "medium"
+    ],
+    "title": "KEENETIC - Сканирование веб-интерфейса из интернета"
+  },
+  {
+    "alert": true,
+    "config": {
+      "type": "aggregation-v1",
+      "query": "source:\"Keenetic-7625\" AND message:\"StartupConfig\" AND message:\"configuration saved\" AND NOT kn_autosave:true",
+      "query_parameters": [],
+      "filters": [],
+      "streams": [
+        "6a36313088b8df857cfde88f"
+      ],
+      "stream_categories": [],
+      "group_by": [],
+      "series": [],
+      "conditions": {
+        "expression": null
+      },
+      "search_within_ms": 300000,
+      "execute_every_ms": 300000,
+      "use_cron_scheduling": false,
+      "cron_expression": null,
+      "cron_timezone": null,
+      "event_limit": 100
+    },
+    "description": "Конфигурация роутера сохранена (StartupConfig: configuration saved). Событие редкое: сверьте, что это ваша правка.\nMITRE ATT&CK. Тактики: Defense Impairment. Техники: T1686 Disable or Modify System Firewall.",
+    "field_spec": {
+      "event": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.message}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "host": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.source}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "mitre_tactic": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "Defense Impairment",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_technique": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1686 Disable or Modify System Firewall",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      },
+      "mitre_techniques": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "T1686",
+            "require_values": false,
+            "exclude_empty_fields": false
+          }
+        ]
+      }
+    },
+    "key_spec": [
+      "host"
+    ],
+    "notification_settings": {
+      "grace_period_ms": 300000,
+      "backlog_size": 3
+    },
+    "notifications": [
+      {
+        "notification_id": "6af1cf9b61b983feab6b8a3a",
+        "notification_parameters": null
+      },
+      {
+        "notification_id": "6ae75423bb96dbe5087d79a8",
+        "notification_parameters": null
+      }
+    ],
+    "priority": 2,
+    "storage": [
+      {
+        "type": "persist-to-streams-v1",
+        "streams": [
+          "000000000000000000000002"
+        ]
+      }
+    ],
+    "tags": [
+      "detection",
+      "keenetic",
+      "medium"
+    ],
+    "title": "KEENETIC - Сохранена конфигурация роутера"
   }
 ]
