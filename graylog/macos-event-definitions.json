@@ -1912,17 +1912,14 @@
     ]
   },
   {
-    "title": "macOS - Запуск утилит удалённого доступа и туннелей",
-    "description": "В командной строке процесса есть утилита удалённого доступа или туннелирования (ngrok, cloudflared, AnyDesk, TeamViewer, RustDesk, chisel, tailscale, zerotier, frpc).\nMITRE ATT&CK. Тактики: Command and Control. Техники: T1219 Remote Access Tools.",
-    "priority": 2,
     "alert": true,
     "config": {
       "type": "aggregation-v1",
-      "query": "log_type:macos_osquery AND name:es_process_events AND columns_cmdline:/.*([nN][gG][rR][oO][kK]|[cC][lL][oO][uU][dD][fF][lL][aA][rR][eE][dD]|[aA][nN][yY][dD][eE][sS][kK]|[tT][eE][aA][mM][vV][iI][eE][wW][eE][rR]|[rR][uU][sS][tT][dD][eE][sS][kK]|[cC][hH][iI][sS][eE][lL]|[tT][aA][iI][lL][sS][cC][aA][lL][eE]|[zZ][eE][rR][oO][tT][iI][eE][rR]|[fF][rR][pP][cC]).*/",
+      "query": "log_type:macos_osquery AND name:es_process_events AND columns_path:/.*\\/([nN][gG][rR][oO][kK]|[cC][lL][oO][uU][dD][fF][lL][aA][rR][eE][dD]|[aA][nN][yY][dD][eE][sS][kK]|[tT][eE][aA][mM][vV][iI][eE][wW][eE][rR]|[rR][uU][sS][tT][dD][eE][sS][kK]|[cC][hH][iI][sS][eE][lL]|[tT][aA][iI][lL][sS][cC][aA][lL][eE][dD]?|[zZ][eE][rR][oO][tT][iI][eE][rR][^\\/]*|[fF][rR][pP][cC])/",
       "query_parameters": [],
       "filters": [],
       "streams": [
-        "<MACOS_STREAM_ID>"
+        "6a362fa188b8df857cfdd94e"
       ],
       "stream_categories": [],
       "group_by": [],
@@ -1937,24 +1934,25 @@
       "cron_timezone": null,
       "event_limit": 100
     },
+    "description": "[матч по columns_path (путь к бинарнику туннеля), а не по подстроке в cmdline] В командной строке процесса есть утилита удалённого доступа или туннелирования (ngrok, cloudflared, AnyDesk, TeamViewer, RustDesk, chisel, tailscale, zerotier, frpc).\nMITRE ATT&CK. Тактики: Command and Control. Техники: T1219 Remote Access Tools.",
     "field_spec": {
-      "host": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "${source.source}",
-            "require_values": false,
-            "exclude_empty_fields": true
-          }
-        ]
-      },
       "event": {
         "data_type": "string",
         "providers": [
           {
             "type": "template-v1",
             "template": "${source.message}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "host": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.source}",
             "require_values": false,
             "exclude_empty_fields": true
           }
@@ -2003,10 +2001,15 @@
     },
     "notifications": [
       {
-        "notification_id": "<NOTIFICATION_ID>",
+        "notification_id": "6af1cf9b61b983feab6b8a3a",
+        "notification_parameters": null
+      },
+      {
+        "notification_id": "6ace4bf7a68bf21dfabbaa3b",
         "notification_parameters": null
       }
     ],
+    "priority": 2,
     "storage": [
       {
         "type": "persist-to-streams-v1",
@@ -2019,20 +2022,18 @@
       "detection",
       "macos",
       "medium"
-    ]
+    ],
+    "title": "macOS - Запуск утилит удалённого доступа и туннелей"
   },
   {
-    "title": "macOS - Утилиты выгрузки в облако (rclone, MEGAsync)",
-    "description": "В командной строке процесса есть утилита выгрузки в облако (rclone, MEGAsync, MEGAcmd).\nMITRE ATT&CK. Тактики: Exfiltration. Техники: T1567.002 Exfiltration to Cloud Storage.",
-    "priority": 2,
     "alert": true,
     "config": {
       "type": "aggregation-v1",
-      "query": "log_type:macos_osquery AND name:es_process_events AND columns_cmdline:/.*([rR][cC][lL][oO][nN][eE]|[mM][eE][gG][aA][sS][yY][nN][cC]|[mM][eE][gG][aA][cC][mM][dD]).*/",
+      "query": "log_type:macos_osquery AND name:es_process_events AND columns_path:/.*\\/([rR][cC][lL][oO][nN][eE]|[mM][eE][gG][aA][sS][yY][nN][cC]|[mM][eE][gG][aA][cC][mM][dD])/",
       "query_parameters": [],
       "filters": [],
       "streams": [
-        "<MACOS_STREAM_ID>"
+        "6a362fa188b8df857cfdd94e"
       ],
       "stream_categories": [],
       "group_by": [],
@@ -2047,24 +2048,25 @@
       "cron_timezone": null,
       "event_limit": 100
     },
+    "description": "[матч по columns_path (путь к бинарнику rclone/MEGA), а не по подстроке в cmdline] В командной строке процесса есть утилита выгрузки в облако (rclone, MEGAsync, MEGAcmd).\nMITRE ATT&CK. Тактики: Exfiltration. Техники: T1567.002 Exfiltration to Cloud Storage.",
     "field_spec": {
-      "host": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "${source.source}",
-            "require_values": false,
-            "exclude_empty_fields": true
-          }
-        ]
-      },
       "event": {
         "data_type": "string",
         "providers": [
           {
             "type": "template-v1",
             "template": "${source.message}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "host": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.source}",
             "require_values": false,
             "exclude_empty_fields": true
           }
@@ -2113,10 +2115,15 @@
     },
     "notifications": [
       {
-        "notification_id": "<NOTIFICATION_ID>",
+        "notification_id": "6af1cf9b61b983feab6b8a3a",
+        "notification_parameters": null
+      },
+      {
+        "notification_id": "6ace4bf7a68bf21dfabbaa3b",
         "notification_parameters": null
       }
     ],
+    "priority": 2,
     "storage": [
       {
         "type": "persist-to-streams-v1",
@@ -2129,20 +2136,18 @@
       "detection",
       "macos",
       "medium"
-    ]
+    ],
+    "title": "macOS - Утилиты выгрузки в облако (rclone, MEGAsync)"
   },
   {
-    "title": "macOS - Сканеры сети (nmap, masscan, arp-scan)",
-    "description": "В командной строке процесса есть сканер сети (nmap, masscan, arp-scan, netdiscover, nbtscan, fping, zmap).\nMITRE ATT&CK. Тактики: Discovery. Техники: T1046 Network Service Discovery.",
-    "priority": 2,
     "alert": true,
     "config": {
       "type": "aggregation-v1",
-      "query": "log_type:macos_osquery AND name:es_process_events AND columns_cmdline:/.*([nN][mM][aA][pP]|[mM][aA][sS][sS][cC][aA][nN]|[aA][rR][pP]-[sS][cC][aA][nN]|[nN][eE][tT][dD][iI][sS][cC][oO][vV][eE][rR]|[nN][bB][tT][sS][cC][aA][nN]|[fF][pP][iI][nN][gG]|[zZ][mM][aA][pP]).*/",
+      "query": "log_type:macos_osquery AND name:es_process_events AND columns_path:/.*\\/([nN][mM][aA][pP]|[mM][aA][sS][sS][cC][aA][nN]|[aA][rR][pP]-[sS][cC][aA][nN]|[nN][eE][tT][dD][iI][sS][cC][oO][vV][eE][rR]|[nN][bB][tT][sS][cC][aA][nN]|[fF][pP][iI][nN][gG]|[zZ][mM][aA][pP])/",
       "query_parameters": [],
       "filters": [],
       "streams": [
-        "<MACOS_STREAM_ID>"
+        "6a362fa188b8df857cfdd94e"
       ],
       "stream_categories": [],
       "group_by": [],
@@ -2157,24 +2162,25 @@
       "cron_timezone": null,
       "event_limit": 100
     },
+    "description": "Путь исполняемого файла процесса совпадает со сканером сети (матч по columns_path, а не по подстроке в cmdline — исключает ложные срабатывания на текст скриптов и выводы osquery). nmap, masscan, arp-scan, netdiscover, nbtscan, fping, zmap. MITRE ATT&CK. Тактики: Discovery. Техники: T1046 Network Service Discovery.",
     "field_spec": {
-      "host": {
-        "data_type": "string",
-        "providers": [
-          {
-            "type": "template-v1",
-            "template": "${source.source}",
-            "require_values": false,
-            "exclude_empty_fields": true
-          }
-        ]
-      },
       "event": {
         "data_type": "string",
         "providers": [
           {
             "type": "template-v1",
             "template": "${source.message}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "host": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.source}",
             "require_values": false,
             "exclude_empty_fields": true
           }
@@ -2223,10 +2229,15 @@
     },
     "notifications": [
       {
-        "notification_id": "<NOTIFICATION_ID>",
+        "notification_id": "6af1cf9b61b983feab6b8a3a",
+        "notification_parameters": null
+      },
+      {
+        "notification_id": "6ace4bf7a68bf21dfabbaa3b",
         "notification_parameters": null
       }
     ],
+    "priority": 2,
     "storage": [
       {
         "type": "persist-to-streams-v1",
@@ -2239,7 +2250,8 @@
       "detection",
       "macos",
       "medium"
-    ]
+    ],
+    "title": "macOS - Сканеры сети (nmap, masscan, arp-scan)"
   },
   {
     "title": "macOS - Поиск паролей в файлах (grep -r по / и ~)",

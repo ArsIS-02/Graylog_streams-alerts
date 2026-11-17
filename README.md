@@ -230,6 +230,7 @@ bash rule-tester/deploy/install.sh        # первый запуск созда
 | 27 | [Утренний дайджест: пульсы и алерты за сутки одним письмом](docs/27-morning-digest.md) | Скрипт на systemd-таймере собирает пульсы и срабатывания за 24 ч, шлёт GELF `dg_event=digest`, правило превращает его в письмо «Mail.ru Daily Digest» — почта без кредов в скрипте |
 | 28 | [IRIS: обогащение алертов активами](docs/28-iris-assets.md) | Алерты Graylog → IRIS с автоматическим списком затронутых хостов, учёток и IOC: три уровня извлечения (поля, текст, replay-поиск), инвентарь HostDeck, реестр Manage → Assets, бэкфилл исторических алертов |
 | 29 | [IRIS: корреляция и скоринг алертов](docs/29-iris-correlation-scoring.md) | Дедупликация по связке «правило + актив» (практики SOAR Security Vision), веса правил с MITRE-множителем, автоэскалация в кейс при пороге скора, эндпоинт наблюдаемости /correlation/status |
+| 30 | [Подавление ночного шума: Wazuh lab-noise и аудит cmdline-матчей](docs/30-noise-tuning-wazuh-graylog.md) | Разбор флуда 5909 алертов (netavark, arp-scan, cron apache), правила 199006–199010 уровня 3 в группе lab-noise, аудит 268 определений Graylog: три macOS-правила переведены с подстроки cmdline на columns_path, найденные дубли и осознанно текстовые сигнатуры |
 
 ### Дашборды
 
@@ -323,6 +324,7 @@ Graylog_streams-alerts/
 │   ├── 27-morning-digest.md           ← утренний дайджест: пульсы и алерты за сутки одним письмом
 │   ├── 28-iris-assets.md              ← IRIS: обогащение алертов активами (TicketBridge, HostDeck, реестр Assets)
 │   ├── 29-iris-correlation-scoring.md ← IRIS: корреляция и скоринг алертов, автоэскалация в кейс
+│   ├── 30-noise-tuning-wazuh-graylog.md ← подавление шума Wazuh (lab-noise), аудит cmdline-матчей Graylog
 │   ├── troubleshooting.md             ← грабли и решения
 │   └── images/                        ← скриншоты и иллюстрации
 ├── graylog/
