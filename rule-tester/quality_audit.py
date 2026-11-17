@@ -91,9 +91,10 @@ def sanitized_tool_report(path, returncode):
     raw = json.loads(path.read_text(encoding="utf-8"))
     rows = []
     for row in raw.get("rows", []):
-        if row.get("status") in ("РАСХОЖДЕНИЕ", "ЕСТЬ СОВПАДЕНИЯ", "ПРОПУЩЕНО"):
+        if row.get("status") in ("РАСХОЖДЕНИЕ", "ЕСТЬ СОВПАДЕНИЯ", "ПРОПУЩЕНО", "НЕ ПРИМЕНИМО"):
             rows.append({"rule": row.get("rule"), "status": row.get("status"),
-                         "detail": row.get("detail"), "priority": row.get("priority")})
+                         "detail": row.get("detail"), "priority": row.get("priority"),
+                         "kind": row.get("kind")})
     return {
         "returncode": returncode,
         "summary": raw.get("summary"),
@@ -214,8 +215,9 @@ def render_markdown(report):
         "| Версия каталога | `%s` |" % report["git"]["commit"],
         "| Drift: каталог ↔ Graylog | правил в каталоге: %s; в Graylog: %s; расхождений: **%s**; ожидаемых подстановок: %s |" % (
             dc.get("catalog", "?"), dc.get("graylog", "?"), dc.get("differences", "?"), dc.get("expected", "?")),
-        "| FP-check | правил: %s; чисто: %s; с совпадениями: **%s**; пропущено: %s |" % (
-            stats.get("total", "?"), stats.get("passed", "?"), stats.get("failed", "?"), stats.get("skipped", "?")),
+        "| FP-check | правил: %s; чисто: %s; с совпадениями: **%s**; не применимо: %s; пропущено: %s |" % (
+            stats.get("total", "?"), stats.get("clean", stats.get("passed", "?")), stats.get("failed", "?"),
+            stats.get("not_applicable", 0), stats.get("skipped", "?")),
         "| Корпус FP-check | %s сообщений за %s (лимит %s) |" % (
             meta.get("corpus", "?"), meta.get("since", "?"), report["parameters"]["limit"]),
         "| Закрыто алертов IRIS | **%d** за %d суток |" % (iris["closed_in_period"], iris["days"]),
@@ -243,6 +245,13 @@ def render_markdown(report):
             lines.append("| %s | %s |" % (md_cell(row.get("rule")), md_cell(row.get("detail"))))
         if len(fp_findings) > 40:
             lines.append("\nПоказаны 40 из %d; полный список — в JSON на сервере." % len(fp_findings))
+    not_applicable = [r for r in fp.get("findings", []) if r.get("status") == "НЕ ПРИМЕНИМО"]
+    if not_applicable:
+        lines.extend(["", "Не применимо к проверке отдельных сообщений: **%d**. Правила тишины срабатывают "
+                      "при отсутствии событий, поэтому обычные совпадения их запросов не считаются FP." % len(not_applicable)])
+        review = [r for r in not_applicable if r.get("kind") != "тишина"]
+        for row in review[:20]:
+            lines.append("- **%s** — %s" % (row.get("rule"), row.get("detail")))
     skipped = [r for r in fp.get("findings", []) if r.get("status") == "ПРОПУЩЕНО"]
     if skipped:
         lines.extend(["", "Пропущенные запросы требуют отдельной проверки:", ""])
@@ -268,7 +277,8 @@ def render_markdown(report):
         "",
         "## Ограничения и эксплуатация",
         "",
-        "- FP-check проверяет Lucene-запросы на последних сообщениях, но не пороги агрегации и `group_by`.",
+        "- FP-check поддерживает числовые диапазоны Lucene. Для агрегаций учитывает порог, `group_by` и скользящее окно; точное расписание выполнения Graylog не воспроизводится.",
+        "- Правила тишины не оцениваются по отдельным совпадениям: их условие относится к отсутствию событий.",
         "- Корпус ограничен лимитом и не является гарантированно «чистым»: совпадение может быть настоящим инцидентом.",
         "- Сырые сообщения Graylog, описания алертов и секреты в эту сводку не включаются.",
         "- Исторические отчёты: `%s`; технические журналы: `%s`." % (

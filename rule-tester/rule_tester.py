@@ -581,11 +581,13 @@ def numeric_fields(args):
     return NUMERIC_DEFAULT | set(x for x in (args.numeric or "").split(",") if x)
 
 
-OKS = ("ПРОШЛО", "СОБЫТИЕ ЕСТЬ", "ЧИСТО", "ИЗМЕРЕНО")
+OKS = ("ПРОШЛО", "СОБЫТИЕ ЕСТЬ", "ЧИСТО", "ИЗМЕРЕНО", "НЕ ПРИМЕНИМО")
 
 
 def stats_of(rows):
     return {"total": len(rows), "passed": sum(r["status"] in OKS for r in rows),
+            "clean": sum(r["status"] == "ЧИСТО" for r in rows),
+            "not_applicable": sum(r["status"] == "НЕ ПРИМЕНИМО" for r in rows),
             "skipped": sum(r["status"] == "ПРОПУЩЕНО" for r in rows),
             "failed": sum(r["status"] not in OKS and r["status"] != "ПРОПУЩЕНО" for r in rows)}
 
@@ -697,10 +699,116 @@ def load_corpus_file(path):
     return [json.loads(line) for line in text.splitlines() if line.strip()]
 
 
+def fp_rule_kind(rule):
+    if is_silence(rule.get("cond")):
+        return "тишина"
+    return "агрегация" if rule.get("cond") else "событие"
+
+
+def _doc_time(doc):
+    try:
+        value = datetime.fromisoformat(str(doc.get("timestamp", "")).replace("Z", "+00:00"))
+    except (TypeError, ValueError):
+        return None
+    return value.replace(tzinfo=timezone.utc) if value.tzinfo is None else value
+
+
+def _group_key(rule, doc):
+    return tuple(str(doc.get(field, "<пусто>")) for field in rule.get("group_by") or [])
+
+
+def aggregation_assessment(rule, matches):
+    """Максимум совпадений в группе и скользящем окне правила.
+
+    Это оценка корпуса, а не повтор планировщика Graylog: любое скользящее окно
+    допускается, поэтому конкретное расписание выполнения не скрывает всплеск.
+    """
+    need = threshold(rule.get("cond"))
+    groups = {}
+    for doc in matches:
+        groups.setdefault(_group_key(rule, doc), []).append(doc)
+    result = {"assessed": True, "threshold": need, "count": 0, "group": (),
+              "window_min": rule.get("window_min"), "groups": len(groups)}
+    if not matches or need <= 1:
+        result["count"] = len(matches)
+        return result
+    if not rule.get("window_min"):
+        result["assessed"] = False
+        result["reason"] = "не задано окно агрегации"
+        return result
+    best = (0, (), None, None)
+    for group, docs in groups.items():
+        timed = sorted(((dt, doc) for dt, doc in ((_doc_time(d), d) for d in docs) if dt is not None),
+                       key=lambda item: item[0])
+        if len(timed) != len(docs):
+            result["assessed"] = False
+            result["reason"] = "у части совпадений нет корректного timestamp"
+            continue
+        left = 0
+        for right, (end, _) in enumerate(timed):
+            while (end - timed[left][0]).total_seconds() > float(rule["window_min"]) * 60:
+                left += 1
+            count = right - left + 1
+            if count > best[0]:
+                best = (count, group, timed[left][0], end)
+    result.update({"count": best[0], "group": best[1],
+                   "from": best[2].isoformat() if best[2] else None,
+                   "to": best[3].isoformat() if best[3] else None})
+    return result
+
+
+def fp_check_rule(rule, corpus):
+    """Оценивает одно правило, не смешивая события, агрегации и детекторы тишины."""
+    kind = fp_rule_kind(rule)
+    base = {"rule": rule["title"], "query": rule["query"], "platform": platform_of(rule["title"]),
+            "priority": rule.get("priority"), "kind": kind}
+    try:
+        node, _ = L.parse(rule["query"])
+    except L.QueryError as e:
+        return dict(base, status="ПРОПУЩЕНО", detail="запрос не разобран: %s" % e, samples=[])
+    matches = []
+    for doc in corpus:
+        try:
+            if L.evaluate(node, doc):
+                matches.append(doc)
+        except Exception:
+            continue
+    if kind == "тишина":
+        return dict(base, status="НЕ ПРИМЕНИМО", samples=[],
+                    detail="правило тишины: запрос совпал с %d сообщениями; наличие сообщений не является ложной тревогой, "
+                           "событие создаётся при условии %s" % (len(matches), rule.get("cond")))
+    if not matches:
+        return dict(base, status="ЧИСТО", samples=[],
+                    detail="совпадений с корпусом (%d сообщений) не найдено" % len(corpus))
+    if kind == "агрегация":
+        assessment = aggregation_assessment(rule, matches)
+        need = assessment["threshold"]
+        if not assessment["assessed"]:
+            return dict(base, status="НЕ ПРИМЕНИМО", samples=[],
+                        detail="агрегация: запрос совпал с %d сообщениями, но порог не оценён: %s" % (
+                            len(matches), assessment.get("reason")))
+        if assessment["count"] < need:
+            group = "/".join(assessment["group"]) if assessment["group"] else "все сообщения"
+            return dict(base, status="ЧИСТО", samples=[], match_count=len(matches), aggregation=assessment,
+                        detail="агрегация: совпадений запроса %d; максимум в группе «%s» за окно %s мин — %d, ниже порога %d" % (
+                            len(matches), group[:100], rule.get("window_min"), assessment["count"], need))
+        detail = "агрегация: порог достигнут — %d совпадений при пороге %d; всего совпадений запроса %d (показаны первые %d)" % (
+            assessment["count"], need, len(matches), min(5, len(matches)))
+    else:
+        detail = "запрос совпал с %d из %d сообщений обычного трафика (показаны первые %d)" % (
+            len(matches), len(corpus), min(5, len(matches)))
+    samples = [{"id": "", "expect": "no_match", "src": "harvest", "origin": "",
+                "why": "сообщение из корпуса «чистого» трафика", "found": True, "ok": False, "doc": doc}
+               for doc in matches[:5]]
+    return dict(base, status="ЕСТЬ СОВПАДЕНИЯ", detail=detail, samples=samples,
+                match_count=len(matches), aggregation=assessment if kind == "агрегация" else None)
+
+
 def cmd_fp_check(args):
-    """Офлайн-проверка: не слишком ли широкие запросы у правил — прогоняет их через недавний «чистый»
-    трафик (боевые потоки без алертного тестового потока и/или файл) и ищет совпадения. Ничего не
-    отправляет и не создаёт в Graylog — только читает."""
+    """Офлайн-проверка запросов на корпусе с учётом порогов, групп и окон агрегации.
+
+    Правила тишины не оцениваются как ложные срабатывания по отдельным сообщениям.
+    Ничего не отправляет и не создаёт в Graylog — только читает."""
     if args.no_live and not args.file:
         sys.exit("Нужен хотя бы один источник трафика: живой Graylog или --file.")
     if args.no_live and args.source == "live":
@@ -729,40 +837,16 @@ def cmd_fp_check(args):
         sys.exit("Корпус «чистого» трафика пуст — нет сообщений для проверки.")
     run = run_id()
     log("Запуск %s: правил %d, сообщений в корпусе %d (проверка ложных срабатываний)." % (run, len(rules), len(corpus)))
-    rows, bad = [], 0
-    for r in rules:
-        try:
-            node, warns = L.parse(r["query"])
-        except L.QueryError as e:
-            rows.append({"rule": r["title"], "status": "ПРОПУЩЕНО", "detail": "запрос не разобран: %s" % e,
-                         "query": r["query"], "platform": platform_of(r["title"]), "priority": r.get("priority"), "samples": []})
-            log("  %-15s %s" % ("ПРОПУЩЕНО", r["title"][:90]))
-            continue
-        total_hits, examples = 0, []
-        for doc in corpus:
-            try:
-                matched = L.evaluate(node, doc)
-            except Exception:
-                continue
-            if matched:
-                total_hits += 1
-                if len(examples) < 5:
-                    examples.append(doc)
-        if total_hits:
-            bad += 1
-            sam = [{"id": "", "expect": "no_match", "src": "harvest", "origin": "", "why": "сообщение из корпуса «чистого» трафика",
-                    "found": True, "ok": False, "doc": d} for d in examples]
-            rows.append({"rule": r["title"], "status": "ЕСТЬ СОВПАДЕНИЯ",
-                         "detail": "запрос совпал с %d из %d сообщений обычного трафика (показаны первые %d)" % (
-                             total_hits, len(corpus), len(examples)),
-                         "query": r["query"], "platform": platform_of(r["title"]), "priority": r.get("priority"), "samples": sam})
-        else:
-            rows.append({"rule": r["title"], "status": "ЧИСТО",
-                         "detail": "совпадений с корпусом (%d сообщений) не найдено" % len(corpus),
-                         "query": r["query"], "platform": platform_of(r["title"]), "priority": r.get("priority"), "samples": []})
-        log("  %-15s %s" % (rows[-1]["status"], r["title"][:90]))
-    summary = "правил %d, чисто %d, с совпадениями %d (корпус: %d сообщений)" % (
-        len(rows), sum(r["status"] == "ЧИСТО" for r in rows), bad, len(corpus))
+    rows = []
+    for rule in rules:
+        row = fp_check_rule(rule, corpus)
+        rows.append(row)
+        log("  %-15s %s" % (row["status"], row["rule"][:90]))
+    bad = sum(row["status"] == "ЕСТЬ СОВПАДЕНИЯ" for row in rows)
+    summary = "правил %d, чисто %d, с совпадениями %d, не применимо %d, пропущено %d (корпус: %d сообщений)" % (
+        len(rows), sum(row["status"] == "ЧИСТО" for row in rows), bad,
+        sum(row["status"] == "НЕ ПРИМЕНИМО" for row in rows),
+        sum(row["status"] == "ПРОПУЩЕНО" for row in rows), len(corpus))
     path = write_report(run, "fp", rows, summary, {"platform": getattr(args, "platform", None) or "",
                                                     "rule": ",".join(args.rule or []), "source": src,
                                                     "since": args.since, "corpus": len(corpus)})

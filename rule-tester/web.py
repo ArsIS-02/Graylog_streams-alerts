@@ -61,7 +61,7 @@ MODE_RU = {"queries": "Запросы в тестовом потоке", "e2e": 
 SETTING_ENV = {"graylog_url": "GRAYLOG_URL", "graylog_token": "GRAYLOG_TOKEN", "gelf": "RT_GELF", "stream": "RT_STREAM",
                "schedule": "RT_SCHEDULE", "schedule_enabled": "RT_SCHEDULE_ENABLED", "e2e_platforms": "RT_E2E_PLATFORMS",
                "insecure": "RT_INSECURE", "ca_file": "RT_CA_FILE", "retention_days": "RT_RETENTION_DAYS"}
-OK_STATUS = ("ПРОШЛО", "СОБЫТИЕ ЕСТЬ", "ЧИСТО", "ИЗМЕРЕНО")
+OK_STATUS = ("ПРОШЛО", "СОБЫТИЕ ЕСТЬ", "ЧИСТО", "ИЗМЕРЕНО", "НЕ ПРИМЕНИМО")
 ADMIN_LOGIN = "admin"  # логин один для всех ролей — роль определяется паролем (RT_PASSWORD/RT_RUNNER_PASSWORD/RT_VIEWER_PASSWORD)
 RUNNER_ALLOWED = ("/api/run", "/api/live/refresh")  # роль «запуск»: может запускать проверки, настроек не меняет
 
@@ -204,7 +204,7 @@ def start_job(mode, platform="", rule="", confirm=False, who="вручную", s
     return job, None
 
 
-STATUS_LINE = re.compile(r"^\s+(ПРОШЛО|ПРОВАЛ|ПРОПУЩЕНО|ОШИБКА ЗАПРОСА|СОБЫТИЕ ЕСТЬ|НЕТ СОБЫТИЯ|РАСХОЖДЕНИЕ|ЧИСТО|ЕСТЬ СОВПАДЕНИЯ|ИЗМЕРЕНО)\s")
+STATUS_LINE = re.compile(r"^\s+(ПРОШЛО|ПРОВАЛ|ПРОПУЩЕНО|ОШИБКА ЗАПРОСА|СОБЫТИЕ ЕСТЬ|НЕТ СОБЫТИЯ|РАСХОЖДЕНИЕ|ЧИСТО|ЕСТЬ СОВПАДЕНИЯ|ИЗМЕРЕНО|НЕ ПРИМЕНИМО)\s")
 TOTAL_LINE = re.compile(r"правил (\d+)")
 
 

@@ -40,6 +40,23 @@ class Lit:
         return "%s:%s<%s>" % (self.field, self.kind, self.text)
 
 
+_RANGE_PATTERN = r"([\[\{])\s*(-?(?:\d+(?:\.\d+)?|\.\d+)|\*)\s+TO\s+(-?(?:\d+(?:\.\d+)?|\.\d+)|\*)\s*([\]\}])"
+_RANGE_RE = re.compile(_RANGE_PATTERN, re.I)
+
+
+def _range_parts(text):
+    """Числовой диапазон Lucene: границы, включительность и неограниченные ``*``."""
+    m = _RANGE_RE.fullmatch(text)
+    if not m:
+        raise QueryError("некорректный числовой диапазон: %s" % text)
+    lo = None if m.group(2) == "*" else float(m.group(2))
+    hi = None if m.group(3) == "*" else float(m.group(3))
+    lo_inc, hi_inc = m.group(1) == "[", m.group(4) == "]"
+    if lo is not None and hi is not None and (lo > hi or lo == hi and not (lo_inc and hi_inc)):
+        raise QueryError("пустой числовой диапазон: %s" % text)
+    return lo, hi, lo_inc, hi_inc
+
+
 class Parser:
     def __init__(self, s):
         self.s, self.i, self.warns = s, 0, []
@@ -179,7 +196,13 @@ class Parser:
             self.i = j + 1
             return Lit(field, "regex", "".join(buf))
         if c in "[{":
-            raise QueryError("диапазоны [a TO b] не поддерживаются тестером")
+            m = _RANGE_RE.match(self.s, self.i)
+            if not m:
+                raise QueryError("поддерживаются числовые диапазоны вида [1 TO 5], {1 TO 5} и [3 TO *]")
+            text = m.group(0)
+            _range_parts(text)
+            self.i = m.end()
+            return Lit(field, "range", text)
         txt, wild = self.bare(want_wild=True)
         self.suffix()
         if re.fullmatch(r"(<=|>=|<|>)-?\d+(\.\d+)?", txt):
@@ -279,15 +302,23 @@ def match_lit(lit, doc):
     if lit.kind == "exists":
         return any(v != "" for v in vals)
     if lit.kind == "range":
-        m = re.fullmatch(r"(<=|>=|<|>)(.+)", lit.text)
-        op, lim = m.group(1), float(m.group(2))
+        relative = re.fullmatch(r"(<=|>=|<|>)(.+)", lit.text)
+        bracket = None if relative else _range_parts(lit.text)
         for v in vals:
             try:
                 x = float(v)
             except ValueError:
                 continue
-            if (op == "<" and x < lim) or (op == "<=" and x <= lim) or (op == ">" and x > lim) or (op == ">=" and x >= lim):
-                return True
+            if relative:
+                op, lim = relative.group(1), float(relative.group(2))
+                if (op == "<" and x < lim) or (op == "<=" and x <= lim) or (op == ">" and x > lim) or (op == ">=" and x >= lim):
+                    return True
+            else:
+                lo, hi, lo_inc, hi_inc = bracket
+                lower_ok = lo is None or x > lo or lo_inc and x == lo
+                upper_ok = hi is None or x < hi or hi_inc and x == hi
+                if lower_ok and upper_ok:
+                    return True
         return False
     if lit.field in TEXT_FIELDS:
         toks_all = [_tokens(v) for v in vals]
@@ -412,8 +443,21 @@ def lit_example(lit):
         return "rt"
     if lit.kind == "range":
         m = re.fullmatch(r"(<=|>=|<|>)(.+)", lit.text)
-        op, lim = m.group(1), float(m.group(2))
-        v = lim - 1 if op == "<" else lim + 1 if op == ">" else lim
+        if m:
+            op, lim = m.group(1), float(m.group(2))
+            v = lim - 1 if op == "<" else lim + 1 if op == ">" else lim
+        else:
+            lo, hi, lo_inc, hi_inc = _range_parts(lit.text)
+            if lo is None and hi is None:
+                v = 0.0
+            elif lo is None:
+                v = hi if hi_inc else hi - 1
+            elif hi is None:
+                v = lo if lo_inc else lo + 1
+            elif lo_inc:
+                v = lo
+            else:
+                v = (lo + hi) / 2
         return str(int(v)) if v == int(v) else str(v)
     raise QueryError(lit.kind)
 
