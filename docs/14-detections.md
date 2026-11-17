@@ -1271,7 +1271,7 @@ syslog роутера; поток Syslog Logs. Правил: 9. Сортиров
 | Правило | Приоритет | Источник логов | Что проверяет | Корреляция | Тактика | Техника |
 |---|---|---|---|---|---|---|
 | Вход в админку роутера (SSH) | высокий | Syslog Logs<br>событие Keenetic SSH_Connection, SSH_Success | SSH-подключение к роутеру Keenetic с IP, не входящего в белый список (сервер мониторинга <IP> и <IP>). | каждое событие | Lateral Movement | `T1021.004` SSH |
-| Отказ во входе на роутер | высокий | Syslog Logs<br>событие Keenetic Auth_Denied | Отказ в доступе к роутеру (Auth_Denied). | каждое событие | Credential Access | `T1110` Brute Force |
+| Отказ во входе на роутер | высокий | Syslog Logs<br>событие Keenetic Auth_Denied | Отказ аутентификации на роутере (Auth_Denied). Исключены сообщения о запрете SFTP после успешного CLI-входа: это ограничение протокола, а не ошибка входа. | каждое событие | Credential Access | `T1110` Brute Force |
 | ARP-конфликт на новом адресе | средний | Syslog Logs<br>событие Keenetic ARP_Conflict | Конфликт ARP (два MAC на одном IP) на адресе, которого нет среди постоянных пар. Исключены <IP>, .54, .118, .38, .117, .146, .145: у них за месяц десятки тысяч конфликтов из-за двух… | каждое событие | Credential Access | `T1557.002` ARP Cache Poisoning |
 | Блокировка адреса за попытки входа в веб-интерфейс | средний | Syslog Logs | Роутер заблокировал удалённый адрес за подбор или сканирование веб-интерфейса (Netfilter Lockout, ban remote host). Адреса из интернета означают, что веб-интерфейс доступен снаружи. | каждое событие | Credential Access | `T1110` Brute Force |
 | Новое устройство в сети | средний | Syslog Logs<br>событие Keenetic DHCP_Request | DHCP выдал адрес устройству, MAC которого отсутствует в белом списке (15 MAC на 17.10.2026). Возможно подключение нового клиента. | каждое событие; повтор не чаще раза в 7 сут | Initial Access | `T1200` Hardware Additions |
@@ -1291,7 +1291,7 @@ kn_event_type:(SSH_Connection OR SSH_Success) AND NOT kn_src_ip:(<белый с�
 **KEENETIC - Отказ во входе на роутер**
 
 ```
-kn_event_type:Auth_Denied
+kn_event_type:Auth_Denied AND NOT (message:sftp AND message:denied)
 ```
 
 **KEENETIC - ARP-конфликт на новом адресе**

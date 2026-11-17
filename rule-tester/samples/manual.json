@@ -122,5 +122,17 @@
       {"why": "ручной: штатная проверка Wazuh по-прежнему исключена",
        "doc": {"audit_type": "SYSCALL", "key": "etcpasswd", "exe": "/var/ossec/bin/wazuh-syscheckd", "auid": "1000", "source": "rt-linux"}}
     ]
+  },
+  "KEENETIC - Отказ во входе на роутер": {
+    "positive": [
+      {"why": "ручной: реальный отказ аутентификации CLI остаётся под детектом",
+       "doc": {"kn_event_type": "Auth_Denied", "message": "Core::Authenticator: password authentication failed for user \"admin\" from 192.0.2.10, tag \"cli\".", "source": "rt-keenetic"}},
+      {"why": "ручной: отказ другого протокола не скрывается исключением SFTP",
+       "doc": {"kn_event_type": "Auth_Denied", "message": "Core::Authenticator: access to \"http\" denied for user \"admin\".", "source": "rt-keenetic"}}
+    ],
+    "negative": [
+      {"why": "ручной: запрет SFTP после успешного CLI-входа не является ошибкой аутентификации",
+       "doc": {"kn_event_type": "Auth_Denied", "message": "Core::Authenticator: access to \"sftp\" denied for user \"admin\".", "source": "rt-keenetic"}}
+    ]
   }
 }

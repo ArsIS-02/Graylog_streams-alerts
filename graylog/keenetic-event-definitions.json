@@ -575,7 +575,7 @@
     "alert": true,
     "config": {
       "type": "aggregation-v1",
-      "query": "kn_event_type:Auth_Denied",
+      "query": "kn_event_type:Auth_Denied AND NOT (message:sftp AND message:denied)",
       "query_parameters": [],
       "filters": [],
       "streams": [
@@ -594,7 +594,7 @@
       "cron_timezone": null,
       "event_limit": 100
     },
-    "description": "Отказ в доступе к роутеру (Auth_Denied).\nMITRE ATT&CK. Тактики: Credential Access. Техники: T1110 Brute Force.",
+    "description": "Отказ аутентификации на роутере (Auth_Denied). Исключены сообщения о запрете SFTP после успешного CLI-входа: это ограничение протокола, а не ошибка входа.\nMITRE ATT&CK. Тактики: Credential Access. Техники: T1110 Brute Force.",
     "field_spec": {
       "event": {
         "data_type": "string",
