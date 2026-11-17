@@ -231,6 +231,7 @@ bash rule-tester/deploy/install.sh        # первый запуск созда
 | 28 | [IRIS: обогащение алертов активами](docs/28-iris-assets.md) | Алерты Graylog → IRIS с автоматическим списком затронутых хостов, учёток и IOC: три уровня извлечения (поля, текст, replay-поиск), инвентарь HostDeck, реестр Manage → Assets, бэкфилл исторических алертов |
 | 29 | [IRIS: корреляция и скоринг алертов](docs/29-iris-correlation-scoring.md) | Дедупликация по связке «правило + актив» (практики SOAR Security Vision), веса правил с MITRE-множителем, автоэскалация в кейс при пороге скора, эндпоинт наблюдаемости /correlation/status |
 | 30 | [Подавление ночного шума: Wazuh lab-noise и аудит cmdline-матчей](docs/30-noise-tuning-wazuh-graylog.md) | Разбор флуда 5909 алертов (netavark, arp-scan, cron apache), правила 199006–199010 уровня 3 в группе lab-noise, аудит 268 определений Graylog: три macOS-правила переведены с подстроки cmdline на columns_path, найденные дубли и осознанно текстовые сигнатуры |
+| 31 | [Еженедельный аудит качества Graylog и итогов IRIS](docs/31-graylog-iris-quality-audit.md) | Отдельный read-only контур: `drift` действующих правил против GitHub, `fp-check` на недавнем корпусе, разрешения закрытых алертов IRIS, отчёт в HomeWiki и cron |
 
 ### Дашборды
 
@@ -325,6 +326,7 @@ Graylog_streams-alerts/
 │   ├── 28-iris-assets.md              ← IRIS: обогащение алертов активами (TicketBridge, HostDeck, реестр Assets)
 │   ├── 29-iris-correlation-scoring.md ← IRIS: корреляция и скоринг алертов, автоэскалация в кейс
 │   ├── 30-noise-tuning-wazuh-graylog.md ← подавление шума Wazuh (lab-noise), аудит cmdline-матчей Graylog
+│   ├── 31-graylog-iris-quality-audit.md ← еженедельный drift/fp-check и итоги закрытия IRIS
 │   ├── troubleshooting.md             ← грабли и решения
 │   └── images/                        ← скриншоты и иллюстрации
 ├── graylog/

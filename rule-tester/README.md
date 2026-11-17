@@ -4,7 +4,8 @@
 
 | Файл | Зачем |
 |---|---|
-| `rule_tester.py` | Консольный инструмент: `selftest`, `list`, `generate`, `doctor`, `setup`, `harvest`, `run-queries`, `run-e2e` |
+| `rule_tester.py` | Консольный инструмент: `selftest`, `list`, `generate`, `doctor`, `setup`, `harvest`, `run-queries`, `run-e2e`, `drift`, `fp-check` |
+| `quality_audit.py` | Еженедельный read-only аудит drift/FP и итогов закрытия IRIS с публикацией в HomeWiki ([глава 31](../docs/31-graylog-iris-quality-audit.md)) |
 | `lucene.py` | Разбор запросов Lucene, вычислитель, сборка образцов, замечания к регулярным выражениям |
 | `graylog_api.py` | REST Graylog (чтение) и GELF HTTP |
 | `web.py`, `web_index.html`, `favicon.svg` | Веб-интерфейс: сводка, правила, образцы, запуск, результаты и сравнение, покрытие, качество, настройки, журнал; роли, расписание |
