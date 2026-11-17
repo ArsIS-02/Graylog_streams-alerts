@@ -233,6 +233,7 @@ bash rule-tester/deploy/install.sh        # первый запуск созда
 | 30 | [Подавление ночного шума: Wazuh lab-noise и аудит cmdline-матчей](docs/30-noise-tuning-wazuh-graylog.md) | Разбор флуда 5909 алертов (netavark, arp-scan, cron apache), правила 199006–199010 уровня 3 в группе lab-noise, аудит 268 определений Graylog: три macOS-правила переведены с подстроки cmdline на columns_path, найденные дубли и осознанно текстовые сигнатуры |
 | 31 | [Еженедельный аудит качества Graylog и итогов IRIS](docs/31-graylog-iris-quality-audit.md) | Отдельный read-only контур: `drift` действующих правил против GitHub, `fp-check` на недавнем корпусе, разрешения закрытых алертов IRIS, отчёт в HomeWiki и cron |
 | 32 | [Сквозной canary Graylog → TicketBridge → IRIS](docs/32-soc-canary.md) | Ежедневный тест с уникальным ID, задержками по стадиям, автозакрытием Legitimate и одним независимым инцидентом Zabbix при сбое |
+| 33 | [IRIS: автоматический пакет доказательств](docs/33-iris-evidence-pack.md) | При эскалации кейс получает ZIP в Evidences: исходные события и контекст Graylog, активы, IOC, таймлайн, история обогащений, ссылки и SHA-256 manifest |
 
 ### Дашборды
 
@@ -329,6 +330,7 @@ Graylog_streams-alerts/
 │   ├── 30-noise-tuning-wazuh-graylog.md ← подавление шума Wazuh (lab-noise), аудит cmdline-матчей Graylog
 │   ├── 31-graylog-iris-quality-audit.md ← еженедельный drift/fp-check и итоги закрытия IRIS
 │   ├── 32-soc-canary.md                 ← сквозной canary Graylog → TicketBridge → IRIS
+│   ├── 33-iris-evidence-pack.md         ← IRIS: автоматический ZIP доказательств в Evidences
 │   ├── troubleshooting.md             ← грабли и решения
 │   └── images/                        ← скриншоты и иллюстрации
 ├── graylog/

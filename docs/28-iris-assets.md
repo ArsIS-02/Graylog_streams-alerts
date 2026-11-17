@@ -103,3 +103,31 @@ Graylog (event definition срабатывает)
 - **Парсер дополнен фильтром `_is_valid_user`**: не берёт в активы суффиксы
   `.service/.timer/.socket/.mount/.target/.scope`, числовые UID и системные имена
   (unknown/system/local/network) — мусор больше не регенерируется.
+
+## Сверка с инвентарём и корреляция 2.0 (17.11.2026)
+
+Реестр IRIS сверен read-only с HostDeck, GLPI, Observium, FreeIPA и Active Directory.
+Все 15 устройств Observium и 8 хостов FreeIPA представлены в IRIS. IP хостовых записей
+совпадают с HostDeck. Найденные расхождения исправлены консервативно, без удаления истории:
+
+- у всех активных хостов заполнен владелец `Igor`;
+- `wazuh-homelab.monitoring.test` получил критичность `medium`;
+- у `wazuh.homelab.monitoring.test` записано пояснение: каноническое имя в
+  FreeIPA/Observium — `wazuh.monitoring.test` (192.168.1.117), текущее имя сохранено
+  для совместимости с HostDeck;
+- добавлены четыре активные записи AD: `ARSENTYEV\testuser_4732`,
+  `ARSENTYEV\testuser_win3`, `ARSENTYEV\testuser_win` и `ARSENTYEV\MONITORING$`;
+- observed-дубли `RedOS-Workstation` (ID 363) и `root` (ID 330) помечены неактивными,
+  а не удалены: у них сохранены 31 и 1 alert sighting соответственно. Канонические
+  записи — ID 16 (Linux Computer) и ID 25 (Linux Account).
+
+В production-копии TicketBridge исправлена типизация новых активов: Linux с профилем
+`laptop/workstation/desktop` или именем, содержащим `workstation`, становится Linux
+Computer; `root`, `redos`, `user` и `ansible` — Linux Account. Типы AD и generic Account
+сохранены. Локальные тесты: 4 passed; серверный smoke-тест подтвердил типы 4/3/5/18/1,
+сервис активен, `/correlation/status` доступен с ключом.
+
+Всего выполнено 25 изменений: реестр вырос с 57 до 61 записи. Полные снимки до/после:
+`/home/redos/ticketbridge/backups/asset-inventory-20261117T153624Z/`. Проверка после
+записи подтвердила все поля, отсутствие активных хостов без владельца и неизменность
+счётчиков и временных меток sightings у обоих дублей.
