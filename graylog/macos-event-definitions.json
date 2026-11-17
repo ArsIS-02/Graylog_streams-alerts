@@ -5018,7 +5018,7 @@
     "alert": true,
     "config": {
       "type": "aggregation-v1",
-      "query": "log_type:macos_wifi_usb AND message:(hostNotificationUSBDeviceInserted AND \"isApple N\")",
+      "query": "log_type:macos_wifi_usb AND message:(hostNotificationUSBDeviceInserted AND \"isApple N\") AND NOT message:(\"EXTERNAL_USB\" OR \"USB2.0 HUB\" OR \"StoreJet Transcend\" OR \"ExternaI\")",
       "query_parameters": [],
       "filters": [],
       "streams": [
