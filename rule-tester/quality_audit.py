@@ -184,11 +184,14 @@ def collect_iris(env, days):
 
 
 def drift_counts(summary):
-    match = re.search(r"правил в каталоге (\d+), в Graylog (\d+), расхождений (\d+)", summary or "")
+    match = re.search(
+        r"правил в каталоге (\d+), в Graylog (\d+), расхождений (\d+)"
+        r"(?:, ожидаемых подстановок (\d+))?", summary or "")
     if not match:
         return {}
     return {"catalog": int(match.group(1)), "graylog": int(match.group(2)),
-            "differences": int(match.group(3))}
+            "differences": int(match.group(3)),
+            "expected": int(match.group(4) or 0)}
 
 
 def render_markdown(report):
@@ -209,8 +212,8 @@ def render_markdown(report):
         "| Проверка | Результат |",
         "|---|---|",
         "| Версия каталога | `%s` |" % report["git"]["commit"],
-        "| Drift: каталог ↔ Graylog | правил в каталоге: %s; в Graylog: %s; расхождений: **%s** |" % (
-            dc.get("catalog", "?"), dc.get("graylog", "?"), dc.get("differences", "?")),
+        "| Drift: каталог ↔ Graylog | правил в каталоге: %s; в Graylog: %s; расхождений: **%s**; ожидаемых подстановок: %s |" % (
+            dc.get("catalog", "?"), dc.get("graylog", "?"), dc.get("differences", "?"), dc.get("expected", "?")),
         "| FP-check | правил: %s; чисто: %s; с совпадениями: **%s**; пропущено: %s |" % (
             stats.get("total", "?"), stats.get("passed", "?"), stats.get("failed", "?"), stats.get("skipped", "?")),
         "| Корпус FP-check | %s сообщений за %s (лимит %s) |" % (

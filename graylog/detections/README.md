@@ -16,3 +16,5 @@
 3. `python3 build_catalog.py` (нужен только Python 3, внешних пакетов нет).
 
 Новое правило попадает в каталог само. Тактика и техника берутся из полей `mitre_tactic`, `mitre_technique`, `mitre_techniques` определения (их записывает `graylog/mitre/import-mitre.js`). Платформа определяется по началу названия: `Windows`, `LNX`, `macOS`, `macOS - Bi.Zone`, `KEENETIC`, `FREEIPA`/`HEALTH`, `Контейнеры`; другое начало скрипт пропустит, добавьте его в функцию `platform()`.
+
+В поле `condition` экспортируются только простые числовые пороги. Составные выражения вроде `&&` сохраняются как `condition: null` при `aggregated: true`: полная логика остаётся в `graylog/*-event-definitions.json`, а сводный каталог не выдаёт составное условие за пустой числовой порог.

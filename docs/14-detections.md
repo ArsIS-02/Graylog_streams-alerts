@@ -1,8 +1,8 @@
 # Каталог детектов Graylog
 
-> Все правила (event definitions) лаборатории в одном месте: какой лог проверяется, по какому условию, как коррелируются события, к какой тактике и технике MITRE ATT&CK относятся. Всего **263** правил: активны **259**, отключены **4** (сохранены для истории). Из них **203** привязаны к технике ATT&CK v20 (118 разных техник). Остальные описывают здоровье сервисов и тишину в логах: атак они не ловят.
+> Все правила (event definitions) лаборатории в одном месте: какой лог проверяется, по какому условию, как коррелируются события, к какой тактике и технике MITRE ATT&CK относятся. Всего **267** правил: активны **263**, отключены **4** (сохранены для истории). Из них **203** привязаны к технике ATT&CK v20 (118 разных техник). Остальные описывают здоровье сервисов и тишину в логах: атак они не ловят.
 
-Встроенное определение `System notification events` (`system-notifications-v1`) в каталог не входит: это не пользовательское правило детектирования. Поэтому при 264 определениях в API здесь 263 пользовательских правила.
+Встроенное определение `System notification events` (`system-notifications-v1`) в каталог не входит: это не пользовательское правило детектирования. Поэтому при 268 определениях в API здесь 267 пользовательских правил.
 
 Страница собирается скриптом из выгрузки Graylog и руками не правится: [как обновить](#как-обновить-каталог). Запросы очищены: IP, MAC, отпечатки ключей и белые списки заменены на `<IP>`, `<MAC>`, `<белый список>`. Готовые определения для импорта лежат в `graylog/*-event-definitions.json`, соответствие техникам подробно описано в [graylog/mitre](../graylog/mitre/README.md).
 
@@ -16,7 +16,7 @@
 - [Keenetic](#keenetic) — 9
 - [FreeIPA и здоровье сервисов](#freeipa-и-здоровье-сервисов) — 27
 - [Контейнеры](#контейнеры) — 18
-- [Экосистема и служебные правила](#экосистема-и-служебные-правила) — 41
+- [Экосистема и служебные правила](#экосистема-и-служебные-правила) — 45
 - [Как читать таблицы](#как-читать-таблицы)
 - [Как обновить каталог](#как-обновить-каталог)
 
@@ -41,8 +41,8 @@
 | Command and Control (управление, C2) | 3 | 3 | 2 |  |  |  | 3 | **11** |
 | Exfiltration (Вывод данных) | 1 | 2 | 2 |  |  |  |  | **5** |
 | Impact (Воздействие) | 2 | 3 | 2 |  |  |  |  | **7** |
-| Без техники (служебные) | 1 | 1 | 2 | 1 | 13 | 16 | 26 | **60** |
-| **Всего** | **59** | **50** | **59** | **9** | **27** | **18** | **41** | **263** |
+| Без техники (служебные) | 1 | 1 | 2 | 1 | 13 | 16 | 30 | **64** |
+| **Всего** | **59** | **50** | **59** | **9** | **27** | **18** | **45** | **267** |
 
 ## Windows
 
@@ -73,9 +73,9 @@ Sysmon, Security, PowerShell, Defender; поток WindowsLogs. Правил: 59
 | Обход UAC через реестр (fodhelper, eventvwr, ms-settings) | высокий | WindowsLogs<br>канал Microsoft-Windows-Sysmon/Operational, EventID 13 | Запись в ветки реестра, через которые обходят UAC и получают высокие права без запроса (ms-settings, mscfile, exefile, подмена windir и SystemRoot). Sysmon 13. | каждое событие; повтор не чаще раза в 1 ч | Privilege Escalation | `T1548.002` Bypass User Account Control |
 | Отключение Firewall (netsh или PS) | высокий | WindowsLogs<br>EventID 1 | Запуск "netsh advfirewall ... disable" или PowerShell "Disable-NetFirewall...". Атакующий отключает брандмауэр, чтобы открыть сетевые соединения. | каждое событие | Defense Impairment | `T1686.003` Windows Host Firewall |
 | Офисное приложение запустило оболочку | высокий | WindowsLogs<br>EventID 1 | Word/Excel/Outlook/PowerPoint запустили cmd, powershell, wscript, cscript или mshta. Характерно для вредоносных макросов. | каждое событие | Execution | `T1204.002` Malicious File<br>`T1059` |
-| Очистка журнала событий | высокий | WindowsLogs<br>EventID 1102, 104 | Журнал Security (1102) или System (104) очищен. Почти всегда признак заметания следов. | каждое событие | Defense Impairment | `T1685.005` Clear Windows Event Logs |
+| Очистка журнала событий | высокий | WindowsLogs<br>канал Security, канал System, EventID 1102, EventID 104 | Журнал Security (1102) или System (104) очищен. Почти всегда признак заметания следов. | каждое событие | Defense Impairment | `T1685.005` Clear Windows Event Logs |
 | Подбор пароля (5+ ошибок входа 4625 за 5 мин) | высокий | WindowsLogs<br>EventID 4625 | 5 и более неудачных входов (Event ID 4625) на одном хосте за 5 минут. Возможен брутфорс, в том числе учётной записи администратора. | число событий ≥ 5 за 5 мин, группировка по source | Credential Access | `T1110` Brute Force |
-| Подбор пароля и успешный вход с одного IP (4625 и 4624) | высокий | WindowsLogs<br>EventID 4624, 4625 | С одного адреса за 15 минут 5 и более сетевых или RDP-входов, среди которых есть и неудачные (4625), и успешные (4624). Так выглядит подбор пароля, закончившийся успехом. | число событий && None за 15 мин, группировка по IpAddress | Credential Access | `T1110` Brute Force<br>`T1078` |
+| Подбор пароля и успешный вход с одного IP (4625 и 4624) | высокий | WindowsLogs<br>EventID 4624, 4625 | С одного адреса за 15 минут 5 и более сетевых или RDP-входов, среди которых есть и неудачные (4625), и успешные (4624). Так выглядит подбор пароля, закончившийся успехом. | агрегация за 15 мин | Credential Access | `T1110` Brute Force<br>`T1078` |
 | Подбор пароля на DC по Kerberos (10+ ошибок 4771 за 5 мин) | высокий | WindowsLogs<br>канал Security, EventID 4771 | Десять и более ошибок предварительной проверки Kerberos (4771) с одного адреса за 5 минут. Подбор пароля к доменным учётным записям. | число событий ≥ 10 за 5 мин, группировка по IpAddress | Credential Access | `T1110.001` Password Guessing<br>`T1110.003` |
 | Подбор пароля на DC по NTLM (10+ ошибок 4776 за 5 мин) | высокий | WindowsLogs<br>канал Security, EventID 4776 | Десять и более неудачных проверок NTLM (4776) с одного рабочего места за 5 минут. Подбор пароля или забытый пароль в службе. | число событий ≥ 10 за 5 мин, группировка по Workstation | Credential Access | `T1110.001` Password Guessing<br>`T1110.003` |
 | Постоянная подписка WMI (5861) | высокий | WindowsLogs<br>канал Microsoft-Windows-WMI-Activity/Operational, EventID 5861 | Создана постоянная подписка на события WMI. Этим способом закрепляются без файлов. | каждое событие; повтор не чаще раза в 1 ч | Persistence | `T1546.003` Windows Management Instrumentation Event Subscription |
@@ -187,7 +187,7 @@ win_event_id:1 AND ((message:localgroup AND message:(administrators OR адми�
 **Windows - Доступ к памяти LSASS**
 
 ```
-win_event_id:10 AND message:"lsass.exe" AND NOT winlogbeat_winlog_event_data_SourceImage:("C:\\WINDOWS\\system32\\svchost.exe" OR "C:\\Windows\\InfraxAgent.exe" OR "C:\\WINDOWS\\system32\\wbem\\wmiprvse.exe" OR "C:\\WINDOWS\\system32\\tasklist.exe" OR "C:\\Program Files\\Zabbix Agent\\zabbix_agentd.exe" OR "C:\\Program Files (x86)\\ossec-agent\\wazuh-agent.exe" OR "C:\\Program Files\\CCleaner\\CCleaner64.exe" OR "C:\\Program Files (x86)\\Microsoft\\EdgeUpdate\\MicrosoftEdgeUpdate.exe") AND NOT message:"Kaspersky Lab" AND NOT message:(<белый список>) AND NOT winlogbeat_winlog_event_data_GrantedAccess:(0x1000 OR 0x1400 OR 0x100000 OR 0x101000)
+win_event_id:10 AND winlogbeat_winlog_event_data_TargetImage:/.*lsass\.exe/ AND NOT winlogbeat_winlog_event_data_SourceImage:("C:\\WINDOWS\\system32\\svchost.exe" OR "C:\\Windows\\InfraxAgent.exe" OR "C:\\WINDOWS\\system32\\wbem\\wmiprvse.exe" OR "C:\\WINDOWS\\system32\\tasklist.exe" OR "C:\\Program Files\\Zabbix Agent\\zabbix_agentd.exe" OR "C:\\Program Files (x86)\\ossec-agent\\wazuh-agent.exe" OR "C:\\Program Files\\CCleaner\\CCleaner64.exe" OR "C:\\Program Files (x86)\\Microsoft\\EdgeUpdate\\MicrosoftEdgeUpdate.exe") AND NOT message:"Kaspersky Lab" AND NOT message:(<белый список>) AND NOT winlogbeat_winlog_event_data_GrantedAccess:(0x1000 OR 0x1400 OR 0x100000 OR 0x101000)
 ```
 
 **Windows - Изменение группы «Администраторы домена»**
@@ -253,7 +253,7 @@ win_event_id:1 AND message:("WINWORD.EXE" OR "EXCEL.EXE" OR "OUTLOOK.EXE" OR "PO
 **Windows - Очистка журнала событий**
 
 ```
-win_event_id:(1102 OR 104)
+(win_event_id:1102 AND win_channel:Security) OR (win_event_id:104 AND win_channel:System)
 ```
 
 **Windows - Подбор пароля (5+ ошибок входа 4625 за 5 мин)**
@@ -325,7 +325,7 @@ win_event_id:1 AND message:("urlcache" OR "mshta.exe" OR "bitsadmin" OR "scrobj.
 **Windows - Автозагрузка через ключ реестра Run**
 
 ```
-win_event_id:13 AND message:"CurrentVersion\\Run" AND NOT win_image:("C:\\Program Files\\Yandex\\YandexBrowser\\Application\\browser.exe" OR "C:\\Program Files\\CCleaner\\CCleaner64.exe" OR "C:\\ProgramData\\Wargaming.net\\GameCenter\\wgc.exe" OR "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe")
+win_event_id:13 AND message:"CurrentVersion\\Run" AND NOT win_image:("C:\\Program Files\\Yandex\\YandexBrowser\\Application\\browser.exe" OR "C:\\Program Files\\CCleaner\\CCleaner64.exe" OR "C:\\ProgramData\\Wargaming.net\\GameCenter\\wgc.exe" OR "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe" OR "C:\\Program Files (x86)\\VanyaVPN\\VanyaVPN.exe")
 ```
 
 **Windows - Блокировка учётной записи (4740)**
@@ -463,7 +463,7 @@ win_event_id:4624 AND winlogbeat_winlog_event_data_LogonType:10
 **Windows - Серия разведки (5+ команд за 5 мин)**
 
 ```
-win_event_id:1 AND message:("whoami.exe" OR "nltest.exe" OR "net.exe" OR "net1.exe" OR "systeminfo.exe" OR "quser.exe" OR "arp.exe")
+win_event_id:1 AND message:("whoami.exe" OR "nltest.exe" OR "net.exe" OR "net1.exe" OR "systeminfo.exe" OR "quser.exe" OR "arp.exe") AND NOT message:ossec-agent
 ```
 
 </details>
@@ -491,7 +491,7 @@ auditd на RED OS; поток RedOS auditd Logs. Правил: 50. Сортир
 | Отключение SELinux или аудита (setenforce 0, auditctl -e 0) | высокий | RedOS auditd Logs<br>auditd PROCTITLE | SELinux переведён в разрешающий режим или отключён аудит ядра. | каждое событие; повтор не чаще раза в 1 ч | Defense Impairment | `T1685` Disable or Modify Tools |
 | Отключение аудита или удаление правил auditd | высокий | RedOS auditd Logs<br>auditd CONFIG_CHANGE | Удалено правило auditd или аудит отключён (audit_enabled=0). Атакующий может ослеплять мониторинг. | каждое событие | Defense Impairment | `T1685.004` Disable or Modify Linux Audit System Log |
 | Подбор пароля sudo или su (5+ ошибок за 5 мин) | высокий | RedOS auditd Logs<br>auditd USER_AUTH | Пять и более неудачных вводов пароля для sudo или su на одном хосте за 5 минут. | число событий ≥ 5 за 5 мин, группировка по source | Credential Access | `T1110` Brute Force |
-| Подбор пароля и успешный вход по SSH (6+ событий за 15 мин) | высокий | RedOS auditd Logs<br>auditd USER_LOGIN | На одном хосте за 15 минут 6 и более событий входа по SSH, среди которых есть и неудачные, и успешные. Похоже на подбор пароля, закончившийся входом. | число событий && None за 15 мин, группировка по source | Credential Access | `T1110` Brute Force<br>`T1078` |
+| Подбор пароля и успешный вход по SSH (6+ событий за 15 мин) | высокий | RedOS auditd Logs<br>auditd USER_LOGIN | На одном хосте за 15 минут 6 и более событий входа по SSH, среди которых есть и неудачные, и успешные. Похоже на подбор пароля, закончившийся входом. | агрегация за 15 мин | Credential Access | `T1110` Brute Force<br>`T1078` |
 | Привилегированный контейнер или docker.sock | высокий | RedOS auditd Logs<br>auditd EXECVE | Запуск docker или podman с флагом --privileged или с монтированием docker.sock. Это путь к root на хосте. | каждое событие | Privilege Escalation | `T1611` Escape to Host<br>`T1610` |
 | Успешный вход root по SSH | высокий | RedOS auditd Logs<br>auditd USER_LOGIN | Успешный вход по SSH под root. Прямой вход под root обычно отключают, повод проверить. | каждое событие; повтор не чаще раза в 1 ч | Lateral Movement | `T1021.004` SSH<br>`T1078.003` |
 | Установка setuid или setgid | высокий | RedOS auditd Logs<br>auditd SYSCALL, ключ perm_modification | chmod, fchmod, fchmodat с битом setuid (04000) или setgid (02000). Исключены systemd-tmpfiles, rpm и dnf: их установки штатно выставляют такие права. | каждое событие | Privilege Escalation | `T1548.001` Setuid and Setgid |
@@ -939,19 +939,19 @@ name:file_events AND (columns_action:CREATED OR columns_action:UPDATED OR column
 **macOS - Обратная оболочка (/dev/tcp, pty.spawn)**
 
 ```
-name:es_process_events AND message:("/dev/tcp" OR "pty.spawn" OR "socket.socket") AND NOT message:"/dev/tcp/<IP>"
+name:es_process_events AND message:("/dev/tcp" OR "pty.spawn" OR "socket.socket") AND NOT message:"/dev/tcp/<IP>" AND NOT message:"Documents/kimi/tasks"
 ```
 
 **macOS - Отключение SIP (csrutil disable)**
 
 ```
-log_type:macos_osquery AND name:es_process_events AND columns_cmdline:/.*csrutil[ ]+(disable|authenticated-root[ ]+disable).*/
+log_type:macos_osquery AND name:es_process_events AND columns_cmdline:/.*csrutil[ ]+(disable|authenticated-root[ ]+disable).*/ AND NOT columns_cmdline:/.*Documents\/kimi\/tasks.*/
 ```
 
 **macOS - Отключение SIP или Gatekeeper**
 
 ```
-name:es_process_events AND ((message:"spctl" AND message:("master-disable" OR "global-disable")) OR (message:"csrutil" AND message:"disable"))
+name:es_process_events AND ((message:"spctl" AND message:("master-disable" OR "global-disable")) OR (message:"csrutil" AND message:"disable")) AND NOT message:"Documents/kimi/tasks"
 ```
 
 **macOS - Отключение межсетевого экрана (socketfilterfw, pfctl)**
@@ -969,7 +969,7 @@ name:es_process_events AND columns_cmdline:/.*(log erase|log config|rm .*(\/var\
 **macOS - Подключено мобильное устройство (не Apple)**
 
 ```
-log_type:macos_wifi_usb AND message:(hostNotificationUSBDeviceInserted AND "isApple N")
+log_type:macos_wifi_usb AND message:(hostNotificationUSBDeviceInserted AND "isApple N") AND NOT message:("EXTERNAL_USB" OR "USB2.0 HUB" OR "StoreJet Transcend" OR "ExternaI")
 ```
 
 **macOS - Подмена библиотек (DYLD_INSERT_LIBRARIES)**
@@ -1077,7 +1077,7 @@ name:es_process_events AND columns_path:(\/tmp\/* OR \/private\/tmp\/* OR \/User
 **macOS - Запуск утилит удалённого доступа и туннелей**
 
 ```
-log_type:macos_osquery AND name:es_process_events AND columns_cmdline:/.*([nN][gG][rR][oO][kK]|[cC][lL][oO][uU][dD][fF][lL][aA][rR][eE][dD]|[aA][nN][yY][dD][eE][sS][kK]|[tT][eE][aA][mM][vV][iI][eE][wW][eE][rR]|[rR][uU][sS][tT][dD][eE][sS][kK]|[cC][hH][iI][sS][eE][lL]|[tT][aA][iI][lL][sS][cC][aA][lL][eE]|[zZ][eE][rR][oO][tT][iI][eE][rR]|[fF][rR][pP][cC]).*/
+log_type:macos_osquery AND name:es_process_events AND columns_path:/.*\/([nN][gG][rR][oO][kK]|[cC][lL][oO][uU][dD][fF][lL][aA][rR][eE][dD]|[aA][nN][yY][dD][eE][sS][kK]|[tT][eE][aA][mM][vV][iI][eE][wW][eE][rR]|[rR][uU][sS][tT][dD][eE][sS][kK]|[cC][hH][iI][sS][eE][lL]|[tT][aA][iI][lL][sS][cC][aA][lL][eE][dD]?|[zZ][eE][rR][oO][tT][iI][eE][rR][^\/]*|[fF][rR][pP][cC])/
 ```
 
 **macOS - Неудачная попытка sudo (неверный пароль)**
@@ -1095,7 +1095,7 @@ log_type:macos_osquery AND name:es_process_events AND columns_cmdline:/.*launchc
 **macOS - Передача данных наружу (scp, rsync, nc, socat)**
 
 ```
-name:es_process_events AND ((columns_cmdline:/(.*[ \/])?(scp|rsync)( .*)? [^ ]*@[^ ]*[.][^ ]*:.*/) OR (columns_cmdline:/(.*[ \/])?(nc|ncat|socat)( .*)?/ AND NOT columns_cmdline:/.* -l .*/)) AND NOT columns_cmdline:/.*(--server|192\.168\.|10\.|172\.(1[6-9]|2[0-9]|3[01])\.|localhost|127\.0\.0\.1|<домен>).*/
+name:es_process_events AND columns_path:/.*\/(scp|rsync|nc|ncat|socat)/ AND ((columns_cmdline:/(.*[ \/])?(scp|rsync)( .*)? [^ ]*@[^ ]*[.][^ ]*:.*/) OR (columns_cmdline:/(.*[ \/])?(nc|ncat|socat)( .*)?/ AND NOT columns_cmdline:/.* -l .*/)) AND NOT columns_cmdline:/.*(--server|192\.168\.|10\.|172\.(1[6-9]|2[0-9]|3[01])\.|localhost|127\.0\.0\.1|<домен>).*/
 ```
 
 **macOS - Поддельное окно ввода пароля (osascript hidden answer)**
@@ -1119,13 +1119,13 @@ log_type:macos_unified AND processImagePath:\/kernel AND senderImagePath:"\/Syst
 **macOS - Поиск паролей в файлах (grep -r по / и ~)**
 
 ```
-log_type:macos_osquery AND name:es_process_events AND columns_cmdline:/.*(grep|rg|find)[ ]+(-[a-zA-Z]*[rR][a-zA-Z]*[ ]+)+.*([pP][aA][sS][sS][wW][oO][rR][dD]|[pP][aA][sS][sS][wW][dD]|[sS][eE][cC][rR][eE][tT]|[cC][rR][eE][dD][eE][nN][tT][iI][aA][lL]|[aA][pP][iI][kK][eE][yY]|[iI][dD]_[rR][sS][aA]|[kK][dD][bB][xX]).*[ ](\/|~|[$]HOME|\/Users[^ ]*)/ AND NOT columns_cmdline:/.*BatchMode.*/
+log_type:macos_osquery AND name:es_process_events AND columns_path:/.*\/(grep|egrep|rg|find|locate|mdfind)/ AND columns_cmdline:/.*(grep|rg|find)[ ]+(-[a-zA-Z]*[rR][a-zA-Z]*[ ]+)+.*([pP][aA][sS][sS][wW][oO][rR][dD]|[pP][aA][sS][sS][wW][dD]|[sS][eE][cC][rR][eE][tT]|[cC][rR][eE][dD][eE][nN][tT][iI][aA][lL]|[aA][pP][iI][kK][eE][yY]|[iI][dD]_[rR][sS][aA]|[kK][dD][bB][xX]).*[ ](\/|~|[$]HOME|\/Users[^ ]*)/ AND NOT columns_cmdline:/.*BatchMode.*/
 ```
 
 **macOS - Сканеры сети (nmap, masscan, arp-scan)**
 
 ```
-log_type:macos_osquery AND name:es_process_events AND columns_cmdline:/.*([nN][mM][aA][pP]|[mM][aA][sS][sS][cC][aA][nN]|[aA][rR][pP]-[sS][cC][aA][nN]|[nN][eE][tT][dD][iI][sS][cC][oO][vV][eE][rR]|[nN][bB][tT][sS][cC][aA][nN]|[fF][pP][iI][nN][gG]|[zZ][mM][aA][pP]).*/
+log_type:macos_osquery AND name:es_process_events AND columns_path:/.*\/([nN][mM][aA][pP]|[mM][aA][sS][sS][cC][aA][nN]|[aA][rR][pP]-[sS][cC][aA][nN]|[nN][eE][tT][dD][iI][sS][cC][oO][vV][eE][rR]|[nN][bB][tT][sS][cC][aA][nN]|[fF][pP][iI][nN][gG]|[zZ][mM][aA][pP])/
 ```
 
 **macOS - Смена DNS или прокси (networksetup)**
@@ -1137,7 +1137,7 @@ log_type:macos_osquery AND name:es_process_events AND columns_cmdline:/.*network
 **macOS - Снятие карантина вне Applications или отключение Gatekeeper**
 
 ```
-log_type:macos_osquery AND name:es_process_events AND columns_cmdline:/.*(spctl[ ]+--(master|global)-disable|xattr[ ]+.*-[a-z]*[dc].*)/ AND NOT columns_cmdline:/.*(\/Applications\/|hostdeck-agent).*/ AND columns_cmdline:/.*(spctl|quarantine|xattr[ ]+-[a-z]*c).*/
+log_type:macos_osquery AND name:es_process_events AND columns_path:("\/usr\/bin\/xattr" OR "\/usr\/sbin\/spctl") AND columns_cmdline:/.*(spctl[ ]+--(master|global)-disable|xattr[ ]+.*-[a-z]*[dc].*)/ AND NOT columns_cmdline:/.*(\/Applications\/|hostdeck-agent|[.]kimi-work|daimon-bundle).*/ AND columns_cmdline:/.*(spctl|quarantine|xattr[ ]+-[a-z]*c).*/
 ```
 
 **macOS - Создание пользователя или изменение групп**
@@ -1149,7 +1149,7 @@ name:es_process_events AND columns_path:("/usr/bin/dscl" OR "/usr/sbin/sysadminc
 **macOS - Утилиты выгрузки в облако (rclone, MEGAsync)**
 
 ```
-log_type:macos_osquery AND name:es_process_events AND columns_cmdline:/.*([rR][cC][lL][oO][nN][eE]|[mM][eE][gG][aA][sS][yY][nN][cC]|[mM][eE][gG][aA][cC][mM][dD]).*/
+log_type:macos_osquery AND name:es_process_events AND columns_path:/.*\/([rR][cC][lL][oO][nN][eE]|[mM][eE][gG][aA][sS][yY][nN][cC]|[mM][eE][gG][aA][cC][mM][dD])/
 ```
 
 **macOS - Элемент входа через sfltool или osascript**
@@ -1247,7 +1247,7 @@ inventory_task_name:"LineInFileFound - Resolv Inventory" AND file_match:nameserv
 **macOS - Bi.Zone: новый элемент автозагрузки**
 
 ```
-mac_bz_event_type:AsepInfo AND asep_file_age:<86400 AND NOT asep_file_path:\/Library\/LaunchDaemons\/com.homelab.bzt*
+mac_bz_event_type:AsepInfo AND asep_file_age:<86400 AND NOT asep_file_path:\/Library\/LaunchDaemons\/com.homelab.bzt* AND NOT asep_file_path:*\/Library\/LaunchAgents\/sh.brew.beszel-agent.plist
 ```
 
 **macOS - Bi.Zone: опасная команда в истории оболочки**
@@ -1321,7 +1321,7 @@ source:"Keenetic-7625" AND message:"Core::Scgi::Session" AND (message:"unsupport
 **KEENETIC - Сохранена конфигурация роутера**
 
 ```
-source:"Keenetic-7625" AND message:"StartupConfig" AND message:"configuration saved"
+source:"Keenetic-7625" AND message:"StartupConfig" AND message:"configuration saved" AND NOT kn_autosave:true
 ```
 
 **KEENETIC - Обрыв PPPoE-соединения с провайдером**
@@ -1677,7 +1677,7 @@ container_name:netalertx
 
 ## Экосистема и служебные правила
 
-AUDIT, HOMEREPO, HOSTDECK, TRAFFICLENS, ZASLON, CANARY, COWRIE, DIFFWATCH, DIGEST, LABSCORE, LOGATLAS и SANDBOX. Правил: 41. Сортировка: сначала высокий приоритет.
+AUDIT, HOMEREPO, HOSTDECK, TRAFFICLENS, ZASLON, CANARY, COWRIE, DIFFWATCH, DIGEST, LABSCORE, LOGATLAS и SANDBOX. Правил: 45. Сортировка: сначала высокий приоритет.
 
 | Правило | Приоритет | Источник логов | Что проверяет | Корреляция | Тактика | Техника |
 |---|---|---|---|---|---|---|
@@ -1701,6 +1701,7 @@ AUDIT, HOMEREPO, HOSTDECK, TRAFFICLENS, ZASLON, CANARY, COWRIE, DIFFWATCH, DIGES
 | Компрометация по итогам анализа трафика | высокий | TrafficLens | TrafficLens разобрал запись трафика (загрузка или живой захват) и выставил итог «Компрометация»: есть совпадение с IOC, сигнатура Suricata высокой важности или файл из базы. Причины и… | каждое событие | — | — |
 | Обращение к индикатору компрометации | высокий | TrafficLens | В трафике найдено обращение к индикатору из базы TrafficLens с уверенностью не ниже 70: адрес, домен, URL, хэш файла или отпечаток JA3/JA4. Где найдено — поле tl_contexts, какие хосты —… | каждое событие; повтор не чаще раза в 1 ч | Command and Control | `T1071` Application Layer Protocol |
 | Ретропроверка: прошлый трафик совпал с новым IOC | высокий | TrafficLens | Индикатор появился в базе после анализа, а трафик с ним уже был: TrafficLens перепроверил прошлые задачи после обновления IOC. Когда это было в трафике — поле tl_seen_ts. | каждое событие | Command and Control | `T1071` Application Layer Protocol |
+| Критичный алерт (уровень 12+) | высокий | Wazuh | Алерт Wazuh с уровнем 12-15. Правило 40101 (логон системной учётки) исключено как шумное. В IRIS передаётся через TicketBridge с приоритетом High. | число событий ≥ 1 за 1 мин, группировка по wazuh_agent, rule_id, rule_level, wazuh_rule_desc, source; повтор не чаще раза в 1 ч | — | — |
 | firewalld остановлен из панели | высокий | ZaSlon | Через ZaSlon остановлена служба firewalld: хост остался без межсетевого экрана. Если остановка с таймером отката не была подтверждена, ZaSlon вернёт службу сам (zs_op:tx_rollback). | каждое событие | Defense Impairment | `T1685` Disable or Modify Tools |
 | Подбор пароля к панели (5+ неудачных входов за 10 мин) | высокий | ZaSlon | Пять и более неудачных входов в панель ZaSlon с одного адреса за 10 минут. Своего ограничения частоты входа у панели нет, поэтому подбор замечает Graylog. Адрес клиента — поле… | число событий ≥ 5 за 10 мин, группировка по zs_client_ip; повтор не чаще раза в 1 ч | Credential Access | `T1110` Brute Force |
 | Base64-декодирование в командной строке | средний | RedOS auditd Logs | В командной строке выполнено base64 -d/--decode — обфускация команд (часто связка echo BASE64 \| base64 -d \| bash). Команда — в тексте события. | каждое событие | — | — |
@@ -1714,6 +1715,8 @@ AUDIT, HOMEREPO, HOSTDECK, TRAFFICLENS, ZASLON, CANARY, COWRIE, DIFFWATCH, DIGES
 | Пользователи, роли и токены | средний | HomeRepo | Создан или удалён пользователь, изменена роль, сброшен или сменён пароль, создан или удалён токен API, выдан доступ Ansible. | каждое событие | Persistence | `T1098` Account Manipulation |
 | Деградация: провалов проверок 3+ | средний | HostDeck | Пульс панели HostDeck сообщает о 3 или больше провалах проверок безопасности (hd_checks_failing >= 3). Панель жива, но состояние парка деградирует — открыть HostDeck и разобрать… | число событий ≥ 1 за 9 ч; повтор не чаще раза в 1 сут | — | — |
 | Открыта консоль root в браузере | средний | HostDeck | Из HostDeck открыта консоль root на хосте (или в ней отказано). Действие редкое и мощное: стоит знать о каждом. | каждое событие | Execution | `T1059.004` Unix Shell |
+| Важный алерт (уровень 9-11) | средний | Wazuh | Алерт Wazuh с уровнем 9-11 (входы в нерабочее время, изменения учёток и т.п.). В IRIS передаётся через TicketBridge с приоритетом Medium. | число событий ≥ 1 за 1 мин, группировка по wazuh_agent, rule_id, rule_level, wazuh_rule_desc, source; повтор не чаще раза в 1 ч | — | — |
+| Проблема на узле или сервисе | средний | Zabbix | Событие PROBLEM из Zabbix. В DFIR-IRIS передаётся через существующий TicketBridge; повторы того же zabbix_event_id не создают новый алерт. RESOLVED этим правилом не обрабатывается. | число событий ≥ 1 за 1 мин, группировка по zabbix_event_id, source, zabbix_event_status, zabbix_trigger_id, zabbix_severity, zabbix_nseverity, zabbix_trigger_description, zabbix_event_duration, zabbix_tags_json, zabbix_url, zabbix_host_conn, zabbix_trigger_name | — | — |
 | SELinux переведён в permissive или disabled из панели | средний | ZaSlon | Через ZaSlon SELinux на хосте переведён в разрешающий режим или отключён. Это легитимное действие администратора, но защита хоста ослаблена: событие позволяет отличить его от setenforce… | каждое событие | Defense Impairment | `T1685` Disable or Modify Tools |
 | Утренний дайджест экосистемы | низкий | — | Скрипт morning-digest.py на <хост> (systemd-таймер, 08:47 YEKT) присылает GELF-сообщение dg_event=digest с пульсами инструментов и сводкой алертов за сутки; это правило превращает его в… | каждое событие | — | — |
 | Агент вернулся на связь | низкий | HomeRepo | Агент снова шлёт heartbeat — TicketBridge автоматически закрывает открытый тикет инцидента. | каждое событие | — | — |
@@ -1721,6 +1724,7 @@ AUDIT, HOMEREPO, HOSTDECK, TRAFFICLENS, ZASLON, CANARY, COWRIE, DIFFWATCH, DIGES
 | Риск принят: добавлено исключение | низкий | HostDeck | В HostDeck добавлено исключение для проверки: её отклонение больше не попадает в итог и в алерты. Событие для учёта принятых рисков. | каждое событие | — | — |
 | Еженедельный отчёт зрелости | низкий | Lab Score | Lab Score: правила, срабатывания за неделю, покрытие HomeWiki, техники MITRE — одним письмом | каждое событие | — | — |
 | Подозрительный трафик | низкий | TrafficLens | Итог анализа «Подозрительно»: эвристики (маячки, крупные выгрузки, невалидный TLS, нестандартные порты) без сильных признаков. Событие без уведомления, для разбора на странице Alerts &… | каждое событие | — | — |
+| Проблема устранена (RESOLVED) | низкий | Zabbix | Событие RESOLVED из Zabbix. TicketBridge находит ранее созданный алерт IRIS по zabbix_event_id и переводит его в статус Closed. Новый алерт и тикет GLPI не создаются. | число событий ≥ 1 за 1 мин, группировка по zabbix_event_id, source, zabbix_event_status, zabbix_trigger_id, zabbix_severity, zabbix_nseverity, zabbix_trigger_description, zabbix_event_duration, zabbix_tags_json, zabbix_url, zabbix_host_conn, zabbix_trigger_name | — | — |
 | Изменения доверия: пароль панели, добавление и удаление хостов | низкий | ZaSlon | Сменён пароль администратора панели, добавлен, зарегистрирован или удалён управляемый хост. Редкие действия, после которых меняется круг доверия ZaSlon. | каждое событие | Persistence | `T1098` Account Manipulation |
 
 <details><summary>Запросы Graylog (очищенные)</summary>
@@ -1845,6 +1849,12 @@ tl_event:ioc_hit AND tl_ioc_conf:>=70
 tl_event:retro_hit
 ```
 
+**WAZUH - Критичный алерт (уровень 12+)**
+
+```
+tool:wazuh AND rule_level:[12 TO 15] AND NOT rule_id:40101
+```
+
 **ZASLON - firewalld остановлен из панели**
 
 ```
@@ -1923,6 +1933,18 @@ hd_event:heartbeat AND hd_checks_failing:[3 TO *]
 hd_event:audit AND hd_action:(term-open OR term-denied)
 ```
 
+**WAZUH - Важный алерт (уровень 9-11)**
+
+```
+tool:wazuh AND rule_level:[9 TO 11]
+```
+
+**ZABBIX - Проблема на узле или сервисе**
+
+```
+_exists_:zabbix_event_id AND zabbix_event_status:PROBLEM
+```
+
 **ZASLON - SELinux переведён в permissive или disabled из панели**
 
 ```
@@ -1963,6 +1985,12 @@ tool:labscore AND ls_event:weekly
 
 ```
 tl_event:verdict AND tl_level:suspicious
+```
+
+**ZABBIX - Проблема устранена (RESOLVED)**
+
+```
+_exists_:zabbix_event_id AND zabbix_event_status:RESOLVED
 ```
 
 **ZASLON - Изменения доверия: пароль панели, добавление и удаление хостов**

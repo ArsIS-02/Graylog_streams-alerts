@@ -59,7 +59,10 @@ async function exportCatalog(opts = {}) {
   const out = defs.filter(d => d.config && d.config.type === 'aggregation-v1').map(d => {
     const c = d.config;
     const ex = (c.conditions || {}).expression;
-    const cond = ex && ex.right ? {op: ex.expr, value: ex.right.value} : null;
+    // В сводный каталог попадают только простые числовые пороги. Составное &&
+    // нельзя представлять как {op:'&&', value:null}: это не порог и ломает drift.
+    const cond = ex && ['>', '>=', '<', '<=', '=='].includes(ex.expr) &&
+      ex.right && ex.right.expr === 'number' ? {op: ex.expr, value: ex.right.value} : null;
     return {
       title: sanitizeText(d.title),
       priority: d.priority,

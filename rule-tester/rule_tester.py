@@ -42,6 +42,8 @@ HARVESTED = DATA / "samples" / "harvested.json"
 REPORTS = DATA / "reports"
 NUMERIC_DEFAULT = {"win_event_id"}
 PLACEHOLDER = re.compile(r"<[^<>]*[А-Яа-яЁё][^<>]*>")
+# Пробел после '<' отсекает shell-перенаправления вроде '< /dev/null >'.
+ANY_PLACEHOLDER = re.compile(r"<[^\s<>][^<>]*>")
 
 
 # ---------------------------------------------------------------- правила
@@ -102,23 +104,80 @@ def load_live_rules(gl):
     return out
 
 
-def diff_catalog(file_rules, live_rules):
-    """Сравнивает каталог репозитория (detections-source.json) с живыми определениями событий Graylog.
-    Возвращает список расхождений: [{'title','kind','detail'}]. Ничего не меняет ни там, ни там —
-    это именно сверка, чтобы расхождение (как с переименованием полей пайплайном 2026-11-02) было
-    видно сразу, а не только когда правило тихо перестанет находить события."""
+def template_match(template, actual):
+    """Совпадает ли развёрнутое значение с обезличенным шаблоном.
+
+    Подменяются только явные placeholders; весь остальной текст должен совпасть полностью.
+    Поэтому дополнительное условие в live-запросе не скрывается за наличием белого списка.
+    """
+    patterns = {
+        "<белый список>": r".+?",
+        "<IP>": r"\d{1,3}(?:\.\d{1,3}){3}",
+        "<MAC>": r"[0-9a-fA-F]{2}(?::[0-9a-fA-F]{2}){5}",
+        "<отпечаток>": r"[A-Za-z0-9+/=]+",
+        "<домен>": r"[A-Za-z0-9_-]+(?:\\?\.[A-Za-z0-9_-]+)+",
+        "<хост>": r"[A-Za-z0-9_-]+",
+    }
+    pos = 0
+    parts = []
+    for match in ANY_PLACEHOLDER.finditer(template):
+        parts.append(re.escape(template[pos:match.start()]))
+        parts.append(patterns.get(match.group(0), r"[^<>]+?"))
+        pos = match.end()
+    parts.append(re.escape(template[pos:]))
+    return re.fullmatch("".join(parts), actual, flags=re.DOTALL) is not None
+
+
+def matched_rule_pairs(file_rules, live_rules):
+    """Сопоставляет точные названия и однозначные пары «шаблон <хост> ↔ экземпляр»."""
     f = {r["title"]: r for r in file_rules}
     live = {r["title"]: r for r in live_rules}
+    pairs = [(f[t], live[t], False) for t in sorted(set(f) & set(live))]
+    file_left = set(f) - set(live)
+    live_left = set(live) - set(f)
+    for title in sorted(list(file_left)):
+        if not ANY_PLACEHOLDER.search(title):
+            continue
+        candidates = [t for t in live_left if template_match(title, t)]
+        if len(candidates) == 1:
+            actual = candidates[0]
+            pairs.append((f[title], live[actual], True))
+            file_left.remove(title)
+            live_left.remove(actual)
+    return pairs, file_left, live_left
+
+
+def expected_substitutions(file_rules, live_rules):
+    """Ожидаемые отличия обезличенного каталога от развёрнутой конфигурации."""
+    pairs, _, _ = matched_rule_pairs(file_rules, live_rules)
+    expected = []
+    for fr, lr, title_is_template in pairs:
+        kinds = []
+        if title_is_template:
+            kinds.append("экземпляр шаблона")
+        if fr["query"].strip() != lr["query"].strip() and template_match(fr["query"].strip(), lr["query"].strip()):
+            kinds.append("значение placeholder")
+        if kinds:
+            expected.append({"catalog_title": fr["title"], "graylog_title": lr["title"],
+                             "kinds": kinds})
+    return expected
+
+
+def diff_catalog(file_rules, live_rules):
+    """Сравнивает каталог репозитория с Graylog, учитывая только валидные подстановки.
+    Ничего не меняет ни там, ни там. Ожидаемые placeholders отдельно возвращает
+    expected_substitutions(), а не смешивает их с настоящими расхождениями."""
+    pairs, file_left, live_left = matched_rule_pairs(file_rules, live_rules)
     out = []
-    for t in sorted(set(f) - set(live)):
+    for t in sorted(file_left):
         out.append({"title": t, "kind": "нет в Graylog",
                     "detail": "правило есть в каталоге репозитория, но не найдено среди живых определений событий"})
-    for t in sorted(set(live) - set(f)):
+    for t in sorted(live_left):
         out.append({"title": t, "kind": "нет в каталоге",
                     "detail": "правило есть в Graylog, но не найдено в detections-source.json"})
-    for t in sorted(set(f) & set(live)):
-        fr, lr = f[t], live[t]
-        if fr["query"].strip() != lr["query"].strip():
+    for fr, lr, title_is_template in pairs:
+        t = fr["title"] if not title_is_template else "%s ↔ %s" % (fr["title"], lr["title"])
+        if not template_match(fr["query"].strip(), lr["query"].strip()):
             out.append({"title": t, "kind": "запрос отличается",
                         "detail": "каталог: %s | Graylog: %s" % (fr["query"][:250], lr["query"][:250])})
         if sorted(fr.get("group_by") or []) != sorted(lr.get("group_by") or []):
@@ -847,17 +906,23 @@ def cmd_drift(args):
     file_rules = load_file_rules()
     live_rules = load_live_rules(gl)
     diffs = diff_catalog(file_rules, live_rules)
+    expected = expected_substitutions(file_rules, live_rules)
     run = run_id()
-    log("Запуск %s: сверка каталога репозитория с живым Graylog. Правил в каталоге: %d, в Graylog: %d." % (
-        run, len(file_rules), len(live_rules)))
+    log("Запуск %s: сверка каталога репозитория с живым Graylog. Правил в каталоге: %d, в Graylog: %d; ожидаемых подстановок: %d." % (
+        run, len(file_rules), len(live_rules), len(expected)))
     rows = []
     for d in diffs:
         rows.append({"rule": d["title"], "status": "РАСХОЖДЕНИЕ", "detail": "%s: %s" % (d["kind"], d["detail"]),
                     "query": "", "platform": platform_of(d["title"]), "priority": None, "samples": []})
         log("  %-13s %s" % ("РАСХОЖДЕНИЕ", d["title"][:90]))
         log("      %s: %s" % (d["kind"], d["detail"][:200]))
-    summary = "правил в каталоге %d, в Graylog %d, расхождений %d" % (len(file_rules), len(live_rules), len(diffs))
-    path = write_report(run, "drift", rows, summary, {"source": "сверка каталога репозитория с Graylog"})
+    summary = "правил в каталоге %d, в Graylog %d, расхождений %d, ожидаемых подстановок %d" % (
+        len(file_rules), len(live_rules), len(diffs), len(expected))
+    path = write_report(run, "drift", rows, summary, {
+        "source": "сверка каталога репозитория с Graylog",
+        "expected_substitutions": len(expected),
+        "expected": expected,
+    })
     log("\n" + summary + "\nОтчёт: " + str(path))
     return 1 if diffs else 0
 

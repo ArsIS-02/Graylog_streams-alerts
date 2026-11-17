@@ -1,5 +1,5 @@
 {
- "generated": "2026-11-11",
+ "generated": "2026-11-17",
  "source": "Graylog 7.2.1",
  "definitions": [
   {
@@ -1435,7 +1435,7 @@
    ],
    "state": "ENABLED",
    "description": "Конфигурация роутера сохранена (StartupConfig: configuration saved). Событие редкое: сверьте, что это ваша правка.",
-   "query": "source:\"Keenetic-7625\" AND message:\"StartupConfig\" AND message:\"configuration saved\"",
+   "query": "source:\"Keenetic-7625\" AND message:\"StartupConfig\" AND message:\"configuration saved\" AND NOT kn_autosave:true",
    "group_by": [],
    "condition": null,
    "aggregated": false,
@@ -2301,10 +2301,7 @@
    "group_by": [
     "source"
    ],
-   "condition": {
-    "op": "&&",
-    "value": null
-   },
+   "condition": null,
    "aggregated": true,
    "window_min": 15.0,
    "grace_min": 5.0,
@@ -2995,7 +2992,7 @@
    ],
    "state": "ENABLED",
    "description": "Запись в ключ CurrentVersion\\Run (Sysmon 13) не известным приложением. Классический способ закрепления.",
-   "query": "win_event_id:13 AND message:\"CurrentVersion\\\\Run\" AND NOT win_image:(\"C:\\\\Program Files\\\\Yandex\\\\YandexBrowser\\\\Application\\\\browser.exe\" OR \"C:\\\\Program Files\\\\CCleaner\\\\CCleaner64.exe\" OR \"C:\\\\ProgramData\\\\Wargaming.net\\\\GameCenter\\\\wgc.exe\" OR \"C:\\\\Program Files (x86)\\\\Microsoft\\\\Edge\\\\Application\\\\msedge.exe\")",
+   "query": "win_event_id:13 AND message:\"CurrentVersion\\\\Run\" AND NOT win_image:(\"C:\\\\Program Files\\\\Yandex\\\\YandexBrowser\\\\Application\\\\browser.exe\" OR \"C:\\\\Program Files\\\\CCleaner\\\\CCleaner64.exe\" OR \"C:\\\\ProgramData\\\\Wargaming.net\\\\GameCenter\\\\wgc.exe\" OR \"C:\\\\Program Files (x86)\\\\Microsoft\\\\Edge\\\\Application\\\\msedge.exe\" OR \"C:\\\\Program Files (x86)\\\\VanyaVPN\\\\VanyaVPN.exe\")",
    "group_by": [],
    "condition": null,
    "aggregated": false,
@@ -3189,7 +3186,7 @@
    ],
    "state": "ENABLED",
    "description": "Процесс открыл память lsass.exe (Sysmon 10). Типичный признак кражи учётных данных (mimikatz, procdump).",
-   "query": "win_event_id:10 AND message:\"lsass.exe\" AND NOT winlogbeat_winlog_event_data_SourceImage:(\"C:\\\\WINDOWS\\\\system32\\\\svchost.exe\" OR \"C:\\\\Windows\\\\InfraxAgent.exe\" OR \"C:\\\\WINDOWS\\\\system32\\\\wbem\\\\wmiprvse.exe\" OR \"C:\\\\WINDOWS\\\\system32\\\\tasklist.exe\" OR \"C:\\\\Program Files\\\\Zabbix Agent\\\\zabbix_agentd.exe\" OR \"C:\\\\Program Files (x86)\\\\ossec-agent\\\\wazuh-agent.exe\" OR \"C:\\\\Program Files\\\\CCleaner\\\\CCleaner64.exe\" OR \"C:\\\\Program Files (x86)\\\\Microsoft\\\\EdgeUpdate\\\\MicrosoftEdgeUpdate.exe\") AND NOT message:\"Kaspersky Lab\" AND NOT message:(<белый список>) AND NOT winlogbeat_winlog_event_data_GrantedAccess:(0x1000 OR 0x1400 OR 0x100000 OR 0x101000)",
+   "query": "win_event_id:10 AND winlogbeat_winlog_event_data_TargetImage:/.*lsass\\.exe/ AND NOT winlogbeat_winlog_event_data_SourceImage:(\"C:\\\\WINDOWS\\\\system32\\\\svchost.exe\" OR \"C:\\\\Windows\\\\InfraxAgent.exe\" OR \"C:\\\\WINDOWS\\\\system32\\\\wbem\\\\wmiprvse.exe\" OR \"C:\\\\WINDOWS\\\\system32\\\\tasklist.exe\" OR \"C:\\\\Program Files\\\\Zabbix Agent\\\\zabbix_agentd.exe\" OR \"C:\\\\Program Files (x86)\\\\ossec-agent\\\\wazuh-agent.exe\" OR \"C:\\\\Program Files\\\\CCleaner\\\\CCleaner64.exe\" OR \"C:\\\\Program Files (x86)\\\\Microsoft\\\\EdgeUpdate\\\\MicrosoftEdgeUpdate.exe\") AND NOT message:\"Kaspersky Lab\" AND NOT message:(<белый список>) AND NOT winlogbeat_winlog_event_data_GrantedAccess:(0x1000 OR 0x1400 OR 0x100000 OR 0x101000)",
    "group_by": [],
    "condition": null,
    "aggregated": false,
@@ -3557,7 +3554,7 @@
    ],
    "state": "ENABLED",
    "description": "Журнал Security (1102) или System (104) очищен. Почти всегда признак заметания следов.",
-   "query": "win_event_id:(1102 OR 104)",
+   "query": "(win_event_id:1102 AND win_channel:Security) OR (win_event_id:104 AND win_channel:System)",
    "group_by": [],
    "condition": null,
    "aggregated": false,
@@ -3636,10 +3633,7 @@
    "group_by": [
     "winlogbeat_winlog_event_data_IpAddress"
    ],
-   "condition": {
-    "op": "&&",
-    "value": null
-   },
+   "condition": null,
    "aggregated": true,
    "window_min": 15.0,
    "grace_min": 5.0,
@@ -3840,7 +3834,7 @@
    ],
    "state": "ENABLED",
    "description": "5 и более запусков net, whoami, nltest, systeminfo, quser, arp на одном хосте за 5 минут — типичная разведка после проникновения.",
-   "query": "win_event_id:1 AND message:(\"whoami.exe\" OR \"nltest.exe\" OR \"net.exe\" OR \"net1.exe\" OR \"systeminfo.exe\" OR \"quser.exe\" OR \"arp.exe\")",
+   "query": "win_event_id:1 AND message:(\"whoami.exe\" OR \"nltest.exe\" OR \"net.exe\" OR \"net1.exe\" OR \"systeminfo.exe\" OR \"quser.exe\" OR \"arp.exe\") AND NOT message:ossec-agent",
    "group_by": [
     "source"
    ],
@@ -4236,7 +4230,7 @@
    ],
    "state": "ENABLED",
    "description": "LaunchAgent/LaunchDaemon или другой элемент автозагрузки создан менее суток назад (кроме служб com.homelab.bzt-*). Классический способ закрепления.",
-   "query": "mac_bz_event_type:AsepInfo AND asep_file_age:<86400 AND NOT asep_file_path:\\/Library\\/LaunchDaemons\\/com.homelab.bzt*",
+   "query": "mac_bz_event_type:AsepInfo AND asep_file_age:<86400 AND NOT asep_file_path:\\/Library\\/LaunchDaemons\\/com.homelab.bzt* AND NOT asep_file_path:*\\/Library\\/LaunchAgents\\/sh.brew.beszel-agent.plist",
    "group_by": [],
    "condition": null,
    "aggregated": false,
@@ -4673,7 +4667,7 @@
    ],
    "state": "ENABLED",
    "description": "В командной строке процесса есть утилита удалённого доступа или туннелирования (ngrok, cloudflared, AnyDesk, TeamViewer, RustDesk, chisel, tailscale, zerotier, frpc).",
-   "query": "log_type:macos_osquery AND name:es_process_events AND columns_cmdline:/.*([nN][gG][rR][oO][kK]|[cC][lL][oO][uU][dD][fF][lL][aA][rR][eE][dD]|[aA][nN][yY][dD][eE][sS][kK]|[tT][eE][aA][mM][vV][iI][eE][wW][eE][rR]|[rR][uU][sS][tT][dD][eE][sS][kK]|[cC][hH][iI][sS][eE][lL]|[tT][aA][iI][lL][sS][cC][aA][lL][eE]|[zZ][eE][rR][oO][tT][iI][eE][rR]|[fF][rR][pP][cC]).*/",
+   "query": "log_type:macos_osquery AND name:es_process_events AND columns_path:/.*\\/([nN][gG][rR][oO][kK]|[cC][lL][oO][uU][dD][fF][lL][aA][rR][eE][dD]|[aA][nN][yY][dD][eE][sS][kK]|[tT][eE][aA][mM][vV][iI][eE][wW][eE][rR]|[rR][uU][sS][tT][dD][eE][sS][kK]|[cC][hH][iI][sS][eE][lL]|[tT][aA][iI][lL][sS][cC][aA][lL][eE][dD]?|[zZ][eE][rR][oO][tT][iI][eE][rR][^\\/]*|[fF][rR][pP][cC])/",
    "group_by": [],
    "condition": null,
    "aggregated": false,
@@ -4819,7 +4813,7 @@
    ],
    "state": "ENABLED",
    "description": "В командной строке /dev/tcp, pty.spawn или socket.socket — признаки reverse shell.",
-   "query": "name:es_process_events AND message:(\"/dev/tcp\" OR \"pty.spawn\" OR \"socket.socket\") AND NOT message:\"/dev/tcp/<IP>\"",
+   "query": "name:es_process_events AND message:(\"/dev/tcp\" OR \"pty.spawn\" OR \"socket.socket\") AND NOT message:\"/dev/tcp/<IP>\" AND NOT message:\"Documents/kimi/tasks\"",
    "group_by": [],
    "condition": null,
    "aggregated": false,
@@ -4862,7 +4856,7 @@
    ],
    "state": "ENABLED",
    "description": "Запрошено отключение защиты целостности системы (SIP).",
-   "query": "log_type:macos_osquery AND name:es_process_events AND columns_cmdline:/.*csrutil[ ]+(disable|authenticated-root[ ]+disable).*/",
+   "query": "log_type:macos_osquery AND name:es_process_events AND columns_cmdline:/.*csrutil[ ]+(disable|authenticated-root[ ]+disable).*/ AND NOT columns_cmdline:/.*Documents\\/kimi\\/tasks.*/",
    "group_by": [],
    "condition": null,
    "aggregated": false,
@@ -4884,7 +4878,7 @@
    ],
    "state": "ENABLED",
    "description": "Попытка отключить SIP (csrutil disable) или Gatekeeper (spctl --master-disable). Резко снижает защищённость системы.",
-   "query": "name:es_process_events AND ((message:\"spctl\" AND message:(\"master-disable\" OR \"global-disable\")) OR (message:\"csrutil\" AND message:\"disable\"))",
+   "query": "name:es_process_events AND ((message:\"spctl\" AND message:(\"master-disable\" OR \"global-disable\")) OR (message:\"csrutil\" AND message:\"disable\")) AND NOT message:\"Documents/kimi/tasks\"",
    "group_by": [],
    "condition": null,
    "aggregated": false,
@@ -4976,7 +4970,7 @@
    ],
    "state": "ENABLED",
    "description": "scp или rsync на user@host с точкой в имени, а также nc, ncat, socat без -l, если адрес не из частных сетей и не в <домен>.",
-   "query": "name:es_process_events AND ((columns_cmdline:/(.*[ \\/])?(scp|rsync)( .*)? [^ ]*@[^ ]*[.][^ ]*:.*/) OR (columns_cmdline:/(.*[ \\/])?(nc|ncat|socat)( .*)?/ AND NOT columns_cmdline:/.* -l .*/)) AND NOT columns_cmdline:/.*(--server|192\\.168\\.|10\\.|172\\.(1[6-9]|2[0-9]|3[01])\\.|localhost|127\\.0\\.0\\.1|<домен>).*/",
+   "query": "name:es_process_events AND columns_path:/.*\\/(scp|rsync|nc|ncat|socat)/ AND ((columns_cmdline:/(.*[ \\/])?(scp|rsync)( .*)? [^ ]*@[^ ]*[.][^ ]*:.*/) OR (columns_cmdline:/(.*[ \\/])?(nc|ncat|socat)( .*)?/ AND NOT columns_cmdline:/.* -l .*/)) AND NOT columns_cmdline:/.*(--server|192\\.168\\.|10\\.|172\\.(1[6-9]|2[0-9]|3[01])\\.|localhost|127\\.0\\.0\\.1|<домен>).*/",
    "group_by": [],
    "condition": null,
    "aggregated": false,
@@ -5040,7 +5034,7 @@
    ],
    "state": "ENABLED",
    "description": "По USB подключено мобильное устройство не Apple (isApple N). Возможна попытка первоначального доступа.",
-   "query": "log_type:macos_wifi_usb AND message:(hostNotificationUSBDeviceInserted AND \"isApple N\")",
+   "query": "log_type:macos_wifi_usb AND message:(hostNotificationUSBDeviceInserted AND \"isApple N\") AND NOT message:(\"EXTERNAL_USB\" OR \"USB2.0 HUB\" OR \"StoreJet Transcend\" OR \"ExternaI\")",
    "group_by": [],
    "condition": null,
    "aggregated": false,
@@ -5131,7 +5125,7 @@
    ],
    "state": "ENABLED",
    "description": "Рекурсивный поиск слов password, secret, token, id_rsa по домашней папке или всему диску (grep -r, rg, find). Запуски через ssh с BatchMode (автоматизация) и поиск внутри рабочих каталогов проектов исключены.",
-   "query": "log_type:macos_osquery AND name:es_process_events AND columns_cmdline:/.*(grep|rg|find)[ ]+(-[a-zA-Z]*[rR][a-zA-Z]*[ ]+)+.*([pP][aA][sS][sS][wW][oO][rR][dD]|[pP][aA][sS][sS][wW][dD]|[sS][eE][cC][rR][eE][tT]|[cC][rR][eE][dD][eE][nN][tT][iI][aA][lL]|[aA][pP][iI][kK][eE][yY]|[iI][dD]_[rR][sS][aA]|[kK][dD][bB][xX]).*[ ](\\/|~|[$]HOME|\\/Users[^ ]*)/ AND NOT columns_cmdline:/.*BatchMode.*/",
+   "query": "log_type:macos_osquery AND name:es_process_events AND columns_path:/.*\\/(grep|egrep|rg|find|locate|mdfind)/ AND columns_cmdline:/.*(grep|rg|find)[ ]+(-[a-zA-Z]*[rR][a-zA-Z]*[ ]+)+.*([pP][aA][sS][sS][wW][oO][rR][dD]|[pP][aA][sS][sS][wW][dD]|[sS][eE][cC][rR][eE][tT]|[cC][rR][eE][dD][eE][nN][tT][iI][aA][lL]|[aA][pP][iI][kK][eE][yY]|[iI][dD]_[rR][sS][aA]|[kK][dD][bB][xX]).*[ ](\\/|~|[$]HOME|\\/Users[^ ]*)/ AND NOT columns_cmdline:/.*BatchMode.*/",
    "group_by": [],
    "condition": null,
    "aggregated": false,
@@ -5152,7 +5146,7 @@
    ],
    "state": "ENABLED",
    "description": "В командной строке процесса есть сканер сети (nmap, masscan, arp-scan, netdiscover, nbtscan, fping, zmap).",
-   "query": "log_type:macos_osquery AND name:es_process_events AND columns_cmdline:/.*([nN][mM][aA][pP]|[mM][aA][sS][sS][cC][aA][nN]|[aA][rR][pP]-[sS][cC][aA][nN]|[nN][eE][tT][dD][iI][sS][cC][oO][vV][eE][rR]|[nN][bB][tT][sS][cC][aA][nN]|[fF][pP][iI][nN][gG]|[zZ][mM][aA][pP]).*/",
+   "query": "log_type:macos_osquery AND name:es_process_events AND columns_path:/.*\\/([nN][mM][aA][pP]|[mM][aA][sS][sS][cC][aA][nN]|[aA][rR][pP]-[sS][cC][aA][nN]|[nN][eE][tT][dD][iI][sS][cC][oO][vV][eE][rR]|[nN][bB][tT][sS][cC][aA][nN]|[fF][pP][iI][nN][gG]|[zZ][mM][aA][pP])/",
    "group_by": [],
    "condition": null,
    "aggregated": false,
@@ -5216,7 +5210,7 @@
    ],
    "state": "ENABLED",
    "description": "Отключён Gatekeeper или снят атрибут карантина с файла вне /Applications. Установка приложений в /Applications и hostdeck-agent исключены.",
-   "query": "log_type:macos_osquery AND name:es_process_events AND columns_cmdline:/.*(spctl[ ]+--(master|global)-disable|xattr[ ]+.*-[a-z]*[dc].*)/ AND NOT columns_cmdline:/.*(\\/Applications\\/|hostdeck-agent).*/ AND columns_cmdline:/.*(spctl|quarantine|xattr[ ]+-[a-z]*c).*/",
+   "query": "log_type:macos_osquery AND name:es_process_events AND columns_path:(\"\\/usr\\/bin\\/xattr\" OR \"\\/usr\\/sbin\\/spctl\") AND columns_cmdline:/.*(spctl[ ]+--(master|global)-disable|xattr[ ]+.*-[a-z]*[dc].*)/ AND NOT columns_cmdline:/.*(\\/Applications\\/|hostdeck-agent|[.]kimi-work|daimon-bundle).*/ AND columns_cmdline:/.*(spctl|quarantine|xattr[ ]+-[a-z]*c).*/",
    "group_by": [],
    "condition": null,
    "aggregated": false,
@@ -5389,7 +5383,7 @@
    ],
    "state": "ENABLED",
    "description": "В командной строке процесса есть утилита выгрузки в облако (rclone, MEGAsync, MEGAcmd).",
-   "query": "log_type:macos_osquery AND name:es_process_events AND columns_cmdline:/.*([rR][cC][lL][oO][nN][eE]|[mM][eE][gG][aA][sS][yY][nN][cC]|[mM][eE][gG][aA][cC][mM][dD]).*/",
+   "query": "log_type:macos_osquery AND name:es_process_events AND columns_path:/.*\\/([rR][cC][lL][oO][nN][eE]|[mM][eE][gG][aA][sS][yY][nN][cC]|[mM][eE][gG][aA][cC][mM][dD])/",
    "group_by": [],
    "condition": null,
    "aggregated": false,
@@ -5901,6 +5895,140 @@
    "aggregated": true,
    "window_min": 10.0,
    "grace_min": 60.0,
+   "tactic": null,
+   "technique": null,
+   "techniques": null
+  },
+  {
+   "title": "WAZUH - Важный алерт (уровень 9-11)",
+   "priority": 2,
+   "streams": [
+    "Wazuh"
+   ],
+   "notifications": [
+    "GLPI Ticket (TicketBridge)"
+   ],
+   "state": "ENABLED",
+   "description": "Алерт Wazuh с уровнем 9-11 (входы в нерабочее время, изменения учёток и т.п.). В IRIS передаётся через TicketBridge с приоритетом Medium.",
+   "query": "tool:wazuh AND rule_level:[9 TO 11]",
+   "group_by": [
+    "wazuh_agent",
+    "rule_id",
+    "rule_level",
+    "wazuh_rule_desc",
+    "source"
+   ],
+   "condition": {
+    "op": ">=",
+    "value": 1.0
+   },
+   "aggregated": true,
+   "window_min": 1.0,
+   "grace_min": 60.0,
+   "tactic": null,
+   "technique": null,
+   "techniques": null
+  },
+  {
+   "title": "WAZUH - Критичный алерт (уровень 12+)",
+   "priority": 3,
+   "streams": [
+    "Wazuh"
+   ],
+   "notifications": [
+    "GLPI Ticket (TicketBridge)"
+   ],
+   "state": "ENABLED",
+   "description": "Алерт Wazuh с уровнем 12-15. Правило 40101 (логон системной учётки) исключено как шумное. В IRIS передаётся через TicketBridge с приоритетом High.",
+   "query": "tool:wazuh AND rule_level:[12 TO 15] AND NOT rule_id:40101",
+   "group_by": [
+    "wazuh_agent",
+    "rule_id",
+    "rule_level",
+    "wazuh_rule_desc",
+    "source"
+   ],
+   "condition": {
+    "op": ">=",
+    "value": 1.0
+   },
+   "aggregated": true,
+   "window_min": 1.0,
+   "grace_min": 60.0,
+   "tactic": null,
+   "technique": null,
+   "techniques": null
+  },
+  {
+   "title": "ZABBIX - Проблема на узле или сервисе",
+   "priority": 2,
+   "streams": [
+    "Zabbix"
+   ],
+   "notifications": [
+    "GLPI Ticket (TicketBridge)"
+   ],
+   "state": "ENABLED",
+   "description": "Событие PROBLEM из Zabbix. В DFIR-IRIS передаётся через существующий TicketBridge; повторы того же zabbix_event_id не создают новый алерт. RESOLVED этим правилом не обрабатывается.",
+   "query": "_exists_:zabbix_event_id AND zabbix_event_status:PROBLEM",
+   "group_by": [
+    "zabbix_event_id",
+    "source",
+    "zabbix_event_status",
+    "zabbix_trigger_id",
+    "zabbix_severity",
+    "zabbix_nseverity",
+    "zabbix_trigger_description",
+    "zabbix_event_duration",
+    "zabbix_tags_json",
+    "zabbix_url",
+    "zabbix_host_conn",
+    "zabbix_trigger_name"
+   ],
+   "condition": {
+    "op": ">=",
+    "value": 1.0
+   },
+   "aggregated": true,
+   "window_min": 1.0,
+   "grace_min": 0.0,
+   "tactic": null,
+   "technique": null,
+   "techniques": null
+  },
+  {
+   "title": "ZABBIX - Проблема устранена (RESOLVED)",
+   "priority": 1,
+   "streams": [
+    "Zabbix"
+   ],
+   "notifications": [
+    "GLPI Ticket (TicketBridge)"
+   ],
+   "state": "ENABLED",
+   "description": "Событие RESOLVED из Zabbix. TicketBridge находит ранее созданный алерт IRIS по zabbix_event_id и переводит его в статус Closed. Новый алерт и тикет GLPI не создаются.",
+   "query": "_exists_:zabbix_event_id AND zabbix_event_status:RESOLVED",
+   "group_by": [
+    "zabbix_event_id",
+    "source",
+    "zabbix_event_status",
+    "zabbix_trigger_id",
+    "zabbix_severity",
+    "zabbix_nseverity",
+    "zabbix_trigger_description",
+    "zabbix_event_duration",
+    "zabbix_tags_json",
+    "zabbix_url",
+    "zabbix_host_conn",
+    "zabbix_trigger_name"
+   ],
+   "condition": {
+    "op": ">=",
+    "value": 1.0
+   },
+   "aggregated": true,
+   "window_min": 1.0,
+   "grace_min": 0.0,
    "tactic": null,
    "technique": null,
    "techniques": null
