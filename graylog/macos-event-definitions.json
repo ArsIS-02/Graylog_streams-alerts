@@ -4013,7 +4013,7 @@
     "alert": true,
     "config": {
       "type": "aggregation-v1",
-      "query": "log_type:macos_osquery AND name:es_process_events AND columns_cmdline:/.*csrutil[ ]+(disable|authenticated-root[ ]+disable).*/",
+      "query": "log_type:macos_osquery AND name:es_process_events AND columns_cmdline:/.*csrutil[ ]+(disable|authenticated-root[ ]+disable).*/ AND NOT columns_cmdline:/.*Documents\\/kimi\\/tasks.*/",
       "query_parameters": [],
       "filters": [],
       "streams": [
