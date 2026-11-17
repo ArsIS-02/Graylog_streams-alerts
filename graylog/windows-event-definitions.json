@@ -6704,7 +6704,7 @@
     "alert": true,
     "config": {
       "type": "aggregation-v1",
-      "query": "win_event_id:1 AND message:(\"whoami.exe\" OR \"nltest.exe\" OR \"net.exe\" OR \"net1.exe\" OR \"systeminfo.exe\" OR \"quser.exe\" OR \"arp.exe\")",
+      "query": "win_event_id:1 AND message:(\"whoami.exe\" OR \"nltest.exe\" OR \"net.exe\" OR \"net1.exe\" OR \"systeminfo.exe\" OR \"quser.exe\" OR \"arp.exe\") AND NOT message:ossec-agent",
       "query_parameters": [],
       "filters": [],
       "streams": [

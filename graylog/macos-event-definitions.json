@@ -6002,7 +6002,7 @@
     "alert": true,
     "config": {
       "type": "aggregation-v1",
-      "query": "log_type:macos_osquery AND name:es_process_events AND columns_cmdline:/.*(spctl[ ]+--(master|global)-disable|xattr[ ]+.*-[a-z]*[dc].*)/ AND NOT columns_cmdline:/.*(\\/Applications\\/|hostdeck-agent).*/ AND columns_cmdline:/.*(spctl|quarantine|xattr[ ]+-[a-z]*c).*/",
+      "query": "log_type:macos_osquery AND name:es_process_events AND columns_path:(\"\\/usr\\/bin\\/xattr\" OR \"\\/usr\\/sbin\\/spctl\") AND columns_cmdline:/.*(spctl[ ]+--(master|global)-disable|xattr[ ]+.*-[a-z]*[dc].*)/ AND NOT columns_cmdline:/.*(\\/Applications\\/|hostdeck-agent|[.]kimi-work|daimon-bundle).*/ AND columns_cmdline:/.*(spctl|quarantine|xattr[ ]+-[a-z]*c).*/",
       "query_parameters": [],
       "filters": [],
       "streams": [
