@@ -3763,7 +3763,7 @@
     "alert": true,
     "config": {
       "type": "aggregation-v1",
-      "query": "name:es_process_events AND message:(\"/dev/tcp\" OR \"pty.spawn\" OR \"socket.socket\") AND NOT message:\"/dev/tcp/192.168.1.137\"",
+      "query": "name:es_process_events AND message:(\"/dev/tcp\" OR \"pty.spawn\" OR \"socket.socket\") AND NOT message:\"/dev/tcp/192.168.1.137\" AND NOT message:\"Documents/kimi/tasks\"",
       "query_parameters": [],
       "filters": [],
       "streams": [
@@ -4127,7 +4127,7 @@
     "alert": true,
     "config": {
       "type": "aggregation-v1",
-      "query": "name:es_process_events AND ((message:\"spctl\" AND message:(\"master-disable\" OR \"global-disable\")) OR (message:\"csrutil\" AND message:\"disable\"))",
+      "query": "name:es_process_events AND ((message:\"spctl\" AND message:(\"master-disable\" OR \"global-disable\")) OR (message:\"csrutil\" AND message:\"disable\")) AND NOT message:\"Documents/kimi/tasks\"",
       "query_parameters": [],
       "filters": [],
       "streams": [
@@ -4669,7 +4669,7 @@
     "alert": true,
     "config": {
       "type": "aggregation-v1",
-      "query": "name:es_process_events AND ((columns_cmdline:/(.*[ \\/])?(scp|rsync)( .*)? [^ ]*@[^ ]*[.][^ ]*:.*/) OR (columns_cmdline:/(.*[ \\/])?(nc|ncat|socat)( .*)?/ AND NOT columns_cmdline:/.* -l .*/)) AND NOT columns_cmdline:/.*(--server|192\\.168\\.|10\\.|172\\.(1[6-9]|2[0-9]|3[01])\\.|localhost|127\\.0\\.0\\.1|monitoring\\.test).*/",
+      "query": "name:es_process_events AND columns_path:/.*\\/(scp|rsync|nc|ncat|socat)/ AND ((columns_cmdline:/(.*[ \\/])?(scp|rsync)( .*)? [^ ]*@[^ ]*[.][^ ]*:.*/) OR (columns_cmdline:/(.*[ \\/])?(nc|ncat|socat)( .*)?/ AND NOT columns_cmdline:/.* -l .*/)) AND NOT columns_cmdline:/.*(--server|192\\.168\\.|10\\.|172\\.(1[6-9]|2[0-9]|3[01])\\.|localhost|127\\.0\\.0\\.1|monitoring\\.test).*/",
       "query_parameters": [],
       "filters": [],
       "streams": [
@@ -5524,7 +5524,7 @@
     "alert": true,
     "config": {
       "type": "aggregation-v1",
-      "query": "log_type:macos_osquery AND name:es_process_events AND columns_cmdline:/.*(grep|rg|find)[ ]+(-[a-zA-Z]*[rR][a-zA-Z]*[ ]+)+.*([pP][aA][sS][sS][wW][oO][rR][dD]|[pP][aA][sS][sS][wW][dD]|[sS][eE][cC][rR][eE][tT]|[cC][rR][eE][dD][eE][nN][tT][iI][aA][lL]|[aA][pP][iI][kK][eE][yY]|[iI][dD]_[rR][sS][aA]|[kK][dD][bB][xX]).*[ ](\\/|~|[$]HOME|\\/Users[^ ]*)/ AND NOT columns_cmdline:/.*BatchMode.*/",
+      "query": "log_type:macos_osquery AND name:es_process_events AND columns_path:/.*\\/(grep|egrep|rg|find|locate|mdfind)/ AND columns_cmdline:/.*(grep|rg|find)[ ]+(-[a-zA-Z]*[rR][a-zA-Z]*[ ]+)+.*([pP][aA][sS][sS][wW][oO][rR][dD]|[pP][aA][sS][sS][wW][dD]|[sS][eE][cC][rR][eE][tT]|[cC][rR][eE][dD][eE][nN][tT][iI][aA][lL]|[aA][pP][iI][kK][eE][yY]|[iI][dD]_[rR][sS][aA]|[kK][dD][bB][xX]).*[ ](\\/|~|[$]HOME|\\/Users[^ ]*)/ AND NOT columns_cmdline:/.*BatchMode.*/",
       "query_parameters": [],
       "filters": [],
       "streams": [
