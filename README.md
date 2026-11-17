@@ -232,6 +232,7 @@ bash rule-tester/deploy/install.sh        # первый запуск созда
 | 29 | [IRIS: корреляция и скоринг алертов](docs/29-iris-correlation-scoring.md) | Дедупликация по связке «правило + актив» (практики SOAR Security Vision), веса правил с MITRE-множителем, автоэскалация в кейс при пороге скора, эндпоинт наблюдаемости /correlation/status |
 | 30 | [Подавление ночного шума: Wazuh lab-noise и аудит cmdline-матчей](docs/30-noise-tuning-wazuh-graylog.md) | Разбор флуда 5909 алертов (netavark, arp-scan, cron apache), правила 199006–199010 уровня 3 в группе lab-noise, аудит 268 определений Graylog: три macOS-правила переведены с подстроки cmdline на columns_path, найденные дубли и осознанно текстовые сигнатуры |
 | 31 | [Еженедельный аудит качества Graylog и итогов IRIS](docs/31-graylog-iris-quality-audit.md) | Отдельный read-only контур: `drift` действующих правил против GitHub, `fp-check` на недавнем корпусе, разрешения закрытых алертов IRIS, отчёт в HomeWiki и cron |
+| 32 | [Сквозной canary Graylog → TicketBridge → IRIS](docs/32-soc-canary.md) | Ежедневный тест с уникальным ID, задержками по стадиям, автозакрытием Legitimate и одним независимым инцидентом Zabbix при сбое |
 
 ### Дашборды
 
@@ -327,6 +328,7 @@ Graylog_streams-alerts/
 │   ├── 29-iris-correlation-scoring.md ← IRIS: корреляция и скоринг алертов, автоэскалация в кейс
 │   ├── 30-noise-tuning-wazuh-graylog.md ← подавление шума Wazuh (lab-noise), аудит cmdline-матчей Graylog
 │   ├── 31-graylog-iris-quality-audit.md ← еженедельный drift/fp-check и итоги закрытия IRIS
+│   ├── 32-soc-canary.md                 ← сквозной canary Graylog → TicketBridge → IRIS
 │   ├── troubleshooting.md             ← грабли и решения
 │   └── images/                        ← скриншоты и иллюстрации
 ├── graylog/

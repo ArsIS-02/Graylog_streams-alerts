@@ -800,5 +800,109 @@
       "low"
     ],
     "title": "HEALTH - Тишина: macOS (сутки)"
+  },
+  {
+    "alert": true,
+    "config": {
+      "type": "aggregation-v1",
+      "query": "soc_canary:true",
+      "query_parameters": [],
+      "filters": [],
+      "streams": [],
+      "stream_categories": [],
+      "group_by": [
+        "soc_canary_id"
+      ],
+      "series": [
+        {
+          "type": "count",
+          "id": "count-",
+          "field": null
+        }
+      ],
+      "conditions": {
+        "expression": {
+          "expr": ">=",
+          "left": {
+            "expr": "number-ref",
+            "ref": "count-"
+          },
+          "right": {
+            "expr": "number",
+            "value": 1.0
+          }
+        }
+      },
+      "search_within_ms": 120000,
+      "execute_every_ms": 60000,
+      "use_cron_scheduling": false,
+      "cron_expression": null,
+      "cron_timezone": null,
+      "event_limit": 10
+    },
+    "description": "Ежедневная контрольная проверка цепочки GELF → Graylog → TicketBridge → IRIS. События создаются только инструментом soc_canary.py. Успешный тест автоматически закрывает собственный алерт как Legitimate; GLPI-заявка для Low не создаётся.",
+    "field_spec": {
+      "event": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.message}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "host": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.source}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      },
+      "soc_canary_id": {
+        "data_type": "string",
+        "providers": [
+          {
+            "type": "template-v1",
+            "template": "${source.soc_canary_id}",
+            "require_values": false,
+            "exclude_empty_fields": true
+          }
+        ]
+      }
+    },
+    "key_spec": [
+      "soc_canary_id"
+    ],
+    "notification_settings": {
+      "grace_period_ms": 0,
+      "backlog_size": 1
+    },
+    "notifications": [
+      {
+        "notification_id": "6af1cf9b61b983feab6b8a3a",
+        "notification_parameters": null
+      }
+    ],
+    "priority": 1,
+    "storage": [
+      {
+        "type": "persist-to-streams-v1",
+        "streams": [
+          "000000000000000000000002"
+        ]
+      }
+    ],
+    "tags": [
+      "health",
+      "canary",
+      "low"
+    ],
+    "title": "HEALTH - SOC canary: сквозная проверка"
   }
 ]
