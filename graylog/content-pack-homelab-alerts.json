@@ -4571,7 +4571,7 @@
           "type": "aggregation-v1",
           "query": {
             "@type": "string",
-            "@value": "name:file_events AND (columns_action:CREATED OR columns_action:UPDATED OR columns_action:DELETED) AND (columns_category:launch_agents OR columns_category:launch_daemons) AND -columns_target_path:\"com.apple*\""
+            "@value": "name:file_events AND (columns_action:CREATED OR columns_action:UPDATED OR columns_action:DELETED) AND (columns_category:launch_agents OR columns_category:launch_daemons) AND -columns_target_path:\"com.apple*\" AND NOT columns_target_path:/.*com\\.microsoft\\.(autoupdate|update\\.agent|office\\.licensingV[23]\\.helper).*/"
           },
           "query_parameters": [],
           "filters": [],

@@ -680,7 +680,7 @@ audit_type:EXECVE AND a0:(insmod OR modprobe OR rmmod)
 **LNX - Загрузка модуля ядра**
 
 ```
-audit_type:SYSCALL AND key:(kernel_modules OR kernel_modules_config)
+audit_type:SYSCALL AND key:(kernel_modules OR kernel_modules_config) AND NOT (source:wazuh-homelab AND message:modprobe AND (auid:4294967295 OR message:"auid=4294967295"))
 ```
 
 **LNX - Закрепление через cron**
@@ -933,7 +933,7 @@ name:es_process_events AND columns_cmdline:/.*(sqlite3|cp|cat|strings|python3?|t
 **macOS - Новый/изменённый plist в автозагрузке**
 
 ```
-name:file_events AND (columns_action:CREATED OR columns_action:UPDATED OR columns_action:DELETED) AND (columns_category:launch_agents OR columns_category:launch_daemons) AND -columns_target_path:"com.apple*"
+name:file_events AND (columns_action:CREATED OR columns_action:UPDATED OR columns_action:DELETED) AND (columns_category:launch_agents OR columns_category:launch_daemons) AND -columns_target_path:"com.apple*" AND NOT columns_target_path:/.*com\.microsoft\.(autoupdate|update\.agent|office\.licensingV[23]\.helper).*/
 ```
 
 **macOS - Обратная оболочка (/dev/tcp, pty.spawn)**
@@ -1053,7 +1053,7 @@ name:es_process_events AND columns_cmdline:/.*(add-trusted-cert|trust-settings-i
 **macOS - Загрузка launchd-задания (load, bootstrap, submit)**
 
 ```
-name:es_process_events AND columns_cmdline:/.*launchctl (load|bootstrap|submit).*/ AND NOT columns_cmdline:/.*(com\.apple\.|hostdeck|org\.graylog|co\.elastic|beszel|homebrew|com\.homelab|logatlas).*/
+name:es_process_events AND columns_cmdline:/.*launchctl (load|bootstrap|submit).*/ AND NOT columns_cmdline:/.*(com\.apple\.|hostdeck|org\.graylog|co\.elastic|beszel|homebrew|com\.homelab|logatlas).*/ AND NOT columns_cmdline:/.*com\.microsoft\.(autoupdate|update\.agent|office\.licensingV[23]\.helper).*/
 ```
 
 **macOS - Загрузка расширения ядра**
@@ -1744,7 +1744,7 @@ audit AND PATH AND ("/etc/passwd" OR "/etc/shadow" OR "/etc/group" OR "/etc/gsha
 **AUDIT - Работа с модулями ядра**
 
 ```
-audit AND (insmod OR modprobe OR rmmod)
+audit AND (insmod OR modprobe OR rmmod) AND NOT (source:wazuh-homelab AND message:modprobe AND (auid:4294967295 OR message:"auid=4294967295"))
 ```
 
 **CANARY - Логин в ловушку**

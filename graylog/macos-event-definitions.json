@@ -2390,7 +2390,7 @@
     "alert": true,
     "config": {
       "type": "aggregation-v1",
-      "query": "name:es_process_events AND columns_cmdline:/.*launchctl (load|bootstrap|submit).*/ AND NOT columns_cmdline:/.*(com\\.apple\\.|hostdeck|org\\.graylog|co\\.elastic|beszel|homebrew|com\\.homelab|logatlas).*/",
+      "query": "name:es_process_events AND columns_cmdline:/.*launchctl (load|bootstrap|submit).*/ AND NOT columns_cmdline:/.*(com\\.apple\\.|hostdeck|org\\.graylog|co\\.elastic|beszel|homebrew|com\\.homelab|logatlas).*/ AND NOT columns_cmdline:/.*com\\.microsoft\\.(autoupdate|update\\.agent|office\\.licensingV[23]\\.helper).*/",
       "query_parameters": [],
       "filters": [],
       "streams": [
@@ -3646,7 +3646,7 @@
     "alert": true,
     "config": {
       "type": "aggregation-v1",
-      "query": "name:file_events AND (columns_action:CREATED OR columns_action:UPDATED OR columns_action:DELETED) AND (columns_category:launch_agents OR columns_category:launch_daemons) AND -columns_target_path:\"com.apple*\"",
+      "query": "name:file_events AND (columns_action:CREATED OR columns_action:UPDATED OR columns_action:DELETED) AND (columns_category:launch_agents OR columns_category:launch_daemons) AND -columns_target_path:\"com.apple*\" AND NOT columns_target_path:/.*com\\.microsoft\\.(autoupdate|update\\.agent|office\\.licensingV[23]\\.helper).*/",
       "query_parameters": [],
       "filters": [],
       "streams": [

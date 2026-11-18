@@ -319,7 +319,7 @@
     "alert": true,
     "config": {
       "type": "aggregation-v1",
-      "query": "audit AND (insmod OR modprobe OR rmmod)",
+      "query": "audit AND (insmod OR modprobe OR rmmod) AND NOT (source:wazuh-homelab AND message:modprobe AND (auid:4294967295 OR message:\"auid=4294967295\"))",
       "query_parameters": [],
       "filters": [],
       "streams": [
@@ -1517,7 +1517,7 @@
     "alert": true,
     "config": {
       "type": "aggregation-v1",
-      "query": "audit_type:SYSCALL AND key:(kernel_modules OR kernel_modules_config)",
+      "query": "audit_type:SYSCALL AND key:(kernel_modules OR kernel_modules_config) AND NOT (source:wazuh-homelab AND message:modprobe AND (auid:4294967295 OR message:\"auid=4294967295\"))",
       "query_parameters": [],
       "filters": [],
       "streams": [
