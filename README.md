@@ -234,6 +234,7 @@ bash rule-tester/deploy/install.sh        # первый запуск созда
 | 31 | [Еженедельный аудит качества Graylog и итогов IRIS](docs/31-graylog-iris-quality-audit.md) | Отдельный read-only контур: `drift` действующих правил против GitHub, `fp-check` на недавнем корпусе, разрешения закрытых алертов IRIS, отчёт в HomeWiki и cron |
 | 32 | [Сквозной canary Graylog → TicketBridge → IRIS](docs/32-soc-canary.md) | Ежедневный тест с уникальным ID, задержками по стадиям, автозакрытием Legitimate и одним независимым инцидентом Zabbix при сбое |
 | 33 | [IRIS: автоматический пакет доказательств](docs/33-iris-evidence-pack.md) | При эскалации кейс получает ZIP в Evidences: исходные события и контекст Graylog, активы, IOC, таймлайн, история обогащений, ссылки и SHA-256 manifest |
+| 34 | [Тюнинг контейнерных детекторов и maintenance-режим TicketBridge](docs/34-container-detectors-maintenance.md) | Ревизия «всплеска ошибок»: GELF level ≠ severity, warn-шум убран, caddy/blackbox вынесены в детекторы доступности (bb_target через pipeline); maintenance-режим TicketBridge (тишина в IRIS на время работ, маркер maintenance_suppressed), веса админских правил 80<100 — кейс со второго срабатывания |
 
 ### Дашборды
 
@@ -331,6 +332,7 @@ Graylog_streams-alerts/
 │   ├── 31-graylog-iris-quality-audit.md ← еженедельный drift/fp-check и итоги закрытия IRIS
 │   ├── 32-soc-canary.md                 ← сквозной canary Graylog → TicketBridge → IRIS
 │   ├── 33-iris-evidence-pack.md         ← IRIS: автоматический ZIP доказательств в Evidences
+│   ├── 34-container-detectors-maintenance.md ← тюнинг контейнерных детекторов, детекторы доступности, maintenance TicketBridge
 │   ├── troubleshooting.md             ← грабли и решения
 │   └── images/                        ← скриншоты и иллюстрации
 ├── graylog/

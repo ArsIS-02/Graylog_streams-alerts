@@ -1,5 +1,132 @@
 [
   {
+    "title": "Доступность: всплеск ошибок проб blackbox",
+    "description": "Больше 5 ошибок проб (Probe failed) за 5 минут по одной цели blackbox (поле bb_target). 18.11.",
+    "priority": 2,
+    "alert": true,
+    "config": {
+      "type": "aggregation-v1",
+      "query": "container_name:blackbox AND message:\"Probe failed\"",
+      "query_parameters": [],
+      "filters": [],
+      "streams": [
+        "<CONTAINERS_STREAM_ID>"
+      ],
+      "stream_categories": [],
+      "group_by": [
+        "bb_target"
+      ],
+      "series": [
+        {
+          "type": "count",
+          "id": "count-000",
+          "field": null
+        }
+      ],
+      "conditions": {
+        "expression": {
+          "expr": ">",
+          "left": {
+            "expr": "number-ref",
+            "ref": "count-000"
+          },
+          "right": {
+            "expr": "number",
+            "value": 5.0
+          }
+        }
+      },
+      "search_within_ms": 300000,
+      "execute_every_ms": 300000,
+      "use_cron_scheduling": false,
+      "cron_expression": null,
+      "cron_timezone": null,
+      "event_limit": 0
+    },
+    "field_spec": {},
+    "key_spec": [],
+    "notification_settings": {
+      "grace_period_ms": 0,
+      "backlog_size": 0
+    },
+    "notifications": [],
+    "storage": [
+      {
+        "type": "persist-to-streams-v1",
+        "streams": [
+          "000000000000000000000002"
+        ]
+      }
+    ],
+    "tags": [],
+    "tactics_techniques": []
+  },
+  {
+    "title": "Доступность: всплеск ошибок прокси caddy",
+    "description": "Больше 10 ошибок http.log.error за 5 минут от caddy (недоступность upstream: connection refused, i/o timeout). Следствие падения бэкендов — дополняет детектор blackbox. 18.11.",
+    "priority": 2,
+    "alert": true,
+    "config": {
+      "type": "aggregation-v1",
+      "query": "container_name:caddy AND message:\"http.log.error\"",
+      "query_parameters": [],
+      "filters": [],
+      "streams": [
+        "<CONTAINERS_STREAM_ID>"
+      ],
+      "stream_categories": [],
+      "group_by": [
+        "container_name"
+      ],
+      "series": [
+        {
+          "type": "count",
+          "id": "count-000",
+          "field": null
+        }
+      ],
+      "conditions": {
+        "expression": {
+          "expr": ">",
+          "left": {
+            "expr": "number-ref",
+            "ref": "count-000"
+          },
+          "right": {
+            "expr": "number",
+            "value": 10.0
+          }
+        }
+      },
+      "search_within_ms": 300000,
+      "execute_every_ms": 300000,
+      "use_cron_scheduling": false,
+      "cron_expression": null,
+      "cron_timezone": null,
+      "event_limit": 0
+    },
+    "field_spec": {},
+    "key_spec": [],
+    "notification_settings": {
+      "grace_period_ms": 0,
+      "backlog_size": 0
+    },
+    "notifications": [],
+    "storage": [
+      {
+        "type": "persist-to-streams-v1",
+        "streams": [
+          "000000000000000000000002"
+        ]
+      }
+    ],
+    "tags": [],
+    "tactics_techniques": []
+  },
+  {
+    "title": "Контейнеры: Grafana — неудачный вход (подбор пароля)",
+    "description": "Больше 5 неудачных входов в Grafana за 5 минут.\nMITRE ATT&CK. Тактики: Credential Access. Техники: T1110 Brute Force.",
+    "priority": 3,
     "alert": true,
     "config": {
       "type": "aggregation-v1",
@@ -7,7 +134,7 @@
       "query_parameters": [],
       "filters": [],
       "streams": [
-        "6ad43d3fcc18050c4f1fa113"
+        "<CONTAINERS_STREAM_ID>"
       ],
       "stream_categories": [],
       "group_by": [
@@ -40,7 +167,6 @@
       "cron_timezone": null,
       "event_limit": 0
     },
-    "description": "Больше 5 неудачных входов в Grafana за 5 минут.\nMITRE ATT&CK. Тактики: Credential Access. Техники: T1110 Brute Force.",
     "field_spec": {
       "mitre_tactic": {
         "data_type": "string",
@@ -81,17 +207,7 @@
       "grace_period_ms": 3600000,
       "backlog_size": 0
     },
-    "notifications": [
-      {
-        "notification_id": "6af1cf9b61b983feab6b8a3a",
-        "notification_parameters": null
-      },
-      {
-        "notification_id": "6ae6b2e9bb96dbe5087a9712",
-        "notification_parameters": null
-      }
-    ],
-    "priority": 3,
+    "notifications": [],
     "storage": [
       {
         "type": "persist-to-streams-v1",
@@ -101,9 +217,12 @@
       }
     ],
     "tags": [],
-    "title": "Контейнеры: Grafana — неудачный вход (подбор пароля)"
+    "tactics_techniques": []
   },
   {
+    "title": "Контейнеры: Loki — ошибки приёма",
+    "description": "Loki пишет level=error (например, write operation failed).",
+    "priority": 2,
     "alert": true,
     "config": {
       "type": "aggregation-v1",
@@ -111,7 +230,7 @@
       "query_parameters": [],
       "filters": [],
       "streams": [
-        "6ad43d3fcc18050c4f1fa113"
+        "<CONTAINERS_STREAM_ID>"
       ],
       "stream_categories": [],
       "group_by": [
@@ -144,24 +263,13 @@
       "cron_timezone": null,
       "event_limit": 0
     },
-    "description": "Loki пишет level=error (например, write operation failed).",
     "field_spec": {},
     "key_spec": [],
     "notification_settings": {
       "grace_period_ms": 3600000,
       "backlog_size": 0
     },
-    "notifications": [
-      {
-        "notification_id": "6af1cf9b61b983feab6b8a3a",
-        "notification_parameters": null
-      },
-      {
-        "notification_id": "6ae6b2e9bb96dbe5087a9712",
-        "notification_parameters": null
-      }
-    ],
-    "priority": 2,
+    "notifications": [],
     "storage": [
       {
         "type": "persist-to-streams-v1",
@@ -171,9 +279,12 @@
       }
     ],
     "tags": [],
-    "title": "Контейнеры: Loki — ошибки приёма"
+    "tactics_techniques": []
   },
   {
+    "title": "Контейнеры: MongoDB — ошибки",
+    "description": "Сообщение уровня E (ошибка) в логе MongoDB (komodo_mongo_1).",
+    "priority": 2,
     "alert": true,
     "config": {
       "type": "aggregation-v1",
@@ -181,7 +292,7 @@
       "query_parameters": [],
       "filters": [],
       "streams": [
-        "6ad43d3fcc18050c4f1fa113"
+        "<CONTAINERS_STREAM_ID>"
       ],
       "stream_categories": [],
       "group_by": [
@@ -214,24 +325,13 @@
       "cron_timezone": null,
       "event_limit": 0
     },
-    "description": "Сообщение уровня E (ошибка) в логе MongoDB (komodo_mongo_1).",
     "field_spec": {},
     "key_spec": [],
     "notification_settings": {
       "grace_period_ms": 3600000,
       "backlog_size": 0
     },
-    "notifications": [
-      {
-        "notification_id": "6af1cf9b61b983feab6b8a3a",
-        "notification_parameters": null
-      },
-      {
-        "notification_id": "6ae6b2e9bb96dbe5087a9712",
-        "notification_parameters": null
-      }
-    ],
-    "priority": 2,
+    "notifications": [],
     "storage": [
       {
         "type": "persist-to-streams-v1",
@@ -241,9 +341,12 @@
       }
     ],
     "tags": [],
-    "title": "Контейнеры: MongoDB — ошибки"
+    "tactics_techniques": []
   },
   {
+    "title": "Контейнеры: netalertx — всплеск объёма логов",
+    "description": "Больше чем втрое выше обычного: более 4500 сообщений netalertx за 15 минут (норма около 1500).",
+    "priority": 1,
     "alert": true,
     "config": {
       "type": "aggregation-v1",
@@ -251,7 +354,7 @@
       "query_parameters": [],
       "filters": [],
       "streams": [
-        "6ad43d3fcc18050c4f1fa113"
+        "<CONTAINERS_STREAM_ID>"
       ],
       "stream_categories": [],
       "group_by": [
@@ -284,24 +387,13 @@
       "cron_timezone": null,
       "event_limit": 0
     },
-    "description": "Больше чем втрое выше обычного: более 4500 сообщений netalertx за 15 минут (норма около 1500).",
     "field_spec": {},
     "key_spec": [],
     "notification_settings": {
       "grace_period_ms": 3600000,
       "backlog_size": 0
     },
-    "notifications": [
-      {
-        "notification_id": "6af1cf9b61b983feab6b8a3a",
-        "notification_parameters": null
-      },
-      {
-        "notification_id": "6ae6b2e9bb96dbe5087a9712",
-        "notification_parameters": null
-      }
-    ],
-    "priority": 1,
+    "notifications": [],
     "storage": [
       {
         "type": "persist-to-streams-v1",
@@ -311,9 +403,12 @@
       }
     ],
     "tags": [],
-    "title": "Контейнеры: netalertx — всплеск объёма логов"
+    "tactics_techniques": []
   },
   {
+    "title": "Контейнеры: netalertx — новое устройство в сети",
+    "description": "Скан netalertx нашёл новые устройства (New Devices больше нуля).\nMITRE ATT&CK. Тактики: Initial Access. Техники: T1200 Hardware Additions.",
+    "priority": 2,
     "alert": true,
     "config": {
       "type": "aggregation-v1",
@@ -321,7 +416,7 @@
       "query_parameters": [],
       "filters": [],
       "streams": [
-        "6ad43d3fcc18050c4f1fa113"
+        "<CONTAINERS_STREAM_ID>"
       ],
       "stream_categories": [],
       "group_by": [
@@ -354,7 +449,6 @@
       "cron_timezone": null,
       "event_limit": 0
     },
-    "description": "Скан netalertx нашёл новые устройства (New Devices больше нуля).\nMITRE ATT&CK. Тактики: Initial Access. Техники: T1200 Hardware Additions.",
     "field_spec": {
       "mitre_tactic": {
         "data_type": "string",
@@ -395,17 +489,7 @@
       "grace_period_ms": 3600000,
       "backlog_size": 0
     },
-    "notifications": [
-      {
-        "notification_id": "6af1cf9b61b983feab6b8a3a",
-        "notification_parameters": null
-      },
-      {
-        "notification_id": "6ae6b2e9bb96dbe5087a9712",
-        "notification_parameters": null
-      }
-    ],
-    "priority": 2,
+    "notifications": [],
     "storage": [
       {
         "type": "persist-to-streams-v1",
@@ -415,9 +499,12 @@
       }
     ],
     "tags": [],
-    "title": "Контейнеры: netalertx — новое устройство в сети"
+    "tactics_techniques": []
   },
   {
+    "title": "Контейнеры: promtail не доставляет логи в Loki",
+    "description": "Больше 15 ошибок «context deadline exceeded» за 10 минут на одном хосте — promtail не может записать в Loki.",
+    "priority": 2,
     "alert": true,
     "config": {
       "type": "aggregation-v1",
@@ -425,7 +512,7 @@
       "query_parameters": [],
       "filters": [],
       "streams": [
-        "6ad43d3fcc18050c4f1fa113"
+        "<CONTAINERS_STREAM_ID>"
       ],
       "stream_categories": [],
       "group_by": [
@@ -458,24 +545,13 @@
       "cron_timezone": null,
       "event_limit": 0
     },
-    "description": "Больше 15 ошибок «context deadline exceeded» за 10 минут на одном хосте — promtail не может записать в Loki.",
     "field_spec": {},
     "key_spec": [],
     "notification_settings": {
       "grace_period_ms": 3600000,
       "backlog_size": 0
     },
-    "notifications": [
-      {
-        "notification_id": "6af1cf9b61b983feab6b8a3a",
-        "notification_parameters": null
-      },
-      {
-        "notification_id": "6ae6b2e9bb96dbe5087a9712",
-        "notification_parameters": null
-      }
-    ],
-    "priority": 2,
+    "notifications": [],
     "storage": [
       {
         "type": "persist-to-streams-v1",
@@ -485,17 +561,20 @@
       }
     ],
     "tags": [],
-    "title": "Контейнеры: promtail не доставляет логи в Loki"
+    "tactics_techniques": []
   },
   {
+    "title": "Контейнеры: всплеск ошибок",
+    "description": "Больше 10 реальных ошибок за 5 минут в одном контейнере: loglevel error/fatal (loki/promtail) или error/fatal/panic/exception/traceback в message. [18.11 v2: убран warn (шум: caddy aborting, grafana gzip); caddy вынесен в отдельный детектор доступности; вычищены nginx SSL_write broken pipe [info], dozzle context deadline exceeded, netalertx plugin timeout]",
+    "priority": 2,
     "alert": true,
     "config": {
       "type": "aggregation-v1",
-      "query": "(loglevel:(error OR warn OR fatal) OR message:(error OR fatal OR panic OR exception OR traceback)) AND _exists_:container_name AND NOT container_name:(cadvisor OR fluent-bit OR promtail)",
+      "query": "(loglevel:(error OR fatal) OR message:(error OR fatal OR panic OR exception OR traceback)) AND _exists_:container_name AND NOT container_name:(cadvisor OR fluent-bit OR promtail OR blackbox OR caddy) AND NOT message:\"SSL_write() failed\" AND NOT (container_name:dozzle AND message:\"context deadline exceeded\") AND NOT (container_name:netalertx AND message:\"forcefully terminated\")",
       "query_parameters": [],
       "filters": [],
       "streams": [
-        "6ad43d3fcc18050c4f1fa113"
+        "<CONTAINERS_STREAM_ID>"
       ],
       "stream_categories": [],
       "group_by": [
@@ -528,24 +607,13 @@
       "cron_timezone": null,
       "event_limit": 0
     },
-    "description": "Больше 10 реальных ошибок за 5 минут в одном контейнере: loglevel error/warn/fatal (loki/promtail) или ключевые слова error/fatal/panic/exception/traceback в message. Исключены cadvisor, fluent-bit и promtail (агенты доставки логов — штатный самовосстанавливающийся шум).",
     "field_spec": {},
     "key_spec": [],
     "notification_settings": {
       "grace_period_ms": 0,
       "backlog_size": 0
     },
-    "notifications": [
-      {
-        "notification_id": "6af1cf9b61b983feab6b8a3a",
-        "notification_parameters": null
-      },
-      {
-        "notification_id": "6ae6b2e9bb96dbe5087a9712",
-        "notification_parameters": null
-      }
-    ],
-    "priority": 2,
+    "notifications": [],
     "storage": [
       {
         "type": "persist-to-streams-v1",
@@ -555,9 +623,12 @@
       }
     ],
     "tags": [],
-    "title": "Контейнеры: всплеск ошибок"
+    "tactics_techniques": []
   },
   {
+    "title": "Контейнеры: нехватка памяти или падение процесса",
+    "description": "В логах контейнера OOM, Killed process, segfault или core dumped.",
+    "priority": 3,
     "alert": true,
     "config": {
       "type": "aggregation-v1",
@@ -565,7 +636,7 @@
       "query_parameters": [],
       "filters": [],
       "streams": [
-        "6ad43d3fcc18050c4f1fa113"
+        "<CONTAINERS_STREAM_ID>"
       ],
       "stream_categories": [],
       "group_by": [
@@ -598,24 +669,13 @@
       "cron_timezone": null,
       "event_limit": 0
     },
-    "description": "В логах контейнера OOM, Killed process, segfault или core dumped.",
     "field_spec": {},
     "key_spec": [],
     "notification_settings": {
       "grace_period_ms": 3600000,
       "backlog_size": 0
     },
-    "notifications": [
-      {
-        "notification_id": "6af1cf9b61b983feab6b8a3a",
-        "notification_parameters": null
-      },
-      {
-        "notification_id": "6ae6b2e9bb96dbe5087a9712",
-        "notification_parameters": null
-      }
-    ],
-    "priority": 3,
+    "notifications": [],
     "storage": [
       {
         "type": "persist-to-streams-v1",
@@ -625,9 +685,12 @@
       }
     ],
     "tags": [],
-    "title": "Контейнеры: нехватка памяти или падение процесса"
+    "tactics_techniques": []
   },
   {
+    "title": "Контейнеры: ошибки прав доступа",
+    "description": "Больше 50 сообщений Operation not permitted за 10 минут",
+    "priority": 2,
     "alert": true,
     "config": {
       "type": "aggregation-v1",
@@ -635,7 +698,7 @@
       "query_parameters": [],
       "filters": [],
       "streams": [
-        "6ad43d3fcc18050c4f1fa113"
+        "<CONTAINERS_STREAM_ID>"
       ],
       "stream_categories": [],
       "group_by": [
@@ -668,24 +731,13 @@
       "cron_timezone": null,
       "event_limit": 0
     },
-    "description": "Больше 50 сообщений Operation not permitted за 10 минут",
     "field_spec": {},
     "key_spec": [],
     "notification_settings": {
       "grace_period_ms": 0,
       "backlog_size": 0
     },
-    "notifications": [
-      {
-        "notification_id": "6af1cf9b61b983feab6b8a3a",
-        "notification_parameters": null
-      },
-      {
-        "notification_id": "6ae6b2e9bb96dbe5087a9712",
-        "notification_parameters": null
-      }
-    ],
-    "priority": 2,
+    "notifications": [],
     "storage": [
       {
         "type": "persist-to-streams-v1",
@@ -695,9 +747,12 @@
       }
     ],
     "tags": [],
-    "title": "Контейнеры: ошибки прав доступа"
+    "tactics_techniques": []
   },
   {
+    "title": "Контейнеры: перезапуски MariaDB",
+    "description": "Больше 2 запусков entrypoint MariaDB (контейнер observiumdb) за 15 минут — цикл перезапусков БД Observium.",
+    "priority": 3,
     "alert": true,
     "config": {
       "type": "aggregation-v1",
@@ -705,7 +760,7 @@
       "query_parameters": [],
       "filters": [],
       "streams": [
-        "6ad43d3fcc18050c4f1fa113"
+        "<CONTAINERS_STREAM_ID>"
       ],
       "stream_categories": [],
       "group_by": [
@@ -738,24 +793,13 @@
       "cron_timezone": null,
       "event_limit": 0
     },
-    "description": "Больше 2 запусков entrypoint MariaDB (контейнер observiumdb) за 15 минут — цикл перезапусков БД Observium.",
     "field_spec": {},
     "key_spec": [],
     "notification_settings": {
       "grace_period_ms": 0,
       "backlog_size": 0
     },
-    "notifications": [
-      {
-        "notification_id": "6af1cf9b61b983feab6b8a3a",
-        "notification_parameters": null
-      },
-      {
-        "notification_id": "6ae6b2e9bb96dbe5087a9712",
-        "notification_parameters": null
-      }
-    ],
-    "priority": 3,
+    "notifications": [],
     "storage": [
       {
         "type": "persist-to-streams-v1",
@@ -765,9 +809,12 @@
       }
     ],
     "tags": [],
-    "title": "Контейнеры: перезапуски MariaDB"
+    "tactics_techniques": []
   },
   {
+    "title": "Контейнеры: тишина — atrium",
+    "description": "Контейнер atrium не прислал ни одного сообщения за час — остановлен или завис.",
+    "priority": 3,
     "alert": true,
     "config": {
       "type": "aggregation-v1",
@@ -775,7 +822,7 @@
       "query_parameters": [],
       "filters": [],
       "streams": [
-        "6ad43d3fcc18050c4f1fa113"
+        "<CONTAINERS_STREAM_ID>"
       ],
       "stream_categories": [],
       "group_by": [],
@@ -806,24 +853,13 @@
       "cron_timezone": null,
       "event_limit": 0
     },
-    "description": "Контейнер atrium не прислал ни одного сообщения за час — остановлен или завис.",
     "field_spec": {},
     "key_spec": [],
     "notification_settings": {
       "grace_period_ms": 86400000,
       "backlog_size": 0
     },
-    "notifications": [
-      {
-        "notification_id": "6af1cf9b61b983feab6b8a3a",
-        "notification_parameters": null
-      },
-      {
-        "notification_id": "6ae6b2e9bb96dbe5087a9712",
-        "notification_parameters": null
-      }
-    ],
-    "priority": 3,
+    "notifications": [],
     "storage": [
       {
         "type": "persist-to-streams-v1",
@@ -833,9 +869,12 @@
       }
     ],
     "tags": [],
-    "title": "Контейнеры: тишина — atrium"
+    "tactics_techniques": []
   },
   {
+    "title": "Контейнеры: тишина — grafana",
+    "description": "Контейнер grafana не прислал ни одного сообщения за час — остановлен или завис.",
+    "priority": 3,
     "alert": true,
     "config": {
       "type": "aggregation-v1",
@@ -843,7 +882,7 @@
       "query_parameters": [],
       "filters": [],
       "streams": [
-        "6ad43d3fcc18050c4f1fa113"
+        "<CONTAINERS_STREAM_ID>"
       ],
       "stream_categories": [],
       "group_by": [],
@@ -874,24 +913,13 @@
       "cron_timezone": null,
       "event_limit": 0
     },
-    "description": "Контейнер grafana не прислал ни одного сообщения за час — остановлен или завис.",
     "field_spec": {},
     "key_spec": [],
     "notification_settings": {
       "grace_period_ms": 86400000,
       "backlog_size": 0
     },
-    "notifications": [
-      {
-        "notification_id": "6af1cf9b61b983feab6b8a3a",
-        "notification_parameters": null
-      },
-      {
-        "notification_id": "6ae6b2e9bb96dbe5087a9712",
-        "notification_parameters": null
-      }
-    ],
-    "priority": 3,
+    "notifications": [],
     "storage": [
       {
         "type": "persist-to-streams-v1",
@@ -901,9 +929,12 @@
       }
     ],
     "tags": [],
-    "title": "Контейнеры: тишина — grafana"
+    "tactics_techniques": []
   },
   {
+    "title": "Контейнеры: тишина — komodo_mongo_1",
+    "description": "Контейнер komodo_mongo_1 не прислал ни одного сообщения за час — остановлен или завис.",
+    "priority": 3,
     "alert": true,
     "config": {
       "type": "aggregation-v1",
@@ -911,7 +942,7 @@
       "query_parameters": [],
       "filters": [],
       "streams": [
-        "6ad43d3fcc18050c4f1fa113"
+        "<CONTAINERS_STREAM_ID>"
       ],
       "stream_categories": [],
       "group_by": [],
@@ -942,24 +973,13 @@
       "cron_timezone": null,
       "event_limit": 0
     },
-    "description": "Контейнер komodo_mongo_1 не прислал ни одного сообщения за час — остановлен или завис.",
     "field_spec": {},
     "key_spec": [],
     "notification_settings": {
       "grace_period_ms": 86400000,
       "backlog_size": 0
     },
-    "notifications": [
-      {
-        "notification_id": "6af1cf9b61b983feab6b8a3a",
-        "notification_parameters": null
-      },
-      {
-        "notification_id": "6ae6b2e9bb96dbe5087a9712",
-        "notification_parameters": null
-      }
-    ],
-    "priority": 3,
+    "notifications": [],
     "storage": [
       {
         "type": "persist-to-streams-v1",
@@ -969,9 +989,12 @@
       }
     ],
     "tags": [],
-    "title": "Контейнеры: тишина — komodo_mongo_1"
+    "tactics_techniques": []
   },
   {
+    "title": "Контейнеры: тишина — loki",
+    "description": "Контейнер loki не прислал ни одного сообщения за час — остановлен или завис.",
+    "priority": 3,
     "alert": true,
     "config": {
       "type": "aggregation-v1",
@@ -979,7 +1002,7 @@
       "query_parameters": [],
       "filters": [],
       "streams": [
-        "6ad43d3fcc18050c4f1fa113"
+        "<CONTAINERS_STREAM_ID>"
       ],
       "stream_categories": [],
       "group_by": [],
@@ -1010,24 +1033,13 @@
       "cron_timezone": null,
       "event_limit": 0
     },
-    "description": "Контейнер loki не прислал ни одного сообщения за час — остановлен или завис.",
     "field_spec": {},
     "key_spec": [],
     "notification_settings": {
       "grace_period_ms": 86400000,
       "backlog_size": 0
     },
-    "notifications": [
-      {
-        "notification_id": "6af1cf9b61b983feab6b8a3a",
-        "notification_parameters": null
-      },
-      {
-        "notification_id": "6ae6b2e9bb96dbe5087a9712",
-        "notification_parameters": null
-      }
-    ],
-    "priority": 3,
+    "notifications": [],
     "storage": [
       {
         "type": "persist-to-streams-v1",
@@ -1037,9 +1049,12 @@
       }
     ],
     "tags": [],
-    "title": "Контейнеры: тишина — loki"
+    "tactics_techniques": []
   },
   {
+    "title": "Контейнеры: тишина — netalertx",
+    "description": "Контейнер netalertx не прислал ни одного сообщения за час — остановлен или завис.",
+    "priority": 3,
     "alert": true,
     "config": {
       "type": "aggregation-v1",
@@ -1047,7 +1062,7 @@
       "query_parameters": [],
       "filters": [],
       "streams": [
-        "6ad43d3fcc18050c4f1fa113"
+        "<CONTAINERS_STREAM_ID>"
       ],
       "stream_categories": [],
       "group_by": [],
@@ -1078,24 +1093,13 @@
       "cron_timezone": null,
       "event_limit": 0
     },
-    "description": "Контейнер netalertx не прислал ни одного сообщения за час — остановлен или завис.",
     "field_spec": {},
     "key_spec": [],
     "notification_settings": {
       "grace_period_ms": 86400000,
       "backlog_size": 0
     },
-    "notifications": [
-      {
-        "notification_id": "6af1cf9b61b983feab6b8a3a",
-        "notification_parameters": null
-      },
-      {
-        "notification_id": "6ae6b2e9bb96dbe5087a9712",
-        "notification_parameters": null
-      }
-    ],
-    "priority": 3,
+    "notifications": [],
     "storage": [
       {
         "type": "persist-to-streams-v1",
@@ -1105,9 +1109,12 @@
       }
     ],
     "tags": [],
-    "title": "Контейнеры: тишина — netalertx"
+    "tactics_techniques": []
   },
   {
+    "title": "Контейнеры: тишина — wazuh.dashboard",
+    "description": "Контейнер wazuh.dashboard не прислал ни одного сообщения за час — остановлен или завис.",
+    "priority": 3,
     "alert": true,
     "config": {
       "type": "aggregation-v1",
@@ -1115,7 +1122,7 @@
       "query_parameters": [],
       "filters": [],
       "streams": [
-        "6ad43d3fcc18050c4f1fa113"
+        "<CONTAINERS_STREAM_ID>"
       ],
       "stream_categories": [],
       "group_by": [],
@@ -1146,24 +1153,13 @@
       "cron_timezone": null,
       "event_limit": 0
     },
-    "description": "Контейнер wazuh.dashboard не прислал ни одного сообщения за час — остановлен или завис.",
     "field_spec": {},
     "key_spec": [],
     "notification_settings": {
       "grace_period_ms": 86400000,
       "backlog_size": 0
     },
-    "notifications": [
-      {
-        "notification_id": "6af1cf9b61b983feab6b8a3a",
-        "notification_parameters": null
-      },
-      {
-        "notification_id": "6ae6b2e9bb96dbe5087a9712",
-        "notification_parameters": null
-      }
-    ],
-    "priority": 3,
+    "notifications": [],
     "storage": [
       {
         "type": "persist-to-streams-v1",
@@ -1173,9 +1169,12 @@
       }
     ],
     "tags": [],
-    "title": "Контейнеры: тишина — wazuh.dashboard"
+    "tactics_techniques": []
   },
   {
+    "title": "Контейнеры: тишина — zaslon",
+    "description": "Контейнер zaslon не прислал ни одного сообщения за 15 минут — остановлен или завис.",
+    "priority": 3,
     "alert": true,
     "config": {
       "type": "aggregation-v1",
@@ -1183,7 +1182,7 @@
       "query_parameters": [],
       "filters": [],
       "streams": [
-        "6ad43d3fcc18050c4f1fa113"
+        "<CONTAINERS_STREAM_ID>"
       ],
       "stream_categories": [],
       "group_by": [],
@@ -1214,24 +1213,13 @@
       "cron_timezone": null,
       "event_limit": 0
     },
-    "description": "Контейнер zaslon не прислал ни одного сообщения за 15 минут — остановлен или завис.",
     "field_spec": {},
     "key_spec": [],
     "notification_settings": {
       "grace_period_ms": 3600000,
       "backlog_size": 0
     },
-    "notifications": [
-      {
-        "notification_id": "6af1cf9b61b983feab6b8a3a",
-        "notification_parameters": null
-      },
-      {
-        "notification_id": "6ae6b2e9bb96dbe5087a9712",
-        "notification_parameters": null
-      }
-    ],
-    "priority": 3,
+    "notifications": [],
     "storage": [
       {
         "type": "persist-to-streams-v1",
@@ -1241,9 +1229,12 @@
       }
     ],
     "tags": [],
-    "title": "Контейнеры: тишина — zaslon"
+    "tactics_techniques": []
   },
   {
+    "title": "Контейнеры: тишина — нет логов ни от одного контейнера",
+    "description": "Поток Containers не получил ни одного сообщения за 10 минут — упал input «Podman Logs», Graylog или все хосты разом.",
+    "priority": 3,
     "alert": true,
     "config": {
       "type": "aggregation-v1",
@@ -1251,7 +1242,7 @@
       "query_parameters": [],
       "filters": [],
       "streams": [
-        "6ad43d3fcc18050c4f1fa113"
+        "<CONTAINERS_STREAM_ID>"
       ],
       "stream_categories": [],
       "group_by": [],
@@ -1282,24 +1273,13 @@
       "cron_timezone": null,
       "event_limit": 0
     },
-    "description": "Поток Containers не получил ни одного сообщения за 10 минут — упал input «Podman Logs», Graylog или все хосты разом.",
     "field_spec": {},
     "key_spec": [],
     "notification_settings": {
       "grace_period_ms": 3600000,
       "backlog_size": 0
     },
-    "notifications": [
-      {
-        "notification_id": "6af1cf9b61b983feab6b8a3a",
-        "notification_parameters": null
-      },
-      {
-        "notification_id": "6ae6b2e9bb96dbe5087a9712",
-        "notification_parameters": null
-      }
-    ],
-    "priority": 3,
+    "notifications": [],
     "storage": [
       {
         "type": "persist-to-streams-v1",
@@ -1309,6 +1289,6 @@
       }
     ],
     "tags": [],
-    "title": "Контейнеры: тишина — нет логов ни от одного контейнера"
+    "tactics_techniques": []
   }
 ]
