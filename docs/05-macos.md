@@ -18,12 +18,14 @@
 | Файл | Назначение |
 |---|---|
 | [`filebeat.yml`](../macos/filebeat.yml) | Конфиг Filebeat (unified log, wifi.log, osquery) |
-| [`co.elastic.filebeat.plist`](../macos/co.elastic.filebeat.plist) | LaunchDaemon для Filebeat |
-| [`osquery.conf`](../macos/osquery.conf) | Конфиг osquery |
-| [`com.user.logstream.plist`](../macos/com.user.logstream.plist) | LaunchDaemon для `log stream` (через wrapper) |
+| [`co.elastic.filebeat.plist`](../macos/co.elastic.filebeat.plist) | LaunchDaemon для Filebeat (без `-e`) |
+| [`osquery.conf`](../macos/osquery.conf) | Конфиг osquery (расписание запросов) |
+| [`osquery.flags`](../macos/osquery.flags) | Флаги osqueryd: ротация, host_identifier, endpointsecurity |
+| [`com.user.logstream.plist`](../macos/com.user.logstream.plist) | LaunchDaemon для `log stream` |
 | [`zshrc.local`](../macos/zshrc.local) | Хук логирования команд |
-| [`logstream/logstream-wrapper.sh`](../macos/logstream/logstream-wrapper.sh) | Обёртка: перезапуск `log stream` при ротации |
-| [`logstream/unified.json.conf`](../macos/logstream/unified.json.conf) | Конфиг newsyslog для ротации |
+| [`logstream/collector.sh`](../macos/logstream/collector.sh) | Сборщик: `log stream` с предикатом, перезапуск при падении |
+| [`logstream/rotate.pl`](../macos/logstream/rotate.pl) | Ротация `unified.json.log` потоково, без перезапуска `log stream` |
+| [`logstream/logstream.conf`](../macos/logstream/logstream.conf) | Параметры: MAX_MB=50, KEEP=72, LEVEL, PREDICATE |
 
 ## Установка
 
@@ -50,20 +52,32 @@ sudo launchctl load /Library/LaunchDaemons/co.elastic.filebeat.plist
 
 ```bash
 sudo cp osquery.conf /private/var/osquery/osquery.conf
-sudo launchctl load /Library/LaunchDaemons/io.osquery.agent.plist
+sudo cp osquery.flags /private/var/osquery/osquery.flags
+sudo chown root:wheel /private/var/osquery/osquery.conf /private/var/osquery/osquery.flags
+sudo launchctl kickstart -k system/io.osquery.agent
 ```
 
-### Ротация unified.json.log
+В `osquery.flags` важно: `logger_rotate=true` (10 × 25 МБ), `host_identifier=hostname`,
+`disable_endpointsecurity=false` (иначе нет таблицы `es_process_events`) и **нет**
+`--verbose` — с ним `/var/log/osquery` пухнет до сотен мегабайт.
+
+### Сбор и ротация unified.json.log
 
 ```bash
-sudo cp logstream/logstream-wrapper.sh /usr/local/bin/
-sudo chmod 755 /usr/local/bin/logstream-wrapper.sh
-sudo cp logstream/unified.json.conf /etc/newsyslog.d/
+sudo mkdir -p /usr/local/libexec/logstream /usr/local/etc/logstream
+sudo cp logstream/collector.sh logstream/rotate.pl /usr/local/libexec/logstream/
+sudo chmod 755 /usr/local/libexec/logstream/collector.sh /usr/local/libexec/logstream/rotate.pl
+sudo cp logstream/logstream.conf /usr/local/etc/logstream/
 sudo cp com.user.logstream.plist /Library/LaunchDaemons/
 sudo chown root:wheel /Library/LaunchDaemons/com.user.logstream.plist
 sudo chmod 644 /Library/LaunchDaemons/com.user.logstream.plist
-sudo launchctl load /Library/LaunchDaemons/com.user.logstream.plist
+sudo launchctl bootstrap system /Library/LaunchDaemons/com.user.logstream.plist
 ```
+
+`collector.sh` гоняет один `log stream` с предикатом из `logstream.conf` и пайпит
+его в `rotate.pl`, который режет файл по MAX_MB и хранит KEEP сжатых архивов —
+`log stream` при ротации не перезапускается (в отличие от старой схемы с
+wrapper + newsyslog).
 
 ### Логирование команд (опционально)
 
@@ -94,8 +108,16 @@ sudo log show --predicate 'process == "filebeat"' --last 5m --info | \
 - **`include_lines` в Filebeat — подстрочный поиск, не regex.** Не добавляй паттерны,
   которые матчатся у шумных процессов (например, `Sandbox` или `incorrect` — их
   генерирует Kaspersky).
-- **`log stream` держит файл открытым**, поэтому нужен wrapper для ротации
-  `unified.json.log`. Без него файл растёт до десятков ГБ.
+- **`log stream` держит файл открытым**, поэтому ротация `unified.json.log` —
+  потоковая через `rotate.pl` (режет входной поток по размеру), без перезапуска
+  процесса. Без ротации файл растёт до десятков ГБ.
+- **Filebeat запускай без `-e` и без `StandardOutPath`/`StandardErrorPath` в plist.**
+  Иначе весь журнал filebeat валится в один `/var/log/filebeat.log` без ротации
+  (в лаборатории набегало 500–625 МБ). Без `-e` работает `logging.to_files` из
+  `filebeat.yml`: ndjson в `/usr/local/filebeat/logs/`, 7 × 10 МБ.
+- **Один logstream-демон на хост.** Два LaunchDaemon'а с `log stream` в один и
+  тот же файл удваивают объём и частоту ротации (поймано на MacBook-Pro:
+  com.graylog.logstream + com.user.logstream одновременно).
 - **Не дублируй `preexec`** в `.zshrc` — используй `add-zsh-hook`, иначе команды
   пишутся в `commands.log` дважды.
 
