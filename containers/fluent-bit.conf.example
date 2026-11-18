@@ -3,11 +3,14 @@
     Log_Level        info
     storage.path     /var/lib/fluent-bit/storage
 
-# Читаем journald. Путь: /var/log/journal (постоянный журнал) или /run/log/journal (volatile)
+# Читаем journald. Path НЕ задаём: с явным путём fluent-bit теряет журнал
+# после каждой ротации (застревает на sealed-файле, лаг доставки 10+ минут).
+# Без Path sd_journal_open читает дефолтные каталоги и сам следит за ротацией.
+# Подробности: docs/35-fluent-bit-journald-path.md
 [INPUT]
     Name             systemd
     Tag              journal.*
-    Path             /var/log/journal
+    # Path           /var/log/journal
     DB               /var/lib/fluent-bit/journal.db
     Read_From_Tail   On
     Strip_Underscores On

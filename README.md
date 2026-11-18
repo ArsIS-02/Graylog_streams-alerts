@@ -236,6 +236,7 @@ bash rule-tester/deploy/install.sh        # первый запуск созда
 | 33 | [IRIS: автоматический пакет доказательств](docs/33-iris-evidence-pack.md) | При эскалации кейс получает ZIP в Evidences: исходные события и контекст Graylog, активы, IOC, таймлайн, история обогащений, ссылки и SHA-256 manifest |
 | 34 | [Тюнинг контейнерных детекторов и maintenance-режим TicketBridge](docs/34-container-detectors-maintenance.md) | Ревизия «всплеска ошибок»: GELF level ≠ severity, warn-шум убран, caddy/blackbox вынесены в детекторы доступности (bb_target через pipeline); maintenance-режим TicketBridge (тишина в IRIS на время работ, маркер maintenance_suppressed), веса админских правил 80<100 — кейс со второго срабатывания |
 | 35 | [Fluent Bit теряет journald после ротации](docs/35-fluent-bit-journald-path.md) | Явный `Path /var/log/journal` в systemd input ломал отслеживание журнала после ротации — лаг 10+ минут; фикс одной строкой на 6 хостах, маркер end-to-end ~30 с; грабли: ненадёжный sort в universal search, syslog-дубликат без container_name, quadlet только через systemctl |
+| 36 | [SSH-харденинг: только ключи, без паролей и root](docs/36-ssh-hardening-key-only.md) | 8 хостов РЕД ОС за день: PermitRootLogin no, PasswordAuthentication no, машинные ключи с from= и no-pty, автоматика Mac с expect-паролей на BatchMode-ключи; p2p MacBook↔MacBook через WireGuard (AllowedIPs), уборка crash-loop старого стека на wazuh-homelab |
 
 ### Дашборды
 
@@ -335,6 +336,7 @@ Graylog_streams-alerts/
 │   ├── 33-iris-evidence-pack.md         ← IRIS: автоматический ZIP доказательств в Evidences
 │   ├── 34-container-detectors-maintenance.md ← тюнинг контейнерных детекторов, детекторы доступности, maintenance TicketBridge
 │   ├── 35-fluent-bit-journald-path.md  ← fluent-bit терял journald после ротации: лаг доставки логов, фикс Path
+│   ├── 36-ssh-hardening-key-only.md    ← SSH только по ключам на 8 хостах, привязка from=, WireGuard p2p
 │   ├── troubleshooting.md             ← грабли и решения
 │   └── images/                        ← скриншоты и иллюстрации
 ├── graylog/
