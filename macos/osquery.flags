@@ -1,0 +1,12 @@
+--config_path=/var/osquery/osquery.conf
+--database_path=/var/osquery/osquery.db
+--pidfile=/var/osquery/osqueryd.pidfile
+--logger_plugin=filesystem
+--logger_path=/var/log/osquery
+--logger_rotate=true
+--logger_rotate_size=26214400
+--logger_rotate_max_files=10
+--host_identifier=hostname
+--disable_extensions=true
+--disable_endpointsecurity=false
+--disable_audit=true

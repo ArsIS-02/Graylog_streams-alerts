@@ -4,12 +4,6 @@ filebeat.inputs:
   # ============================================================
   # 1. ТОЛЬКО КРИТИЧЕСКИЕ СОБЫТИЯ из unified logging
   # ============================================================
-  # ВАЖНО: include_lines — это грубый фильтр по подстроке.
-  # Он не умеет исключать. Если добавишь паттерн, который
-  # часто встречается у шумных процессов (Kaspersky, Sandbox),
-  # поток резко вырастет. Проверяй через:
-  #   grep -c "паттерн" /var/log/unified.json.log*
-  # ============================================================
   - type: filestream
     id: unified-json
     enabled: true
@@ -18,33 +12,49 @@ filebeat.inputs:
     fields:
       log_type: macos_unified
     fields_under_root: true
+    # Фильтр по ключевым словам (можно расширять)
     include_lines:
-      # События передачи файлов
       - 'AirDrop'
-      # Доступ к камере/микрофону/сенсорам (TCC = Transparency Consent Control)
+      - 'sharingd'
+      - 'USB'
+      - 'enumerated'
+      - 'sudo'
+      - 'incorrect'
+      - 'password'
       - 'TCC'
-      # USB-устройства (точный паттерн, в отличие от широкого "USB")
-      - 'hostNotificationUSB'
-      # Паники ядра и сбои оборудования
+      - 'Sandbox'
       - 'kernel panic'
-      # USB-устройства Apple (в unified logs)
+      - 'diskarbitrationd'
       - 'AMPDeviceDiscovery'
-      # Защита системы
-      - 'SIP'
-      - 'FileVault'
-      - 'Gatekeeper'
     processors:
+      # 1. Переименовываем ключ timestamp в исходной JSON-строке,
+      #    чтобы Graylog не принимал его за время сообщения
+      - script:
+          lang: javascript
+          id: rename_unified_timestamp
+          source: |
+            function process(event) {
+              var msg = event.Get("message");
+              if (msg) {
+                event.Put("message", msg.replace('"timestamp":"', '"event_timestamp":"'));
+              }
+            }
+      # 2. Разбираем JSON, как и раньше
       - decode_json_fields:
           fields: ["message"]
           target: ""
           overwrite_keys: true
+      # 3. Время события из event_timestamp ("2026-10-20 22:25:12.141137+0500") в @timestamp
+      - timestamp:
+          field: event_timestamp
+          layouts:
+            - '2006-01-02 15:04:05.999999-0700'
+          test:
+            - '2026-10-20 22:25:12.141137+0500'
 
   # ============================================================
   # 2. USB-события из wifi.log (подключение/отключение)
   # ============================================================
-  # Здесь источник — /var/log/wifi.log, куда macOS пишет
-  # уведомления о USB через "Usb Host Notification".
-  # Эти строки дают точную информацию о том, что подключено.
   - type: filestream
     id: macos-wifi-usb
     enabled: true
@@ -59,7 +69,7 @@ filebeat.inputs:
       - 'USBDeviceRemoved'
 
   # ============================================================
-  # 3. Результаты osquery (структурированные снимки состояния)
+  # 3. Результаты osquery (обязательно)
   # ============================================================
   - type: filestream
     id: osquery-results
@@ -74,30 +84,40 @@ filebeat.inputs:
           fields: ["message"]
           target: ""
           overwrite_keys: true
-
+  - type: filestream
+    id: macos-commands
+    enabled: true
+    paths:
+      - /Users/igor/.local/log/commands.log
+    fields:
+      log_type: macos_commands
+    fields_under_root: true
+    exclude_lines:
+     - '^.*\|\s*cd /usr/local/filebeat'
+     - '^.*\|\s*sudo \./filebeat.*'
+     - '^.*\|\s*cat .*filebeat.yml'
+     - '^.*\|\s*grep .*'
+     - '^.*\|\s*cat -vet.*'
   # ============================================================
   # ОТКЛЮЧЕНЫ (закомментированы или удалены):
   # - macos-firewall (включить, если нужны логи брандмауэра)
   # - macos-crash (только для отладки)
-  # - macos-commands (только если нужно логировать команды)
   # - macos-system (system.log – устарел)
   # - macos-install (install.log – редко нужен)
   # - macos-apps (очень шумно)
-  # ============================================================
 
 # =========================== Processors ===========================
 processors:
   - add_host_metadata: ~
 
 # =========================== Output ===========================
-# ЗАМЕНИТЬ на IP:PORT своего Graylog Beats Input!
 output.logstash:
-  hosts: ["YOUR GRAYLOG-SERVER IP:PORT"]
+  hosts: ["192.168.1.137:5046"]   # новый порт
   timeout: 30s
   ttl: 5s
   pipelining: 1
   compression_level: 3
-  bulk_max_size: 256
+  bulk_max_size: 256              # ещё меньше для снижения нагрузки
 
 # =========================== Metadata ===========================
 tags: ["macos", "prod", "essential"]

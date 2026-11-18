@@ -4,12 +4,19 @@
 
 | Файл | Назначение |
 |---|---|
-| [`filebeat.yml`](filebeat.yml) | Filebeat (unified log, wifi.log, osquery) |
-| [`osquery.conf`](osquery.conf) | конфиг osquery |
-| [`co.elastic.filebeat.plist`](co.elastic.filebeat.plist) | LaunchDaemon для Filebeat |
+| [`filebeat.yml`](filebeat.yml) | Filebeat (unified log, wifi.log, osquery, commands.log) |
+| [`osquery.conf`](osquery.conf) | конфиг osquery (расписание запросов) |
+| [`osquery.flags`](osquery.flags) | флаги osqueryd: ротация логов (10 × 25 МБ), host_identifier, endpointsecurity |
+| [`co.elastic.filebeat.plist`](co.elastic.filebeat.plist) | LaunchDaemon для Filebeat (без `-e`: логи в `logs/*.ndjson`, 7 × 10 МБ) |
 | [`com.user.logstream.plist`](com.user.logstream.plist) | LaunchDaemon для `log stream` |
 | [`zshrc.local`](zshrc.local) | хук логирования команд |
-| [`logstream/`](logstream/) | ротация `unified.json.log` (wrapper + newsyslog) |
+| [`logstream/`](logstream/) | сбор и ротация `unified.json.log`: `collector.sh` + `rotate.pl` + `logstream.conf` (MAX_MB=50, KEEP=72) |
+
+Эталон с MacMiniM2, 18.11.2026 приведён к единому виду на всех трёх маках
+(MacMiniM2, MacBook-Pro, MacBookPro-M4Pro). Ключевое про ротацию: filebeat
+запускается **без** флага `-e` и без `StandardOutPath` в plist — иначе
+`/var/log/filebeat.log` растёт бесконечно (набегало 500+ МБ). osquery без
+`--verbose`, с `logger_rotate`.
 
 Подробная инструкция — [docs/05-macos.md](../docs/05-macos.md): unified log, Filebeat и osquery.
 
