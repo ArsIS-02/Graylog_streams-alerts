@@ -84,3 +84,27 @@ redosrp16, wazuh-homelab (конфиг про запас, сервис не по
   (18.11 так fluent-bit на homelab простаивал ~9 минут).
 - Образ `ghcr.io/fluent/fluent-bit:latest` с `AutoUpdate=registry` — версия
   плавает (на 18.11 была v5.2.0). Кандидат на пин конкретной версии.
+
+## Эпилог (вечер 18.11): закрепление результата
+
+1. **Версия запинена.** На всех 5 хостах с fluent-bit образ сменён с
+   `ghcr.io/fluent/fluent-bit:latest` на `:5.2.0`, `AutoUpdate=registry`
+   закомментирован (бэкап `fluent-bit.container.bak-20261118-pin`).
+   Теперь версия не сменится сама при рестарте. Обновление — осознанное:
+   сменить тег, daemon-reload, restart, маркер.
+2. **Дубликаты контейнерного stdout в syslog-пути убраны.** rsyslog каждого
+   хоста шлёт `*.*` в `auditd_decoder.py` (UDP 1514 → GELF 12201), и тот
+   ретранслировал всё — включая stdout контейнеров, который уже везёт
+   fluent-bit. В декодер добавлен дроп по списку имён контейнеров
+   (`tag[pid]:`, ~50 имён с `podman ps` всех хостов) плюс scoped-правило:
+   на redosrp16 stdout приходит с тегом `podman` — дропается отдельно
+   (бэкапы `auditd_decoder.py.bak-20261118-container-dups` и `-podman`).
+   Проверено E2E: дубли homelab исчезли, обычный syslog (sudo, sshd) проходит.
+3. **Остаток, который не закрыт:** у части хостов (homelab, redosrp16)
+   Graylog Sidecar/filebeat шлёт `/var/log/messages` через Collector Ingest
+   (HTTP 14401) — третья копия тех же строк. Поток мелкий, но для полной
+   дедупликации нужен `drop_event` в конфиге filebeat коллектора.
+4. **Грабля диагностики №2:** full-text поиск Graylog по тестовым строкам
+   бесполезен для верификации — osquery/BiZone на Mac тащат cmdline твоих
+   же команд, и маркер «находится» в чужих событиях. Верифицировать только
+   связкой `source:<хост> + точная фраза + gl2_source_input`.
