@@ -3,7 +3,7 @@
     "alert": true,
     "config": {
       "type": "aggregation-v1",
-      "query": "mac_bz_event_type:SSHKeyInfo AND NOT auth_key_fingerprint:(\"SHA256:8dubGwbg2XxIh2eaC8N3qEtfrFpYC9kcDjAICme6Sxo\" OR \"SHA256:G4qQi+ybGhJXKanFm1ayrgx1WXILdwExtcJKLjDCLjw\" OR \"SHA256:H0079HocHA6d7LWXBr1PdO+QbY3dVT6JEwEK9PLLWV0\" OR \"SHA256:HXZkCt0v6zWy3odYVoL0Y3PuFVenxrL8DCS7AYgMyHM\" OR \"SHA256:OL2R5gYDpaMvY5KZf4HiPpzvz/IxJqr2ZKgBDXPXw78\" OR \"SHA256:akRodw0f+LWX91jmHyAbcZ/hjlAkNjfS7EYNYDnbEeQ\" OR \"SHA256:lOTgBZ8m/hicwrqej4xY+ZAFRler4Q5A0X372UayW6M\" OR \"SHA256:nTzaPTeFkcbdfHl2n7aaEa+M5ETCzN3VA9q5mylm5v4\" OR \"SHA256:nlwK5MCHgBro/B3o/PcroSYIaa803TBQaIiLgRzwL/g\" OR \"SHA256:uX/+Fp6Lb1349sN88Uhho/u/Ad/ETLCFw6GdtBKgJvY\" OR \"SHA256:wi+GgrkLHv9gPZYvmrSAuTj/coIyN8ECjBj61x3I3A8\" OR \"SHA256:lbW2Do5u0QMoBzRofZoIpCm7varb1TszPvoXgV3EPxQ\" OR \"SHA256:XG0Lc0LXq7qLmVnTKo1C/48IGxMA+RNeCer0XQYjHU8\" OR \"SHA256:aYGMsQBFOqoVjeZ/9WXS8+pTLOz9pqEVUCcUHwPFWEQ\")",
+      "query": "mac_bz_event_type:SSHKeyInfo AND NOT auth_key_fingerprint:(\"SHA256:8dubGwbg2XxIh2eaC8N3qEtfrFpYC9kcDjAICme6Sxo\" OR \"SHA256:G4qQi+ybGhJXKanFm1ayrgx1WXILdwExtcJKLjDCLjw\" OR \"SHA256:H0079HocHA6d7LWXBr1PdO+QbY3dVT6JEwEK9PLLWV0\" OR \"SHA256:HXZkCt0v6zWy3odYVoL0Y3PuFVenxrL8DCS7AYgMyHM\" OR \"SHA256:OL2R5gYDpaMvY5KZf4HiPpzvz/IxJqr2ZKgBDXPXw78\" OR \"SHA256:akRodw0f+LWX91jmHyAbcZ/hjlAkNjfS7EYNYDnbEeQ\" OR \"SHA256:lOTgBZ8m/hicwrqej4xY+ZAFRler4Q5A0X372UayW6M\" OR \"SHA256:nTzaPTeFkcbdfHl2n7aaEa+M5ETCzN3VA9q5mylm5v4\" OR \"SHA256:nlwK5MCHgBro/B3o/PcroSYIaa803TBQaIiLgRzwL/g\" OR \"SHA256:uX/+Fp6Lb1349sN88Uhho/u/Ad/ETLCFw6GdtBKgJvY\" OR \"SHA256:wi+GgrkLHv9gPZYvmrSAuTj/coIyN8ECjBj61x3I3A8\" OR \"SHA256:lbW2Do5u0QMoBzRofZoIpCm7varb1TszPvoXgV3EPxQ\" OR \"SHA256:XG0Lc0LXq7qLmVnTKo1C/48IGxMA+RNeCer0XQYjHU8\" OR \"SHA256:aYGMsQBFOqoVjeZ/9WXS8+pTLOz9pqEVUCcUHwPFWEQ\" OR \"SHA256:UYS6QzKTKgFwGBfGsk3fmvfnZ8yVhxE3Pb/CgUteskc\")",
       "query_parameters": [],
       "filters": [],
       "streams": [
@@ -22,7 +22,7 @@
       "cron_timezone": null,
       "event_limit": 100
     },
-    "description": "В authorized_keys появился ключ, отпечатка которого нет в белом списке (14 ключей на 17.10.2026). Возможен бэкдор-доступ по SSH.\nMITRE ATT&CK. Тактики: Persistence, Privilege Escalation. Техники: T1098.004 SSH Authorized Keys.",
+    "description": "В authorized_keys появился ключ, отпечатка которого нет в белом списке (15 ключей на 19.11.2026). Возможен бэкдор-доступ по SSH.\nMITRE ATT&CK. Тактики: Persistence, Privilege Escalation. Техники: T1098.004 SSH Authorized Keys.",
     "field_spec": {
       "file": {
         "data_type": "string",
@@ -1189,7 +1189,7 @@
     "alert": true,
     "config": {
       "type": "aggregation-v1",
-      "query": "log_type:macos_osquery AND name:suspicious_processes AND columns_cmdline:/.*osascript.*-l[ ]JavaScript.*/ AND NOT columns_cmdline:(/.*CoreWLAN.*/ OR /.*URLForApplicationT.*/ OR /.*CGWindowListCopyWindowInfo.*NSRunningApplication.*NSBitmapImageFileTypePNG.*/ OR /.*iconDataURL.*NSWorkspace.*TIFFRepresentation.*base64EncodedStringWithOptions.*/)",
+      "query": "log_type:macos_osquery AND name:suspicious_processes AND columns_cmdline:/.*osascript.*-l[ ]JavaScript.*/ AND NOT columns_cmdline:(/.*CoreWLAN.*/ OR /.*URLForApplicationT.*/ OR /.*CGWindowListCopyWindowInfo.*NSRunningApplication.*NSBitmapImageFileTypePNG.*/ OR /.*iconDataURL.*NSWorkspace.*TIFFRepresentation.*base64EncodedStringWithOptions.*/) AND NOT columns_cwd:\"/Library/Ossec\"",
       "query_parameters": [],
       "filters": [],
       "streams": [
@@ -1208,7 +1208,7 @@
       "cron_timezone": null,
       "event_limit": 100
     },
-    "description": "Запуск osascript с JavaScript (JXA). Такие скрипты используют для сбора данных и запуска команд. Исключены инвентаризация Wi-Fi через CoreWLAN и подбор приложения для файла (NSWorkspace).\nMITRE ATT&CK. Тактики: Execution. Техники: T1059.002 AppleScript.",
+    "description": "Запуск osascript с JavaScript (JXA). Такие скрипты используют для сбора данных и запуска команд. Исключены инвентаризация Wi-Fi через CoreWLAN и подбор приложения для файла (NSWorkspace).\nMITRE ATT&CK. Тактики: Execution. Техники: T1059.002 AppleScript.\n19.11.2026: исключён агент Wazuh (cwd /Library/Ossec) — он сам читает loginwindow через JXA.",
     "field_spec": {
       "event": {
         "data_type": "string",
@@ -1387,7 +1387,7 @@
     "alert": true,
     "config": {
       "type": "aggregation-v1",
-      "query": "name:es_process_events AND message:(\"setremotelogin\" OR \"kickstart\" OR \"setremoteappleevents\")",
+      "query": "name:es_process_events AND message:\"__disabled_duplicate__see_6ae6cc6fbb96dbe5087b119b\"",
       "query_parameters": [],
       "filters": [],
       "streams": [
@@ -1406,7 +1406,7 @@
       "cron_timezone": null,
       "event_limit": 100
     },
-    "description": "systemsetup -setremotelogin, kickstart ARD или setremoteappleevents — открытие удалённого доступа к Маку.\nMITRE ATT&CK. Тактики: Lateral Movement. Техники: T1021.004 SSH; T1021.005 VNC.",
+    "description": "НЕТРАЛИЗОВАНО 19.11.2026. Запрос матчил любое слово kickstart в сообщении — ложные срабатывания на launchctl kickstart -k (обычный перезапуск сервисов). API не даёт отключить определение, поэтому запрос заменён на несовпадающий маркер. Рабочее точное правило: \"macOS - Включение удалённого доступа (SSH, Screen Sharing, ARD)\" (6ae6cc6fbb96dbe5087b119b). Чтобы вернуть — восстановить запрос из истории версий.",
     "field_spec": {
       "cmdline": {
         "data_type": "string",
@@ -1517,7 +1517,7 @@
       "macos",
       "medium"
     ],
-    "title": "macOS - Включение удалённого входа или Screen Sharing"
+    "title": "[ОТКЛЮЧЕНО] macOS - Включение удалённого входа или Screen Sharing"
   },
   {
     "alert": true,

@@ -169,7 +169,7 @@ BI.ZONE Triage (процессы, сеть, autoruns, baseline). О нём — �
 | Алерт | Что ловит | Приоритет | За 30 дней |
 |---|---|---|---|
 | Запись экрана на MacBook (replayd) | `replayd` начал сессию захвата экрана; Mac mini исключён, на нём это удалённая работа | 1 | 4 |
-| JXA-скрипт через osascript | `osascript -l JavaScript` в таблице `suspicious_processes`; исключены инвентаризация Wi-Fi (CoreWLAN) и подбор приложения для файла (NSWorkspace) | 2 | 0 |
+| JXA-скрипт через osascript | `osascript -l JavaScript` в таблице `suspicious_processes`; исключены инвентаризация Wi-Fi (CoreWLAN), подбор приложения для файла (NSWorkspace) и штатные вызовы агента Wazuh (cwd `/Library/Ossec`, с 19.11.2026) | 2 | 0 |
 | Открытая Wi-Fi сеть в сохранённых | таблица `wifi_history`, `security_type = Open`; сводка раз в сутки, повтор не чаще раза в неделю | 1 | 15 |
 
 Ещё два алерта на тишину отдельных хостов (Mac mini и MacBook-Pro) лежат в [health-event-definitions.json](../graylog/health-event-definitions.json). Ноутбук может уснуть, поэтому для него окно 3 часа и низкий приоритет. Имена хостов (`macminim2`, `macbook-pro`) и исключения под твои скрипты замени на свои.
@@ -207,3 +207,9 @@ BI.ZONE Triage (процессы, сеть, autoruns, baseline). О нём — �
 | Элемент входа | `sfltool add`, `osascript … make login item` | 1 | 0 |
 
 Что не вошло. Запросы про `launchctl print system/com.apple.screensharing` давали 589 событий в месяц, поэтому алерт на удалённый доступ смотрит только на включение. Алерты по таблицам osquery (новые расширения браузера, слушающие порты, USB, неподписанные процессы) требуют знать имена таблиц и дифференциальный режим в вашей выгрузке; отложены.
+
+### Изменения 19.11.2026 (после SSH-харденинга 18.11)
+
+- `Bi.Zone: неизвестный SSH-ключ в authorized_keys` — в белый список добавлен 15-й отпечаток (`SHA256:UYS6QzKTKgFwGBfGsk3fmvfnZ8yVhxE3Pb/CgUteskc`), новый ключ с харденинга SSH 18.11. Срабатывание было легитимным — свои ключи.
+- `JXA-скрипт через osascript` — добавлено исключение `NOT columns_cwd:"/Library/Ossec"`: агент Wazuh штатно вызывает JXA от root с рабочим каталогом `/Library/Ossec`.
+- `Включение удалённого входа или Screen Sharing` — отключено (нейтрализовано несовпадающим маркером, т.к. API Graylog не даёт снять определение с дежурства). Грубый запрос матчил любое слово «kickstart». Покрытие сохраняет точное правило «Включение удалённого доступа (SSH, Screen Sharing, ARD)».
