@@ -21,6 +21,20 @@
     Match            journal.*
     Regex            CONTAINER_NAME .+
 
+# Выкидываем пустые сообщения — без них индекс чище
+[FILTER]
+    Name             grep
+    Match            journal.*
+    Exclude          MESSAGE ^\s*$
+
+# Journald иногда подбрасывает поля с пустым именем, GELF-вход Graylog их не
+# переваривает. Lua-фильтр удаляет такие ключи (скрипт — clean.lua из этого каталога)
+[FILTER]
+    Name             lua
+    Match            journal.*
+    script           /var/lib/fluent-bit/clean.lua
+    call             drop_empty_keys
+
 # Отправка в Graylog по GELF TCP. Замени <graylog> на адрес сервера Graylog.
 # Порт 12202 — input "GELF TCP", отдельный от GELF UDP (12201).
 [OUTPUT]

@@ -22,8 +22,8 @@
    │                                  │
    └─► Fluent Bit (Quadlet) ──────────┘ поток "Containers" (CONTAINER_NAME есть)
        grep CONTAINER_NAME              │
-                                        ├─ extractor JSON (только строки от { )
-                                        ├─ extractor logfmt (строки level=)
+       grep -v пустые MESSAGE           ├─ extractor JSON (только строки от { )
+       lua drop_empty_keys              ├─ extractor logfmt (строки level=)
                                         ├─ extractor chown (строки changing ownership)
                                         └─ pipeline "Container logs" (normalize)
 ```
