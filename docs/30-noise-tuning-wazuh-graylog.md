@@ -41,6 +41,22 @@
 | 199009 | 80711 | то же | — |
 | 199010 | 40101 | pcre2 `session opened for user apache\(` | ежеминутные cron-сессии apache |
 
+Добавлены 19.11.2026 (после утренней сверки):
+
+| ID | Родитель | Уровень | Условие | Что подавляет |
+|---|---|---|---|---|
+| 199011 | 17101 | 5 | `srcip 192.168.1.210` | ночной вход homelab → redos-server (root-cron `backup-monitoring.sh`, 03:17) |
+| 199012 | 521 | 3 | pcre2 `/tmp/\.mount_` | ложный «kernel rootkit» rootcheck на точках монтирования AppImage (VanyaVPN на RedOS-Workstation) |
+| 199013 | 17101 | 3 | pcre2 `pam_unix\(sshd:session\)` | дублирующая PAM-строка SSH-входа (без srcip); алерт идёт по строке `Accepted publickey` |
+
+Почему 199013 — дедупликация, а не ослабление: ночной SSH-вход порождает два события —
+`Accepted publickey … from <ip>` (есть srcip, режется 199003/199011) и
+`pam_unix(sshd:session): session opened` (srcip нет). Детект не страдает: ночной вход
+с незнакомого адреса по-прежнему даёт уровень 9 по строке Accepted.
+
+Проверка 19.11: `wazuh-analysisd -t` чисто, рестарт без CRITICAL (только известный
+косметический `logger-helper: Missing enabled field`).
+
 Каждый кейс проверен `wazuh-logtest` → level 3. Правило 17101 (SSH ночью 00:00–08:00 YEKT)
 намеренно НЕ тронуто — это осознанный детект.
 

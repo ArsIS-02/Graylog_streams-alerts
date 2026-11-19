@@ -1,0 +1,147 @@
+<!-- Local rules -->
+
+<!-- Modify it at your will. -->
+<!-- Copyright (C) 2015, Wazuh Inc. -->
+
+<!-- Example -->
+<group name="local,syslog,sshd,">
+
+  <!--
+  Dec 10 01:02:02 host sshd[1234]: Failed none for root from 1.1.1.1 port 1066 ssh2
+  -->
+  <rule id="100001" level="5">
+    <if_sid>5716</if_sid>
+    <srcip>1.1.1.1</srcip>
+    <description>sshd: authentication failed from IP 1.1.1.1.</description>
+    <group>authentication_failed,pci_dss_10.2.4,pci_dss_10.2.5,</group>
+  </rule>
+
+  <!-- Информационный маркер: вход в выходной день (ночные входы ловит 17101) -->
+  <rule id="17102" level="3" overwrite="yes">
+    <if_group>authentication_success</if_group>
+    <weekday>weekends</weekday>
+    <description>Вход в выходной день (информационно; ночные входы ловит 17101)</description>
+    <mitre>
+      <id>T1078</id>
+    </mitre>
+    <group>login_day,</group>
+  </rule>
+
+</group>
+
+<!-- Подавление штатного шума лаборатории (2026-11-13) -->
+<group name="lab-noise,">
+
+  <!-- 2026-11-17: штатная работа Podman netavark при создании/удалении veth —
+       массово шумит правило 80710/80711 (флуд 4.6k за ночь на wazuh-homelab) -->
+  <rule id="199006" level="3">
+    <if_sid>80710</if_sid>
+    <match type="pcre2">exe="/usr/libexec/podman/netavark"</match>
+    <description>Podman netavark: включение promiscuous mode на veth (штатно)</description>
+  </rule>
+
+  <rule id="199007" level="3">
+    <if_sid>80711</if_sid>
+    <match type="pcre2">exe="/usr/libexec/podman/netavark"</match>
+    <description>Podman netavark: выключение promiscuous mode на veth (штатно)</description>
+  </rule>
+
+  <!-- 2026-11-17: WatchYourLAN (arp-scan в контейнере) штатно сканирует сеть -->
+  <rule id="199008" level="3">
+    <if_sid>80710</if_sid>
+    <match type="pcre2">exe="/usr/bin/arp-scan"</match>
+    <description>WatchYourLAN arp-scan: включение promiscuous mode (штатно)</description>
+  </rule>
+
+  <rule id="199009" level="3">
+    <if_sid>80711</if_sid>
+    <match type="pcre2">exe="/usr/bin/arp-scan"</match>
+    <description>WatchYourLAN arp-scan: выключение promiscuous mode (штатно)</description>
+  </rule>
+
+  <!-- 2026-11-17: cron-сессии системной учётки apache на redos-raspi (каждую минуту) —
+       понижены до уровня 3, чтобы не эскалировать в Graylog/IRIS -->
+  <rule id="199010" level="3">
+    <if_sid>40101</if_sid>
+    <match type="pcre2">session opened for user apache\(</match>
+    <description>Штатная cron-сессия системной учётки apache</description>
+  </rule>
+
+  <!-- cron/systemd/runuser/sudo сессии вне рабочего времени: штатные фоновые задачи -->
+  <rule id="199001" level="3">
+    <if_sid>17101</if_sid>
+    <match type="pcre2">pam_unix\((runuser|sudo|sudo-l|su|su-l|crond|cron):session\)</match>
+    <description>Локальная служебная PAM-сессия (runuser/sudo/cron) вне рабочего времени</description>
+  </rule>
+
+  <rule id="199002" level="3">
+    <if_sid>17101</if_sid>
+    <match>systemd-user:session</match>
+    <description>Штатная systemd-user PAM-сессия (cron/systemd) вне рабочего времени</description>
+  </rule>
+
+  <!-- SSH с админской машины MacMiniM2: понижаем до 5, видно в Wazuh, не уходит в IRIS -->
+  <rule id="199003" level="5">
+    <if_sid>17101</if_sid>
+    <srcip>192.168.1.3</srcip>
+    <description>SSH-вход с админской машины MacMiniM2 (192.168.1.3) вне рабочего времени</description>
+  </rule>
+
+  <!-- NetAlertX (arp-scan) на homeserver штатно включает/выключает promiscuous mode -->
+  <rule id="199004" level="3">
+    <if_sid>80710</if_sid>
+    <match type="pcre2">\buid=20211\b</match>
+    <description>NetAlertX arp-scan на homeserver: включение promiscuous mode (штатно)</description>
+  </rule>
+
+  <rule id="199005" level="3">
+    <if_sid>80711</if_sid>
+    <match type="pcre2">\buid=20211\b</match>
+    <description>NetAlertX arp-scan на homeserver: выключение promiscuous mode (штатно)</description>
+  </rule>
+
+  <!-- 2026-11-15: переопределение штатного 17101 (Successful login during non-business hours).
+       Окно сужено до 00:00-08:00 YEKT (контейнер менеджера в UTC => 19:00-03:00 UTC).
+       PAM/systemd/cron-шум понижают дочерние правила 199001-199002 (уровень 3),
+       входы с MacMiniM2 (192.168.1.3) — 199003 (уровень 5). На уровне 9 остаются
+       ночные входы по SSH от реальных пользователей с других адресов.
+       NB: overwrite не позволяет менять if_sid/if_group — см. warning 7605. -->
+  <rule id="17101" level="9" overwrite="yes">
+    <if_group>authentication_success</if_group>
+    <time>7 pm - 3 am</time>
+    <description>Вход реального пользователя ночью (00:00-08:00 YEKT)</description>
+    <mitre>
+      <id>T1078</id>
+    </mitre>
+    <group>login_time,pci_dss_10.2.5,pci_dss_10.6.1,gpg13_7.1,gpg13_7.2,gdpr_IV_35.7.d,gdpr_IV_32.2,hipaa_164.312.b,nist_800_53_AU.14,nist_800_53_AC.7,nist_800_53_AU.6,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
+  </rule>
+
+  <!-- 2026-11-19: штатный ночной бэкап с homelab (root cron 03:17,
+       /root/backup-monitoring.sh -> ssh на redos-server по ключу).
+       Понижен до 5, как входы с MacMiniM2 (199003) -->
+  <rule id="199011" level="5">
+    <if_sid>17101</if_sid>
+    <srcip>192.168.1.210</srcip>
+    <description>SSH-вход с homelab (192.168.1.210), ночной бэкап monitoring (штатно)</description>
+  </rule>
+
+  <!-- 2026-11-19: rootcheck 521 ложно срабатывает на точки монтирования AppImage:
+       "Anomaly detected in file '/tmp/.mount_XXXX'. Hidden from stats, but showing
+       up on readdir" (поймано на RedOS-Workstation, VanyaVPN AppImage) -->
+  <rule id="199012" level="3">
+    <if_sid>521</if_sid>
+    <match type="pcre2">/tmp/\.mount_</match>
+    <description>AppImage mount point в /tmp - не руткит (ложное срабатывание rootcheck)</description>
+  </rule>
+
+  <!-- 2026-11-19: дедупликация 17101. Каждый ночной SSH-вход даёт ДВА события:
+       "Accepted publickey ... from <ip>" (есть srcip, режется 199003/199011) и
+       "pam_unix(sshd:session)" (srcip нет — не режется ничем). PAM-строка —
+       бессодержательный дубль, понижаем её; алерт остаётся по строке Accepted -->
+  <rule id="199013" level="3">
+    <if_sid>17101</if_sid>
+    <match type="pcre2">pam_unix\(sshd:session\)</match>
+    <description>Дублирующая PAM-сессия SSH (алерт идёт по строке Accepted с srcip)</description>
+  </rule>
+
+</group>
