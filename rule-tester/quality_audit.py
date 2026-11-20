@@ -172,19 +172,28 @@ def iris_observables(row):
         if dimension == "host" and value is None:
             value = observable_value(content.get("source"))
         result[dimension] = value or UNKNOWN_FIELD
+    result["source_rule_id"] = UNKNOWN_FIELD
+    result["source_event"] = UNKNOWN_FIELD
+    if str(row.get("alert_title") or "").upper().startswith("WAZUH"):
+        result["source_rule_id"] = (observable_value(lower_fields.get("wazuh_rule_id"))
+                                    or observable_value(lower_fields.get("rule_id"))
+                                    or UNKNOWN_FIELD)
+        result["source_event"] = (observable_value(lower_fields.get("wazuh_rule_desc"))
+                                  or observable_value(lower_fields.get("event"))
+                                  or UNKNOWN_FIELD)
     return result
 
 
 def tuning_candidates(alerts):
     """Сгруппировать только FP/Legitimate; рекомендация не является автоматическим исключением."""
     groups = {}
+    dimensions = ("rule", "source_rule_id", "source_event", "host", "user", "command")
     for alert in alerts:
         if alert.get("resolution") not in TUNING_RESOLUTIONS:
             continue
-        key = tuple(alert.get(dimension) or UNKNOWN_FIELD
-                    for dimension in ("rule", "host", "user", "command"))
+        key = tuple(alert.get(dimension) or UNKNOWN_FIELD for dimension in dimensions)
         group = groups.setdefault(key, {
-            "rule": key[0], "host": key[1], "user": key[2], "command": key[3],
+            **dict(zip(dimensions, key)),
             "count": 0, "resolutions": Counter(), "alert_ids": [], "last_closed_at": "",
         })
         group["count"] += 1
@@ -204,8 +213,8 @@ def tuning_candidates(alerts):
             "Единичное закрытие: ручной разбор и наблюдение; правило автоматически не менять."
         )
         result.append(group)
-    result.sort(key=lambda item: (-item["count"], item["rule"], item["host"],
-                                  item["user"], item["command"]))
+    result.sort(key=lambda item: (-item["count"], item["rule"], item["source_rule_id"],
+                                  item["source_event"], item["host"], item["user"], item["command"]))
     return result
 
 
@@ -372,8 +381,8 @@ def render_markdown(report):
         "## 4. Кандидаты на тюнинг по итогам закрытий IRIS",
         "",
         "Учитываются только разрешения **False Positive** и **Legitimate**: %d алертов, %d групп. "
-        "Группировка — правило, хост, пользователь и команда. `(нет данных)` означает, что поле "
-        "отсутствует в исходном событии агрегированного алерта." % (
+        "Группировка — правило, хост, пользователь и команда; для Wazuh дополнительно `rule_id` "
+        "и описание исходного события. `(нет данных)` означает, что поле отсутствует в событии." % (
             iris.get("tuning_candidate_alerts", 0), len(iris.get("tuning_candidates", []))),
         "",
     ])
@@ -382,15 +391,22 @@ def render_markdown(report):
         lines.append("Закрытий False Positive/Legitimate за выбранный период не найдено.")
     else:
         lines.extend([
-            "| Правило | Хост | Пользователь | Команда | Закрытия | Последнее | Примеры | Рекомендация |",
+            "| Правило / событие Wazuh | Хост | Пользователь | Команда | Закрытия | Последнее | Примеры | Рекомендация |",
             "|---|---|---|---|---:|---|---|---|",
         ])
         for row in candidates[:40]:
             resolutions = ", ".join("%s: %d" % (name, count)
                                     for name, count in row["resolutions"].items())
             ids = ", ".join("#A-%s" % identifier for identifier in row["alert_ids"])
+            rule_label = md_cell(row["rule"])
+            source_rule_id = row.get("source_rule_id", UNKNOWN_FIELD)
+            source_event = row.get("source_event", UNKNOWN_FIELD)
+            if source_rule_id != UNKNOWN_FIELD:
+                rule_label += "<br>`rule_id: %s`" % md_cell(source_rule_id)
+            if source_event != UNKNOWN_FIELD:
+                rule_label += "<br>%s" % md_cell(source_event)
             lines.append("| %s | %s | %s | %s | %d (%s) | %s | %s | %s |" % (
-                md_cell(row["rule"]), md_cell(row["host"]), md_cell(row["user"]),
+                rule_label, md_cell(row["host"]), md_cell(row["user"]),
                 md_cell(row["command"]), row["count"], resolutions, row["last_closed_at"],
                 ids, md_cell(row["recommendation"])))
         if len(candidates) > 40:

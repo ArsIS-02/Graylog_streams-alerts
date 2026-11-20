@@ -21,7 +21,23 @@ class ObservableTest(unittest.TestCase):
             "host": "endpoint.example.test",
             "user": "analyst",
             "command": "/usr/bin/systemctl restart demo.service",
+            "source_rule_id": qa.UNKNOWN_FIELD,
+            "source_event": qa.UNKNOWN_FIELD,
         })
+
+    def test_wazuh_rule_id_and_event_are_extracted(self):
+        row = {
+            "alert_title": "WAZUH - Важный алерт (уровень 9-11): детали",
+            "alert_source_content": {"fields": {
+                "wazuh_agent": "endpoint.example.test",
+                "rule_id": "31151",
+                "wazuh_rule_desc": "Multiple web server 400 error codes from same source ip.",
+            }},
+        }
+        observed = qa.iris_observables(row)
+        self.assertEqual(observed["source_rule_id"], "31151")
+        self.assertEqual(observed["source_event"],
+                         "Multiple web server 400 error codes from same source ip.")
 
     def test_missing_fields_are_explicit(self):
         row = {"alert_source_content": {"source": "aggregator.example.test", "fields": {}}}
@@ -29,6 +45,8 @@ class ObservableTest(unittest.TestCase):
             "host": "aggregator.example.test",
             "user": qa.UNKNOWN_FIELD,
             "command": qa.UNKNOWN_FIELD,
+            "source_rule_id": qa.UNKNOWN_FIELD,
+            "source_event": qa.UNKNOWN_FIELD,
         })
 
     def test_invalid_content_does_not_break_collection(self):
@@ -36,13 +54,16 @@ class ObservableTest(unittest.TestCase):
             "host": qa.UNKNOWN_FIELD,
             "user": qa.UNKNOWN_FIELD,
             "command": qa.UNKNOWN_FIELD,
+            "source_rule_id": qa.UNKNOWN_FIELD,
+            "source_event": qa.UNKNOWN_FIELD,
         })
 
 
 class CandidateTest(unittest.TestCase):
     @staticmethod
     def alert(identifier, resolution="False Positive", closed="2026-11-20T10:00:00+05:00",
-              host="endpoint.example.test"):
+              host="endpoint.example.test", source_rule_id=qa.UNKNOWN_FIELD,
+              source_event=qa.UNKNOWN_FIELD):
         return {
             "id": identifier,
             "rule": "WAZUH - Важный алерт (уровень 9-11)",
@@ -51,6 +72,8 @@ class CandidateTest(unittest.TestCase):
             "host": host,
             "user": qa.UNKNOWN_FIELD,
             "command": qa.UNKNOWN_FIELD,
+            "source_rule_id": source_rule_id,
+            "source_event": source_event,
         }
 
     def test_only_fp_and_legitimate_are_grouped(self):
@@ -81,6 +104,22 @@ class CandidateTest(unittest.TestCase):
         groups = qa.tuning_candidates(rows)
         self.assertEqual([(row["host"], row["count"]) for row in groups],
                          [("host-a", 2), ("host-b", 1)])
+
+    def test_wazuh_id_and_event_split_otherwise_identical_alerts(self):
+        rows = [
+            self.alert(1, source_rule_id="31151", source_event="HTTP 400"),
+            self.alert(2, source_rule_id="900052", source_event="Queue flooded"),
+            self.alert(3, source_rule_id="31151", source_event="HTTP 400"),
+            self.alert(4, source_rule_id="31151", source_event="Other HTTP event"),
+        ]
+        groups = qa.tuning_candidates(rows)
+        self.assertEqual(len(groups), 3)
+        self.assertEqual([(row["source_rule_id"], row["source_event"], row["count"])
+                          for row in groups], [
+            ("31151", "HTTP 400", 2),
+            ("31151", "Other HTTP event", 1),
+            ("900052", "Queue flooded", 1),
+        ])
 
 
 if __name__ == "__main__":
