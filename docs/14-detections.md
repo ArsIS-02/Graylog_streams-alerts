@@ -1715,7 +1715,7 @@ AUDIT, HOMEREPO, HOSTDECK, TRAFFICLENS, ZASLON, CANARY, COWRIE, DIFFWATCH, DIGES
 | Пользователи, роли и токены | средний | HomeRepo | Создан или удалён пользователь, изменена роль, сброшен или сменён пароль, создан или удалён токен API, выдан доступ Ansible. | каждое событие | Persistence | `T1098` Account Manipulation |
 | Деградация: провалов проверок 3+ | средний | HostDeck | Пульс панели HostDeck сообщает о 3 или больше провалах проверок безопасности (hd_checks_failing >= 3). Панель жива, но состояние парка деградирует — открыть HostDeck и разобрать… | число событий ≥ 1 за 9 ч; повтор не чаще раза в 1 сут | — | — |
 | Открыта консоль root в браузере | средний | HostDeck | Из HostDeck открыта консоль root на хосте (или в ней отказано). Действие редкое и мощное: стоит знать о каждом. | каждое событие | Execution | `T1059.004` Unix Shell |
-| Важный алерт (уровень 9-11) | средний | Wazuh | Алерт Wazuh с уровнем 9-11 (входы в нерабочее время, изменения учёток и т.п.). В IRIS передаётся через TicketBridge с приоритетом Medium. | число событий ≥ 1 за 1 мин, группировка по wazuh_agent, rule_id, rule_level, wazuh_rule_desc, source; повтор не чаще раза в 1 ч | — | — |
+| Важный алерт (уровень 9-11) | средний | Wazuh | Алерт Wazuh с уровнем 9-11 (входы в нерабочее время, изменения учёток и т.п.). В IRIS передаётся через TicketBridge с приоритетом Medium. Для правила 31151 исключены штатные ответы IRIS… | число событий ≥ 1 за 1 мин, группировка по wazuh_agent, rule_id, rule_level, wazuh_rule_desc, source; повтор не чаще раза в 1 ч | — | — |
 | Проблема на узле или сервисе | средний | Zabbix | Событие PROBLEM из Zabbix. В DFIR-IRIS передаётся через существующий TicketBridge; повторы того же zabbix_event_id не создают новый алерт. RESOLVED этим правилом не обрабатывается. | число событий ≥ 1 за 1 мин, группировка по zabbix_event_id, source, zabbix_event_status, zabbix_trigger_id, zabbix_severity, zabbix_nseverity, zabbix_trigger_description, zabbix_event_duration, zabbix_tags_json, zabbix_url, zabbix_host_conn, zabbix_trigger_name | — | — |
 | SELinux переведён в permissive или disabled из панели | средний | ZaSlon | Через ZaSlon SELinux на хосте переведён в разрешающий режим или отключён. Это легитимное действие администратора, но защита хоста ослаблена: событие позволяет отличить его от setenforce… | каждое событие | Defense Impairment | `T1685` Disable or Modify Tools |
 | Утренний дайджест экосистемы | низкий | — | Скрипт morning-digest.py на <хост> (systemd-таймер, 08:47 YEKT) присылает GELF-сообщение dg_event=digest с пульсами инструментов и сводкой алертов за сутки; это правило превращает его в… | каждое событие | — | — |
@@ -1936,7 +1936,7 @@ hd_event:audit AND hd_action:(term-open OR term-denied)
 **WAZUH - Важный алерт (уровень 9-11)**
 
 ```
-tool:wazuh AND rule_level:[9 TO 11]
+tool:wazuh AND rule_level:[9 TO 11] AND NOT (rule_id:31151 AND data_id:[400 TO 401] AND (data_url:"/api/v2/auth/refresh-token" OR data_url:"/api/v2/dashboard/reviews/list" OR data_url:"/api/v2/notifications/unread-count" OR data_url:"/api/v2/users/mentionable?q="))
 ```
 
 **ZABBIX - Проблема на узле или сервисе**

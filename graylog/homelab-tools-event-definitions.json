@@ -2651,7 +2651,7 @@
     "alert": true,
     "config": {
       "type": "aggregation-v1",
-      "query": "tool:wazuh AND rule_level:[9 TO 11]",
+      "query": "tool:wazuh AND rule_level:[9 TO 11] AND NOT (rule_id:31151 AND data_id:[400 TO 401] AND (data_url:\"/api/v2/auth/refresh-token\" OR data_url:\"/api/v2/dashboard/reviews/list\" OR data_url:\"/api/v2/notifications/unread-count\" OR data_url:\"/api/v2/users/mentionable?q=\"))",
       "query_parameters": [],
       "filters": [],
       "streams": [
@@ -2692,7 +2692,7 @@
       "cron_timezone": null,
       "event_limit": 100
     },
-    "description": "Алерт Wazuh с уровнем 9-11 (входы в нерабочее время, изменения учёток и т.п.). В IRIS передаётся через TicketBridge с приоритетом Medium.",
+    "description": "Алерт Wazuh с уровнем 9-11 (входы в нерабочее время, изменения учёток и т.п.). В IRIS передаётся через TicketBridge с приоритетом Medium. Для правила 31151 исключены штатные ответы IRIS 400/401 на четырёх API-точках обновления сессии и фоновых запросов.",
     "field_spec": {
       "event": {
         "data_type": "string",
