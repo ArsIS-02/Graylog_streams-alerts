@@ -123,6 +123,32 @@
        "doc": {"audit_type": "SYSCALL", "key": "etcpasswd", "exe": "/var/ossec/bin/wazuh-syscheckd", "auid": "1000", "source": "rt-linux"}}
     ]
   },
+  "WAZUH - Важный алерт (уровень 9-11)": {
+    "positive": [
+      {"why": "регрессия: ответ 401 на другом API-адресе остаётся под детектом",
+       "doc": {"tool": "wazuh", "rule_level": 10, "rule_id": "31151", "data_id": "401",
+               "data_url": "/api/v2/alerts/42", "source": "rt-iris", "wazuh_agent": "rt-iris",
+               "wazuh_rule_desc": "Multiple web server 400 error codes from same source ip."}}
+    ],
+    "negative": [
+      {"why": "регрессия: штатное обновление сессии IRIS исключено",
+       "doc": {"tool": "wazuh", "rule_level": 10, "rule_id": "31151", "data_id": "400",
+               "data_url": "/api/v2/auth/refresh-token", "source": "rt-iris", "wazuh_agent": "rt-iris",
+               "wazuh_rule_desc": "Multiple web server 400 error codes from same source ip."}},
+      {"why": "регрессия: штатный фоновый запрос списка обзоров IRIS исключён",
+       "doc": {"tool": "wazuh", "rule_level": 10, "rule_id": "31151", "data_id": "401",
+               "data_url": "/api/v2/dashboard/reviews/list", "source": "rt-iris", "wazuh_agent": "rt-iris",
+               "wazuh_rule_desc": "Multiple web server 400 error codes from same source ip."}},
+      {"why": "регрессия: штатный запрос числа непрочитанных уведомлений IRIS исключён",
+       "doc": {"tool": "wazuh", "rule_level": 10, "rule_id": "31151", "data_id": "401",
+               "data_url": "/api/v2/notifications/unread-count", "source": "rt-iris", "wazuh_agent": "rt-iris",
+               "wazuh_rule_desc": "Multiple web server 400 error codes from same source ip."}},
+      {"why": "регрессия: штатный запрос доступных для упоминания пользователей IRIS исключён",
+       "doc": {"tool": "wazuh", "rule_level": 10, "rule_id": "31151", "data_id": "401",
+               "data_url": "/api/v2/users/mentionable?q=", "source": "rt-iris", "wazuh_agent": "rt-iris",
+               "wazuh_rule_desc": "Multiple web server 400 error codes from same source ip."}}
+    ]
+  },
   "KEENETIC - Отказ во входе на роутер": {
     "positive": [
       {"why": "ручной: реальный отказ аутентификации CLI остаётся под детектом",

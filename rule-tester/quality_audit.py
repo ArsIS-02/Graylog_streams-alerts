@@ -2,7 +2,7 @@
 """Еженедельный read-only аудит Graylog и итогов закрытия алертов IRIS.
 
 Запускает существующие ``drift`` и ``fp-check`` Rule Tester, собирает закрытые
-алерты IRIS, сохраняет обезличенную сводку и обновляет одну страницу HomeWiki.
+алерты IRIS, сохраняет внутреннюю сводку и обновляет одну страницу HomeWiki.
 Не изменяет правила Graylog, алерты IRIS или расписание основного Rule Tester.
 """
 import argparse
@@ -122,6 +122,93 @@ def iris_client(env):
     return get
 
 
+TUNING_RESOLUTIONS = {"False Positive", "Legitimate"}
+UNKNOWN_FIELD = "(нет данных)"
+OBSERVABLE_FIELDS = {
+    "host": ("host", "wazuh_agent", "agent_name", "source", "hostname", "node", "device",
+             "win_computer_name", "winlog_computer_name"),
+    "user": ("user", "username", "acct", "account", "suser", "subjectusername",
+             "targetusername", "winlog_event_data_targetusername",
+             "winlogbeat_winlog_event_data_targetusername",
+             "winlogbeat_winlog_event_data_subjectusername"),
+    "command": ("process_command_line", "command_line", "cmdline", "columns_cmdline",
+                "proctitle", "process_name", "exe"),
+}
+
+
+def observable_value(value):
+    """Скаляр для внутренней группировки; сложные структуры не сериализуем."""
+    if isinstance(value, (list, tuple)):
+        value = ", ".join(str(item) for item in value)
+    if value is None or isinstance(value, dict):
+        return None
+    text = str(value).strip()
+    if not text:
+        return None
+    return text[:239] + "…" if len(text) > 240 else text
+
+
+def iris_observables(row):
+    """Извлечь только поля группировки из исходного события, уже есть в ответе списка."""
+    content = row.get("alert_source_content") or {}
+    if isinstance(content, str):
+        try:
+            content = json.loads(content)
+        except (TypeError, ValueError):
+            content = {}
+    if not isinstance(content, dict):
+        content = {}
+    fields = content.get("fields") or {}
+    if not isinstance(fields, dict):
+        fields = {}
+    lower_fields = {str(key).lower(): value for key, value in fields.items()}
+    result = {}
+    for dimension, names in OBSERVABLE_FIELDS.items():
+        value = None
+        for name in names:
+            value = observable_value(lower_fields.get(name))
+            if value is not None:
+                break
+        if dimension == "host" and value is None:
+            value = observable_value(content.get("source"))
+        result[dimension] = value or UNKNOWN_FIELD
+    return result
+
+
+def tuning_candidates(alerts):
+    """Сгруппировать только FP/Legitimate; рекомендация не является автоматическим исключением."""
+    groups = {}
+    for alert in alerts:
+        if alert.get("resolution") not in TUNING_RESOLUTIONS:
+            continue
+        key = tuple(alert.get(dimension) or UNKNOWN_FIELD
+                    for dimension in ("rule", "host", "user", "command"))
+        group = groups.setdefault(key, {
+            "rule": key[0], "host": key[1], "user": key[2], "command": key[3],
+            "count": 0, "resolutions": Counter(), "alert_ids": [], "last_closed_at": "",
+        })
+        group["count"] += 1
+        group["resolutions"][alert["resolution"]] += 1
+        if alert.get("id") is not None:
+            group["alert_ids"].append(alert["id"])
+        group["last_closed_at"] = max(group["last_closed_at"], alert.get("closed_at") or "")
+
+    result = []
+    for group in groups.values():
+        group["resolutions"] = dict(sorted(group["resolutions"].items()))
+        group["alert_ids"] = group["alert_ids"][:5]
+        group["recommendation"] = (
+            "Повтор: проверить запрос и добавить регрессионные positive/negative; "
+            "исключение только после ручного разбора."
+            if group["count"] > 1 else
+            "Единичное закрытие: ручной разбор и наблюдение; правило автоматически не менять."
+        )
+        result.append(group)
+    result.sort(key=lambda item: (-item["count"], item["rule"], item["host"],
+                                  item["user"], item["command"]))
+    return result
+
+
 def collect_iris(env, days):
     get = iris_client(env)
     now = datetime.now().astimezone()
@@ -157,7 +244,7 @@ def collect_iris(env, days):
         resolution = (row.get("resolution_status") or {}).get("resolution_status_name")
         if not resolution:
             resolution = RESOLUTIONS.get(resolution_id, "Без разрешения" if resolution_id is None else "Неизвестно")
-        selected.append({
+        item = {
             "id": row.get("alert_id"),
             "title": row.get("alert_title"),
             "rule": rule_name(row.get("alert_title")),
@@ -165,10 +252,14 @@ def collect_iris(env, days):
             "resolution": resolution,
             "closed_at": closed.isoformat(timespec="seconds"),
             "time_field": time_field,
-        })
+        }
+        if resolution in TUNING_RESOLUTIONS:
+            item.update(iris_observables(row))
+        selected.append(item)
     selected.sort(key=lambda item: item["closed_at"], reverse=True)
     resolution_counts = Counter(item["resolution"] for item in selected)
     rule_counts = Counter(item["rule"] for item in selected)
+    candidates = tuning_candidates(selected)
     return {
         "days": days,
         "from": cutoff.isoformat(timespec="seconds"),
@@ -180,6 +271,8 @@ def collect_iris(env, days):
                         for name, count in sorted(resolution_counts.items(), key=lambda x: (-x[1], x[0]))],
         "rules": [{"rule": name, "count": count}
                   for name, count in sorted(rule_counts.items(), key=lambda x: (-x[1], x[0]))],
+        "tuning_candidate_alerts": sum(group["count"] for group in candidates),
+        "tuning_candidates": candidates,
         "alerts": selected,
     }
 
@@ -276,12 +369,41 @@ def render_markdown(report):
         "поэтому использовано `date_update` (время последнего изменения)." % (
             iris["closed_total_api"], iris["date_update_fallback"]),
         "",
+        "## 4. Кандидаты на тюнинг по итогам закрытий IRIS",
+        "",
+        "Учитываются только разрешения **False Positive** и **Legitimate**: %d алертов, %d групп. "
+        "Группировка — правило, хост, пользователь и команда. `(нет данных)` означает, что поле "
+        "отсутствует в исходном событии агрегированного алерта." % (
+            iris.get("tuning_candidate_alerts", 0), len(iris.get("tuning_candidates", []))),
+        "",
+    ])
+    candidates = iris.get("tuning_candidates", [])
+    if not candidates:
+        lines.append("Закрытий False Positive/Legitimate за выбранный период не найдено.")
+    else:
+        lines.extend([
+            "| Правило | Хост | Пользователь | Команда | Закрытия | Последнее | Примеры | Рекомендация |",
+            "|---|---|---|---|---:|---|---|---|",
+        ])
+        for row in candidates[:40]:
+            resolutions = ", ".join("%s: %d" % (name, count)
+                                    for name, count in row["resolutions"].items())
+            ids = ", ".join("#A-%s" % identifier for identifier in row["alert_ids"])
+            lines.append("| %s | %s | %s | %s | %d (%s) | %s | %s | %s |" % (
+                md_cell(row["rule"]), md_cell(row["host"]), md_cell(row["user"]),
+                md_cell(row["command"]), row["count"], resolutions, row["last_closed_at"],
+                ids, md_cell(row["recommendation"])))
+        if len(candidates) > 40:
+            lines.append("\nПоказаны 40 из %d групп; полный список — в JSON на сервере." % len(candidates))
+    lines.extend([
+        "",
         "## Ограничения и эксплуатация",
         "",
         "- FP-check поддерживает числовые диапазоны Lucene. Для агрегаций учитывает `group_by`, скользящее окно, `count()` и `cardinality()`; точное расписание Graylog не воспроизводится.",
         "- Правила тишины и информационные сводки не оцениваются как FP по отдельным совпадениям.",
         "- Корпус ограничен лимитом и не является гарантированно «чистым»: совпадение может быть настоящим инцидентом.",
-        "- Сырые сообщения Graylog, описания алертов и секреты в эту сводку не включаются.",
+        "- Кандидаты на тюнинг — основание для ручного разбора, а не для автоматического исключения или ослабления правил.",
+        "- Сырые сообщения Graylog, описания алертов и секреты в эту сводку не включаются. Хосты, пользователи и команды из кандидатов остаются только во внутренних отчётах на сервере и в HomeWiki; их нельзя переносить в GitHub.",
         "- Исторические отчёты: `%s`; технические журналы: `%s`." % (
             report["paths"]["history_dir"], report["paths"]["logs_dir"]),
         "- Исходный отчёт Rule Tester: `%s`." % fp.get("report_json"),
