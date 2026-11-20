@@ -120,8 +120,8 @@
     "GLPI Ticket (TicketBridge)"
    ],
    "state": "ENABLED",
-   "description": "Запущены insmod/modprobe/rmmod или изменён /etc/modprobe.d — загрузка или выгрузка модулей ядра (rootkit-активность). Команда — в тексте события.",
-   "query": "audit AND (insmod OR modprobe OR rmmod) AND NOT (source:wazuh-homelab AND message:modprobe AND (auid:4294967295 OR message:\"auid=4294967295\"))",
+   "description": "Запущены insmod/modprobe/rmmod или изменён /etc/modprobe.d — загрузка или выгрузка модулей ядра (rootkit-активность). Команда — в тексте события.\nУточнено 20.11.2026: события с key=kernel_modules/kernel_modules_config обрабатываются правилом LNX - Загрузка модуля ядра; здесь исключены дубли.",
+   "query": "audit AND (insmod OR modprobe OR rmmod) AND NOT key:(kernel_modules OR kernel_modules_config) AND NOT (source:wazuh-homelab AND message:modprobe AND (auid:4294967295 OR message:\"auid=4294967295\"))",
    "group_by": [],
    "condition": null,
    "aggregated": false,
@@ -4739,8 +4739,8 @@
     "GLPI Ticket (TicketBridge)"
    ],
    "state": "ENABLED",
-   "description": "security authorizationdb: правка прав на системные действия. Позволяет выполнять привилегированные операции без пароля.",
-   "query": "name:es_process_events AND columns_cmdline:/.*authorizationdb.*/",
+   "description": "security authorizationdb: правка прав на системные действия. Позволяет выполнять привилегированные операции без пароля.\nУточнено 20.11.2026: детект только на write; чтение authorizationdb read не является изменением.",
+   "query": "name:es_process_events AND columns_cmdline:/.*authorizationdb[ \\t]+write.*/",
    "group_by": [],
    "condition": null,
    "aggregated": false,

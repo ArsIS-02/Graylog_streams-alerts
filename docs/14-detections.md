@@ -858,9 +858,9 @@ osquery Endpoint Security и unified log; поток MacOS Logs. Правил: 5
 | Установка или удаление профиля конфигурации | высокий | MacOS Logs<br>osquery es_process_events | Запуск profiles с install, remove, -I или -R. Профили конфигурации ставят прокси, сертификаты и VPN, отключают защиту. Штатные `profiles list` и `profiles status` не попадают. | каждое событие | Defense Impairment | `T1685` Disable or Modify Tools<br>`T1553.004` |
 | Установка конфигурационного профиля (profiles install) | высокий | MacOS Logs<br>osquery es_process_events | Установлен конфигурационный профиль. Через профили меняют настройки безопасности, прокси и сертификаты. | каждое событие; повтор не чаще раза в 1 ч | Persistence | `T1547` Boot or Logon Autostart Execution |
 | Фишинговый запрос пароля через osascript | высокий | MacOS Logs<br>osquery es_process_events | osascript показывает диалог со скрытым вводом — так вредоносы выманивают пароль пользователя. | каждое событие | Collection | `T1056.002` GUI Input Capture |
-| JXA-скрипт через osascript | средний | MacOS Logs | Запуск osascript с JavaScript (JXA). Такие скрипты используют для сбора данных и запуска команд. Исключены инвентаризация Wi-Fi через CoreWLAN, подбор приложения для файла (NSWorkspace) и штатные вызовы агента Wazuh (cwd `/Library/Ossec`, добавлено 19.11.2026). | каждое событие; повтор не чаще раза в 1 ч | Execution | `T1059.002` AppleScript |
+| JXA-скрипт через osascript | средний | MacOS Logs | Запуск osascript с JavaScript (JXA). Такие скрипты используют для сбора данных и запуска команд. Исключены инвентаризация Wi-Fi через CoreWLAN и подбор приложения для файла (NSWorkspace). | каждое событие; повтор не чаще раза в 1 ч | Execution | `T1059.002` AppleScript |
 | Активность AirDrop | средний | MacOS Logs<br>журнал macos_unified | Передача или приём через AirDrop (sharingd). Возможна утечка данных. | число событий ≥ 1 за 5 мин, группировка по source | — | — |
-| ~~Включение удалённого входа или Screen Sharing~~ (отключено 19.11.2026) | средний | MacOS Logs<br>osquery es_process_events | Грубый запрос матчил любое слово «kickstart», дублировал правило «Включение удалённого доступа (SSH, Screen Sharing, ARD)» — нейтрализован несовпадающим маркером. Рабочее покрытие — строка выше. | — | Lateral Movement | `T1021.004` SSH<br>`T1021.005` |
+| Включение удалённого входа или Screen Sharing | средний | MacOS Logs<br>osquery es_process_events | systemsetup -setremotelogin, kickstart ARD или setremoteappleevents — открытие удалённого доступа к Маку. | каждое событие | Lateral Movement | `T1021.004` SSH<br>`T1021.005` |
 | Добавление корневого сертификата | средний | MacOS Logs<br>osquery es_process_events | security add-trusted-cert, trust-settings-import или add-certificates: сертификат становится доверенным в системе. Так подготавливают перехват TLS. | каждое событие | Stealth | `T1553.004` Install Root Certificate |
 | Загрузка launchd-задания (load, bootstrap, submit) | средний | MacOS Logs<br>osquery es_process_events | launchctl load, bootstrap или submit для заданий вне исключений (Apple, hostdeck, Graylog, Elastic, beszel, Homebrew, homelab, logatlas). Так запускают закреплённые задания. | каждое событие | Execution | `T1569.001` Launchctl<br>`T1543.004` |
 | Загрузка расширения ядра | средний | MacOS Logs<br>osquery es_process_events | Загрузка kext через kextload или kmutil load. | каждое событие | Persistence | `T1547.006` Kernel Modules and Extensions |
@@ -921,7 +921,7 @@ name:file_events AND columns_category:sudoers AND (action:added OR columns_actio
 **macOS - Изменение базы авторизации (authorizationdb)**
 
 ```
-name:es_process_events AND columns_cmdline:/.*authorizationdb.*/
+name:es_process_events AND columns_cmdline:/.*authorizationdb[ \t]+write.*/
 ```
 
 **macOS - Копирование данных браузера**
@@ -1029,10 +1029,8 @@ name:es_process_events AND message:"osascript" AND message:("display dialog" OR 
 **macOS - JXA-скрипт через osascript**
 
 ```
-log_type:macos_osquery AND name:suspicious_processes AND columns_cmdline:/.*osascript.*-l[ ]JavaScript.*/ AND NOT columns_cwd:"/Library/Ossec" AND NOT columns_cmdline:(/.*CoreWLAN.*/ OR /.*URLForApplicationT.*/ OR /.*CGWindowListCopyWindowInfo.*NSRunningApplication.*NSBitmapImageFileTypePNG.*/ OR /.*iconDataURL.*NSWorkspace.*TIFFRepresentation.*base64EncodedStringWithOptions.*/)
+log_type:macos_osquery AND name:suspicious_processes AND columns_cmdline:/.*osascript.*-l[ ]JavaScript.*/ AND NOT columns_cmdline:(/.*CoreWLAN.*/ OR /.*URLForApplicationT.*/ OR /.*CGWindowListCopyWindowInfo.*NSRunningApplication.*NSBitmapImageFileTypePNG.*/ OR /.*iconDataURL.*NSWorkspace.*TIFFRepresentation.*base64EncodedStringWithOptions.*/)
 ```
-
-(`NOT columns_cwd:"/Library/Ossec"` — исключение штатных JXA-вызовов агента Wazuh, добавлено 19.11.2026)
 
 **macOS - Активность AirDrop**
 
@@ -1040,12 +1038,10 @@ log_type:macos_osquery AND name:suspicious_processes AND columns_cmdline:/.*osas
 log_type:macos_unified AND processImagePath:"/usr/libexec/sharingd" AND (eventMessage:"Creating new AirDrop connection" OR eventMessage:"SDAirDropReceiveService.transfers ADD" OR eventMessage:"Received ASK request")
 ```
 
-**~~macOS - Включение удалённого входа или Screen Sharing~~ (отключено 19.11.2026)**
-
-Грубый запрос `message:("setremotelogin" OR "kickstart" OR "setremoteappleevents")` матчил любое слово «kickstart» и дублировал точное правило «Включение удалённого доступа (SSH, Screen Sharing, ARD)». API Graylog не даёт отключить определение, поэтому запрос нейтрализован несовпадающим маркером. Рабочее правило:
+**macOS - Включение удалённого входа или Screen Sharing**
 
 ```
-name:es_process_events AND message:"__disabled_duplicate__see_6ae6cc6fbb96dbe5087b119b"
+name:es_process_events AND message:("setremotelogin" OR "kickstart" OR "setremoteappleevents")
 ```
 
 **macOS - Добавление корневого сертификата**
@@ -1200,7 +1196,7 @@ name:es_process_events AND columns_path:"/usr/bin/xattr" AND message:"com.apple.
 
 | Правило | Приоритет | Источник логов | Что проверяет | Корреляция | Тактика | Техника |
 |---|---|---|---|---|---|---|
-| Bi.Zone: неизвестный SSH-ключ в authorized_keys | высокий | BiZone_macOS<br>BI.ZONE SSHKeyInfo | В authorized_keys появился ключ, отпечатка которого нет в белом списке (15 ключей на 19.11.2026). Возможен бэкдор-доступ по SSH. | каждое событие; повтор не чаще раза в 7 сут | Persistence | `T1098.004` SSH Authorized Keys |
+| Bi.Zone: неизвестный SSH-ключ в authorized_keys | высокий | BiZone_macOS<br>BI.ZONE SSHKeyInfo | В authorized_keys появился ключ, отпечатка которого нет в белом списке (14 ключей на 17.10.2026). Возможен бэкдор-доступ по SSH. | каждое событие; повтор не чаще раза в 7 сут | Persistence | `T1098.004` SSH Authorized Keys |
 | Bi.Zone: новое правило в sudoers | высокий | BiZone_macOS<br>BI.ZONE SudoersInfo | В sudoers появилось правило не из белого списка (root, %admin, logatlas-collect). Возможна эскалация привилегий. | каждое событие; повтор не чаще раза в 7 сут | Privilege Escalation | `T1548.003` Sudo and Sudo Caching |
 | Bi.Zone: новый пользователь | высокий | BiZone_macOS<br>BI.ZONE UserInfo | В системе появился пользователь с uid ≥ 500, которого нет в белом списке (igor, logatlas-collect, nobody). | каждое событие; повтор не чаще раза в 7 сут | Persistence | `T1136.001` Local Account |
 | Bi.Zone: подозрительная запись в hosts | высокий | BiZone_macOS<br>BI.ZONE NetworkHostsFileInfo | В /etc/hosts появилась запись не из белого списка. Так перенаправляют обновления, антивирус или банк на чужой адрес. | каждое событие; повтор не чаще раза в 7 сут | Impact | `T1565.001` Stored Data Manipulation |
@@ -1687,7 +1683,7 @@ AUDIT, HOMEREPO, HOSTDECK, TRAFFICLENS, ZASLON, CANARY, COWRIE, DIFFWATCH, DIGES
 |---|---|---|---|---|---|---|
 | Запуск программы из временного каталога | высокий | RedOS auditd Logs | Выполнен бинарник или скрипт из /tmp, /var/tmp или /dev/shm — классическое место распаковки дропперов и малвари. Команда и аргументы — в тексте события (EXECVE). | ОТКЛЮЧЕНО; каждое событие | — | — |
 | Изменение файлов учётных записей | высокий | RedOS auditd Logs | Изменены /etc/passwd, /etc/shadow, /etc/group или /etc/gshadow — создание или правка учётной записи (persistence). Файл и операция — в тексте события. | ОТКЛЮЧЕНО; каждое событие | — | — |
-| Работа с модулями ядра | высокий | RedOS auditd Logs | Запущены insmod/modprobe/rmmod или изменён /etc/modprobe.d — загрузка или выгрузка модулей ядра (rootkit-активность). Команда — в тексте события. | каждое событие | — | — |
+| Работа с модулями ядра | высокий | RedOS auditd Logs<br>ключ kernel_modules, kernel_modules_config | Запущены insmod/modprobe/rmmod или изменён /etc/modprobe.d — загрузка или выгрузка модулей ядра (rootkit-активность). Команда — в тексте события. | каждое событие | — | — |
 | Логин в ловушку | высокий | Canary | Кто-то ввёл логин/пароль в ловушку canary (Telnet 2323 или HTTP Basic 8081). Легитимных обращений к ловушке нет: это сканер с подбором паролей или злоумышленник в сети. Логин и пароль —… | каждое событие | — | — |
 | Открытие honeytoken-файла | высокий | RedOS auditd Logs<br>auditd SYSCALL, ключ honeytoken | Чтение канареечного файла (passwords.xlsx, backup_credentials.txt) — признак разведки или компрометации хоста | число событий ≥ 1 за 1 мин, группировка по source | — | — |
 | Команда в honeypot | высокий | Cowrie | Внутри honeypot выполнена команда: разведка (uname, ip a), закачка (wget/curl), запуск вредоноса. Текст команды — в поле input, адрес — src_ip. | каждое событие | — | — |
@@ -1748,7 +1744,7 @@ audit AND PATH AND ("/etc/passwd" OR "/etc/shadow" OR "/etc/group" OR "/etc/gsha
 **AUDIT - Работа с модулями ядра**
 
 ```
-audit AND (insmod OR modprobe OR rmmod) AND NOT (source:wazuh-homelab AND message:modprobe AND (auid:4294967295 OR message:"auid=4294967295"))
+audit AND (insmod OR modprobe OR rmmod) AND NOT key:(kernel_modules OR kernel_modules_config) AND NOT (source:wazuh-homelab AND message:modprobe AND (auid:4294967295 OR message:"auid=4294967295"))
 ```
 
 **CANARY - Логин в ловушку**

@@ -3257,7 +3257,7 @@
     "alert": true,
     "config": {
       "type": "aggregation-v1",
-      "query": "name:es_process_events AND columns_cmdline:/.*authorizationdb.*/",
+      "query": "name:es_process_events AND columns_cmdline:/.*authorizationdb[ \\t]+write.*/",
       "query_parameters": [],
       "filters": [],
       "streams": [
@@ -3276,7 +3276,7 @@
       "cron_timezone": null,
       "event_limit": 100
     },
-    "description": "security authorizationdb: правка прав на системные действия. Позволяет выполнять привилегированные операции без пароля.\nMITRE ATT&CK. Тактики: Privilege Escalation. Техники: T1548 Abuse Elevation Control Mechanism.",
+    "description": "security authorizationdb: правка прав на системные действия. Позволяет выполнять привилегированные операции без пароля.\nMITRE ATT&CK. Тактики: Privilege Escalation. Техники: T1548 Abuse Elevation Control Mechanism.\nУточнено 20.11.2026: детект только на write; чтение authorizationdb read не является изменением.",
     "field_spec": {
       "cmdline": {
         "data_type": "string",
