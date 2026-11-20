@@ -122,5 +122,37 @@ class CandidateTest(unittest.TestCase):
         ])
 
 
+class RenderTest(unittest.TestCase):
+    def test_candidates_use_full_width_blocks_instead_of_wide_table(self):
+        candidate = CandidateTest.alert(
+            42, source_rule_id="900052", source_event="Agent event queue is flooded.")
+        groups = qa.tuning_candidates([candidate])
+        report = {
+            "finished": "2026-11-20T20:00:00+05:00",
+            "git": {"commit": "test"},
+            "parameters": {"limit": 500},
+            "drift": {"summary": "", "findings": []},
+            "fp_check": {"stats": {}, "meta": {}, "findings": [], "report_json": "fp.json"},
+            "iris": {
+                "days": 1,
+                "closed_in_period": 1,
+                "closed_total_api": 1,
+                "date_update_fallback": 0,
+                "resolutions": [],
+                "rules": [],
+                "tuning_candidate_alerts": 1,
+                "tuning_candidates": groups,
+            },
+            "errors": [],
+            "paths": {"history_dir": "history", "logs_dir": "logs"},
+        }
+        markdown = qa.render_markdown(report)
+        self.assertNotIn("| Правило / событие Wazuh |", markdown)
+        self.assertIn("### 1. WAZUH - Важный алерт", markdown)
+        self.assertIn("**Событие Wazuh:** `rule_id: 900052` — Agent event queue is flooded.",
+                      markdown)
+        self.assertIn("**последнее:** `2026-11-20T10:00:00+05:00`", markdown)
+
+
 if __name__ == "__main__":
     unittest.main()

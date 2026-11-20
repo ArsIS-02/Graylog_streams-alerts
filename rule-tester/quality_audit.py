@@ -390,25 +390,30 @@ def render_markdown(report):
     if not candidates:
         lines.append("Закрытий False Positive/Legitimate за выбранный период не найдено.")
     else:
-        lines.extend([
-            "| Правило / событие Wazuh | Хост | Пользователь | Команда | Закрытия | Последнее | Примеры | Рекомендация |",
-            "|---|---|---|---|---:|---|---|---|",
-        ])
-        for row in candidates[:40]:
+        # Карточки вместо восьмиколоночной таблицы: на A4 узкие ячейки дробят
+        # слова и timestamps, а полноширинные блоки остаются читаемыми.
+        for index, row in enumerate(candidates[:40], 1):
             resolutions = ", ".join("%s: %d" % (name, count)
                                     for name, count in row["resolutions"].items())
             ids = ", ".join("#A-%s" % identifier for identifier in row["alert_ids"])
-            rule_label = md_cell(row["rule"])
+            lines.extend(["", "### %d. %s" % (index, md_cell(row["rule"])), ""])
             source_rule_id = row.get("source_rule_id", UNKNOWN_FIELD)
             source_event = row.get("source_event", UNKNOWN_FIELD)
-            if source_rule_id != UNKNOWN_FIELD:
-                rule_label += "<br>`rule_id: %s`" % md_cell(source_rule_id)
-            if source_event != UNKNOWN_FIELD:
-                rule_label += "<br>%s" % md_cell(source_event)
-            lines.append("| %s | %s | %s | %s | %d (%s) | %s | %s | %s |" % (
-                rule_label, md_cell(row["host"]), md_cell(row["user"]),
-                md_cell(row["command"]), row["count"], resolutions, row["last_closed_at"],
-                ids, md_cell(row["recommendation"])))
+            if source_rule_id != UNKNOWN_FIELD or source_event != UNKNOWN_FIELD:
+                source = []
+                if source_rule_id != UNKNOWN_FIELD:
+                    source.append("`rule_id: %s`" % md_cell(source_rule_id))
+                if source_event != UNKNOWN_FIELD:
+                    source.append(md_cell(source_event))
+                lines.append("**Событие Wazuh:** " + " — ".join(source))
+            lines.extend([
+                "- **Хост:** %s; **пользователь:** %s" % (
+                    md_cell(row["host"]), md_cell(row["user"])),
+                "- **Команда:** %s" % md_cell(row["command"]),
+                "- **Закрытия:** %d (%s); **последнее:** `%s`; **примеры:** %s" % (
+                    row["count"], resolutions, row["last_closed_at"], ids),
+                "- **Рекомендация:** %s" % md_cell(row["recommendation"]),
+            ])
         if len(candidates) > 40:
             lines.append("\nПоказаны 40 из %d групп; полный список — в JSON на сервере." % len(candidates))
     lines.extend([
