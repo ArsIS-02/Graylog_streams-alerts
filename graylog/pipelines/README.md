@@ -60,6 +60,51 @@
 Скрипт нарочно не трогает сами pipeline. Запись pipeline через API заменяет его целиком и
 стирает стадии, которых нет в теле запроса (см. главу 11, «Грабли», п. 4).
 
+## HostDeck maintenance для availability
+
+Правило [`rules/availability-hostdeck-maintenance.rule`](rules/availability-hostdeck-maintenance.rule)
+и отдельный pipeline `hostdeck: availability maintenance` добавляют только в явно
+распознанные availability-сообщения поля `maintenance_active`,
+`maintenance_until` и `maintenance_reason`. Это Zabbix `PROBLEM`, heartbeat
+HostDeck/HomeRepo, HomeRepo `agent_silent` и сообщения `Cannot contact any KDC`.
+Для `agent_silent` ключ lookup — `hr_agent_name`, потому что `source` у такого
+сообщения обозначает саму панель. Security-сообщения не изменяются.
+
+Две lookup tables, `hostdeck-maintenance-until` и `hostdeck-maintenance-reason`,
+читают CSV HostDeck через свои HTTP DSV adapters с общим кэшем. Секретный URL
+остаётся в переменной окружения и не выводится скриптом. Истёкшее окно HostDeck
+экспортирует как `until=0`.
+
+Синхронизатор [`sync_availability_maintenance.py`](sync_availability_maintenance.py)
+создаёт cache, adapters, tables, rule и pipeline, подключает pipeline к выбранным
+потокам и добавляет maintenance-поля только в перечисленные event definitions.
+Существующие `pipeline_ids`, query, key_spec, notifications, priority и state
+сохраняются. У aggregation-правила Zabbix поля добавляются и в `group_by`, и в
+`field_spec`. Перед записью создаётся частный backup в
+`~/graylog-maintenance-backups/<timestamp>/before.json`.
+
+```bash
+export GRAYLOG_URL='http://127.0.0.1:9000'
+export GRAYLOG_TOKEN='<access-token>'
+export HOSTDECK_CSV_URL='http://127.0.0.1:8080/api/export/hosts.csv?token=<export-token>&key=name&header=0'
+export MAINTENANCE_STREAM_IDS='stream-zabbix,stream-hostdeck,stream-homerepo,stream-auditd'
+export MAINTENANCE_DEFINITION_IDS='definition-kdc,definition-agent-silent,definition-homerepo-degradation,definition-hostdeck-degradation'
+export ZABBIX_DEFINITION_ID='definition-zabbix-problem'
+python3 sync_availability_maintenance.py          # обязательный dry-run
+python3 sync_availability_maintenance.py --apply  # backup и запись
+```
+
+ID и имена выше вымышленные. Проверено на Graylog 7.2.2: pipeline создаётся с
+обязательным `source`, подключение выполняется через
+`/api/system/pipelines/connections/to_stream`, правило дополнительно проходит
+штатный parser. Lookup обновляется примерно раз в 60 секунд.
+
+**Ограничение silence.** У события «тишины» нет исходного heartbeat, поэтому
+pipeline не может восстановить hostname. Такие definition_id обогащаются позже в
+TicketBridge по отдельной явной карте fallback hostname. Агрегированные алерты
+нескольких хостов нельзя привязывать к одному окну. Этот этап не скрывает и не
+закрывает алерты и не отключает email Graylog/IRIS; он только добавляет контекст.
+
 ## Порядок внутри стадии
 
 - Правила, меняющие поле (`abbreviate`, `set_field`), ставят **после** тех, что это поле

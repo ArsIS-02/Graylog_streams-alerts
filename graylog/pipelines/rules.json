@@ -1,5 +1,10 @@
 [
   {
+    "title": "availability: HostDeck maintenance",
+    "description": "Только availability-сообщения Zabbix, HostDeck, HomeRepo и KDC получают активные maintenance_until/maintenance_reason из HostDeck; security-события не изменяются.",
+    "source": "rule \"availability: HostDeck maintenance\"\nwhen\n  has_field(\"source\")\n  AND (\n    (has_field(\"zabbix_event_id\") AND to_string($message.zabbix_event_status) == \"PROBLEM\")\n    OR to_string($message.hd_event) == \"heartbeat\"\n    OR to_string($message.hr_event) == \"heartbeat\"\n    OR to_string($message.hr_event) == \"agent_silent\"\n    OR contains(to_string($message.message), \"Cannot contact any KDC\")\n  )\n  AND (\n    to_long(lookup_value(\"hostdeck-maintenance-until\", to_string($message.source), \"0\")) > 0\n    OR to_long(lookup_value(\"hostdeck-maintenance-until\", to_string($message.hr_agent_name), \"0\")) > 0\n  )\nthen\n  set_field(\"maintenance_active\", true);\n  set_field(\"maintenance_until\", to_long(lookup_value(\"hostdeck-maintenance-until\", to_string($message.source), lookup_value(\"hostdeck-maintenance-until\", to_string($message.hr_agent_name), \"0\"))));\n  set_field(\"maintenance_reason\", lookup_value(\"hostdeck-maintenance-reason\", to_string($message.source), lookup_value(\"hostdeck-maintenance-reason\", to_string($message.hr_agent_name), \"\")));\nend"
+  },
+  {
     "title": "collectors: drop kaspersky flow noise",
     "description": "Отбрасывает шум сетевого расширения Касперского с macOS (NetworkExtension flow write errors)",
     "source": "rule \"collectors: drop kaspersky flow noise\"\nwhen\n  to_string($message.process_name) == \"com.kaspersky.kav.sysext\"\n  AND (\n    contains(to_string($message.message), \"Failed to write flow Data\")\n    OR contains(to_string($message.message), \"flow is closed for writes\")\n  )\nthen\n  drop_message();\nend"

@@ -1,0 +1,20 @@
+// description: Только availability-сообщения Zabbix, HostDeck, HomeRepo и KDC получают активные maintenance_until/maintenance_reason из HostDeck; security-события не изменяются.
+rule "availability: HostDeck maintenance"
+when
+  has_field("source")
+  AND (
+    (has_field("zabbix_event_id") AND to_string($message.zabbix_event_status) == "PROBLEM")
+    OR to_string($message.hd_event) == "heartbeat"
+    OR to_string($message.hr_event) == "heartbeat"
+    OR to_string($message.hr_event) == "agent_silent"
+    OR contains(to_string($message.message), "Cannot contact any KDC")
+  )
+  AND (
+    to_long(lookup_value("hostdeck-maintenance-until", to_string($message.source), "0")) > 0
+    OR to_long(lookup_value("hostdeck-maintenance-until", to_string($message.hr_agent_name), "0")) > 0
+  )
+then
+  set_field("maintenance_active", true);
+  set_field("maintenance_until", to_long(lookup_value("hostdeck-maintenance-until", to_string($message.source), lookup_value("hostdeck-maintenance-until", to_string($message.hr_agent_name), "0"))));
+  set_field("maintenance_reason", lookup_value("hostdeck-maintenance-reason", to_string($message.source), lookup_value("hostdeck-maintenance-reason", to_string($message.hr_agent_name), "")));
+end
