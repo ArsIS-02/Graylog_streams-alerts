@@ -128,7 +128,11 @@
       {"why": "регрессия: ответ 401 на другом API-адресе остаётся под детектом",
        "doc": {"tool": "wazuh", "rule_level": 10, "rule_id": "31151", "data_id": "401",
                "data_url": "/api/v2/alerts/42", "source": "rt-iris", "wazuh_agent": "rt-iris",
-               "wazuh_rule_desc": "Multiple web server 400 error codes from same source ip."}}
+               "wazuh_rule_desc": "Multiple web server 400 error codes from same source ip."}},
+      {"why": "ручной разбор: переполнение очереди агента — эксплуатационный сигнал, не исключать",
+       "doc": {"tool": "wazuh", "rule_level": 10, "rule_id": "900052",
+               "source": "rt-wazuh", "wazuh_agent": "rt-wazuh",
+               "wazuh_rule_desc": "Agent event queue is flooded. Check the agent configuration."}}
     ],
     "negative": [
       {"why": "регрессия: штатное обновление сессии IRIS исключено",
