@@ -131,7 +131,7 @@
     "alert": true,
     "config": {
       "type": "aggregation-v1",
-      "query": "audit AND PATH AND (\"/etc/systemd/system\" OR \"config/systemd\")",
+      "query": "audit AND PATH AND (\"/etc/systemd/system\" OR \"config/systemd\") AND (message:/.*(service|timer|socket|mount|automount|slice|scope|swap|device|nspawn|link|netdev|network|conf)/ OR message:/.*\\.path/ OR (message:/.*target/ AND NOT message:wants))",
       "query_parameters": [],
       "filters": [],
       "streams": [

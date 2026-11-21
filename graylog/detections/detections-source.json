@@ -56,7 +56,7 @@
    ],
    "state": "ENABLED",
    "description": "Изменены юниты systemd (/etc/systemd/system или ~/.config/systemd/user) — установка сервиса (persistence). Файл — в тексте события.",
-   "query": "audit AND PATH AND (\"/etc/systemd/system\" OR \"config/systemd\")",
+   "query": "audit AND PATH AND (\"/etc/systemd/system\" OR \"config/systemd\") AND (message:/.*(service|timer|socket|mount|automount|slice|scope|swap|device|nspawn|link|netdev|network|conf)/ OR message:/.*\\.path/ OR (message:/.*target/ AND NOT message:wants))",
    "group_by": [],
    "condition": null,
    "aggregated": false,

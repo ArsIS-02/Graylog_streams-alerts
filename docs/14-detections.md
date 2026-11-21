@@ -1876,7 +1876,7 @@ audit AND EXECVE AND base64 AND ("-d" OR "--decode")
 **AUDIT - Изменение systemd-юнитов**
 
 ```
-audit AND PATH AND ("/etc/systemd/system" OR "config/systemd")
+audit AND PATH AND ("/etc/systemd/system" OR "config/systemd") AND (message:/.*(service|timer|socket|mount|automount|slice|scope|swap|device|nspawn|link|netdev|network|conf)/ OR message:/.*\.path/ OR (message:/.*target/ AND NOT message:wants))
 ```
 
 **AUDIT - Изменение расписаний cron**
