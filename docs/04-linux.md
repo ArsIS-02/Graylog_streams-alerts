@@ -130,7 +130,7 @@ program:sshd AND message:"Authentication failure"
 
 ## Ещё 8 алертов по auditd
 
-Определения лежат в [graylog/linux-event-definitions.json](../graylog/linux-event-definitions.json) (в файле плейсхолдеры `<AUDITD_STREAM_ID>` и `<NOTIFICATION_ID>`, подставьте свои). Поле `audit_key` в запросах берётся из правил auditd (`kernel_modules`, `cron_persistence`, `perm_modification`, `file_deletion`). Запросы проверены на истории за 30 дней.
+Определения лежат в [graylog/linux-event-definitions.json](../graylog/linux-event-definitions.json) (в файле плейсхолдеры `<AUDITD_STREAM_ID>` и `<NOTIFICATION_ID>`, подставьте свои). Поле `audit_key` в запросах берётся из правил auditd (`kernel_modules`, `cron_persistence`, `identity_modification`, `perm_modification`, `file_deletion`). Запросы проверены на истории за 30 дней; для файлов учётных записей сохранены также старые ключи `etcpasswd`, `etcgroup`, `opasswd`.
 
 | Алерт | Что ловит | MITRE | Приоритет |
 |---|---|---|---|

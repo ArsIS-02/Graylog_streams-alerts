@@ -116,7 +116,9 @@
   "LNX - Изменение /etc/passwd, shadow, group": {
     "positive": [
       {"why": "ручной: пользовательский процесс изменил файл учётных записей",
-       "doc": {"audit_type": "SYSCALL", "key": "etcpasswd", "exe": "/usr/bin/passwd", "auid": "1000", "source": "rt-linux"}}
+       "doc": {"audit_type": "SYSCALL", "key": "etcpasswd", "exe": "/usr/bin/passwd", "auid": "1000", "source": "rt-linux"}},
+      {"why": "регрессия 21.11: актуальный набор auditd использует identity_modification",
+       "doc": {"audit_type": "SYSCALL", "key": "identity_modification", "exe": "/usr/sbin/useradd", "auid": "1000", "source": "rt-linux"}}
     ],
     "negative": [
       {"why": "ручной: штатная проверка Wazuh по-прежнему исключена",

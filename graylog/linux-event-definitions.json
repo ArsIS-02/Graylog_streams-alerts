@@ -2421,7 +2421,7 @@
     "alert": true,
     "config": {
       "type": "aggregation-v1",
-      "query": "key:(etcpasswd OR etcgroup OR opasswd) AND audit_type:SYSCALL AND NOT exe:(\"/usr/sbin/unix_chkpwd\" OR \"/usr/lib/systemd/systemd-userwork\" OR \"/var/ossec/bin/wazuh-modulesd\" OR \"/var/ossec/bin/wazuh-syscheckd\" OR \"/usr/libexec/accounts-daemon\") AND NOT auid:4294967295",
+      "query": "key:(identity_modification OR etcpasswd OR etcgroup OR opasswd) AND audit_type:SYSCALL AND NOT exe:(\"/usr/sbin/unix_chkpwd\" OR \"/usr/lib/systemd/systemd-userwork\" OR \"/var/ossec/bin/wazuh-modulesd\" OR \"/var/ossec/bin/wazuh-syscheckd\" OR \"/usr/libexec/accounts-daemon\") AND NOT auid:4294967295",
       "query_parameters": [],
       "filters": [],
       "streams": [

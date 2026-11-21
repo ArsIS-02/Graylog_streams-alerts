@@ -481,7 +481,7 @@ auditd на RED OS; поток RedOS auditd Logs. Правил: 50. Сортир
 | Добавление/удаление пользователя | высокий | RedOS auditd Logs<br>auditd ADD_USER, auditd DEL_USER | На хосте успешно добавлен или удалён локальный пользователь. В исходных сообщениях: учётка и инициатор (auid). | число событий > 0 за 5 мин, группировка по source | Persistence | `T1136.001` Local Account |
 | Запуск из /tmp, /dev/shm, /var/tmp | высокий | RedOS auditd Logs<br>auditd EXECVE | EXECVE: программа запущена из /tmp, /dev/shm или /var/tmp, либо интерпретатор (sh, bash, dash, python, perl) исполняет оттуда скрипт. Скрипты Wazuh `execute-*.sh` исключены. Так обычно… | каждое событие | Execution | `T1059.004` Unix Shell<br>`T1036` |
 | Затирание следов (shred, history, truncate логов) | высокий | RedOS auditd Logs<br>auditd EXECVE | Уничтожение файлов через shred, работа с .bash_history или обрезка логов в /var/log. Типичное заметание следов после атаки. | каждое событие | Stealth | `T1070` Indicator Removal<br>`T1070.003`, `T1685.006` |
-| Изменение /etc/passwd, shadow, group | высокий | RedOS auditd Logs<br>auditd SYSCALL, ключ etcpasswd, etcgroup, opasswd | Запись или смена атрибутов файлов учётных записей (/etc/passwd, /etc/shadow, /etc/group, /etc/security/opasswd) вне штатных служб. Возможно создание скрытой учётки или смена пароля. | каждое событие | Persistence | `T1098` Account Manipulation |
+| Изменение /etc/passwd, shadow, group | высокий | RedOS auditd Logs<br>auditd SYSCALL, ключ identity_modification, etcpasswd, etcgroup, opasswd | Запись или смена атрибутов файлов учётных записей (/etc/passwd, /etc/shadow, /etc/group, /etc/security/opasswd) вне штатных служб. Возможно создание скрытой учётки или смена пароля. | каждое событие | Persistence | `T1098` Account Manipulation |
 | Изменение sshd_config | высокий | RedOS auditd Logs<br>auditd SYSCALL, ключ sshd | Изменение конфигурации SSH-сервера. Возможны включение входа root, паролей или подмена AuthorizedKeysFile. | каждое событие | Defense Impairment | `T1556` Modify Authentication Process |
 | Массовое удаление файлов (200+ за 5 мин) | высокий | RedOS auditd Logs<br>auditd SYSCALL, ключ file_deletion | Один процесс удалил 200 и более файлов за 5 минут (обычный максимум в лаборатории около 30). Так выглядит затирание данных или шифровальщик. | число событий ≥ 200 за 5 мин, группировка по source, exe | Impact | `T1485` Data Destruction<br>`T1070.004` |
 | Обратная оболочка (/dev/tcp) | высокий | RedOS auditd Logs<br>auditd EXECVE | В командной строке использован /dev/tcp — типичный приём reverse shell в bash. | каждое событие | Execution | `T1059.004` Unix Shell |
@@ -524,6 +524,11 @@ auditd на RED OS; поток RedOS auditd Logs. Правил: 50. Сортир
 | Правка crontab (crontab -e) | низкий | RedOS auditd Logs<br>auditd PROCTITLE | Пользователь открыл редактирование своего crontab. Закрепление через планировщик. | каждое событие; повтор не чаще раза в 1 ч | Persistence | `T1053.003` Cron |
 | Разведка (id, whoami) | низкий | RedOS auditd Logs<br>auditd SYSCALL, ключ recon | Запуск команд разведки системы. Сами по себе безобидны, важны в связке с другими событиями. | каждое событие | Discovery | `T1033` System Owner/User Discovery |
 | Ручная смена системного времени | низкий | RedOS auditd Logs<br>auditd PROCTITLE | Время вручную изменено. Сбивает корреляцию событий. | каждое событие; повтор не чаще раза в 1 ч | Stealth | `T1070` Indicator Removal |
+
+### Проверка отключённых PATH-дублей (21.11.2026)
+
+- **Cron:** comment-only файл в `/etc/cron.d` дал 3 SYSCALL с `cron_persistence` и 3 срабатывания активного правила. Старый запрос `audit AND PATH AND cron` тестовые PATH-записи не вернул; правило `AUDIT - Изменение расписаний cron` оставлено отключённым.
+- **Учётные записи:** `useradd`, `usermod`, `userdel` временной записи дали 6 SYSCALL с `identity_modification` и 6 срабатываний активного правила. PATH-записи тех же изменений присутствуют; правило `AUDIT - Изменение файлов учётных записей` оставлено отключённым как дубль. Тестовые файл и пользователь удалены.
 
 <details><summary>Запросы Graylog (очищенные)</summary>
 
@@ -572,7 +577,7 @@ audit_type:EXECVE AND (a0:("shred" OR "/usr/bin/shred") OR message:".bash_histor
 **LNX - Изменение /etc/passwd, shadow, group**
 
 ```
-key:(etcpasswd OR etcgroup OR opasswd) AND audit_type:SYSCALL AND NOT exe:("/usr/sbin/unix_chkpwd" OR "/usr/lib/systemd/systemd-userwork" OR "/var/ossec/bin/wazuh-modulesd" OR "/var/ossec/bin/wazuh-syscheckd" OR "/usr/libexec/accounts-daemon") AND NOT auid:4294967295
+key:(identity_modification OR etcpasswd OR etcgroup OR opasswd) AND audit_type:SYSCALL AND NOT exe:("/usr/sbin/unix_chkpwd" OR "/usr/lib/systemd/systemd-userwork" OR "/var/ossec/bin/wazuh-modulesd" OR "/var/ossec/bin/wazuh-syscheckd" OR "/usr/libexec/accounts-daemon") AND NOT auid:4294967295
 ```
 
 **LNX - Изменение sshd_config**
