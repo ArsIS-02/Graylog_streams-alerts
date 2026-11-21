@@ -20,7 +20,7 @@
 | netavark (podman) на wazuh-homelab | 80710 promiscuous | ~4,6k | хост перезагрузился в 04:21 после пропадания питания; crash-loop перезапусков rootless-контейнеров, событие на каждый veth |
 | arp-scan (WatchYourLAN) на homelab | 80710 | сотни | штатные сканы сети |
 | cron-сессии `apache` на redos-raspi | 40101 (ур. 12) | 659 | ежеминутные системные сессии |
-| SSH-входы redos@redos-server | 17101 | 10 | диагностика администратора во время разбора |
+| SSH-входы redos@lab-server | 17101 | 10 | диагностика администратора во время разбора |
 | Bi.Zone (curl\|bash, launchctl) | — | 3 | легитимная установка kimi-code и graylog-collector |
 | KEENETIC PPPoE | — | 2 | переподключение провайдера |
 
@@ -45,7 +45,7 @@
 
 | ID | Родитель | Уровень | Условие | Что подавляет |
 |---|---|---|---|---|
-| 199011 | 17101 | 5 | `srcip 192.168.1.210` | ночной вход homelab → redos-server (root-cron `backup-monitoring.sh`, 03:17) |
+| 199011 | 17101 | 5 | `srcip 192.0.2.210` | ночной вход homelab → lab-server (root-cron `backup-monitoring.sh`, 03:17) |
 | 199012 | 521 | 3 | pcre2 `/tmp/\.mount_` | ложный «kernel rootkit» rootcheck на точках монтирования AppImage (VanyaVPN на RedOS-Workstation) |
 | 199013 | 17101 | 3 | pcre2 `pam_unix\(sshd:session\)` | дублирующая PAM-строка SSH-входа (без srcip); алерт идёт по строке `Accepted publickey` |
 
@@ -107,7 +107,7 @@ here-doc. Действующие определения содержат сле�
 
 | Правило | ID | Как исключён шум |
 |---|---|---|
-| macOS - Обратная оболочка (/dev/tcp, pty.spawn) | `6ad30abbcc18050c4f1d7e84` | `NOT message:"Documents/kimi/tasks"`; прежнее внутреннее исключение `/dev/tcp/192.168.1.137` сохранено |
+| macOS - Обратная оболочка (/dev/tcp, pty.spawn) | `6ad30abbcc18050c4f1d7e84` | `NOT message:"Documents/kimi/tasks"`; прежнее внутреннее исключение `/dev/tcp/192.0.2.137` сохранено |
 | macOS - Отключение SIP (csrutil disable) | `6ae6cc6ebb96dbe5087b1138` | `NOT columns_cmdline:/.*Documents\/kimi\/tasks.*/` |
 | macOS - Отключение SIP или Gatekeeper | `6ad30abbcc18050c4f1d7e67` | `NOT message:"Documents/kimi/tasks"` |
 | macOS - Снятие карантина вне Applications или отключение Gatekeeper | `6ae6cc6dbb96dbe5087b1128` | дополнительное исключение каталога не нужно: запрос принимает только реальные `columns_path` `/usr/bin/xattr` и `/usr/sbin/spctl`, поэтому текст внутри `/bin/bash` не подходит |
@@ -172,7 +172,9 @@ audit AND (insmod OR modprobe OR rmmod) AND NOT key:(kernel_modules OR kernel_mo
 
 Короткие переполнения буфера могли приводить к потере части событий. Для общей группы агентов
 установлена ёмкость **50 000 событий**, а скорость оставлена прежней — **500 событий/с**.
-Это сглаживает всплески, но не увеличивает постоянную нагрузку на менеджер и сеть.
+Это сглаживает всплески, но не увеличивает постоянную нагрузку на менеджер и сеть. На
+`lab-server` действует отдельная локальная настройка с той же ёмкостью **50 000**, но с
+**1000 событий/с**; её не следует ошибочно заменять общим групповым значением 500.
 
 ```xml
 <agent_config>
@@ -191,6 +193,79 @@ audit AND (insmod OR modprobe OR rmmod) AND NOT key:(kernel_modules OR kernel_mo
 Проверка после изменений: активные агенты синхронизированы, отключённые получат конфигурацию
 при следующем подключении; новых прежних срабатываний Graylog и системных уведомлений нет.
 Перед изменением определений и конфигурации созданы резервные копии.
+
+## Уточнение 21.11: переполнение буфера Wazuh на lab-server
+
+### Симптомы и первопричина
+
+За 45 минут journald на `lab-server` получил **932 401 запись**, около **98 %** которых
+относились к auditd. Средний поток составлял примерно **345 событий/с**. Основной объём создавали
+правила `file_deletion`, `network_socket_created` и `perm_modification`; примерно **73 %**
+syscall-событий относились к SELinux-субъекту `container_runtime_t`.
+
+Одновременно Wazuh получал один и тот же kernel audit через три пути:
+
+- основной файл `/var/log/audit/audit.log`;
+- audit-сообщения в journald (`_TRANSPORT=audit`);
+- сообщения `audisp-syslog` в journald.
+
+Из-за умножения потока переполнялся клиентский буфер агента. Увеличения буфера само по себе
+недостаточно: необходимо убрать лишние источники и чрезмерно широкие syscall-правила.
+
+### Что изменено
+
+В `/etc/audit/rules.d/99-custom-x86_64.rules` в **семь правил** только из групп
+`file_deletion`, `network_socket_created` и `perm_modification` добавлено условие:
+
+```text
+-F subj_type!=container_runtime_t
+```
+
+Версия набора правил обновлена до **1.6**. Правила systemd, cron, honeytoken, sudo/su,
+`tmp_exec` и сетевых инструментов не изменялись. Исключение не отключает аудит контейнеров
+целиком и не затрагивает остальные детекты.
+
+В `/var/ossec/etc/ossec.conf` для чтения journald добавлены два фильтра:
+
+```xml
+<filter field="_TRANSPORT" ignore_if_missing="yes">^(?!audit$).*$</filter>
+<filter field="SYSLOG_IDENTIFIER" ignore_if_missing="yes">^(?!audisp-syslog$).*$</filter>
+```
+
+Основной поток через `/var/log/audit/audit.log` сохранён. Права файла конфигурации после
+перезапуска проверены: владелец `root:wazuh`, режим `660`; агент активен, TCP-соединение с
+менеджером `192.0.2.55:1514` установлено.
+
+### Проверка результата
+
+За контрольные 10 минут journald получил **51 087 записей**: средний поток снизился с примерно
+**345 до 85,14 событий/с**, то есть примерно на **75 %**. Новых записей
+`container_runtime_t` в отфильтрованных группах, сообщений `buffer full`, `flooded` и новых
+ошибок Wazuh не обнаружено.
+
+Контрольные события `perm_modification`, `network_socket_created` и `file_deletion` сработали,
+тестовый файл удалён. Эти события видны в Graylog; новых срабатываний правил 203 и 900052 после
+изменения нет. В `auditctl -s` счётчик `lost=76` не вырос, `backlog=0`.
+
+Перед изменением создана резервная копия:
+
+```text
+/var/backups/homelab-wazuh-queue-20261121-095832
+```
+
+### Откат
+
+```bash
+cp /var/backups/homelab-wazuh-queue-20261121-095832/99-custom-x86_64.rules.before /etc/audit/rules.d/99-custom-x86_64.rules
+cp /var/backups/homelab-wazuh-queue-20261121-095832/ossec.conf.before /var/ossec/etc/ossec.conf
+chown root:wazuh /var/ossec/etc/ossec.conf
+chmod 660 /var/ossec/etc/ossec.conf
+augenrules --load
+systemctl restart wazuh-agent
+```
+
+После отката повторно проверить `systemctl is-active wazuh-agent`, соединение с менеджером,
+`auditctl -s`, контрольные audit-события и их поступление в Graylog.
 
 ## Закрытые алерты IRIS (все с комментариями)
 
